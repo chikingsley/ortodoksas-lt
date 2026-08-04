@@ -1,0 +1,19 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "extends": [
+    "ultracite/biome/core",
+    "ultracite/biome/react",
+    "ultracite/biome/vitest"
+  ],
+  "files": {
+    "includes": [
+      "!node_modules",
+      "!.wrangler",
+      "!dist",
+      "!worker-configuration.d.ts"
+    ]
+  },
+  "css": {
+    "linter": { "enabled": false }
+  }
+}
