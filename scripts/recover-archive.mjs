@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import { basename, join } from "node:path";
 import * as cheerio from "cheerio";
+import { sanitizeRecoveredHtml } from "./lib/sanitize-recovered-html.mjs";
 
 const projectRoot = new URL("..", import.meta.url).pathname;
 const archiveRoot = join(projectRoot, "public", "archive");
@@ -112,7 +113,7 @@ function extractPage(raw, capture) {
     section: sectionFor(title, path),
     labels: [...new Set(labels)],
     hero: hero ? absoluteUrl(hero, capture.timestamp, "im_") : null,
-    html: body.html()?.trim() || "",
+    html: sanitizeRecoveredHtml(body.html()?.trim() || ""),
     capture: capture.timestamp,
     source: capture.original,
   };

@@ -1,85 +1,100 @@
 ---
 import ArticleCard from "../components/ArticleCard.astro";
 import SiteLayout from "../layouts/SiteLayout.astro";
+import { selectHomepageArticles } from "../lib/homepage";
 import { articles, catalog, formatDate, sectionSlug, sections } from "../lib/publication";
 
-const feature = articles.find((entry) => entry.hero) ?? articles[0];
-const latest = articles.filter((entry) => entry.path !== feature?.path);
+const { lead, secondary, remaining } = selectHomepageArticles(articles);
 const standalone = new Map(catalog.filter((entry) => entry.kind === "page").map((entry) => [entry.path, entry]));
 const pageDescription = "Viskas apie Ortodoksų Bažnyčią Lietuvoje ir pasaulyje, taip pat apie ortodoksų tikėjimą ir gyvenimą.";
+const archiveMonths = new Map<string, number>();
+for (const article of articles) {
+  if (!article.published) continue;
+  const date = new Date(article.published);
+  const key = new Intl.DateTimeFormat("lt-LT", { month: "long", year: "numeric" }).format(date);
+  archiveMonths.set(key, (archiveMonths.get(key) ?? 0) + 1);
+}
+const serviceLinks = [
+  { href: "/p/bendruomenes_21.html", title: "Pamaldos", detail: "Tvarkaraščiai ir bendruomenės", icon: "church" },
+  { href: "/p/kalendorius.html", title: "Kalendorius", detail: "Šventės ir pasninkai", icon: "calendar" },
+  { href: "/p/biblioteka.html", title: "Biblioteka", detail: "Straipsniai ir knygos", icon: "book" },
+  { href: "/p/paremti.html", title: "Paremti", detail: "Prisidėkite prie misijos", icon: "heart" },
+];
 ---
 
 <SiteLayout title="ortodoksas.lt" description={pageDescription}>
   <main>
-    <section class="hero-section site-width">
-      <div class="edition-line">
-        <span>Naujausia archyvo laida</span>
-        <span>2012–2026</span>
-      </div>
-      {feature ? (
-        <div class="hero-grid">
-          <ArticleCard entry={feature} featured />
-          <div class="latest-stack">
-            {latest.slice(0, 3).map((entry, index) => (
-              <article class="headline-item">
-                <span class="headline-number">0{index + 1}</span>
-                <div>
-                  <div class="eyebrow">{entry.section}</div>
-                  <h2><a href={entry.path}>{entry.title}</a></h2>
-                  <time datetime={entry.published ?? undefined}>{formatDate(entry.published)}</time>
-                </div>
-              </article>
-            ))}
+    {lead ? <section class="site-width home-hero">
+      <article class="lead-story">
+        {lead.hero ? <a class="lead-image" href={lead.path}><img src={lead.hero} alt="" fetchpriority="high" /></a> : null}
+        <div class="eyebrow">{lead.section}</div>
+        <h1><a href={lead.path}>{lead.title}</a></h1>
+        <p>{lead.description}</p>
+        <a class="story-link" href={lead.path}>Skaityti daugiau <span aria-hidden="true">→</span></a>
+      </article>
+      <div class="secondary-stories">
+        {secondary.map((entry) => <article class="secondary-story">
+          {entry.hero ? <a class="secondary-image" href={entry.path}><img src={entry.hero} alt="" loading="eager" /></a> : null}
+          <div>
+            <div class="eyebrow">{entry.section}</div>
+            <h2><a href={entry.path}>{entry.title}</a></h2>
+            <p>{entry.description}</p>
+            <a class="story-link" href={entry.path}>Skaityti <span aria-hidden="true">→</span></a>
           </div>
-        </div>
-      ) : null}
-    </section>
+        </article>)}
+      </div>
+      <img class="hero-motif" src="/assets/brand/production/canva-patterns/motif-green-chain.png" alt="" />
+    </section> : null}
 
-    <section class="service-band">
+    <section class="service-band" aria-label="Praktinė informacija">
       <div class="site-width service-grid">
-        <a href="/p/bendruomenes_21.html"><span class="service-icon">☦</span><span><strong>Pamaldos</strong><small>Bendruomenės ir tvarkaraščiai</small></span><span>→</span></a>
-        <a href="/p/kalendorius.html"><span class="service-icon">✦</span><span><strong>Kalendorius</strong><small>Pasninkai ir šventės</small></span><span>→</span></a>
-        <a href="/p/biblioteka.html"><span class="service-icon">▤</span><span><strong>Biblioteka</strong><small>Tekstai, natos ir paskaitos</small></span><span>→</span></a>
-        <a href="/p/paremti.html"><span class="service-icon">♡</span><span><strong>Paremti</strong><small>Prisidėkite prie veiklos</small></span><span>→</span></a>
+        {serviceLinks.map((service) => <a href={service.href}>
+          <svg class="service-icon" aria-hidden="true" viewBox="0 0 32 32">
+            {service.icon === "church" ? <><path d="M16 3v7M12.5 6.5h7M8 27h16M10 27V14l6-4 6 4v13M14 27v-7h4v7"></path></> : null}
+            {service.icon === "calendar" ? <><rect x="6" y="8" width="20" height="18" rx="1"></rect><path d="M10 5v6M22 5v6M6 13h20M11 18h3M18 18h3M11 22h3M18 22h3"></path></> : null}
+            {service.icon === "book" ? <><path d="M5 7h8a3 3 0 0 1 3 3v17a4 4 0 0 0-4-4H5zM27 7h-8a3 3 0 0 0-3 3v17a4 4 0 0 1 4-4h7z"></path></> : null}
+            {service.icon === "heart" ? <path d="M16 27S6 21 6 13.5A5.5 5.5 0 0 1 16 10a5.5 5.5 0 0 1 10 3.5C26 21 16 27 16 27Z"></path> : null}
+          </svg>
+          <span><strong>{service.title}</strong><small>{service.detail}</small></span>
+          <img src="/assets/brand/production/canva-patterns/motif-gold-chain.png" alt="" />
+        </a>)}
       </div>
     </section>
 
-    <section class="site-width content-section">
-      <div class="section-heading"><h2>Naujausi įrašai</h2><a href="/archyvas">Visi įrašai →</a></div>
-      <div class="article-grid">
-        {latest.slice(3, 9).map((entry) => <ArticleCard entry={entry} />)}
-      </div>
+    <section class="site-width mobile-secondary-list" aria-label="Naujausi straipsniai">
+      <div class="section-heading"><h2>Naujausi straipsniai</h2></div>
+      {secondary.map((entry) => <article>
+        {entry.hero ? <a class="secondary-image" href={entry.path}><img src={entry.hero} alt="" loading="eager" /></a> : null}
+        <div><div class="eyebrow">{entry.section}</div><h2><a href={entry.path}>{entry.title}</a></h2></div>
+      </article>)}
     </section>
 
-    {sections.slice(0, 3).map((section) => {
-      const sectionArticles = articles.filter((entry) => entry.section === section).slice(0, 4);
-      return (
-        <section class="site-width content-section section-row">
-          <div class="section-heading"><h2>{section}</h2><a href={`/tema/${sectionSlug(section)}`}>Daugiau →</a></div>
-          <div class="section-articles">
-            {sectionArticles.map((entry) => (
-              <article>
-                {entry.hero ? <div class="section-thumb"><img src={entry.hero} alt="" loading="lazy" /></div> : <div class="section-thumb image-placeholder">☦</div>}
-                <div>
-                  <time datetime={entry.published ?? undefined}>{formatDate(entry.published)}</time>
-                  <h3><a href={entry.path}>{entry.title}</a></h3>
-                  <p>{entry.description}</p>
-                </div>
-              </article>
-            ))}
-          </div>
-        </section>
-      );
+    <section class="site-width home-lower" id="articles">
+      <div>
+        <div class="section-heading"><h2>Naujausi straipsniai</h2><a href="/archyvas">Visi straipsniai <span aria-hidden="true">→</span></a></div>
+        <div class="article-grid">{remaining.slice(0, 3).map((entry) => <ArticleCard entry={entry} />)}</div>
+      </div>
+      <aside class="archive-panel">
+        <div class="section-heading"><h2>Archyvas</h2></div>
+        {[...archiveMonths.entries()].slice(0, 5).map(([month, count]) => <a href="/archyvas"><span>{month}</span><strong>{count}</strong></a>)}
+        <a class="archive-all" href="/archyvas">Visas archyvas <span aria-hidden="true">→</span></a>
+      </aside>
+    </section>
+
+    {sections.slice(0, 2).map((section) => {
+      const sectionArticles = articles.filter((entry) => entry.section === section && entry.path !== lead?.path).slice(0, 4);
+      return sectionArticles.length ? <section class="site-width content-section section-row">
+        <div class="section-heading"><h2>{section}</h2><a href={`/tema/${sectionSlug(section)}`}>Daugiau <span aria-hidden="true">→</span></a></div>
+        <div class="section-articles">{sectionArticles.map((entry) => <article>
+          {entry.hero ? <a class="section-thumb" href={entry.path}><img src={entry.hero} alt="" loading="lazy" /></a> : null}
+          <div><time datetime={entry.published ?? undefined}>{formatDate(entry.published)}</time><h3><a href={entry.path}>{entry.title}</a></h3><p>{entry.description}</p></div>
+        </article>)}</div>
+      </section> : null;
     })}
 
     <section class="site-width library-callout">
-      <div>
-        <span class="eyebrow">Skaitymui ir studijoms</span>
-        <h2>{standalone.get("/p/biblioteka.html")?.title ?? "Biblioteka"}</h2>
-        <p>{standalone.get("/p/biblioteka.html")?.description ?? "Atkurtų tekstų, paskaitų ir liturginės medžiagos rinkinys."}</p>
-        <a class="text-link" href="/p/biblioteka.html">Atverti biblioteką →</a>
-      </div>
-      <div class="library-mark" aria-hidden="true">☦</div>
+      <div><h2>{standalone.get("/p/biblioteka.html")?.title ?? "Biblioteka"}</h2><p>{standalone.get("/p/biblioteka.html")?.description ?? "Atkurtų tekstų, paskaitų ir liturginės medžiagos rinkinys."}</p><a class="text-link" href="/p/biblioteka.html">Atverti biblioteką <span aria-hidden="true">→</span></a></div>
+      <img src="/assets/brand/production/canva-patterns/pattern-gold-grid.png" alt="" />
     </section>
   </main>
 </SiteLayout>

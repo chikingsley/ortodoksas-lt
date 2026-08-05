@@ -52,7 +52,7 @@ const baseSchema = {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
-    <meta name="theme-color" content="#661d25" />
+    <meta name="theme-color" content="#015c4b" />
     <meta name="description" content={description} />
     <title>{title}</title>
     <link rel="canonical" href={canonical} />
@@ -68,6 +68,14 @@ const baseSchema = {
     <script type="application/ld+json" set:html={JSON.stringify(baseSchema).replace(/</g, "\\u003c")} />
   </head>
   <body>
+    <!--
+    THESIS: A living Lithuanian church publication joins institutional authority to a compact newsroom, leaving the generic lifestyle-blog hero behind.
+    OWN-WORLD: White and cool-bone fields, patriarchal green, ceremonial gold, exact institutional marks, Playfair headlines, Arimo utility type, hairline rules, and authentic chain motifs.
+    STORY: Readers identify the institution, reach the current lead story, scan three supporting stories, then move into services, recent articles, and the archive.
+    FIRST VIEWPORT: A dual-mark masthead and centered navigation sit above a 56/44 editorial grid; the lead photograph and headline dominate left while three image-led briefs stack right.
+    FORM: User-approved C Institutional Edition, first choice and production target; seed key user-approved-c-institutional.
+    FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
+    -->
     <div class="site-shell">
       <SiteHeader locale={locale} />
       <slot />

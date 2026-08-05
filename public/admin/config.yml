@@ -11,6 +11,9 @@ local_backend:
   url: http://localhost:8081/api/v1
 
 publish_mode: editorial_workflow
+site_url: https://ortodoksas.grassinside.com
+display_url: https://ortodoksas.grassinside.com
+logo_url: /assets/brand/production/exarchate-lockup-client.png
 media_folder: public/media
 public_folder: /media
 
@@ -21,20 +24,31 @@ i18n:
 
 collections:
   - name: publications
-    label: Publications
-    label_singular: Publication
+    label: Publikacijos
+    label_singular: Publikacija
     folder: public/content/editorial
     extension: json
     format: json
     create: true
     slug: "{{slug}}"
-    summary: "{{title}} · {{published}}"
+    summary: "{{title}} · {{homepage}} · {{published}}"
     i18n: true
     fields:
-      - { label: Title, name: title, widget: string, i18n: true }
-      - { label: Slug, name: slug, widget: string, i18n: duplicate }
-      - { label: Section, name: section, widget: string, i18n: true }
-      - { label: Description, name: description, widget: text, i18n: true }
-      - { label: Published, name: published, widget: datetime, i18n: duplicate }
-      - { label: Hero image, name: hero, widget: image, required: false, i18n: duplicate }
-      - { label: Body, name: body, widget: markdown, i18n: true }
+      - { label: Antraštė, name: title, widget: string, i18n: true }
+      - { label: Adreso dalis, name: slug, widget: string, i18n: duplicate, hint: "Trumpas adresas mažosiomis lotyniškomis raidėmis, pvz. vasaros-piligrimyste" }
+      - { label: Skiltis, name: section, widget: string, i18n: true }
+      - { label: Trumpas aprašymas, name: description, widget: text, i18n: true }
+      - { label: Publikavimo data, name: published, widget: datetime, i18n: duplicate }
+      - { label: Pagrindinė nuotrauka, name: hero, widget: image, required: false, i18n: duplicate }
+      - label: Vieta tituliniame puslapyje
+        name: homepage
+        widget: select
+        default: feed
+        i18n: duplicate
+        hint: "Pagrindinė istorija pakeičia ankstesnę pagrindinę istoriją. Antrinės istorijos rodomos dešinėje pagal eilės numerį."
+        options:
+          - { label: "Bendras srautas", value: feed }
+          - { label: "Pagrindinė istorija", value: lead }
+          - { label: "Antrinė istorija", value: secondary }
+      - { label: Antrinės istorijos eilė, name: homepage_order, widget: number, value_type: int, min: 1, max: 3, default: 1, required: false, i18n: duplicate, condition: { field: homepage, value: secondary } }
+      - { label: Tekstas, name: body, widget: markdown, i18n: true }

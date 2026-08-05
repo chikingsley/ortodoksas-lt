@@ -1,0 +1,96 @@
+@font-face {
+  font-family: "Arimo";
+  font-style: normal;
+  font-weight: 400 700;
+  src: url("/assets/brand/fonts/Arimo-Variable.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Playfair Display";
+  font-style: normal;
+  font-weight: 400 900;
+  src: url("/assets/brand/fonts/PlayfairDisplay-Variable.ttf")
+    format("truetype");
+}
+
+.editor-preview {
+  min-height: 100vh;
+  padding: 0 6vw 80px;
+  font-family: "Arimo", sans-serif;
+  color: #171916;
+  background: #fff;
+}
+
+.editor-preview__masthead {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  padding: 20px 0;
+  margin-bottom: 56px;
+  border-bottom: 1px solid #015c4b;
+}
+
+.editor-preview__masthead img {
+  width: 260px;
+  height: auto;
+}
+
+.editor-preview__masthead span {
+  padding-left: 24px;
+  font:
+    700 28px / 1 "Playfair Display",
+    serif;
+  border-left: 1px solid #c9c7bd;
+}
+
+.editor-preview__article {
+  max-width: 760px;
+  margin: auto;
+}
+
+.editor-preview__article > img {
+  width: 100%;
+  max-height: 460px;
+  object-fit: cover;
+}
+
+.editor-preview__placement {
+  display: inline-block;
+  padding: 6px 9px;
+  margin-top: 18px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #015c4b;
+  background: #face6b;
+}
+
+.editor-preview__section {
+  margin-top: 18px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #015c4b;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.editor-preview h1 {
+  margin: 8px 0 18px;
+  font:
+    700 clamp(38px, 6vw, 64px) / 1.02 "Playfair Display",
+    serif;
+  letter-spacing: -0.025em;
+}
+
+.editor-preview__description {
+  font:
+    20px / 1.5 "Playfair Display",
+    serif;
+  color: #4c524e;
+}
+
+.editor-preview__body {
+  margin-top: 36px;
+  font:
+    18px / 1.7 "Playfair Display",
+    serif;
+}

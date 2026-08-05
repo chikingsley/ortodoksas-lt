@@ -6,6 +6,8 @@ export interface CatalogEntry {
   description: string;
   file?: string;
   hero: string | null;
+  homepage?: "feed" | "lead" | "secondary";
+  homepageOrder?: number;
   kind: "article" | "page";
   labels: string[];
   origin?: "editorial" | "recovered";
@@ -98,6 +100,8 @@ interface EditorialSource {
   body?: unknown;
   description?: unknown;
   hero?: unknown;
+  homepage?: unknown;
+  homepage_order?: unknown;
   published?: unknown;
   section?: unknown;
   slug?: unknown;
@@ -106,6 +110,62 @@ interface EditorialSource {
 
 const editorialSlugPattern = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
 
+function parseEditorialArticle(
+  directory: URL,
+  file: string,
+  locale: SiteLocale
+): LocalizedArticle[] {
+  const source = readJson<EditorialSource>(directory, file);
+  const fileSlug = file.slice(0, -5);
+  const slug = typeof source?.slug === "string" ? source.slug : fileSlug;
+  if (
+    !source ||
+    typeof source.title !== "string" ||
+    typeof source.body !== "string" ||
+    !editorialSlugPattern.test(slug) ||
+    slug !== fileSlug
+  ) {
+    return [];
+  }
+  const section =
+    typeof source.section === "string" && source.section.trim()
+      ? source.section.trim()
+      : "Naujienos";
+  const html = marked.parse(source.body, { async: false }) as string;
+  const description =
+    typeof source.description === "string" && source.description.trim()
+      ? source.description.trim()
+      : html
+          .replace(/<[^>]+>/g, " ")
+          .replace(/\s+/g, " ")
+          .trim()
+          .slice(0, 180);
+  return [
+    {
+      description,
+      file: `public/content/editorial/${locale}/${file}`,
+      hero: typeof source.hero === "string" ? source.hero : null,
+      homepage:
+        source.homepage === "lead" || source.homepage === "secondary"
+          ? source.homepage
+          : "feed",
+      homepageOrder:
+        typeof source.homepage_order === "number"
+          ? source.homepage_order
+          : undefined,
+      html,
+      kind: "article" as const,
+      labels: [section],
+      locale: locale === "lt" ? undefined : locale,
+      origin: "editorial" as const,
+      path: `/e/${slug}.html`,
+      published: typeof source.published === "string" ? source.published : null,
+      section,
+      title: source.title,
+    } as LocalizedArticle,
+  ];
+}
+
 function loadEditorialArticles(locale: SiteLocale): LocalizedArticle[] {
   const directory = new URL(`${locale}/`, editorialDirectory);
   if (!existsSync(directory)) {
@@ -113,50 +173,7 @@ function loadEditorialArticles(locale: SiteLocale): LocalizedArticle[] {
   }
   return readdirSync(directory, { encoding: "utf8" })
     .filter((file) => file.endsWith(".json"))
-    .flatMap((file) => {
-      const source = readJson<EditorialSource>(directory, file);
-      const fileSlug = file.slice(0, -5);
-      const slug = typeof source?.slug === "string" ? source.slug : fileSlug;
-      if (
-        !source ||
-        typeof source.title !== "string" ||
-        typeof source.body !== "string" ||
-        !editorialSlugPattern.test(slug) ||
-        slug !== fileSlug
-      ) {
-        return [];
-      }
-      const section =
-        typeof source.section === "string" && source.section.trim()
-          ? source.section.trim()
-          : "Naujienos";
-      const html = marked.parse(source.body, { async: false }) as string;
-      const description =
-        typeof source.description === "string" && source.description.trim()
-          ? source.description.trim()
-          : html
-              .replace(/<[^>]+>/g, " ")
-              .replace(/\s+/g, " ")
-              .trim()
-              .slice(0, 180);
-      return [
-        {
-          description,
-          file: `public/content/editorial/${locale}/${file}`,
-          hero: typeof source.hero === "string" ? source.hero : null,
-          html,
-          kind: "article" as const,
-          labels: [section],
-          locale: locale === "lt" ? undefined : locale,
-          origin: "editorial" as const,
-          path: `/e/${slug}.html`,
-          published:
-            typeof source.published === "string" ? source.published : null,
-          section,
-          title: source.title,
-        } as LocalizedArticle,
-      ];
-    });
+    .flatMap((file) => parseEditorialArticle(directory, file, locale));
 }
 
 const editorialArticles = {
@@ -449,10 +466,15 @@ export function cleanHtml(value: string) {
   return value
     .replace(/<script[\s\S]*?<\/script>/gi, "")
     .replace(/<style[\s\S]*?<\/style>/gi, "")
+    .replace(/<(iframe|frame|object|form)\b[\s\S]*?<\/\1\s*>/gi, "")
+    .replace(/<(?:iframe|frame|object|embed|form)\b[^>]*\/?\s*>/gi, "")
     .replace(/<link\b[^>]*>/gi, "")
     .replace(/<base\b[^>]*>/gi, "")
     .replace(/\s+on[a-z]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, "")
-    .replace(/javascript:/gi, "");
+    .replace(
+      /\s+(?:href|src|data|action|formaction)\s*=\s*(?:"\s*(?:javascript|vbscript|file):[^"]*"|'\s*(?:javascript|vbscript|file):[^']*')/gi,
+      ""
+    );
 }
 
 export function escapeXml(value: string) {

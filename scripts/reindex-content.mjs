@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { readFile, rename, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { sanitizeRecoveredHtml } from "./lib/sanitize-recovered-html.mjs";
 
 const root = new URL("../public/content", import.meta.url).pathname;
 const pagesRoot = join(root, "pages");
@@ -17,9 +18,9 @@ for (const entry of catalog) {
   const newFile = contentFile(entry.path);
   const oldPath = join(pagesRoot, oldFile);
   const newPath = join(pagesRoot, newFile);
-  const raw = await readFile(oldPath, "utf8");
-  const localLinks = raw.replace(/href=\\"https?:\/\/(?:www\.)?ortodoksas\.lt\//g, "href=\\\"/");
-  await writeFile(oldPath, localLinks);
+  const page = JSON.parse(await readFile(oldPath, "utf8"));
+  page.html = sanitizeRecoveredHtml(page.html).replace(/href="https?:\/\/(?:www\.)?ortodoksas\.lt\//g, 'href="/');
+  await writeFile(oldPath, `${JSON.stringify(page)}\n`);
   if (oldFile !== newFile) await rename(oldPath, newPath);
   entry.file = newFile;
 }

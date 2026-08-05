@@ -1,0 +1,16 @@
+{
+  "title": "C — Institutional Edition",
+  "status": "approved",
+  "approved": true,
+  "selectionState": "Green text with a thin gold underline",
+  "brand": {
+    "logoOrder": "Ecumenical Patriarchate seal on the left, Exarchate lockup on the right",
+    "publicationName": "ortodoksas.lt remains visible",
+    "palette": ["#F0EEE4", "#FACE6B", "#2A4782", "#015C4B", "#000000"],
+    "displayFont": "Playfair Display",
+    "sansFont": "Arimo"
+  },
+  "composition": "Approved compact-newsroom direction C, adapted to the client-supplied institutional brand system.",
+  "rendering": "Approved composition reference. Production uses the exact client Exarchate PNG and the official Patriarchate emblem SVG.",
+  "source": "home-c-institutional-edition.html"
+}

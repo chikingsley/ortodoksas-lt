@@ -7,12 +7,14 @@
   ],
   "files": {
     "includes": [
+      "!.impeccable",
       "!node_modules",
       "!.wrangler",
       "!dist",
       "!docs/revival",
       "!index.html",
       "!public/archive",
+      "!public/assets/brand/**/*.svg",
       "!public/content",
       "!public/original.html",
       "!recovery",

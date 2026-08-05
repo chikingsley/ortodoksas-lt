@@ -1,0 +1,186 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-05T11:04:52Z",
+  "title": "Design System: ortodoksas.lt C Institutional Edition",
+  "extensions": {
+    "colorMeta": {
+      "patriarchal-green": {
+        "role": "primary",
+        "displayName": "Patriarchal Green",
+        "canonical": "#015c4b",
+        "tonalRamp": ["oklch(15% 0.055 171)", "oklch(26% 0.072 171)", "oklch(37% 0.087 171)", "#015c4b", "oklch(58% 0.088 171)", "oklch(70% 0.07 171)", "oklch(83% 0.043 171)", "oklch(95% 0.014 171)"]
+      },
+      "patriarchal-green-deep": {
+        "role": "primary",
+        "displayName": "Deep Patriarchal Green",
+        "canonical": "#004438",
+        "tonalRamp": ["oklch(15% 0.048 171)", "#004438", "oklch(36% 0.078 171)", "oklch(47% 0.081 171)", "oklch(58% 0.073 171)", "oklch(70% 0.058 171)", "oklch(83% 0.036 171)", "oklch(95% 0.012 171)"]
+      },
+      "ceremonial-gold": {
+        "role": "secondary",
+        "displayName": "Ceremonial Gold",
+        "canonical": "#face6b",
+        "tonalRamp": ["oklch(15% 0.04 86)", "oklch(27% 0.065 86)", "oklch(39% 0.09 86)", "oklch(51% 0.115 86)", "oklch(63% 0.13 86)", "oklch(75% 0.135 86)", "#face6b", "oklch(95% 0.04 86)"]
+      },
+      "library-blue": {
+        "role": "tertiary",
+        "displayName": "Library Blue",
+        "canonical": "#2a4782",
+        "tonalRamp": ["oklch(15% 0.045 263)", "oklch(25% 0.07 263)", "#2a4782", "oklch(45% 0.115 263)", "oklch(57% 0.11 263)", "oklch(69% 0.085 263)", "oklch(82% 0.05 263)", "oklch(95% 0.015 263)"]
+      },
+      "cool-bone": {
+        "role": "neutral",
+        "displayName": "Cool Bone",
+        "canonical": "#f0eee4",
+        "tonalRamp": ["oklch(15% 0.012 95)", "oklch(27% 0.013 95)", "oklch(39% 0.014 95)", "oklch(51% 0.015 95)", "oklch(63% 0.016 95)", "oklch(75% 0.017 95)", "oklch(86% 0.018 95)", "#f0eee4"]
+      },
+      "cool-bone-deep": {
+        "role": "neutral",
+        "displayName": "Deep Cool Bone",
+        "canonical": "#e4e1d4",
+        "tonalRamp": ["oklch(15% 0.014 95)", "oklch(27% 0.015 95)", "oklch(39% 0.016 95)", "oklch(51% 0.017 95)", "oklch(63% 0.018 95)", "oklch(75% 0.019 95)", "#e4e1d4", "oklch(95% 0.012 95)"]
+      },
+      "living-ink": {
+        "role": "neutral",
+        "displayName": "Living Ink",
+        "canonical": "#171916",
+        "tonalRamp": ["#171916", "oklch(26% 0.008 135)", "oklch(38% 0.007 135)", "oklch(50% 0.006 135)", "oklch(62% 0.005 135)", "oklch(74% 0.004 135)", "oklch(86% 0.003 135)", "oklch(95% 0.002 135)"]
+      },
+      "quiet-ink": {
+        "role": "neutral",
+        "displayName": "Quiet Ink",
+        "canonical": "#555b57",
+        "tonalRamp": ["oklch(15% 0.01 155)", "oklch(27% 0.012 155)", "#555b57", "oklch(50% 0.011 155)", "oklch(62% 0.009 155)", "oklch(74% 0.007 155)", "oklch(86% 0.004 155)", "oklch(95% 0.002 155)"]
+      },
+      "hairline": {
+        "role": "neutral",
+        "displayName": "Institutional Hairline",
+        "canonical": "#c9c7bd",
+        "tonalRamp": ["oklch(15% 0.008 92)", "oklch(27% 0.009 92)", "oklch(39% 0.01 92)", "oklch(51% 0.011 92)", "oklch(63% 0.012 92)", "#c9c7bd", "oklch(86% 0.008 92)", "oklch(95% 0.003 92)"]
+      },
+      "white": {
+        "role": "neutral",
+        "displayName": "Publication White",
+        "canonical": "#ffffff",
+        "tonalRamp": ["oklch(15% 0 0)", "oklch(27% 0 0)", "oklch(39% 0 0)", "oklch(51% 0 0)", "oklch(63% 0 0)", "oklch(75% 0 0)", "oklch(87% 0 0)", "#ffffff"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Article Display", "purpose": "Centered article titles and major page introductions." },
+      "headline": { "displayName": "Lead Headline", "purpose": "Lead-story titles in image-led editorial compositions." },
+      "title": { "displayName": "Section Title", "purpose": "Section headings and prominent editorial modules." },
+      "body": { "displayName": "Reading Body", "purpose": "Long-form article prose and spacious editorial reading." },
+      "label": { "displayName": "Institutional Label", "purpose": "Navigation support, metadata, languages, actions, and status." }
+    },
+    "shadows": [
+      { "name": "mobile-menu-float", "value": "0 12px 28px rgba(0, 39, 31, 0.15)", "purpose": "Structural depth for the expanded small-screen navigation overlay." }
+    ],
+    "motion": [
+      { "name": "editorial-image-ease", "value": "0.55s cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Quiet 2% image scale on interactive editorial cards." },
+      { "name": "reduced-motion-collapse", "value": "0.01ms", "purpose": "Immediate state changes under the reduced-motion preference." }
+    ],
+    "breakpoints": [
+      { "name": "editorial-stack", "value": "980px" },
+      { "name": "compact-publication", "value": "720px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Institutional Masthead",
+      "kind": "custom",
+      "description": "The required institutional and publication identities in their durable order.",
+      "html": "<div class=\"ds-masthead\"><span class=\"ds-seal\" aria-hidden=\"true\">☦</span><span class=\"ds-exarchate\">VISUOTINIO PATRIARCHATO<br><strong>EGZARCHATAS LIETUVOJE</strong></span><span class=\"ds-divider\"></span><span class=\"ds-publication\"><strong>ortodoksas.lt</strong><small>BAŽNYČIOS LEIDINYS</small></span></div>",
+      "css": ".ds-masthead { display:flex; align-items:center; gap:14px; min-height:94px; padding:8px 0; color:var(--ink, #171916); border-bottom:1px solid var(--green, #015c4b); font-family:Arimo, Arial, sans-serif; } .ds-seal { display:grid; place-items:center; width:44px; height:44px; flex:0 0 44px; color:var(--green, #015c4b); border:1px solid var(--green, #015c4b); border-radius:50%; font:22px Georgia, serif; } .ds-exarchate { font-size:8px; line-height:1.25; letter-spacing:.04em; } .ds-exarchate strong { font-size:11px; } .ds-divider { width:1px; height:42px; margin:0 4px; background:var(--line, #c9c7bd); } .ds-publication strong { display:block; font:700 30px/.95 'Playfair Display', Georgia, serif; letter-spacing:-.025em; } .ds-publication small { display:block; margin-top:8px; color:var(--green, #015c4b); font-size:9px; font-weight:700; letter-spacing:.11em; }"
+    },
+    {
+      "name": "Primary Navigation Item",
+      "kind": "nav",
+      "refersTo": "nav-item",
+      "description": "Centered publication navigation with a ceremonial active state.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Edition\"><a href=\"#\">Pradžia</a><a class=\"ds-active\" href=\"#\">Biblioteka</a><a href=\"#\">Archyvas</a></nav>",
+      "css": ".ds-nav { display:flex; justify-content:center; border-bottom:1px solid #9ca29e; font-family:'Playfair Display', Georgia, serif; } .ds-nav a { position:relative; padding:16px 27px 14px; color:var(--ink, #171916); text-decoration:none; font-size:14px; font-weight:600; line-height:1; } .ds-nav a:hover, .ds-nav a:focus-visible, .ds-nav a.ds-active { color:var(--green, #015c4b); } .ds-nav a:focus-visible { outline:2px solid var(--blue, #2a4782); outline-offset:4px; } .ds-nav a.ds-active::after { position:absolute; right:27px; bottom:-1px; left:27px; height:2px; content:''; background:var(--gold, #face6b); }"
+    },
+    {
+      "name": "Story Link",
+      "kind": "button",
+      "refersTo": "story-link",
+      "description": "A compact green editorial action for continuing into a story.",
+      "html": "<a class=\"ds-story-link\" href=\"#\">Skaityti daugiau <span aria-hidden=\"true\">→</span></a>",
+      "css": ".ds-story-link { display:inline-flex; gap:7px; align-items:center; color:var(--green, #015c4b); text-decoration:none; font-family:Arimo, Arial, sans-serif; font-size:11px; font-weight:700; } .ds-story-link:hover { color:var(--green-deep, #004438); } .ds-story-link:focus-visible { outline:2px solid var(--blue, #2a4782); outline-offset:4px; } .ds-story-link:active { transform:translateY(1px); }"
+    },
+    {
+      "name": "Editorial Card",
+      "kind": "card",
+      "description": "The image-led story unit used across recent and section content.",
+      "html": "<article class=\"ds-card\"><div class=\"ds-card-image\"></div><div class=\"ds-card-copy\"><span>BAŽNYČIOS GYVENIMAS</span><h2><a href=\"#\">Gyvas pasakojimas iš bendruomenės</a></h2><small>2026 M. RUGPJŪČIO 5 D. · SKAITYTI</small></div></article>",
+      "css": ".ds-card { width:260px; color:var(--ink, #171916); background:var(--white, #fff); } .ds-card-image { aspect-ratio:1.48; overflow:hidden; background:linear-gradient(145deg, var(--paper, #f0eee4), var(--line, #c9c7bd)); } .ds-card-copy { padding-top:14px; } .ds-card-copy > span { color:var(--green, #015c4b); font:700 10px/1.3 Arimo, Arial, sans-serif; letter-spacing:.08em; } .ds-card h2 { margin:7px 0 12px; font:700 20px/1.12 'Playfair Display', Georgia, serif; letter-spacing:-.012em; } .ds-card h2 a { color:inherit; text-decoration:none; } .ds-card h2 a:hover { color:var(--green, #015c4b); } .ds-card h2 a:focus-visible { outline:2px solid var(--blue, #2a4782); outline-offset:4px; } .ds-card small { color:var(--muted, #555b57); font:700 9px/1.3 Arimo, Arial, sans-serif; letter-spacing:.05em; }"
+    },
+    {
+      "name": "Service Link",
+      "kind": "custom",
+      "refersTo": "service-link",
+      "description": "A practical church-service destination inside the green utility band.",
+      "html": "<a class=\"ds-service\" href=\"#\"><svg aria-hidden=\"true\" viewBox=\"0 0 32 32\"><path d=\"M16 3v7M12.5 6.5h7M8 27h16M10 27V14l6-4 6 4v13M14 27v-7h4v7\"/></svg><span><strong>Pamaldos</strong><small>Tvarkaraščiai ir bendruomenės</small></span></a>",
+      "css": ".ds-service { display:grid; grid-template-columns:34px 1fr; gap:13px; align-items:center; min-height:66px; padding:11px 20px; color:var(--white, #fff); background:var(--green, #015c4b); border-right:1px solid rgba(255,255,255,.3); text-decoration:none; } .ds-service:hover { background:var(--green-deep, #004438); } .ds-service:focus-visible { outline:2px solid var(--blue, #2a4782); outline-offset:4px; } .ds-service:active { background:var(--green-deep, #004438); } .ds-service svg { width:30px; height:30px; fill:none; stroke:var(--gold, #face6b); stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; } .ds-service strong { display:block; font:700 16px/1.1 'Playfair Display', Georgia, serif; } .ds-service small { display:block; margin-top:4px; color:#dcebe7; font:10px/1.3 Arimo, Arial, sans-serif; }"
+    },
+    {
+      "name": "Archive Text Field",
+      "kind": "input",
+      "refersTo": "text-field",
+      "description": "A square white search field nested in the cool-bone archive controls.",
+      "html": "<label class=\"ds-field\"><svg aria-hidden=\"true\" viewBox=\"0 0 24 24\"><circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"m16 16 4.2 4.2\"/></svg><span class=\"ds-visually-hidden\">Paieška</span><input type=\"search\" placeholder=\"Ieškoti archyve\"></label>",
+      "css": ".ds-field { display:flex; gap:10px; align-items:center; min-width:280px; padding:0 14px; background:var(--white, #fff); border:1px solid var(--line, #c9c7bd); } .ds-field svg { width:18px; fill:none; stroke:var(--green, #015c4b); stroke-width:1.5; stroke-linecap:round; } .ds-field input { width:100%; min-height:46px; color:var(--ink, #171916); background:transparent; border:0; outline:0; font:14px Arimo, Arial, sans-serif; } .ds-field:focus-within { outline:2px solid var(--blue, #2a4782); outline-offset:4px; } .ds-visually-hidden { position:absolute; width:1px; height:1px; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); }"
+    },
+    {
+      "name": "Article Tag",
+      "kind": "chip",
+      "refersTo": "tag-chip",
+      "description": "A restrained pill reserved for end-of-article metadata.",
+      "html": "<a class=\"ds-tag\" href=\"#\">liturgija</a>",
+      "css": ".ds-tag { display:inline-block; padding:7px 11px; color:var(--muted, #555b57); background:var(--white, #fff); border:1px solid var(--line, #c9c7bd); border-radius:999px; text-decoration:none; font:10px/1.3 Arimo, Arial, sans-serif; } .ds-tag:hover { color:var(--green, #015c4b); border-color:var(--green, #015c4b); } .ds-tag:focus-visible { outline:2px solid var(--blue, #2a4782); outline-offset:4px; } .ds-tag:active { background:var(--paper, #f0eee4); }"
+    },
+    {
+      "name": "Editorial Placement Status",
+      "kind": "chip",
+      "description": "The branded CMS-preview status for homepage story placement.",
+      "html": "<span class=\"ds-placement\">PAGRINDINĖ NAUJIENA</span>",
+      "css": ".ds-placement { display:inline-block; padding:6px 9px; color:var(--green, #015c4b); background:var(--gold, #face6b); font:700 11px/1.3 Arimo, Arial, sans-serif; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Living Ecclesial Press",
+    "overview": "The C Institutional Edition presents a living Lithuanian church publication through the visual discipline of an ecclesial institution and the pace of a compact newsroom. White and cool-bone fields keep the publication immediate and readable; patriarchal green, ceremonial gold, exact institutional marks, and authentic chain motifs give it provenance and ceremony.\n\nThe system feels authoritative, editorial, restrained, and current. Playfair Display carries headlines and long-form reading with literary gravity, while Arimo handles navigation, metadata, controls, and multilingual utility text. Dense story groupings remain legible through strong type hierarchy, image crops, hairline rules, and generous section intervals rather than generic lifestyle-blog staging.",
+    "keyCharacteristics": [
+      "Exact dual institutional marks paired with the visible `ortodoksas.lt` publication identity.",
+      "Flat white and cool-bone fields structured by green and neutral hairlines.",
+      "Playfair-led editorial hierarchy with compact Arimo utility labels.",
+      "Ceremonial green and gold accents used with discipline; library blue marks a distinct content destination.",
+      "Authentic chain and grid motifs acting as cropped edge signatures rather than wallpaper.",
+      "Image-led reporting with quiet scale motion and highly legible responsive density."
+    ],
+    "rules": [
+      { "name": "The Ceremonial Accent Rule", "body": "Gold identifies ceremony, selection, or an institutional motif; it remains an accent rather than a broad reading surface.", "section": "colors" },
+      { "name": "The Blue Room Rule", "body": "Blue belongs to the library destination and focus visibility, giving that content one distinct chamber inside the green-led world.", "section": "colors" },
+      { "name": "The Two-Voice Rule", "body": "Playfair speaks for publication content; Arimo speaks for wayfinding, metadata, controls, and status.", "section": "typography" },
+      { "name": "The Compact Headline Rule", "body": "Editorial headings use bold weight, tight leading, and restrained negative tracking, gaining hierarchy through scale rather than ornamental treatment.", "section": "typography" },
+      { "name": "The Surface-Specific Story Rule", "body": "Preserve the homepage journey from institutional identity through lead and briefs, services, recent stories, and archive; carry the shared system to other pages without turning that journey into a universal template.", "section": "layout" },
+      { "name": "The Flat Institution Rule", "body": "Resting publication surfaces gain authority from alignment, tone, and hairlines; floating depth belongs to a true overlay.", "section": "elevation" },
+      { "name": "The Reserved Curve Rule", "body": "Curves signal a compact token, circular action, or emblem container; editorial surfaces retain square corners.", "section": "shapes" }
+    ],
+    "dos": [
+      "Do preserve the exact dual-mark order and keep `ortodoksas.lt` visible as the publication identity.",
+      "Do use green hairlines, paper fields, editorial image crops, and spacing to structure dense information.",
+      "Do pair Playfair publication content with Arimo utility text across both public pages and editorial preview.",
+      "Do treat chain and grid motifs as authentic, cropped institutional signatures.",
+      "Do maintain the homepage's lead-to-archive journey as a homepage behavior.",
+      "Do preserve the blue focus outline and reduced-motion behavior across interactive elements."
+    ],
+    "donts": [
+      "Don't replace the client-supplied Exarchate lockup or reorder the Patriarchate and Exarchate marks.",
+      "Don't turn gold into a broad background or routine body-text color.",
+      "Don't round editorial cards, fields, callouts, and navigation into a generic soft-interface language.",
+      "Don't use the homepage's 56/44 story grid as a universal page template.",
+      "Don't substitute a generic lifestyle-blog hero, floating-card stack, or ornamental church aesthetic for the compact institutional newsroom."
+    ]
+  }
+}

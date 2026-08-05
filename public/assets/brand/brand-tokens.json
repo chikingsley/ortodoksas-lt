@@ -1,0 +1,19 @@
+{
+  "source": "Orth_inst-template-feed.zip, page 9",
+  "colors": {
+    "marshmallow": "#F0EEE4",
+    "gold": "#FACE6B",
+    "blue": "#2A4782",
+    "green": "#015C4B",
+    "black": "#000000"
+  },
+  "type": {
+    "display": "Playfair Display",
+    "sans": "Arimo"
+  },
+  "logoOrder": [
+    "Ecumenical Patriarchate seal",
+    "Exarchate of the Ecumenical Patriarchate in Lithuania lockup"
+  ],
+  "publicationName": "ortodoksas.lt"
+}
