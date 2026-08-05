@@ -1,0 +1,25 @@
+---
+import { formatDate, type CatalogEntry } from "../../lib/publication";
+import EditorialImage from "../media/EditorialImage.astro";
+
+interface Props {
+  entry: CatalogEntry;
+  featured?: boolean;
+}
+
+const { entry, featured = false } = Astro.props;
+---
+
+<article class={featured ? "article-card featured-card" : "article-card"}>
+  {entry.hero ? <EditorialImage class="card-image" href={entry.path} label={`Atverti: ${entry.title}`} src={entry.hero} /> : null}
+  <div class="card-copy">
+    <div class="eyebrow">{entry.section}</div>
+    <h2><a href={entry.path}>{entry.title}</a></h2>
+    {featured ? <p>{entry.description}</p> : null}
+    <div class="article-meta">
+      {entry.published ? <time datetime={entry.published}>{formatDate(entry.published)}</time> : null}
+      <span aria-hidden="true">·</span>
+      <span>Skaityti</span>
+    </div>
+  </div>
+</article>

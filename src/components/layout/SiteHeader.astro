@@ -1,0 +1,70 @@
+---
+import { localeUi, type SiteLocale } from "../../lib/publication";
+import InstitutionalLockup from "../InstitutionalLockup.astro";
+
+interface Props {
+  locale?: SiteLocale;
+}
+
+const { locale = "lt" } = Astro.props;
+const copy = localeUi[locale];
+const localized = locale !== "lt";
+const locales = [
+  ["lt", "LT", "/"],
+  ["en", "EN", "/en"],
+  ["ru", "RU", "/ru"],
+  ["uk", "UA", "/uk"],
+  ["be", "BY", "/be"],
+] as const;
+const pathname = Astro.url.pathname;
+const navItems = localized
+  ? [
+      [copy.home, `/${locale}`],
+      [copy.archive, `/${locale}#articles`],
+      ["LT", "/"],
+    ]
+  : [
+      ["Pradžia", "/"],
+      ["Pamaldos", "/p/bendruomenes_21.html"],
+      ["Dvasininkai", "/p/dvasininkai.html"],
+      ["Biblioteka", "/p/biblioteka.html"],
+      ["Kalendorius", "/p/kalendorius.html"],
+      ["Archyvas", "/archyvas"],
+    ];
+const isActive = (href: string) =>
+  pathname === href ||
+  (href !== "/" && (pathname.startsWith(`${href}/`) || pathname.startsWith(href.replace(/\.html$/, ""))));
+---
+
+<header class="site-header">
+  <div class="site-width masthead">
+    <a class="institution-brand" href={localized ? `/${locale}` : "/"} aria-label={`${copy.home} · ortodoksas.lt`}>
+      <img class="patriarchate-emblem" src="/assets/brand/source/ecumenical-patriarchate-emblem.svg" alt="Visuotinis Patriarchatas" width="64" height="64" />
+      <span class="mobile-row-break" aria-hidden="true"></span>
+      <InstitutionalLockup class="exarchate-lockup" />
+    </a>
+    <span class="masthead-rule" aria-hidden="true"></span>
+    <a class="publication-brand" href={localized ? `/${locale}` : "/"}>
+      <strong>ortodoksas.lt</strong>
+      <span>Bažnyčios leidinys</span>
+    </a>
+    <nav class="locale-switcher" aria-label={copy.languages}>
+      {locales.map(([code, label, href]) => <a class={pathname === href || (href !== "/" && pathname.startsWith(`${href}/`)) ? "active" : undefined} href={href} lang={code}>{label}</a>)}
+    </nav>
+    <details class="mobile-menu">
+      <summary aria-label="Atverti meniu"><span></span><span></span><span></span></summary>
+      <nav aria-label={copy.edition}>
+        {navItems.map(([label, href]) => <a class={isActive(href) ? "active" : undefined} href={href}>{label}</a>)}
+        <a href="/paieska">Paieška</a>
+      </nav>
+    </details>
+  </div>
+  <nav class="primary-nav" aria-label={copy.edition}>
+    <div class="site-width nav-scroll">
+      {navItems.map(([label, href]) => <a class={isActive(href) ? "active" : undefined} href={href}>{label}</a>)}
+      {!localized ? <a class="nav-search" href="/paieska" aria-label={copy.search}>
+        <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4.2 4.2"></path></svg>
+      </a> : null}
+    </div>
+  </nav>
+</header>

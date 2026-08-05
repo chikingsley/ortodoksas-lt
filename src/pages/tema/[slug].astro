@@ -1,6 +1,8 @@
 ---
+import ArchiveList from "../../components/archive/ArchiveList.astro";
+import PageIntro from "../../components/publication/PageIntro.astro";
 import SiteLayout from "../../layouts/SiteLayout.astro";
-import { articles, formatDate, sectionSlug, sections } from "../../lib/publication";
+import { articles, sectionSlug, sections } from "../../lib/publication";
 
 export function getStaticPaths() {
   return sections.map((section) => ({ params: { slug: sectionSlug(section) }, props: { section } }));
@@ -12,19 +14,7 @@ const entries = articles.filter((entry) => entry.section === section);
 
 <SiteLayout title={`${section} · ortodoksas.lt`} description={`Atkurtos ortodoksas.lt publikacijos skiltyje „${section}“.`} canonicalPath={`/tema/${sectionSlug(section)}`}>
   <main class="site-width category-page">
-    <header class="page-intro">
-      <div class="eyebrow">Publikacijų skiltis</div>
-      <h1>{section}</h1>
-      <p>{entries.length.toLocaleString("lt-LT")} atkurtos publikacijos iš viešojo ortodoksas.lt archyvo.</p>
-    </header>
-    <div class="archive-list">
-      {entries.map((entry) => (
-        <article>
-          <time datetime={entry.published ?? undefined}>{formatDate(entry.published)}</time>
-          <div><span>{entry.labels[0] ?? section}</span><h2><a href={entry.path}>{entry.title}</a></h2><p>{entry.description}</p></div>
-          <a aria-label={`Skaityti: ${entry.title}`} href={entry.path}>→</a>
-        </article>
-      ))}
-    </div>
+    <PageIntro description={`${entries.length.toLocaleString("lt-LT")} atkurtos publikacijos iš viešojo ortodoksas.lt archyvo.`} eyebrow="Publikacijų skiltis" title={section} />
+    <ArchiveList entries={entries} fallbackSection={section} />
   </main>
 </SiteLayout>

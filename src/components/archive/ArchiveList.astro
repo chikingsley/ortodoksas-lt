@@ -1,0 +1,36 @@
+---
+import { formatDate, normalizeText, type CatalogEntry, type SiteLocale } from "../../lib/publication";
+
+interface Props {
+  entries: CatalogEntry[];
+  fallbackSection?: string;
+  id?: string;
+  locale?: SiteLocale;
+  searchable?: boolean;
+}
+
+const {
+  entries,
+  fallbackSection,
+  id,
+  locale = "lt",
+  searchable = false,
+} = Astro.props;
+const localized = locale !== "lt";
+---
+
+<div class:list={["archive-list", { "localized-list": localized }]} id={id}>
+  {entries.map((entry) => {
+    const href = localized ? `/${locale}${entry.path}` : entry.path;
+    const label = entry.labels[0] ?? entry.section ?? fallbackSection;
+    return <article
+      data-section={searchable ? entry.section : undefined}
+      data-search={searchable ? normalizeText(`${entry.title} ${entry.description} ${entry.labels.join(" ")}`) : undefined}
+      data-year={searchable ? entry.published?.slice(0, 4) ?? "" : undefined}
+    >
+      <time datetime={entry.published ?? undefined}>{formatDate(entry.published, locale)}</time>
+      <div><span>{label}</span><h2><a href={href}>{entry.title}</a></h2><p>{entry.description}</p></div>
+      <a aria-label={`Skaityti: ${entry.title}`} href={href}>→</a>
+    </article>;
+  })}
+</div>

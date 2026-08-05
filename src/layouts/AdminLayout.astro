@@ -1,0 +1,38 @@
+---
+import "../features/admin/admin.css";
+
+interface Props {
+  title: string;
+  description?: string;
+  centered?: boolean;
+}
+
+const {
+  title,
+  description = "ortodoksas.lt redakcijos darbo aplinka",
+  centered = false,
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="lt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="theme-color" content="#015c4b" />
+    <meta name="description" content={description} />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{title}</title>
+  </head>
+  <body class:list={["admin-body", { "admin-body--centered": centered }]}>
+    <!--
+    THESIS: The whole publication is one legible editorial desk, replacing repository-shaped CMS work with direct browser operations.
+    OWN-WORLD: White and cool-bone work surfaces, patriarchal green structure, ceremonial gold selection, square controls, Arimo utility type, and the approved institutional identity.
+    STORY: An editor enters the workspace, finds any recovered article, opens it, edits it, previews the public result, and controls homepage prominence.
+    FIRST VIEWPORT: The fake login presents the approved identity and one direct action; the inventory presents navigation, search, filters, real article rows, and pagination without dashboard decoration.
+    FORM: Dense editorial operations table, first choice; seed key ortodoksas-editorial-desk.
+    FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
+    -->
+    <slot />
+  </body>
+</html>

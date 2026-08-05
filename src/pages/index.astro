@@ -1,8 +1,12 @@
 ---
-import ArticleCard from "../components/ArticleCard.astro";
+import ArchivePanel from "../components/archive/ArchivePanel.astro";
+import ArticleCard from "../components/publication/ArticleCard.astro";
+import LeadStory from "../components/publication/LeadStory.astro";
+import SectionHeader from "../components/publication/SectionHeader.astro";
+import StoryRow from "../components/publication/StoryRow.astro";
 import SiteLayout from "../layouts/SiteLayout.astro";
 import { selectHomepageArticles } from "../lib/homepage";
-import { articles, catalog, formatDate, sectionSlug, sections } from "../lib/publication";
+import { articles, catalog, sectionSlug, sections } from "../lib/publication";
 
 const { lead, secondary, remaining } = selectHomepageArticles(articles);
 const standalone = new Map(catalog.filter((entry) => entry.kind === "page").map((entry) => [entry.path, entry]));
@@ -25,23 +29,9 @@ const serviceLinks = [
 <SiteLayout title="ortodoksas.lt" description={pageDescription}>
   <main>
     {lead ? <section class="site-width home-hero">
-      <article class="lead-story">
-        {lead.hero ? <a class="lead-image" href={lead.path}><img src={lead.hero} alt="" fetchpriority="high" /></a> : null}
-        <div class="eyebrow">{lead.section}</div>
-        <h1><a href={lead.path}>{lead.title}</a></h1>
-        <p>{lead.description}</p>
-        <a class="story-link" href={lead.path}>Skaityti daugiau <span aria-hidden="true">→</span></a>
-      </article>
+      <LeadStory entry={lead} />
       <div class="secondary-stories">
-        {secondary.map((entry) => <article class="secondary-story">
-          {entry.hero ? <a class="secondary-image" href={entry.path}><img src={entry.hero} alt="" loading="eager" /></a> : null}
-          <div>
-            <div class="eyebrow">{entry.section}</div>
-            <h2><a href={entry.path}>{entry.title}</a></h2>
-            <p>{entry.description}</p>
-            <a class="story-link" href={entry.path}>Skaityti <span aria-hidden="true">→</span></a>
-          </div>
-        </article>)}
+        {secondary.map((entry) => <StoryRow entry={entry} />)}
       </div>
       <img class="hero-motif" src="/assets/brand/production/canva-patterns/motif-green-chain.png" alt="" />
     </section> : null}
@@ -62,33 +52,23 @@ const serviceLinks = [
     </section>
 
     <section class="site-width mobile-secondary-list" aria-label="Naujausi straipsniai">
-      <div class="section-heading"><h2>Naujausi straipsniai</h2></div>
-      {secondary.map((entry) => <article>
-        {entry.hero ? <a class="secondary-image" href={entry.path}><img src={entry.hero} alt="" loading="eager" /></a> : null}
-        <div><div class="eyebrow">{entry.section}</div><h2><a href={entry.path}>{entry.title}</a></h2></div>
-      </article>)}
+      <SectionHeader title="Naujausi straipsniai" />
+      {secondary.map((entry) => <StoryRow entry={entry} variant="compact" />)}
     </section>
 
     <section class="site-width home-lower" id="articles">
       <div>
-        <div class="section-heading"><h2>Naujausi straipsniai</h2><a href="/archyvas">Visi straipsniai <span aria-hidden="true">→</span></a></div>
+        <SectionHeader href="/archyvas" linkLabel="Visi straipsniai" title="Naujausi straipsniai" />
         <div class="article-grid">{remaining.slice(0, 3).map((entry) => <ArticleCard entry={entry} />)}</div>
       </div>
-      <aside class="archive-panel">
-        <div class="section-heading"><h2>Archyvas</h2></div>
-        {[...archiveMonths.entries()].slice(0, 5).map(([month, count]) => <a href="/archyvas"><span>{month}</span><strong>{count}</strong></a>)}
-        <a class="archive-all" href="/archyvas">Visas archyvas <span aria-hidden="true">→</span></a>
-      </aside>
+      <ArchivePanel months={[...archiveMonths.entries()]} />
     </section>
 
     {sections.slice(0, 2).map((section) => {
       const sectionArticles = articles.filter((entry) => entry.section === section && entry.path !== lead?.path).slice(0, 4);
       return sectionArticles.length ? <section class="site-width content-section section-row">
-        <div class="section-heading"><h2>{section}</h2><a href={`/tema/${sectionSlug(section)}`}>Daugiau <span aria-hidden="true">→</span></a></div>
-        <div class="section-articles">{sectionArticles.map((entry) => <article>
-          {entry.hero ? <a class="section-thumb" href={entry.path}><img src={entry.hero} alt="" loading="lazy" /></a> : null}
-          <div><time datetime={entry.published ?? undefined}>{formatDate(entry.published)}</time><h3><a href={entry.path}>{entry.title}</a></h3><p>{entry.description}</p></div>
-        </article>)}</div>
+        <SectionHeader href={`/tema/${sectionSlug(section)}`} linkLabel="Daugiau" title={section} />
+        <div class="section-articles">{sectionArticles.map((entry) => <StoryRow entry={entry} variant="section" />)}</div>
       </section> : null;
     })}
 

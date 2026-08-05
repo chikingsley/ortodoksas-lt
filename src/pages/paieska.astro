@@ -1,4 +1,5 @@
 ---
+import PageIntro from "../components/publication/PageIntro.astro";
 import SiteLayout from "../layouts/SiteLayout.astro";
 import { catalog, formatDate, normalizeText } from "../lib/publication";
 
@@ -7,7 +8,7 @@ const entries = catalog.filter((entry) => entry.kind === "article");
 
 <SiteLayout title="Paieška · ortodoksas.lt" description="Ieškokite atkurtame ortodoksas.lt publikacijų archyve." canonicalPath="/paieska">
   <main class="site-width search-page">
-    <header class="page-intro compact"><div class="eyebrow">Archyvo paieška</div><h1>Ko ieškote?</h1><p>Paieška veikia šiame statiniame archyvo puslapyje ir nereikalauja serverio.</p></header>
+    <PageIntro compact description="Paieška veikia šiame statiniame archyvo puslapyje ir nereikalauja serverio." eyebrow="Archyvo paieška" title="Ko ieškote?" />
     <form class="search-form" id="site-search" action="/paieska" method="get">
       <span aria-hidden="true">⌕</span>
       <label class="sr-only" for="search-query">Ieškoti</label>

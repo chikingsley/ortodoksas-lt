@@ -79,9 +79,35 @@
       { "name": "editorial-image-ease", "value": "0.55s cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Quiet 2% image scale on interactive editorial cards." },
       { "name": "reduced-motion-collapse", "value": "0.01ms", "purpose": "Immediate state changes under the reduced-motion preference." }
     ],
+    "foundation": {
+      "name": "U.S. Web Design System 3",
+      "scope": "Spacing, responsive widths, grid behavior, site margins, structural borders, and state semantics",
+      "sources": [
+        "https://designsystem.digital.gov/design-tokens/spacing-units/",
+        "https://designsystem.digital.gov/utilities/layout-grid/",
+        "https://designsystem.digital.gov/components/header/",
+        "https://www.w3.org/WAI/WCAG22/Techniques/aria/ARIA26",
+        "https://www.w3.org/WAI/WCAG22/Understanding/focus-appearance.html"
+      ]
+    },
+    "spacingTokens": [
+      { "name": "us-05", "value": "4px" },
+      { "name": "us-1", "value": "8px" },
+      { "name": "us-105", "value": "12px" },
+      { "name": "us-2", "value": "16px" },
+      { "name": "us-205", "value": "20px" },
+      { "name": "us-3", "value": "24px" },
+      { "name": "us-4", "value": "32px" },
+      { "name": "us-5", "value": "40px" },
+      { "name": "us-6", "value": "48px" },
+      { "name": "us-8", "value": "64px" }
+    ],
     "breakpoints": [
-      { "name": "editorial-stack", "value": "980px" },
-      { "name": "compact-publication", "value": "720px" }
+      { "name": "mobile-lg", "value": "480px" },
+      { "name": "tablet", "value": "640px" },
+      { "name": "tablet-lg", "value": "880px" },
+      { "name": "desktop", "value": "1024px" },
+      { "name": "desktop-lg", "value": "1200px" }
     ]
   },
   "components": [

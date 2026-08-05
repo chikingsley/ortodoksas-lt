@@ -12,13 +12,14 @@ This folder contains the client-supplied Exarchate identity, the Canva reference
 
 ## Production assets
 
-- `production/exarchate-lockup-client.png`: client-supplied lockup, cropped to its artwork bounds and preserved pixel for pixel
+- `production/exarchate-crest-client.png`: accepted client crest with its exterior background removed and internal white lettering preserved
+- `production/exarchate-lockup-client.png`: client-supplied full lockup retained as the visual source reference
 - `production/canva-patterns/`: six transparent, pixel-faithful extractions from the Canva brand board
 - `source/ecumenical-patriarchate-emblem.svg`: complete vector artwork matching the emblem in the Canva brand board
 - `source/ecumenical-patriarchate-emblem-2048.png`: transparent 2,048 px render of that vector
 - `source/ecumenical-patriarchate-emblem-official-raster.png`: 512 px raster served by the Ecumenical Patriarchate's official website
 
-The client PNG is the sole production master for the Exarchate lockup. Preserve its proportions and render it as a single image. An original vector supplied by the identity owner can supersede it later.
+The production interface composes the accepted client crest with a live Arimo 700 wordmark through `InstitutionalLockup.astro`. The client full-lockup PNG remains the visual reference for spacing, weight, proportions, and color. An original vector supplied by the identity owner can supersede the crest raster later.
 
 The Canva decorations remain transparent PNGs as their pixel-faithful masters. The vectorization trial is preserved in the audit comparison as a viable future direction. Treat the supplied samples as bounded decorative panels and vertical motifs. Preserve their orientation, proportions, and colors.
 

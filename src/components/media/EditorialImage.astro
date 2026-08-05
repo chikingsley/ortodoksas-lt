@@ -1,0 +1,37 @@
+---
+interface Props {
+  alt?: string;
+  class?: string;
+  decoding?: "async" | "auto" | "sync";
+  height?: number;
+  href?: string;
+  label?: string;
+  loading?: "eager" | "lazy";
+  priority?: boolean;
+  src: string;
+  width?: number;
+}
+
+const {
+  alt = "",
+  class: className,
+  decoding = "async",
+  height,
+  href,
+  label,
+  loading = "lazy",
+  priority = false,
+  src,
+  width,
+} = Astro.props;
+---
+
+{href ? (
+  <a class={className} href={href} aria-label={label || alt || undefined}>
+    <img src={src} alt={alt} decoding={decoding} fetchpriority={priority ? "high" : undefined} height={height} loading={priority ? "eager" : loading} width={width} />
+  </a>
+) : (
+  <div class={className}>
+    <img src={src} alt={alt} decoding={decoding} fetchpriority={priority ? "high" : undefined} height={height} loading={priority ? "eager" : loading} width={width} />
+  </div>
+)}

@@ -113,9 +113,7 @@ svg {
   object-fit: contain;
 }
 .exarchate-lockup {
-  width: 184px;
-  height: auto;
-  object-fit: contain;
+  --institutional-lockup-width: 184px;
 }
 .masthead-rule {
   flex: 0 0 1px;
@@ -688,6 +686,28 @@ svg {
   height: auto;
   margin: 2rem auto;
 }
+.archive-media-unavailable {
+  display: grid;
+  gap: 8px;
+  place-content: center;
+  width: 100%;
+  min-height: 150px;
+  padding: 28px;
+  margin: 2rem 0;
+  font-family: "Arimo", sans-serif;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--muted);
+  text-align: center;
+  background: var(--paper);
+  border: 1px solid var(--line);
+}
+.archive-media-unavailable strong {
+  font-size: 13px;
+  color: var(--green);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
 .prose figure {
   margin: 2rem 0;
 }
@@ -1105,7 +1125,7 @@ svg {
     height: 44px;
   }
   .exarchate-lockup {
-    width: 184px;
+    --institutional-lockup-width: 184px;
   }
   .masthead-rule {
     margin-inline: 16px;
@@ -1189,8 +1209,9 @@ svg {
     height: 39px;
   }
   .exarchate-lockup {
+    --institutional-lockup-width: 155px;
+
     order: 5;
-    width: 155px;
     margin-top: 8px;
   }
   .mobile-row-break {

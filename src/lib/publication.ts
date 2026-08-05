@@ -1,5 +1,6 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { marked } from "marked";
+import { localizeMediaHtml, localizeMediaUrl } from "./media";
 
 export interface CatalogEntry {
   capture?: string;
@@ -82,13 +83,21 @@ function readJson<T>(base: URL, file: string) {
 
 const recoveredPages = contentFiles
   .map((file) => readJson<ContentPage>(pagesDirectory, file))
-  .filter((page): page is ContentPage => Boolean(page && page.path !== "/"));
+  .filter((page): page is ContentPage => Boolean(page && page.path !== "/"))
+  .map((page) => ({
+    ...page,
+    hero: localizeMediaUrl(page.hero, page.path),
+    html: localizeMediaHtml(page.html),
+  }));
 
 const catalogValue = readJson<CatalogEntry[]>(
   pagesDirectory,
   "../catalog.json"
 );
-const recoveredCatalog = catalogValue ?? [];
+const recoveredCatalog = (catalogValue ?? []).map((entry) => ({
+  ...entry,
+  hero: localizeMediaUrl(entry.hero, entry.path),
+}));
 
 export const localeShells = ["en", "ru", "uk", "be"] as const;
 
@@ -144,7 +153,8 @@ function parseEditorialArticle(
     {
       description,
       file: `public/content/editorial/${locale}/${file}`,
-      hero: typeof source.hero === "string" ? source.hero : null,
+      hero:
+        typeof source.hero === "string" ? localizeMediaUrl(source.hero) : null,
       homepage:
         source.homepage === "lead" || source.homepage === "secondary"
           ? source.homepage
@@ -153,7 +163,7 @@ function parseEditorialArticle(
         typeof source.homepage_order === "number"
           ? source.homepage_order
           : undefined,
-      html,
+      html: localizeMediaHtml(html),
       kind: "article" as const,
       labels: [section],
       locale: locale === "lt" ? undefined : locale,
@@ -372,17 +382,19 @@ function loadLocalizedArticles(locale: Locale): LocalizedArticle[] {
       ) {
         return [];
       }
-      const hero =
+      const hero = localizeMediaUrl(
         rawEntry.media.find(
           (media) => media.type === "image" && typeof media.url === "string"
-        )?.url ?? null;
+        )?.url ?? null,
+        rawEntry.path
+      );
       return [
         {
           capture: rawEntry.provenance.timestamp,
           description: rawEntry.description,
           file: rawEntry.file,
           hero,
-          html: content.body,
+          html: localizeMediaHtml(content.body),
           kind: "article" as const,
           labels: rawEntry.labels,
           locale,

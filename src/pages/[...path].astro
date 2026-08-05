@@ -1,4 +1,5 @@
 ---
+import EditorialImage from "../components/media/EditorialImage.astro";
 import SiteLayout from "../layouts/SiteLayout.astro";
 import { cleanHtml, formatDate, pages, type ContentPage } from "../lib/publication";
 
@@ -40,7 +41,7 @@ const articleSchema = page.kind === "article" ? {
         <div class="eyebrow">{page.kind === "page" ? "ortodoksas.lt" : page.section}</div>
         <h1>{page.title}</h1>
         {page.published ? <div class="article-byline"><time datetime={page.published}>{formatDate(page.published)}</time><span>{page.origin === "editorial" ? "ortodoksas.lt redakcijos publikacija" : `Atkurta iš ${page.capture?.slice(0, 4) ?? "viešojo"} m. archyvo kopijos`}</span></div> : null}
-        {page.hero ? <div class="article-hero"><img src={page.hero} alt="" fetchpriority="high" /></div> : null}
+        {page.hero ? <EditorialImage class="article-hero" priority src={page.hero} /> : null}
       </header>
       <div class="prose" set:html={cleanHtml(page.html)} />
       {page.labels.length > 0 ? <footer class="article-tags">{page.labels.map((label) => <span>{label}</span>)}</footer> : null}

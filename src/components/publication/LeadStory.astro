@@ -1,0 +1,18 @@
+---
+import type { CatalogEntry } from "../../lib/publication";
+import EditorialImage from "../media/EditorialImage.astro";
+
+interface Props {
+  entry: CatalogEntry;
+}
+
+const { entry } = Astro.props;
+---
+
+<article class="lead-story">
+  {entry.hero ? <EditorialImage class="lead-image" href={entry.path} label={`Atverti: ${entry.title}`} priority src={entry.hero} /> : null}
+  <div class="eyebrow">{entry.section}</div>
+  <h1><a href={entry.path}>{entry.title}</a></h1>
+  <p>{entry.description}</p>
+  <a class="story-link" href={entry.path}>Skaityti daugiau <span aria-hidden="true">→</span></a>
+</article>

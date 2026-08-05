@@ -1,0 +1,30 @@
+---
+import AdminIdentity from "../../components/admin/AdminIdentity.astro";
+import AdminLayout from "../../layouts/AdminLayout.astro";
+---
+
+<AdminLayout title="Prisijungimas · ortodoksas.lt redakcija" centered>
+  <main class="admin-login">
+    <a class="admin-login__public-link" href="/">Grįžti į ortodoksas.lt</a>
+    <section class="admin-login__panel" aria-labelledby="login-title">
+      <AdminIdentity />
+      <div class="admin-login__intro">
+        <p class="admin-kicker">Demonstracinė prieiga</p>
+        <h1 id="login-title">Redakcijos darbo aplinka</h1>
+        <p>Prisijunkite prie straipsnių, vertimų ir pagrindinio puslapio valdymo.</p>
+      </div>
+      <form class="admin-login__form" action="/admin/articles" method="get">
+        <label>
+          <span>El. paštas</span>
+          <input type="email" name="email" value="redakcija@ortodoksas.lt" autocomplete="username" />
+        </label>
+        <label>
+          <span>Slaptažodis</span>
+          <input type="password" name="password" value="prototipas" autocomplete="current-password" />
+        </label>
+        <button type="submit">Prisijungti prie redakcijos</button>
+      </form>
+      <p class="admin-login__note">Šiame etape prisijungimas yra demonstracinis. Vėliau tą pačią vietą perims Clerk.</p>
+    </section>
+  </main>
+</AdminLayout>

@@ -1,0 +1,18 @@
+---
+import InstitutionalLockup from "../InstitutionalLockup.astro";
+
+interface Props {
+  compact?: boolean;
+}
+
+const { compact = false } = Astro.props;
+---
+
+<a class:list={["admin-identity", { "admin-identity--compact": compact }]} href="/admin" aria-label="ortodoksas.lt redakcija">
+  <InstitutionalLockup class="admin-identity__institution" />
+  <span class="admin-identity__divider" aria-hidden="true"></span>
+  <span class="admin-identity__publication">
+    <strong>ortodoksas.lt</strong>
+    <small>Redakcija</small>
+  </span>
+</a>

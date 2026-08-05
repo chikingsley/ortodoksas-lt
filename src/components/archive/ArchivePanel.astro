@@ -1,0 +1,15 @@
+---
+import SectionHeader from "../publication/SectionHeader.astro";
+
+interface Props {
+  months: Array<[string, number]>;
+}
+
+const { months } = Astro.props;
+---
+
+<aside class="archive-panel">
+  <SectionHeader title="Archyvas" />
+  {months.slice(0, 5).map(([month, count]) => <a href="/archyvas"><span>{month}</span><strong>{count}</strong></a>)}
+  <a class="archive-all" href="/archyvas">Visas archyvas <span aria-hidden="true">→</span></a>
+</aside>

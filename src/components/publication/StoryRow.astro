@@ -1,0 +1,38 @@
+---
+import { formatDate, type CatalogEntry } from "../../lib/publication";
+import EditorialImage from "../media/EditorialImage.astro";
+
+interface Props {
+  entry: CatalogEntry;
+  locale?: Parameters<typeof formatDate>[1];
+  variant?: "compact" | "section" | "supporting";
+}
+
+const { entry, locale = "lt", variant = "supporting" } = Astro.props;
+---
+
+{variant === "supporting" ? (
+  <article class="secondary-story">
+    {entry.hero ? <EditorialImage class="secondary-image" href={entry.path} label={`Atverti: ${entry.title}`} loading="eager" src={entry.hero} /> : null}
+    <div>
+      <div class="eyebrow">{entry.section}</div>
+      <h2><a href={entry.path}>{entry.title}</a></h2>
+      <p>{entry.description}</p>
+      <a class="story-link" href={entry.path}>Skaityti <span aria-hidden="true">→</span></a>
+    </div>
+  </article>
+) : variant === "compact" ? (
+  <article>
+    {entry.hero ? <EditorialImage class="secondary-image" href={entry.path} label={`Atverti: ${entry.title}`} loading="eager" src={entry.hero} /> : null}
+    <div><div class="eyebrow">{entry.section}</div><h2><a href={entry.path}>{entry.title}</a></h2></div>
+  </article>
+) : (
+  <article>
+    {entry.hero ? <EditorialImage class="section-thumb" href={entry.path} label={`Atverti: ${entry.title}`} src={entry.hero} /> : null}
+    <div>
+      <time datetime={entry.published ?? undefined}>{formatDate(entry.published, locale)}</time>
+      <h3><a href={entry.path}>{entry.title}</a></h3>
+      <p>{entry.description}</p>
+    </div>
+  </article>
+)}

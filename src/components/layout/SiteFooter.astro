@@ -1,0 +1,29 @@
+---
+import { localeUi, type SiteLocale } from "../../lib/publication";
+
+interface Props {
+  locale?: SiteLocale;
+}
+
+const { locale = "lt" } = Astro.props;
+const copy = localeUi[locale];
+const localized = locale !== "lt";
+---
+
+<footer class="site-footer">
+  <div class="site-width footer-grid">
+    <div class="footer-identity">
+      <img src="/assets/brand/source/ecumenical-patriarchate-emblem.svg" alt="" width="52" height="52" />
+      <div><div class="footer-brand">ortodoksas.lt</div><p>{copy.footerDescription}</p></div>
+    </div>
+    <div>
+      <h2>{copy.articles}</h2>
+      {localized ? <a href={`/${locale}#articles`}>{copy.archive}</a> : <><a href="/p/katekizmas_12.html">Katekizmas</a><a href="/p/dvasininkai.html">Dvasininkai</a><a href="/p/biblioteka.html">Biblioteka</a></>}
+    </div>
+    <div>
+      <h2>{localized ? copy.edition : "Susisiekti"}</h2>
+      {localized ? <a href="/">{copy.backToLithuanian}</a> : <><a href="/p/kontaktai_30.html">Kontaktai</a><a href="/p/paremti.html">Paremti veiklą</a><a href="/admin/">Redakcija</a></>}
+    </div>
+  </div>
+  <div class="site-width footer-base"><span>{localized ? copy.provenance : "Atkurta iš viešojo ortodoksas.lt archyvo"}</span><span>{localized ? "2022" : "2012–2026"}</span></div>
+</footer>

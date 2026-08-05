@@ -1,6 +1,8 @@
 ---
+import ArchiveList from "../components/archive/ArchiveList.astro";
+import PageIntro from "../components/publication/PageIntro.astro";
 import SiteLayout from "../layouts/SiteLayout.astro";
-import { formatDate, getLocalizedArticles, localeShells, localeUi, type Locale } from "../lib/publication";
+import { getLocalizedArticles, localeShells, localeUi, type Locale } from "../lib/publication";
 
 const copy: Record<Locale, { name: string; title: string; message: string }> = {
   en: { name: "English", title: "English edition", message: "No recovered English publications are available yet. The Lithuanian archive remains the source edition while translated material is being prepared." },
@@ -22,18 +24,8 @@ const localizedCopy = localeUi[locale];
 <SiteLayout title={`${language.title} · ortodoksas.lt`} description={entries.length ? `${entries.length} ${localizedCopy.articles.toLocaleLowerCase(locale)} · ${language.title}.` : language.message} canonicalPath={`/${locale}`} lang={locale} locale={locale}>
   <main class="site-width language-shell">
     {entries.length ? <>
-      <header class="page-intro">
-        <div class="eyebrow">{language.name} · {locale.toUpperCase()}</div>
-        <h1>{language.title}</h1>
-        <p>{entries.length} {localizedCopy.articles.toLocaleLowerCase(locale)} · {localizedCopy.provenance}</p>
-      </header>
-      <div class="archive-list localized-list" id="articles">
-        {entries.map((entry) => <article>
-          <time datetime={entry.published ?? undefined}>{formatDate(entry.published, locale)}</time>
-          <div><span>{entry.labels[0] ?? language.name}</span><h2><a href={`/${locale}${entry.path}`}>{entry.title}</a></h2><p>{entry.description}</p></div>
-          <a aria-label={`${entry.title}`} href={`/${locale}${entry.path}`}>→</a>
-        </article>)}
-      </div>
+      <PageIntro description={`${entries.length} ${localizedCopy.articles.toLocaleLowerCase(locale)} · ${localizedCopy.provenance}`} eyebrow={`${language.name} · ${locale.toUpperCase()}`} title={language.title} />
+      <ArchiveList entries={entries} fallbackSection={language.name} id="articles" locale={locale} />
     </> : <div class="shell-card">
       <div class="eyebrow">{language.name} · {locale.toUpperCase()}</div>
       <h1>{language.title}</h1>

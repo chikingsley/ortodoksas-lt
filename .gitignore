@@ -17,6 +17,12 @@ recovery/
 .dev.vars*
 worker-configuration.d.ts.tmp
 
+# The verified recovery mirror remains local while R2 serves deployed media.
+public/media/files/
+
+# Canva ZIP extraction workspace; curated brand assets live under public/assets.
+Orth_inst-template-feed.zip.sb-*/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
