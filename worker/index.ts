@@ -56,6 +56,27 @@ function oauthUnavailable() {
   );
 }
 
+export function oauthResultPage(
+  result: "error" | "success",
+  payload: Record<string, string>
+) {
+  const message = `authorization:github:${result}:${JSON.stringify(payload)}`;
+  const scriptMessage = JSON.stringify(message).replace(/</g, "\\u003c");
+  return new Response(
+    `<!doctype html><meta charset="utf-8"><title>Authorization complete</title><script>(()=>{const result=${scriptMessage};const receiveMessage=(event)=>{if(event.source!==window.opener||event.data!=="authorizing:github")return;window.removeEventListener("message",receiveMessage,false);window.opener.postMessage(result,event.origin);window.close()};window.addEventListener("message",receiveMessage,false);window.opener.postMessage("authorizing:github","*")})()</script><p>Authorization complete. You can close this window.</p>`,
+    {
+      headers: {
+        "Cache-Control": "no-store",
+        "Content-Type": "text/html; charset=utf-8",
+        "Referrer-Policy": "no-referrer",
+        "Set-Cookie":
+          "oauth_state=; Path=/api/auth; Max-Age=0; Secure; HttpOnly; SameSite=Lax",
+        "X-Content-Type-Options": "nosniff",
+      },
+    }
+  );
+}
+
 function startOAuth(request: Request, env: Env & OAuthBindings) {
   if (!env.GITHUB_CLIENT_ID) {
     return oauthUnavailable();
@@ -79,11 +100,22 @@ async function finishOAuth(request: Request, env: Env & OAuthBindings) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
   const state = url.searchParams.get("state");
+  const oauthError = url.searchParams.get("error");
   if (!(env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET)) {
     return oauthUnavailable();
   }
-  if (!(code && state) || state !== readCookie(request, "oauth_state")) {
+  if (!state || state !== readCookie(request, "oauth_state")) {
     return Response.json({ error: "Invalid OAuth state." }, { status: 400 });
+  }
+  if (oauthError) {
+    return oauthResultPage("error", {
+      message:
+        url.searchParams.get("error_description") ??
+        "GitHub authorization was declined.",
+    });
+  }
+  if (!code) {
+    return Response.json({ error: "Missing OAuth code." }, { status: 400 });
   }
 
   const tokenResponse = await fetch(
@@ -113,20 +145,10 @@ async function finishOAuth(request: Request, env: Env & OAuthBindings) {
     );
   }
 
-  const payload = JSON.stringify({ token: token.access_token }).replace(
-    /</g,
-    "\\u003c"
-  );
-  return new Response(
-    `<!doctype html><meta charset="utf-8"><title>Authorization complete</title><script>window.opener.postMessage("authorization:github:success:${payload}", window.location.origin); window.close();</script><p>Authorization complete. You can close this window.</p>`,
-    {
-      headers: {
-        "Content-Type": "text/html; charset=utf-8",
-        "Set-Cookie":
-          "oauth_state=; Path=/api/auth; Max-Age=0; Secure; HttpOnly; SameSite=Lax",
-      },
-    }
-  );
+  return oauthResultPage("success", {
+    provider: "github",
+    token: token.access_token,
+  });
 }
 
 export default {

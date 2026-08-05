@@ -1,4 +1,5 @@
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { marked } from "marked";
 
 export interface CatalogEntry {
   capture?: string;
@@ -7,6 +8,7 @@ export interface CatalogEntry {
   hero: string | null;
   kind: "article" | "page";
   labels: string[];
+  origin?: "editorial" | "recovered";
   path: string;
   published: string | null;
   section: string;
@@ -59,6 +61,10 @@ const localesDirectory = new URL(
   "../../public/content/locales/",
   import.meta.url
 );
+const editorialDirectory = new URL(
+  "../../public/content/editorial/",
+  import.meta.url
+);
 const safeLocaleFilePattern = /^pages\/[A-Za-z0-9._-]+\.json$/;
 const contentFiles = readdirSync(pagesDirectory, { encoding: "utf8" }).filter(
   (file) => file.endsWith(".json")
@@ -72,7 +78,7 @@ function readJson<T>(base: URL, file: string) {
   }
 }
 
-export const pages = contentFiles
+const recoveredPages = contentFiles
   .map((file) => readJson<ContentPage>(pagesDirectory, file))
   .filter((page): page is ContentPage => Boolean(page && page.path !== "/"));
 
@@ -80,7 +86,107 @@ const catalogValue = readJson<CatalogEntry[]>(
   pagesDirectory,
   "../catalog.json"
 );
-export const catalog = catalogValue ?? [];
+const recoveredCatalog = catalogValue ?? [];
+
+export const localeShells = ["en", "ru", "uk", "be"] as const;
+
+export type Locale = (typeof localeShells)[number];
+
+export type SiteLocale = "lt" | Locale;
+
+interface EditorialSource {
+  body?: unknown;
+  description?: unknown;
+  hero?: unknown;
+  published?: unknown;
+  section?: unknown;
+  slug?: unknown;
+  title?: unknown;
+}
+
+const editorialSlugPattern = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
+
+function loadEditorialArticles(locale: SiteLocale): LocalizedArticle[] {
+  const directory = new URL(`${locale}/`, editorialDirectory);
+  if (!existsSync(directory)) {
+    return [];
+  }
+  return readdirSync(directory, { encoding: "utf8" })
+    .filter((file) => file.endsWith(".json"))
+    .flatMap((file) => {
+      const source = readJson<EditorialSource>(directory, file);
+      const fileSlug = file.slice(0, -5);
+      const slug = typeof source?.slug === "string" ? source.slug : fileSlug;
+      if (
+        !source ||
+        typeof source.title !== "string" ||
+        typeof source.body !== "string" ||
+        !editorialSlugPattern.test(slug) ||
+        slug !== fileSlug
+      ) {
+        return [];
+      }
+      const section =
+        typeof source.section === "string" && source.section.trim()
+          ? source.section.trim()
+          : "Naujienos";
+      const html = marked.parse(source.body, { async: false }) as string;
+      const description =
+        typeof source.description === "string" && source.description.trim()
+          ? source.description.trim()
+          : html
+              .replace(/<[^>]+>/g, " ")
+              .replace(/\s+/g, " ")
+              .trim()
+              .slice(0, 180);
+      return [
+        {
+          description,
+          file: `public/content/editorial/${locale}/${file}`,
+          hero: typeof source.hero === "string" ? source.hero : null,
+          html,
+          kind: "article" as const,
+          labels: [section],
+          locale: locale === "lt" ? undefined : locale,
+          origin: "editorial" as const,
+          path: `/e/${slug}.html`,
+          published:
+            typeof source.published === "string" ? source.published : null,
+          section,
+          title: source.title,
+        } as LocalizedArticle,
+      ];
+    });
+}
+
+const editorialArticles = {
+  be: loadEditorialArticles("be"),
+  en: loadEditorialArticles("en"),
+  lt: loadEditorialArticles("lt"),
+  ru: loadEditorialArticles("ru"),
+  uk: loadEditorialArticles("uk"),
+};
+
+function assertUniquePaths(entries: CatalogEntry[], label: string) {
+  const paths = new Set<string>();
+  for (const entry of entries) {
+    if (paths.has(entry.path)) {
+      throw new Error(`Duplicate ${label} path: ${entry.path}`);
+    }
+    paths.add(entry.path);
+  }
+  return entries;
+}
+
+export const pages = assertUniquePaths(
+  [...recoveredPages, ...editorialArticles.lt],
+  "Lithuanian publication"
+) as ContentPage[];
+
+export const catalog = assertUniquePaths(
+  [...recoveredCatalog, ...editorialArticles.lt],
+  "Lithuanian catalog"
+);
 
 export const articles = catalog
   .filter((entry) => entry.kind === "article")
@@ -93,12 +199,6 @@ export const articles = catalog
 export const sections = [
   ...new Set(articles.map((entry) => entry.section)),
 ].sort((a, b) => a.localeCompare(b, "lt"));
-
-export const localeShells = ["en", "ru", "uk", "be"] as const;
-
-export type Locale = (typeof localeShells)[number];
-
-export type SiteLocale = "lt" | Locale;
 
 export const localeUi: Record<
   SiteLocale,
@@ -121,7 +221,7 @@ export const localeUi: Record<
     backToLithuanian: "Літоўскі архіў",
     edition: "Беларускае выданне",
     footerDescription:
-      "Аўтэнтычныя матэрыялы беларускага выдання будуць дададзеныя пасля іх аднаўлення.",
+      "Праваслаўная вера, традыцыя і царкоўнае жыццё ў Літве і свеце.",
     home: "Галоўная",
     institution: "Экзархат Канстанцінопальскага патрыярхату ў Літве",
     languages: "Мовы",
@@ -134,7 +234,7 @@ export const localeUi: Record<
     backToLithuanian: "Lithuanian archive",
     edition: "English edition",
     footerDescription:
-      "Authentic English edition material will appear after it has been recovered.",
+      "Orthodox faith, tradition, and church life in Lithuania and beyond.",
     home: "Home",
     institution: "Exarchate of the Ecumenical Patriarchate in Lithuania",
     languages: "Languages",
@@ -160,7 +260,7 @@ export const localeUi: Record<
     backToLithuanian: "Литовский архив",
     edition: "Русское издание",
     footerDescription:
-      "Аутентичные материалы русского издания, восстановленные из публичного архива.",
+      "Православная вера, традиция и церковная жизнь в Литве и мире.",
     home: "Главная",
     institution: "Экзархат Вселенского патриархата в Литве",
     languages: "Языки",
@@ -173,7 +273,7 @@ export const localeUi: Record<
     backToLithuanian: "Литовський архів",
     edition: "Українське видання",
     footerDescription:
-      "Автентичні матеріали українського видання, відновлені з публічного архіву.",
+      "Православна віра, традиція і церковне життя в Литві та світі.",
     home: "Головна",
     institution: "Екзархат Вселенського патріархату в Литві",
     languages: "Мови",
@@ -283,7 +383,15 @@ function loadLocalizedArticles(locale: Locale): LocalizedArticle[] {
 }
 
 export const localizedArticles = Object.fromEntries(
-  localeShells.map((locale) => [locale, loadLocalizedArticles(locale)])
+  localeShells.map((locale) => [
+    locale,
+    assertUniquePaths(
+      [...loadLocalizedArticles(locale), ...editorialArticles[locale]],
+      `${locale} publication`
+    ).sort(
+      (a, b) => Date.parse(b.published ?? "") - Date.parse(a.published ?? "")
+    ),
+  ])
 ) as Record<Locale, LocalizedArticle[]>;
 
 export function getLocalizedArticles(locale: Locale) {

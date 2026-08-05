@@ -40,15 +40,15 @@ const articleSchema = {
       <header class="article-header">
         <div class="eyebrow">{copy.edition}</div>
         <h1>{page.title}</h1>
-        {page.published ? <div class="article-byline"><time datetime={page.published}>{formatDate(page.published, locale)}</time><span>{copy.provenance}</span></div> : null}
+        {page.published ? <div class="article-byline"><time datetime={page.published}>{formatDate(page.published, locale)}</time><span>{page.origin === "editorial" ? copy.institution : copy.provenance}</span></div> : null}
         {page.hero ? <div class="article-hero"><img src={page.hero} alt="" fetchpriority="high" /></div> : null}
       </header>
       <div class="prose" set:html={cleanHtml(page.html)}></div>
       {page.labels.length > 0 ? <footer class="article-tags">{page.labels.map((label) => <span>{label}</span>)}</footer> : null}
     </article>
-    <aside class="site-width archive-note">
+    {page.origin !== "editorial" ? <aside class="site-width archive-note">
       <span aria-hidden="true">☦</span>
       <p>{copy.provenance} {page.source ? <a href={page.source} rel="noreferrer">{page.source}</a> : null}</p>
-    </aside>
+    </aside> : null}
   </main>
 </SiteLayout>

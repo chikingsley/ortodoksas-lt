@@ -139,6 +139,17 @@ Exit criteria:
 - The retained Wrangler preview is active at
   `https://ortodoksas.grassinside.com` with login autostart disabled.
 - CMS publication acceptance awaits repository-specific GitHub OAuth secrets.
+- GitHub OAuth now completes through the Cloudflare Worker handshake. Decap's
+  multilingual editor created Lithuanian and English variants, saved a draft,
+  revised it, moved it through Ready, merged pull request `#1`, and deleted the
+  published acceptance entry through the CMS UI.
+- The temporary publication generated exact Lithuanian and English `/e/*.html`
+  routes, appeared in archive, search, RSS, sitemap, and locale navigation, and
+  passed rendered desktop/mobile inspection before the unpublish exercise.
+- The CMS acceptance content was removed by Decap commit
+  `b9b42cf2a280357c7eb7d3391cfef9cbee259075`; the publication remains clean.
+- A production GitHub-to-Cloudflare build connection remains part of the domain
+  cutover gate. The retained Wrangler preview rebuild path is accepted.
 - Production domain cutover remains an explicit external release action.
 - G0's capture index covers all 46,540 exposed CDX records. The publication
   corpus is recovered; exhaustive byte mirroring remains queued for 44,995

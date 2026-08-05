@@ -2,8 +2,10 @@ backend:
   name: github
   repo: chikingsley/ortodoksas-revival
   branch: main
-  base_url: /api
-  auth_endpoint: auth
+  base_url: https://ortodoksas.grassinside.com
+  auth_endpoint: api/auth
+  auth_scope: repo
+  squash_merges: true
 
 local_backend:
   url: http://localhost:8081/api/v1
@@ -11,6 +13,11 @@ local_backend:
 publish_mode: editorial_workflow
 media_folder: public/media
 public_folder: /media
+
+i18n:
+  structure: multiple_folders
+  locales: [lt, en, ru, uk, be]
+  default_locale: lt
 
 collections:
   - name: publications
@@ -21,16 +28,13 @@ collections:
     format: json
     create: true
     slug: "{{slug}}"
-    i18n:
-      structure: multiple_folders
-      locales: [lt, en, ru, uk, be]
-      default_locale: lt
+    summary: "{{title}} · {{published}}"
+    i18n: true
     fields:
-      - { label: Title, name: title, widget: string }
-      - { label: Slug, name: slug, widget: string }
-      - { label: Locale, name: locale, widget: select, options: [lt, en, ru, uk, be] }
-      - { label: Section, name: section, widget: string, required: false }
-      - { label: Description, name: description, widget: text, required: false }
-      - { label: Published, name: published, widget: datetime, required: false }
-      - { label: Hero image, name: hero, widget: image, required: false }
-      - { label: Body, name: body, widget: markdown }
+      - { label: Title, name: title, widget: string, i18n: true }
+      - { label: Slug, name: slug, widget: string, i18n: duplicate }
+      - { label: Section, name: section, widget: string, i18n: true }
+      - { label: Description, name: description, widget: text, i18n: true }
+      - { label: Published, name: published, widget: datetime, i18n: duplicate }
+      - { label: Hero image, name: hero, widget: image, required: false, i18n: duplicate }
+      - { label: Body, name: body, widget: markdown, i18n: true }
