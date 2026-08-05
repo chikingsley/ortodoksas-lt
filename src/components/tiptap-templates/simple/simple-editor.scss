@@ -1,0 +1,60 @@
+.simple-editor-wrapper {
+  --tt-toolbar-height: 44px;
+  --tt-theme-text: var(--tt-gray-light-900);
+  position: relative;
+  width: 100%;
+  min-height: 640px;
+  color: var(--tt-theme-text);
+  background: var(--tt-bg-color);
+  overscroll-behavior: contain;
+}
+
+.dark .simple-editor-wrapper {
+  --tt-theme-text: var(--tt-gray-dark-900);
+}
+
+.simple-editor-search-and-replace {
+  position: absolute;
+  top: calc(var(--tt-toolbar-height) + 0.5rem);
+  right: 0.5rem;
+  z-index: 51;
+  max-height: 28rem;
+}
+
+.simple-editor-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  width: 100%;
+  max-width: 760px;
+  min-height: 590px;
+  margin: 0 auto;
+}
+
+.simple-editor-content .tiptap.ProseMirror.simple-editor {
+  flex: 1;
+  min-height: 590px;
+  padding: 3rem 3rem 12rem;
+  font-family: "Geist Variable", sans-serif;
+}
+
+@media screen and (max-width: 640px) {
+  .simple-editor-wrapper {
+    min-height: 540px;
+  }
+
+  .simple-editor-search-and-replace {
+    right: 0.5rem;
+    left: 0.5rem;
+    width: auto;
+  }
+
+  .simple-editor-content,
+  .simple-editor-content .tiptap.ProseMirror.simple-editor {
+    min-height: 500px;
+  }
+
+  .simple-editor-content .tiptap.ProseMirror.simple-editor {
+    padding: 2rem 1.25rem 8rem;
+  }
+}

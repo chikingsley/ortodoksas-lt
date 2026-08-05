@@ -5,3 +5,9 @@
 allowBuilds:
   esbuild: true
   workerd: true
+minimumReleaseAgeExclude:
+  - '@cloudflare/vite-plugin@1.51.0'
+  - '@cloudflare/vitest-pool-workers@0.20.2'
+  - miniflare@5.20260801.0-alpha
+  - wrangler@4.119.0
+  - ultracite@7.10.1
