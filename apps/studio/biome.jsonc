@@ -1,0 +1,25 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "extends": ["ultracite/biome/core", "ultracite/biome/react"],
+  "files": {
+    "includes": ["!public/content"]
+  },
+  "overrides": [
+    {
+      "includes": [
+        "src/components/tiptap-extension/**",
+        "src/components/tiptap-icons/**",
+        "src/components/tiptap-node/**",
+        "src/components/tiptap-templates/**",
+        "src/components/tiptap-ui/**",
+        "src/components/tiptap-ui-primitive/**",
+        "src/hooks/**",
+        "src/lib/tiptap-utils.ts"
+      ],
+      "linter": {
+        // The Tiptap CLI owns this copied template layer. Application code wraps it.
+        "enabled": false
+      }
+    }
+  ]
+}
