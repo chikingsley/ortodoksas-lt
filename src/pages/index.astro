@@ -1,0 +1,85 @@
+---
+import ArticleCard from "../components/ArticleCard.astro";
+import SiteLayout from "../layouts/SiteLayout.astro";
+import { articles, catalog, formatDate, sectionSlug, sections } from "../lib/publication";
+
+const feature = articles.find((entry) => entry.hero) ?? articles[0];
+const latest = articles.filter((entry) => entry.path !== feature?.path);
+const standalone = new Map(catalog.filter((entry) => entry.kind === "page").map((entry) => [entry.path, entry]));
+const pageDescription = "Viskas apie Ortodoksų Bažnyčią Lietuvoje ir pasaulyje, taip pat apie ortodoksų tikėjimą ir gyvenimą.";
+---
+
+<SiteLayout title="ortodoksas.lt" description={pageDescription}>
+  <main>
+    <section class="hero-section site-width">
+      <div class="edition-line">
+        <span>Naujausia archyvo laida</span>
+        <span>2012–2026</span>
+      </div>
+      {feature ? (
+        <div class="hero-grid">
+          <ArticleCard entry={feature} featured />
+          <div class="latest-stack">
+            {latest.slice(0, 3).map((entry, index) => (
+              <article class="headline-item">
+                <span class="headline-number">0{index + 1}</span>
+                <div>
+                  <div class="eyebrow">{entry.section}</div>
+                  <h2><a href={entry.path}>{entry.title}</a></h2>
+                  <time datetime={entry.published ?? undefined}>{formatDate(entry.published)}</time>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      ) : null}
+    </section>
+
+    <section class="service-band">
+      <div class="site-width service-grid">
+        <a href="/p/bendruomenes_21.html"><span class="service-icon">☦</span><span><strong>Pamaldos</strong><small>Bendruomenės ir tvarkaraščiai</small></span><span>→</span></a>
+        <a href="/p/kalendorius.html"><span class="service-icon">✦</span><span><strong>Kalendorius</strong><small>Pasninkai ir šventės</small></span><span>→</span></a>
+        <a href="/p/biblioteka.html"><span class="service-icon">▤</span><span><strong>Biblioteka</strong><small>Tekstai, natos ir paskaitos</small></span><span>→</span></a>
+        <a href="/p/paremti.html"><span class="service-icon">♡</span><span><strong>Paremti</strong><small>Prisidėkite prie veiklos</small></span><span>→</span></a>
+      </div>
+    </section>
+
+    <section class="site-width content-section">
+      <div class="section-heading"><h2>Naujausi įrašai</h2><a href="/archyvas">Visi įrašai →</a></div>
+      <div class="article-grid">
+        {latest.slice(3, 9).map((entry) => <ArticleCard entry={entry} />)}
+      </div>
+    </section>
+
+    {sections.slice(0, 3).map((section) => {
+      const sectionArticles = articles.filter((entry) => entry.section === section).slice(0, 4);
+      return (
+        <section class="site-width content-section section-row">
+          <div class="section-heading"><h2>{section}</h2><a href={`/tema/${sectionSlug(section)}`}>Daugiau →</a></div>
+          <div class="section-articles">
+            {sectionArticles.map((entry) => (
+              <article>
+                {entry.hero ? <div class="section-thumb"><img src={entry.hero} alt="" loading="lazy" /></div> : <div class="section-thumb image-placeholder">☦</div>}
+                <div>
+                  <time datetime={entry.published ?? undefined}>{formatDate(entry.published)}</time>
+                  <h3><a href={entry.path}>{entry.title}</a></h3>
+                  <p>{entry.description}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      );
+    })}
+
+    <section class="site-width library-callout">
+      <div>
+        <span class="eyebrow">Skaitymui ir studijoms</span>
+        <h2>{standalone.get("/p/biblioteka.html")?.title ?? "Biblioteka"}</h2>
+        <p>{standalone.get("/p/biblioteka.html")?.description ?? "Atkurtų tekstų, paskaitų ir liturginės medžiagos rinkinys."}</p>
+        <a class="text-link" href="/p/biblioteka.html">Atverti biblioteką →</a>
+      </div>
+      <div class="library-mark" aria-hidden="true">☦</div>
+    </section>
+  </main>
+</SiteLayout>

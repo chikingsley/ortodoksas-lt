@@ -1,0 +1,56 @@
+---
+import { localeUi, type SiteLocale } from "../lib/publication";
+
+interface Props {
+  locale?: SiteLocale;
+}
+
+const { locale = "lt" } = Astro.props;
+const copy = localeUi[locale];
+const localized = locale !== "lt";
+const locales = [
+  ["lt", "LT", "/"],
+  ["en", "EN", "/en"],
+  ["ru", "RU", "/ru"],
+  ["uk", "UA", "/uk"],
+  ["be", "BY", "/be"],
+] as const;
+const pathname = Astro.url.pathname;
+---
+
+<div class="utility-bar">
+  <div class="site-width utility-inner">
+    <span>{copy.institution}</span>
+    <div class="utility-links">
+      <a href="https://www.facebook.com/ortodoksas.lt" rel="noreferrer">Facebook</a>
+      <a href="https://www.instagram.com/lietuvos_egzarchatas/" rel="noreferrer">Instagram</a>
+    </div>
+  </div>
+</div>
+<header class="site-header">
+  <div class="site-width masthead">
+    <a class="brand" href={localized ? `/${locale}` : "/"} aria-label={`${copy.home} · ortodoksas.lt`}>
+      <img class="brand-logo" src="/assets/ortodoksas-logo.png" alt="ortodoksas.lt" width="360" height="55" />
+    </a>
+    <div class="header-tools">
+      <nav class="locale-switcher" aria-label={copy.languages}>
+        {locales.map(([code, label, href]) => <a class={pathname === href || pathname.startsWith(`${href}/`) ? "active" : undefined} href={href} lang={code}>{label}</a>)}
+      </nav>
+      {localized ? <span class="edition-label">{copy.edition}</span> : <form class="header-search" action="/paieska" method="get">
+        <label class="sr-only" for="header-search">{copy.search}</label>
+        <input id="header-search" name="q" placeholder={copy.search} type="search" />
+        <button aria-label={copy.search} type="submit">⌕</button>
+      </form>}
+    </div>
+  </div>
+  <nav class="primary-nav" aria-label={copy.edition}>
+    <div class="site-width nav-scroll">
+      {localized ? <><a class={pathname === `/${locale}` ? "active" : undefined} href={`/${locale}`}>{copy.home}</a><a href={`/${locale}#articles`}>{copy.archive}</a><a href="/">LT</a></> : <><a class={pathname === "/" ? "active" : undefined} href="/">Pradžia</a>
+        <a class={pathname.startsWith("/p/bendruomenes_21") ? "active" : undefined} href="/p/bendruomenes_21.html">Pamaldos</a>
+        <a class={pathname.startsWith("/p/dvasininkai") ? "active" : undefined} href="/p/dvasininkai.html">Dvasininkai</a>
+        <a class={pathname.startsWith("/p/biblioteka") ? "active" : undefined} href="/p/biblioteka.html">Biblioteka</a>
+        <a class={pathname.startsWith("/p/kalendorius") ? "active" : undefined} href="/p/kalendorius.html">Kalendorius</a>
+        <a class={pathname.startsWith("/archyvas") || pathname.startsWith("/tema/") ? "active" : undefined} href="/archyvas">Archyvas</a></>}
+    </div>
+  </nav>
+</header>

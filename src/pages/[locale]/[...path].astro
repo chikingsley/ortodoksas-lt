@@ -1,0 +1,54 @@
+---
+import SiteLayout from "../../layouts/SiteLayout.astro";
+import { cleanHtml, formatDate, getLocalizedArticles, localeShells, localeUi, type Locale, type LocalizedArticle } from "../../lib/publication";
+
+export function getStaticPaths() {
+  return localeShells.flatMap((locale) => getLocalizedArticles(locale).map((page) => ({
+    params: { locale, path: page.path.slice(1).replace(/\.html$/, "") },
+    props: { locale, page },
+  })));
+}
+
+const { locale, page } = Astro.props as { locale: Locale; page: LocalizedArticle };
+const copy = localeUi[locale];
+const canonicalPath = `/${locale}${page.path}`;
+const articleSchema = {
+  articleSection: page.section,
+  dateModified: page.published ?? undefined,
+  datePublished: page.published ?? undefined,
+  headline: page.title,
+  keywords: page.labels.join(", "),
+  mainEntityOfPage: canonicalPath,
+};
+---
+
+<SiteLayout
+  title={`${page.title} · ${copy.edition}`}
+  description={page.description}
+  canonicalPath={canonicalPath}
+  image={page.hero}
+  jsonLd={articleSchema}
+  lang={locale}
+  locale={locale}
+  type="article"
+>
+  <main class="article-page localized-article">
+    <div class="site-width article-breadcrumbs">
+      <a href={`/${locale}`}>{copy.home}</a><span aria-hidden="true">›</span><span>{copy.edition}</span>
+    </div>
+    <article class="reading-column">
+      <header class="article-header">
+        <div class="eyebrow">{copy.edition}</div>
+        <h1>{page.title}</h1>
+        {page.published ? <div class="article-byline"><time datetime={page.published}>{formatDate(page.published, locale)}</time><span>{copy.provenance}</span></div> : null}
+        {page.hero ? <div class="article-hero"><img src={page.hero} alt="" fetchpriority="high" /></div> : null}
+      </header>
+      <div class="prose" set:html={cleanHtml(page.html)}></div>
+      {page.labels.length > 0 ? <footer class="article-tags">{page.labels.map((label) => <span>{label}</span>)}</footer> : null}
+    </article>
+    <aside class="site-width archive-note">
+      <span aria-hidden="true">☦</span>
+      <p>{copy.provenance} {page.source ? <a href={page.source} rel="noreferrer">{page.source}</a> : null}</p>
+    </aside>
+  </main>
+</SiteLayout>

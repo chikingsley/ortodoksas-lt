@@ -1,0 +1,51 @@
+---
+import SiteLayout from "../layouts/SiteLayout.astro";
+import { catalog, formatDate, normalizeText } from "../lib/publication";
+
+const entries = catalog.filter((entry) => entry.kind === "article");
+---
+
+<SiteLayout title="Paieška · ortodoksas.lt" description="Ieškokite atkurtame ortodoksas.lt publikacijų archyve." canonicalPath="/paieska">
+  <main class="site-width search-page">
+    <header class="page-intro compact"><div class="eyebrow">Archyvo paieška</div><h1>Ko ieškote?</h1><p>Paieška veikia šiame statiniame archyvo puslapyje ir nereikalauja serverio.</p></header>
+    <form class="search-form" id="site-search" action="/paieska" method="get">
+      <span aria-hidden="true">⌕</span>
+      <label class="sr-only" for="search-query">Ieškoti</label>
+      <input id="search-query" name="q" placeholder="Įveskite žodį ar frazę" type="search" />
+      <button type="submit">Ieškoti</button>
+    </form>
+    <p class="results-line"><strong id="search-count">{entries.length.toLocaleString("lt-LT")}</strong> rezultatai</p>
+    <div class="search-results" id="search-results">
+      {entries.map((entry) => (
+        <article data-search={normalizeText(`${entry.title} ${entry.description} ${entry.labels.join(" ")}`)}>
+          <div class="eyebrow">{entry.section}</div>
+          <h2><a href={entry.path}>{entry.title}</a></h2>
+          <p>{entry.description}</p>
+          <time datetime={entry.published ?? undefined}>{formatDate(entry.published)}</time>
+        </article>
+      ))}
+    </div>
+    <noscript><p class="archive-empty">Įjungus JavaScript visi atkurtų publikacijų įrašai pateikiami šiame puslapyje.</p></noscript>
+  </main>
+</SiteLayout>
+
+<script is:inline>
+  const input = document.querySelector("#search-query");
+  const count = document.querySelector("#search-count");
+  const rows = [...document.querySelectorAll("#search-results article")];
+  const normalize = (value) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase();
+  const update = () => {
+    const value = normalize(input.value);
+    let visible = 0;
+    rows.forEach((row) => {
+      const match = !value || row.dataset.search.includes(value);
+      row.hidden = !match;
+      if (match) visible += 1;
+    });
+    count.textContent = visible.toLocaleString("lt-LT");
+    history.replaceState(null, "", `${location.pathname}${input.value ? `?q=${encodeURIComponent(input.value)}` : ""}`);
+  };
+  input.value = new URLSearchParams(location.search).get("q") || "";
+  input.addEventListener("input", update);
+  update();
+</script>

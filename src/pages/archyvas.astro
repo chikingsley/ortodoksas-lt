@@ -1,0 +1,63 @@
+---
+import SiteLayout from "../layouts/SiteLayout.astro";
+import { articles, formatDate, normalizeText, sections } from "../lib/publication";
+
+const years = [...new Set(articles.map((entry) => entry.published?.slice(0, 4)).filter((year): year is string => Boolean(year)))].sort((a, b) => b.localeCompare(a));
+---
+
+<SiteLayout title="Archyvas · ortodoksas.lt" description="Visas atkurtas ortodoksas.lt straipsnių, pamokslų ir Bažnyčios gyvenimo archyvas." canonicalPath="/archyvas">
+  <main class="site-width archive-page">
+    <header class="page-intro">
+      <div class="eyebrow">2012–2026</div>
+      <h1>Publikacijų archyvas</h1>
+      <p>{articles.length.toLocaleString("lt-LT")} atkurti straipsniai, pamokslai, paskaitos ir Bažnyčios gyvenimo naujienos.</p>
+    </header>
+    <form class="archive-controls" id="archive-controls" action="/archyvas" method="get">
+      <label class="archive-search"><span aria-hidden="true">⌕</span><span class="sr-only">Ieškoti archyve</span><input id="archive-query" name="q" placeholder="Ieškoti pagal pavadinimą ar temą" type="search" /></label>
+      <select aria-label="Tema" id="archive-section" name="tema"><option value="">Visos temos</option>{sections.map((section) => <option value={section}>{section}</option>)}</select>
+      <select aria-label="Metai" id="archive-year" name="metai"><option value="">Visi metai</option>{years.map((year) => <option value={year}>{year}</option>)}</select>
+    </form>
+    <p class="results-line"><strong id="archive-count">{articles.length.toLocaleString("lt-LT")}</strong> rezultatai</p>
+    <div class="archive-list" id="archive-list">
+      {articles.map((entry) => (
+        <article data-section={entry.section} data-search={normalizeText(`${entry.title} ${entry.description} ${entry.labels.join(" ")}`)} data-year={entry.published?.slice(0, 4) ?? ""}>
+          <time datetime={entry.published ?? undefined}>{formatDate(entry.published)}</time>
+          <div><span>{entry.section}</span><h2><a href={entry.path}>{entry.title}</a></h2><p>{entry.description}</p></div>
+          <a aria-label={`Skaityti: ${entry.title}`} href={entry.path}>→</a>
+        </article>
+      ))}
+    </div>
+    <noscript><p class="archive-empty">Įjungus JavaScript filtrai neveikia, tačiau visas archyvas pateiktas šiame puslapyje.</p></noscript>
+  </main>
+</SiteLayout>
+
+<script is:inline>
+  const query = document.querySelector("#archive-query");
+  const section = document.querySelector("#archive-section");
+  const year = document.querySelector("#archive-year");
+  const count = document.querySelector("#archive-count");
+  const rows = [...document.querySelectorAll("#archive-list article")];
+  const normalize = (value) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase();
+  const update = () => {
+    const q = normalize(query.value);
+    let visible = 0;
+    rows.forEach((row) => {
+      const match = (!q || row.dataset.search.includes(q)) && (!section.value || row.dataset.section === section.value) && (!year.value || row.dataset.year === year.value);
+      row.hidden = !match;
+      if (match) visible += 1;
+    });
+    count.textContent = visible.toLocaleString("lt-LT");
+    const params = new URLSearchParams();
+    if (query.value) params.set("q", query.value);
+    if (section.value) params.set("tema", section.value);
+    if (year.value) params.set("metai", year.value);
+    history.replaceState(null, "", `${location.pathname}${params.toString() ? `?${params}` : ""}`);
+  };
+  const params = new URLSearchParams(location.search);
+  query.value = params.get("q") || "";
+  section.value = params.get("tema") || "";
+  year.value = params.get("metai") || "";
+  [query, section, year].forEach((field) => field.addEventListener("input", update));
+  [section, year].forEach((field) => field.addEventListener("change", update));
+  update();
+</script>

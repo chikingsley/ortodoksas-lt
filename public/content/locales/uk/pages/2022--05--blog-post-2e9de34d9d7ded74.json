@@ -1,0 +1,45 @@
+{
+  "body": "<p>Проект ortodoksas.lt із 2013 р. ділиться з Литвою духовними скарбами православної традиції.&nbsp;</p><p>У 2022 р. відкрито українську версію.</p>",
+  "date": "2022-05-13T17:58:00.000Z",
+  "dateOriginal": "2022-05-13T19:58:00+02:00",
+  "description": "Проект ortodoksas.lt із 2013 р. ділиться з Литвою духовними скарбами православної традиції. У 2022 р. відкрито українську версію.",
+  "file": "pages/2022--05--blog-post-2e9de34d9d7ded74.json",
+  "internalLinks": [],
+  "kind": "article",
+  "labels": [
+    "новини",
+    "повідомлення"
+  ],
+  "locale": "uk",
+  "media": [],
+  "path": "/2022/05/blog-post.html",
+  "provenance": {
+    "digest": "V3PEEVMUJKBKNOHA4H6BHRYWSN6ZJ5C4",
+    "original": "https://ortodoksas-ua.blogspot.com/2022/05/blog-post.html",
+    "timestamp": "20220812045724",
+    "url": "https://web.archive.org/web/20220812045724id_/https://ortodoksas-ua.blogspot.com/2022/05/blog-post.html"
+  },
+  "sanitization": {
+    "eventHandlers": 0,
+    "scripts": 0,
+    "unsafeUrls": 0
+  },
+  "title": "Вітаємо!",
+  "versions": [
+    {
+      "digest": "V3PEEVMUJKBKNOHA4H6BHRYWSN6ZJ5C4",
+      "locale": "uk",
+      "original": "https://ortodoksas-ua.blogspot.com/2022/05/blog-post.html",
+      "outcome": "parsed",
+      "sourceQueries": [
+        "uk:host"
+      ],
+      "status": "200",
+      "timestamp": "20220812045724",
+      "url": "https://web.archive.org/web/20220812045724id_/https://ortodoksas-ua.blogspot.com/2022/05/blog-post.html",
+      "kind": "article",
+      "published": "2022-05-13T17:58:00.000Z",
+      "payload": "recovery/payloads/V3/V3PEEVMUJKBKNOHA4H6BHRYWSN6ZJ5C4.bin"
+    }
+  ]
+}

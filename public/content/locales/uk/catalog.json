@@ -1,0 +1,306 @@
+[
+  {
+    "date": "2022-06-20T11:10:00.000Z",
+    "dateOriginal": "2022-06-20T13:10:00+02:00",
+    "description": "Співає литовський православний хор \"Амнос\".",
+    "file": "pages/2022--06--22-3922cf4b99265e26.json",
+    "internalLinks": [],
+    "kind": "article",
+    "labels": [
+      "amnos",
+      "псалом"
+    ],
+    "locale": "uk",
+    "media": [],
+    "path": "/2022/06/22.html",
+    "provenance": {
+      "digest": "UWK64JCRUGOGH4ZSLYPC2NKIFEJVCVXE",
+      "original": "https://ortodoksas-ua.blogspot.com/2022/06/22.html",
+      "timestamp": "20220812060816",
+      "url": "https://web.archive.org/web/20220812060816id_/https://ortodoksas-ua.blogspot.com/2022/06/22.html"
+    },
+    "sanitization": {
+      "eventHandlers": 0,
+      "scripts": 0,
+      "unsafeUrls": 0
+    },
+    "title": "Псалом 22 литовською [відео]",
+    "versions": [
+      {
+        "digest": "UWK64JCRUGOGH4ZSLYPC2NKIFEJVCVXE",
+        "locale": "uk",
+        "original": "https://ortodoksas-ua.blogspot.com/2022/06/22.html",
+        "outcome": "parsed",
+        "sourceQueries": [
+          "uk:host"
+        ],
+        "status": "200",
+        "timestamp": "20220812060816",
+        "url": "https://web.archive.org/web/20220812060816id_/https://ortodoksas-ua.blogspot.com/2022/06/22.html",
+        "kind": "article",
+        "published": "2022-06-20T11:10:00.000Z",
+        "payload": "recovery/payloads/UW/UWK64JCRUGOGH4ZSLYPC2NKIFEJVCVXE.bin"
+      }
+    ]
+  },
+  {
+    "date": "2022-05-21T15:08:00.000Z",
+    "dateOriginal": "2022-05-21T17:08:00+02:00",
+    "description": "У середу, 18 травня 2022 року, посол Литви Річардас Дегутіс відвідав Вселенський Патріархат. Р. Дегутіс був гостинно прийнятий Вселенським П...",
+    "file": "pages/2022--05--blog-post_21-bf1ebba8ccdb03ee.json",
+    "internalLinks": [],
+    "kind": "article",
+    "labels": [
+      "константинопольський патріархат",
+      "новини"
+    ],
+    "locale": "uk",
+    "media": [
+      {
+        "alt": null,
+        "type": "image",
+        "url": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEg47dHa0vvNI7osqRISLkmSwLSLpTEpfQTGpzp-CHFwcgAHjtWHXJa0U-cdQdJJ3f-YT-PkvU_PmjQvmECwYkXbHvZ5pwK4S0R27P9OVqC6KX64IKauOD0eMV3-jcDIdP82AY2KEk7Rr8UG_HLIv2eBXuX9o5iCRSgxSn6F-zGBq9M5yoeyAD6tKQJj/s320/DSC_3588.jpg"
+      }
+    ],
+    "path": "/2022/05/blog-post_21.html",
+    "provenance": {
+      "digest": "NUJNA3S3C35ZIWJZKOXLGBE5VAXRIZOY",
+      "original": "https://ortodoksas-ua.blogspot.com/2022/05/blog-post_21.html",
+      "timestamp": "20220812060500",
+      "url": "https://web.archive.org/web/20220812060500id_/https://ortodoksas-ua.blogspot.com/2022/05/blog-post_21.html"
+    },
+    "sanitization": {
+      "eventHandlers": 0,
+      "scripts": 0,
+      "unsafeUrls": 0
+    },
+    "title": "Посол Литви відвідав Вселенський патріархат",
+    "versions": [
+      {
+        "digest": "NUJNA3S3C35ZIWJZKOXLGBE5VAXRIZOY",
+        "locale": "uk",
+        "original": "https://ortodoksas-ua.blogspot.com/2022/05/blog-post_21.html",
+        "outcome": "parsed",
+        "sourceQueries": [
+          "uk:host"
+        ],
+        "status": "200",
+        "timestamp": "20220812060500",
+        "url": "https://web.archive.org/web/20220812060500id_/https://ortodoksas-ua.blogspot.com/2022/05/blog-post_21.html",
+        "kind": "article",
+        "published": "2022-05-21T15:08:00.000Z",
+        "payload": "recovery/payloads/NU/NUJNA3S3C35ZIWJZKOXLGBE5VAXRIZOY.bin"
+      }
+    ]
+  },
+  {
+    "date": "2022-05-18T20:30:00.000Z",
+    "dateOriginal": "2022-05-18T22:30:00+02:00",
+    "description": "Митрополиту Віленському та Литовському Інокентію 15 травня, 2022 Вільнюс Ваше Високопреосвященство, Христос Воскресе! В одному з коментарів ...",
+    "file": "pages/2022--05--blog-post_18-a1960b878438ecfe.json",
+    "internalLinks": [
+      {
+        "path": "/2022/05/blog-post_15.html",
+        "text": "раніше існувала",
+        "url": "https://ortodoksas-ua.blogspot.com/2022/05/blog-post_15.html"
+      }
+    ],
+    "kind": "article",
+    "labels": [
+      "Лист",
+      "повідомлення"
+    ],
+    "locale": "uk",
+    "media": [
+      {
+        "alt": null,
+        "type": "image",
+        "url": "https://blogger.googleusercontent.com/img/a/AVvXsEjjdqYYTL1IdT8GghTZnN3L8CfXpAWni82f7GpJ4XgNUb8YkZ0BJfH6lMl-VL36sUDfs2R2qlDxfo7sIUMiuVTzWYoyS89-9Ung5mH4wXxqbx597gl0g6tKWjY6hpxHtHe2kq2j9LN9VJd_4atcK7i1SvEO5cAxDqjjvMNrSMTyT5jcquIqvmsj_Kvxjw"
+      }
+    ],
+    "path": "/2022/05/blog-post_18.html",
+    "provenance": {
+      "digest": "LIX32G4WCVXD5DUJ4D2IRBNQOH7UO32H",
+      "original": "https://ortodoksas-ua.blogspot.com/2022/05/blog-post_18.html",
+      "timestamp": "20220812060845",
+      "url": "https://web.archive.org/web/20220812060845id_/https://ortodoksas-ua.blogspot.com/2022/05/blog-post_18.html"
+    },
+    "sanitization": {
+      "eventHandlers": 0,
+      "scripts": 0,
+      "unsafeUrls": 0
+    },
+    "title": "Лист православних мирян Литовському митрополиту",
+    "versions": [
+      {
+        "digest": "LIX32G4WCVXD5DUJ4D2IRBNQOH7UO32H",
+        "locale": "uk",
+        "original": "https://ortodoksas-ua.blogspot.com/2022/05/blog-post_18.html",
+        "outcome": "parsed",
+        "sourceQueries": [
+          "uk:host"
+        ],
+        "status": "200",
+        "timestamp": "20220812060845",
+        "url": "https://web.archive.org/web/20220812060845id_/https://ortodoksas-ua.blogspot.com/2022/05/blog-post_18.html",
+        "kind": "article",
+        "published": "2022-05-18T20:30:00.000Z",
+        "payload": "recovery/payloads/LI/LIX32G4WCVXD5DUJ4D2IRBNQOH7UO32H.bin"
+      }
+    ]
+  },
+  {
+    "date": "2022-05-16T18:31:00.000Z",
+    "dateOriginal": "2022-05-16T20:31:00+02:00",
+    "description": "mitropolija.com фото 16 травня 2022 Синод Сербської Православної Церкви оголосив про відновлення євхаристичного спілкування з Православно...",
+    "file": "pages/2022--05--blog-post_16-e9be08588a93c8c3.json",
+    "internalLinks": [],
+    "kind": "article",
+    "labels": [
+      "історія",
+      "новини"
+    ],
+    "locale": "uk",
+    "media": [
+      {
+        "alt": null,
+        "type": "image",
+        "url": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjIHEVSJiDlaxH64r1O-u9vlzyH2db-K3cc2Ht-Nz7I6Dy3hevLEcz-9n7KarbhUiwb73gmB2qPVF7aWhqNbnLn-2Nxa-HcfoTpuEev47I4l7ZQMpf4jYb3jx57hz9I7GyJ2qpuk90vO2gX2Ppy8zN2LEme7GRD0qae4056uSF20jMhri2GNWC2-qe0/s320/20220516-130604-469.jpeg"
+      }
+    ],
+    "path": "/2022/05/blog-post_16.html",
+    "provenance": {
+      "digest": "4JD55JO4G35U74NLKUGJDZTQKOTR67XE",
+      "original": "https://ortodoksas-ua.blogspot.com/2022/05/blog-post_16.html",
+      "timestamp": "20220812052615",
+      "url": "https://web.archive.org/web/20220812052615id_/https://ortodoksas-ua.blogspot.com/2022/05/blog-post_16.html"
+    },
+    "sanitization": {
+      "eventHandlers": 0,
+      "scripts": 0,
+      "unsafeUrls": 0
+    },
+    "title": "Сербська Православна Церква відновлює євхаристійне спілкування з Церквою Північної Македонії (Охріда)",
+    "versions": [
+      {
+        "digest": "4JD55JO4G35U74NLKUGJDZTQKOTR67XE",
+        "locale": "uk",
+        "original": "https://ortodoksas-ua.blogspot.com/2022/05/blog-post_16.html",
+        "outcome": "parsed",
+        "sourceQueries": [
+          "uk:host"
+        ],
+        "status": "200",
+        "timestamp": "20220812052615",
+        "url": "https://web.archive.org/web/20220812052615id_/https://ortodoksas-ua.blogspot.com/2022/05/blog-post_16.html",
+        "kind": "article",
+        "published": "2022-05-16T18:31:00.000Z",
+        "payload": "recovery/payloads/4J/4JD55JO4G35U74NLKUGJDZTQKOTR67XE.bin"
+      }
+    ]
+  },
+  {
+    "date": "2022-05-15T16:57:00.000Z",
+    "dateOriginal": "2022-05-15T18:57:00+02:00",
+    "description": "Нещодавно група православних мирян та священнослужителів Литви виявила бажання звернутися до Його Всесвятості Вселенського (Константинопольс...",
+    "file": "pages/2022--05--blog-post_15-dc72daac6f0cf41f.json",
+    "internalLinks": [],
+    "kind": "article",
+    "labels": [
+      "історія",
+      "константинопольський патріархат"
+    ],
+    "locale": "uk",
+    "media": [
+      {
+        "alt": null,
+        "type": "image",
+        "url": "https://blogger.googleusercontent.com/img/a/AVvXsEjFIQOEYJ2lPIMLOTOP7cxWFiVsuvu73R9dq2-Z_m7g2Vh0Ql3oO3BSOmvpUIY-SmZOo_fdHYaJXJUXP4wYu99gbFJ2zQyChcQgWlOIPd-Z1J37nzVhfW6QHnKlY09KqelbhLBGF6EqYWApUSKAAmNvA180w9GZJWShw0v4RFpn06iKF36YzCyWn2pG"
+      },
+      {
+        "alt": null,
+        "type": "image",
+        "url": "https://blogger.googleusercontent.com/img/a/AVvXsEjNCdQJPHFMCpD3740NfcTEpm1yguMMTnfbc9AGG2btPGxliCNoXmkLK2IQDhNXhsOcu7m-HC6E-p_aPFcx0msMwBPDwjV5fUjTGHou0o1_SqhgaLyxLi-QT5eH9ZipHM2GYHu6mBhZDr5Sq7WRpbM_yQ1JLQdVw-kZiNN86De6DdBa0qR5mGgbXV98=w237-h400"
+      },
+      {
+        "alt": null,
+        "type": "image",
+        "url": "https://blogger.googleusercontent.com/img/a/AVvXsEjttnFzz8BTPAAcKc0TWMjYnou58WnBFXJvRIm8zBQK4tcQH30sb2NGIa7lM38UWE9i42sRb97wWPKJOxiCBDMtFukpMEAmxRld92IfRI0lujOrgRkMbbVU6MIDSVEiCii_XwExUymJYlJKqPQSB3OGsUkPif3ATMxtZzFUx1v6i4ntz9754ZJIoKWX=w278-h400"
+      }
+    ],
+    "path": "/2022/05/blog-post_15.html",
+    "provenance": {
+      "digest": "XEXFGP5X4ABPBLDLHB4CQOW2F47G2CU2",
+      "original": "https://ortodoksas-ua.blogspot.com/2022/05/blog-post_15.html",
+      "timestamp": "20220812050325",
+      "url": "https://web.archive.org/web/20220812050325id_/https://ortodoksas-ua.blogspot.com/2022/05/blog-post_15.html"
+    },
+    "sanitization": {
+      "eventHandlers": 0,
+      "scripts": 0,
+      "unsafeUrls": 0
+    },
+    "title": "Історія Константинопольського патріархату у Литві",
+    "versions": [
+      {
+        "digest": "XEXFGP5X4ABPBLDLHB4CQOW2F47G2CU2",
+        "locale": "uk",
+        "original": "https://ortodoksas-ua.blogspot.com/2022/05/blog-post_15.html",
+        "outcome": "parsed",
+        "sourceQueries": [
+          "uk:host"
+        ],
+        "status": "200",
+        "timestamp": "20220812050325",
+        "url": "https://web.archive.org/web/20220812050325id_/https://ortodoksas-ua.blogspot.com/2022/05/blog-post_15.html",
+        "kind": "article",
+        "published": "2022-05-15T16:57:00.000Z",
+        "payload": "recovery/payloads/XE/XEXFGP5X4ABPBLDLHB4CQOW2F47G2CU2.bin"
+      }
+    ]
+  },
+  {
+    "date": "2022-05-13T17:58:00.000Z",
+    "dateOriginal": "2022-05-13T19:58:00+02:00",
+    "description": "Проект ortodoksas.lt із 2013 р. ділиться з Литвою духовними скарбами православної традиції. У 2022 р. відкрито українську версію.",
+    "file": "pages/2022--05--blog-post-2e9de34d9d7ded74.json",
+    "internalLinks": [],
+    "kind": "article",
+    "labels": [
+      "новини",
+      "повідомлення"
+    ],
+    "locale": "uk",
+    "media": [],
+    "path": "/2022/05/blog-post.html",
+    "provenance": {
+      "digest": "V3PEEVMUJKBKNOHA4H6BHRYWSN6ZJ5C4",
+      "original": "https://ortodoksas-ua.blogspot.com/2022/05/blog-post.html",
+      "timestamp": "20220812045724",
+      "url": "https://web.archive.org/web/20220812045724id_/https://ortodoksas-ua.blogspot.com/2022/05/blog-post.html"
+    },
+    "sanitization": {
+      "eventHandlers": 0,
+      "scripts": 0,
+      "unsafeUrls": 0
+    },
+    "title": "Вітаємо!",
+    "versions": [
+      {
+        "digest": "V3PEEVMUJKBKNOHA4H6BHRYWSN6ZJ5C4",
+        "locale": "uk",
+        "original": "https://ortodoksas-ua.blogspot.com/2022/05/blog-post.html",
+        "outcome": "parsed",
+        "sourceQueries": [
+          "uk:host"
+        ],
+        "status": "200",
+        "timestamp": "20220812045724",
+        "url": "https://web.archive.org/web/20220812045724id_/https://ortodoksas-ua.blogspot.com/2022/05/blog-post.html",
+        "kind": "article",
+        "published": "2022-05-13T17:58:00.000Z",
+        "payload": "recovery/payloads/V3/V3PEEVMUJKBKNOHA4H6BHRYWSN6ZJ5C4.bin"
+      }
+    ]
+  }
+]

@@ -1,7 +1,11 @@
 {
   "files": [],
   "compilerOptions": {
-    "paths": { "@/*": ["./src/*"] }
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "paths": { "@/*": ["./src/*"] },
+    "skipLibCheck": true,
+    "target": "ES2023"
   },
   "references": [
     { "path": "./tsconfig.app.json" },
