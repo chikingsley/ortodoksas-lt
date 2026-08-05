@@ -26,6 +26,8 @@ const BACKOFF_MAX_MS = 300_000;
 const MAX_RESPONSE_HISTORY = 20;
 const MAX_HEADER_COUNT = 32;
 const MAX_HEADER_VALUE_CHARS = 2_048;
+const CHECKPOINT_INTERVAL_MS = 30_000;
+const CHECKPOINT_COMPLETION_INTERVAL = 100;
 const USER_AGENT = "ortodoksas-revival-payloads/1.0 (G0 recovery)";
 
 function fetchRaw(url, { headers, signal }) {
@@ -46,6 +48,8 @@ function fetchRaw(url, { headers, signal }) {
 
 let lastRequestAt = 0;
 let checkpointWrite = Promise.resolve();
+let checkpointCompletedAt = 0;
+let checkpointWrittenAt = 0;
 let interrupted = false;
 const stopController = new AbortController();
 const activeControllers = new Set();
@@ -721,6 +725,19 @@ async function persistEntries(entries, captures, manifestFingerprint) {
   await checkpointWrite;
 }
 
+async function persistEntriesIfDue(entries, captures, manifestFingerprint, progress) {
+  const now = Date.now();
+  if (
+    progress.completed - checkpointCompletedAt < CHECKPOINT_COMPLETION_INTERVAL &&
+    now - checkpointWrittenAt < CHECKPOINT_INTERVAL_MS
+  ) {
+    return;
+  }
+  checkpointCompletedAt = progress.completed;
+  checkpointWrittenAt = now;
+  await persistEntries(entries, captures, manifestFingerprint);
+}
+
 async function writeMetadata(entry) {
   const metadataPath = join(root, entry.expectedPayloadPath.replace(/\.bin$/, ".json"));
   const metadata = {
@@ -804,7 +821,6 @@ function appendHistory(entry, history) {
 async function processEntry(entry, options, entries, captures, manifestFingerprint, progress) {
   entry.status = "downloading";
   entry.error = null;
-  await persistEntries(entries, captures, manifestFingerprint);
   try {
     const result = await fetchReplay(entry, options);
     const stored = await storePayload(entry, result);
@@ -834,7 +850,6 @@ async function processEntry(entry, options, entries, captures, manifestFingerpri
     if (error instanceof InterruptError) {
       entry.status = "queued";
       entry.error = error.message;
-      await persistEntries(entries, captures, manifestFingerprint);
       return;
     }
     const failure = error instanceof RequestFailure ? error : new RequestFailure(error.message, { attempts: 1 });
@@ -848,7 +863,7 @@ async function processEntry(entry, options, entries, captures, manifestFingerpri
     await writeMetadata(entry);
     logProgress(entry, progress);
   } finally {
-    await persistEntries(entries, captures, manifestFingerprint);
+    await persistEntriesIfDue(entries, captures, manifestFingerprint, progress);
   }
 }
 
@@ -964,6 +979,8 @@ async function main() {
   await mkdir(payloadsDir, { recursive: true });
   await removeStaleParts(payloadsDir);
   await persistEntries(entries, captures, manifestStats.fingerprint);
+  checkpointCompletedAt = 0;
+  checkpointWrittenAt = Date.now();
 
   const candidates = [...entries.values()]
     .filter((entry) => groupMatches(entry, options))
