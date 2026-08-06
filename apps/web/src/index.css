@@ -338,12 +338,12 @@ svg {
 .hero-motif {
   position: absolute;
   top: 22px;
-  right: -18px;
-  width: 34px;
+  right: -27px;
+  width: 18px;
   height: 560px;
   background:
     url("/assets/brand/production/canva-patterns/motif-green-chain.png") center
-    top / 34px 68px repeat-y;
+    top / 18px 36px repeat-y;
 }
 
 .service-band {
@@ -584,7 +584,7 @@ svg {
   top: -35px;
   right: -20px;
   width: 300px;
-  opacity: 1;
+  opacity: 0.9;
 }
 
 .article-breadcrumbs {
