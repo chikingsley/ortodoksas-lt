@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-05T23:51:01.774Z",
+  "generatedAt": "2026-08-06T00:34:39.065Z",
   "media": [
     {
       "acquiredFrom": "https://blogger.googleusercontent.com/img/a/AVvXsEhcpOEX4rpL7oxP9p9K08FHW113aHVRgksWnt81IyokECQRCqpXeZMWfprr4wH0BeJ0nvXLPnmH0fxtWkRP1Wr4Fc8J_muOyFtH7Oar98kHnSIdIT0CWpCFDC-OYlI8hFsJKUGI_94QqcqzMatDv2nVOY3E6TYKoMh8XHSLefccdZcp7gPrhnpe9bST",
@@ -44599,6 +44599,19 @@
       "path": "/media/files/a3c059476842f79c5aa0b0f893f3be1796fe956e7cfddfad0d7c94cccea2bca4.jpg",
       "sha256": "a3c059476842f79c5aa0b0f893f3be1796fe956e7cfddfad0d7c94cccea2bca4",
       "width": 258
+    },
+    {
+      "acquiredFrom": "https://www.pravmir.com/wp-content/uploads/2014/01/p1480529_2.jpg",
+      "aliases": [
+        "https://web.archive.org/web/20170228041458im_/http://xpam-xpicta.ru/images/p1480529_2.jpg",
+        "http://xpam-xpicta.ru/images/p1480529_2.jpg"
+      ],
+      "bytes": 156428,
+      "format": "jpeg",
+      "height": 411,
+      "path": "/media/files/a3c4b949a4ca59cf1f82bafa7ff02ff866180eb0deccdafcb65a15419b710613.jpg",
+      "sha256": "a3c4b949a4ca59cf1f82bafa7ff02ff866180eb0deccdafcb65a15419b710613",
+      "width": 1024
     },
     {
       "acquiredFrom": "https://lh5.googleusercontent.com/proxy/7sMMzxs2Xtx-78HAhPkMOA_3g1OYr7t-fyFPWRMThojxTxT6PQSEP2pD3CaXwmMSNWvwJUEI31KZCgZyQf8uJPROLv0=w1200-h630-n-k-no-nu",
