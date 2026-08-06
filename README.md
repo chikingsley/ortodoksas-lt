@@ -11,7 +11,8 @@ the shared content system.
 - `packages/editor` — shared Tiptap schema, rendering, provenance, and quality gates.
 - `packages/db` — Drizzle schema and immutable D1 migrations.
 - `scripts/content` — resumable migration into canonical D1 records.
-- `scripts/recovery` — archive and media recovery utilities.
+- `scripts/recovery` — active unresolved-media recovery, queue, registry, and
+  integrity tooling.
 
 Both apps use the same D1 database and R2 media bucket. D1 stores one article
 model, its pristine conversion baseline, current field-level changes, revision

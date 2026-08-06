@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { localizeMediaHtml } from "./media";
 
@@ -13,5 +15,24 @@ describe("localizeMediaHtml", () => {
 
     expect(localized).toContain(`src="${recoveredVideo}"`);
     expect(localized).toContain(`href="${recoveredVideo}"`);
+  });
+
+  it("renders every queued unresolved body image as a recovery card", () => {
+    const queue = JSON.parse(
+      readFileSync(
+        resolve(process.cwd(), "public/media/unresolved.json"),
+        "utf8"
+      )
+    ) as { issues: Array<{ originalUrl: string }> };
+
+    expect(queue.issues).toHaveLength(60);
+    for (const issue of queue.issues) {
+      const localized = localizeMediaHtml(
+        `<img src="${issue.originalUrl}" alt="Archive evidence">`
+      );
+      expect(localized).toContain('class="archive-media-unavailable"');
+      expect(localized).toContain('aria-label="Archyvo vaizdas atkuriamas"');
+      expect(localized).toContain("data-original-src=");
+    }
   });
 });

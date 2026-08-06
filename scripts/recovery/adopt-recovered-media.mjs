@@ -2,32 +2,40 @@
 
 import { createHash } from "node:crypto";
 import { readFile, writeFile } from "node:fs/promises";
-import { basename, join } from "node:path";
+import { basename, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 
-const root = fileURLToPath(new URL("../", import.meta.url));
-const manifestPath = join(root, "public/media/manifest.json");
+const root = fileURLToPath(new URL("../../", import.meta.url));
+const publicRoot = join(root, "apps/web/public");
+const manifestPath = join(publicRoot, "media/manifest.json");
 
 function argument(name) {
   const index = process.argv.indexOf(`--${name}`);
   return index === -1 ? null : process.argv[index + 1];
 }
 
-const relativeFile = argument("file");
+const file = argument("file");
 const originalUrl = argument("original-url");
 const acquiredFrom = argument("acquired-from");
 
-if (!(relativeFile && originalUrl && acquiredFrom)) {
+if (!(file && originalUrl && acquiredFrom)) {
   throw new Error(
-    "Usage: adopt-recovered-media.mjs --file <public path> --original-url <url> --acquired-from <url>"
+    "Usage: adopt-recovered-media.mjs --file <repo path or /media path> --original-url <url> --acquired-from <url>"
   );
 }
 
-const absoluteFile = join(root, relativeFile.replace(/^\//, ""));
+const absoluteFile = file.startsWith("/media/")
+  ? resolve(publicRoot, file.slice(1))
+  : resolve(root, file);
+const publicRelativePath = relative(publicRoot, absoluteFile);
+if (publicRelativePath.startsWith("..")) {
+  throw new Error("Recovered file must live under apps/web/public");
+}
+const mediaPath = `/${publicRelativePath}`;
 const bytes = await readFile(absoluteFile);
 const sha256 = createHash("sha256").update(bytes).digest("hex");
-if (!basename(relativeFile).startsWith(sha256)) {
+if (!basename(absoluteFile).startsWith(sha256)) {
   throw new Error(`Filename does not match SHA-256: ${sha256}`);
 }
 
@@ -47,18 +55,20 @@ const entry = existing ?? {
   bytes: bytes.length,
   format: metadata.format,
   height: metadata.height,
-  path: relativeFile.replace(/^public/, ""),
+  path: mediaPath,
   sha256,
   width: metadata.width,
 };
 entry.aliases = [
   ...new Set([...entry.aliases, originalUrl, normalizedOriginal]),
 ];
-if (!existing) manifest.media.push(entry);
+if (!existing) {
+  manifest.media.push(entry);
+}
 manifest.generatedAt = new Date().toISOString();
 manifest.media.sort((left, right) => left.path.localeCompare(right.path));
 await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
 
 console.log(
-  `Adopted ${relativeFile} for ${originalUrl} (${metadata.width}x${metadata.height})`
+  `Adopted ${mediaPath} for ${originalUrl} (${metadata.width}x${metadata.height})`
 );
