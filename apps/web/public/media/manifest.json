@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-06T00:34:39.065Z",
+  "generatedAt": "2026-08-06T03:36:53.753Z",
   "media": [
     {
       "acquiredFrom": "https://blogger.googleusercontent.com/img/a/AVvXsEhcpOEX4rpL7oxP9p9K08FHW113aHVRgksWnt81IyokECQRCqpXeZMWfprr4wH0BeJ0nvXLPnmH0fxtWkRP1Wr4Fc8J_muOyFtH7Oar98kHnSIdIT0CWpCFDC-OYlI8hFsJKUGI_94QqcqzMatDv2nVOY3E6TYKoMh8XHSLefccdZcp7gPrhnpe9bST",
@@ -2757,7 +2757,9 @@
       "acquiredFrom": "http://img.lrytas.lt/show_foto/?id=756908&amp;s=11&amp;f=4",
       "aliases": [
         "https://web.archive.org/web/20200805195644im_/http://img.lrytas.lt/show_foto/?id=756908&amp;s=11&amp;f=4",
-        "http://img.lrytas.lt/show_foto/?id=756908&amp;s=11&amp;f=4"
+        "http://img.lrytas.lt/show_foto/?id=756908&amp;s=11&amp;f=4",
+        "https://web.archive.org/web/20200805195644im_/http://img.lrytas.lt/show_foto/?id=756908&s=11&f=4",
+        "http://img.lrytas.lt/show_foto/?id=756908&s=11&f=4"
       ],
       "bytes": 64148,
       "format": "jpeg",
@@ -58170,6 +58172,18 @@
       "path": "/media/files/d33cc4fbeffd3b467e38daca001428fe56333b0946613d4ef1282514389b3296.jpg",
       "sha256": "d33cc4fbeffd3b467e38daca001428fe56333b0946613d4ef1282514389b3296",
       "width": 99
+    },
+    {
+      "acquiredFrom": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgzFo8npiQ0YBidMQhtmuVV-1Ufp-6I_6CJMYsP58Cf12_Oh-I0Nk3nRGPSSea0ns_pkX2bl-ejjBxXCd-eWlVGYrAOEnNY2otr0LtwbTURXypgl0eZ0YD6fOTDRK00alZ7yYDU7ELbkEyP6nB9yh32MEjSYR2WOFnjkfwjqJubyQXoKaUiVcUORYiL/s0/Pope_Franciscus_&_Patriarch_Bartholomew_I_in_the_Church_of_the_Holy_Sepulchre_in_Jerusalem_(1)_(cropped).jpeg",
+      "aliases": [
+        "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgzFo8npiQ0YBidMQhtmuVV-1Ufp-6I_6CJMYsP58Cf12_Oh-I0Nk3nRGPSSea0ns_pkX2bl-ejjBxXCd-eWlVGYrAOEnNY2otr0LtwbTURXypgl0eZ0YD6fOTDRK00alZ7yYDU7ELbkEyP6nB9yh32MEjSYR2WOFnjkfwjqJubyQXoKaUiVcUORYiL/s0/Pope_Franciscus_&_Patriarch_Bartholomew_I_in_the_Church_of_the_Holy_Sepulchre_in_Jerusalem_(1)_(cropped).jpeg"
+      ],
+      "bytes": 1491739,
+      "format": "jpeg",
+      "height": 1181,
+      "path": "/media/files/d33d493afb1386cd34a67a61c0eecb087a3730182cc5d731aa5198beca2e3a4c.jpg",
+      "sha256": "d33d493afb1386cd34a67a61c0eecb087a3730182cc5d731aa5198beca2e3a4c",
+      "width": 1639
     },
     {
       "acquiredFrom": "http://t0.gstatic.com/images?q=tbn:ANd9GcT2m-JU2yqm5Miw8cqjAHVVrAEIOSjepbhiZtwSQtYmw6T5slcxZfvdMCYU",
