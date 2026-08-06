@@ -2,7 +2,8 @@
 import ArchiveList from "../components/archive/ArchiveList.astro";
 import PageIntro from "../components/publication/PageIntro.astro";
 import SiteLayout from "../layouts/SiteLayout.astro";
-import { getLocalizedArticles, localeShells, localeUi, type Locale } from "../lib/publication";
+import { getLocalizedArticles, localeShells, type Locale } from "../lib/publication";
+import { localeUi } from "../lib/locale-ui";
 
 const copy: Record<Locale, { name: string; title: string; message: string }> = {
   en: { name: "English", title: "English edition", message: "No recovered English publications are available yet. The Lithuanian archive remains the source edition while translated material is being prepared." },

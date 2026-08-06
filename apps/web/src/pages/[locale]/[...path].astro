@@ -1,7 +1,8 @@
 ---
 import EditorialImage from "../../components/media/EditorialImage.astro";
 import SiteLayout from "../../layouts/SiteLayout.astro";
-import { cleanHtml, formatDate, getLocalizedArticles, localeShells, localeUi, type Locale, type LocalizedArticle } from "../../lib/publication";
+import { cleanHtml, formatDate, getLocalizedArticles, localeShells, type Locale, type LocalizedArticle } from "../../lib/publication";
+import { localeUi } from "../../lib/locale-ui";
 
 export function getStaticPaths() {
   return localeShells.flatMap((locale) => getLocalizedArticles(locale).map((page) => ({

@@ -1,67 +1,12 @@
 ---
-import { localeUi, type SiteLocale } from "../../lib/publication";
-import InstitutionalLockup from "../InstitutionalLockup.astro";
-import LanguageSwitcher from "../navigation/LanguageSwitcher.astro";
-import MobileNavigation from "../navigation/MobileNavigation.astro";
-import PrimaryNavigation from "../navigation/PrimaryNavigation.astro";
+import PublicationHeader from "./publication-header";
+import type { SiteLocale } from "../../lib/publication";
 
 interface Props {
   locale?: SiteLocale;
 }
 
 const { locale = "lt" } = Astro.props;
-const copy = localeUi[locale];
-const localized = locale !== "lt";
-const locales = [
-  ["lt", "LT", "/"],
-  ["en", "EN", "/en"],
-  ["ru", "RU", "/ru"],
-  ["uk", "UA", "/uk"],
-  ["be", "BY", "/be"],
-] as const;
-const navItems = localized
-  ? [
-      [copy.home, `/${locale}`],
-      [copy.archive, `/${locale}#articles`],
-      ["LT", "/"],
-    ]
-  : [
-      ["Pradžia", "/"],
-      ["Pamaldos", "/p/bendruomenes_21.html"],
-      ["Dvasininkai", "/p/dvasininkai.html"],
-      ["Biblioteka", "/p/biblioteka.html"],
-      ["Kalendorius", "/p/kalendorius.html"],
-      ["Archyvas", "/archyvas"],
-    ];
-const isActive = (href: string) =>
-  Astro.url.pathname === href ||
-  (href !== "/" && (Astro.url.pathname.startsWith(`${href}/`) || Astro.url.pathname.startsWith(href.replace(/\.html$/, ""))));
-const localeOptions = locales.map(([code, label, href]) => ({
-  active: code === locale,
-  code,
-  href,
-  label,
-}));
-const navigationItems = navItems.map(([label, href]) => ({
-  active: isActive(href),
-  href,
-  label,
-}));
 ---
 
-<header class="site-header">
-  <div class="site-width masthead">
-    <a class="institution-brand" href={localized ? `/${locale}` : "/"} aria-label={`${copy.home} · ortodoksas.lt`}>
-      <img class="patriarchate-emblem" src="/assets/brand/source/ecumenical-patriarchate-emblem.svg" alt="Visuotinis Patriarchatas" width="64" height="64" />
-      <InstitutionalLockup class="exarchate-lockup" />
-    </a>
-    <span class="masthead-rule" aria-hidden="true"></span>
-    <a class="publication-brand" href={localized ? `/${locale}` : "/"}>
-      <strong>ortodoksas.lt</strong>
-      <span>Bažnyčios leidinys</span>
-    </a>
-    <LanguageSwitcher ariaLabel={copy.languages} locales={localeOptions} />
-    <MobileNavigation items={navigationItems} searchHref="/paieska" searchLabel={copy.edition} />
-  </div>
-  <PrimaryNavigation items={navigationItems} searchHref={!localized ? "/paieska" : undefined} searchLabel={copy.search} />
-</header>
+<PublicationHeader client:load currentPath={Astro.url.pathname} locale={locale} />
