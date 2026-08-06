@@ -1,6 +1,9 @@
 ---
 import { localeUi, type SiteLocale } from "../../lib/publication";
 import InstitutionalLockup from "../InstitutionalLockup.astro";
+import LanguageSwitcher from "../navigation/LanguageSwitcher.astro";
+import MobileNavigation from "../navigation/MobileNavigation.astro";
+import PrimaryNavigation from "../navigation/PrimaryNavigation.astro";
 
 interface Props {
   locale?: SiteLocale;
@@ -33,6 +36,17 @@ const navItems = localized
 const isActive = (href: string) =>
   Astro.url.pathname === href ||
   (href !== "/" && (Astro.url.pathname.startsWith(`${href}/`) || Astro.url.pathname.startsWith(href.replace(/\.html$/, ""))));
+const localeOptions = locales.map(([code, label, href]) => ({
+  active: code === locale,
+  code,
+  href,
+  label,
+}));
+const navigationItems = navItems.map(([label, href]) => ({
+  active: isActive(href),
+  href,
+  label,
+}));
 ---
 
 <header class="site-header">
@@ -46,23 +60,8 @@ const isActive = (href: string) =>
       <strong>ortodoksas.lt</strong>
       <span>Bažnyčios leidinys</span>
     </a>
-    <nav class="locale-switcher" aria-label={copy.languages}>
-      {locales.map(([code, label, href]) => <a aria-current={code === locale ? "page" : undefined} class={code === locale ? "active" : undefined} href={href} lang={code}>{label}</a>)}
-    </nav>
-    <details class="mobile-menu">
-      <summary aria-label="Atverti meniu"><span></span><span></span><span></span></summary>
-      <nav aria-label={copy.edition}>
-        {navItems.map(([label, href]) => <a class={isActive(href) ? "active" : undefined} href={href}>{label}</a>)}
-        <a href="/paieska">Paieška</a>
-      </nav>
-    </details>
+    <LanguageSwitcher ariaLabel={copy.languages} locales={localeOptions} />
+    <MobileNavigation items={navigationItems} searchHref="/paieska" searchLabel={copy.edition} />
   </div>
-  <nav class="primary-nav" aria-label={copy.edition}>
-    <div class="site-width nav-scroll">
-      {navItems.map(([label, href]) => <a class={isActive(href) ? "active" : undefined} href={href}>{label}</a>)}
-      {!localized ? <a class="nav-search" href="/paieska" aria-label={copy.search}>
-        <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4.2 4.2"></path></svg>
-      </a> : null}
-    </div>
-  </nav>
+  <PrimaryNavigation items={navigationItems} searchHref={!localized ? "/paieska" : undefined} searchLabel={copy.search} />
 </header>

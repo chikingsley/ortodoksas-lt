@@ -1,0 +1,27 @@
+---
+import NavigationItem from "./NavigationItem.astro";
+
+interface NavOption {
+  active: boolean;
+  href: string;
+  label: string;
+}
+
+interface Props {
+  items: NavOption[];
+  searchHref: string;
+  searchLabel: string;
+}
+
+const { items, searchHref, searchLabel } = Astro.props;
+---
+
+<details class="mobile-menu">
+  <summary aria-label="Atverti meniu"><span></span><span></span><span></span></summary>
+  <nav aria-label={searchLabel}>
+    {items.map((item) => (
+      <NavigationItem active={item.active} className="mobile-item" href={item.href} label={item.label} />
+    ))}
+    <NavigationItem href={searchHref} label="Paieška" />
+  </nav>
+</details>

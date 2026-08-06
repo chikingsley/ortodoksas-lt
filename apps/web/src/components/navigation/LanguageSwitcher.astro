@@ -1,0 +1,29 @@
+---
+import NavigationItem from "./NavigationItem.astro";
+
+interface LocaleOption {
+  active: boolean;
+  code: string;
+  href: string;
+  label: string;
+}
+
+interface Props {
+  ariaLabel: string;
+  locales: LocaleOption[];
+}
+
+const { ariaLabel, locales } = Astro.props;
+---
+
+<nav class="locale-switcher" aria-label={ariaLabel}>
+  {locales.map((locale) => (
+    <NavigationItem
+      active={locale.active}
+      className="locale-item"
+      href={locale.href}
+      lang={locale.code}
+      label={locale.label}
+    />
+  ))}
+</nav>
