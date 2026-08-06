@@ -17,6 +17,9 @@ import type { StudioEnvironment } from "../types";
 
 export const articleRoutes = new Hono<StudioEnvironment>();
 
+const WAYBACK_URL_PATTERN =
+  /^https:\/\/web\.archive\.org\/web\/\d+[a-z_]*\/(https?:\/\/)/u;
+
 const toHex = (value: ArrayBuffer): string =>
   [...new Uint8Array(value)]
     .map((byte) => byte.toString(16).padStart(2, "0"))
@@ -45,13 +48,18 @@ const attachMediaRecords = async (
       ) {
         return node;
       }
+      const candidates = [
+        source,
+        source.replace(WAYBACK_URL_PATTERN, "$1"),
+      ].filter((value, index, values) => values.indexOf(value) === index);
       const media = await database
         .prepare(
           `SELECT media_assets.id FROM media_aliases
           JOIN media_assets ON media_assets.id = media_aliases.media_id
-          WHERE media_aliases.alias = ? LIMIT 1`
+          WHERE media_aliases.alias IN (${candidates.map(() => "?").join(", ")})
+          LIMIT 1`
         )
-        .bind(source)
+        .bind(...candidates)
         .first<{ id: string }>();
       if (!media) {
         return node;
