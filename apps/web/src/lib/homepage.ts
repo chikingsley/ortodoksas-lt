@@ -13,17 +13,20 @@ export function selectHomepageArticles<T extends HomepageEntry>(entries: T[]) {
     return right - left;
   });
   const lead =
-    sorted.find((entry) => entry.homepage === "lead") ??
+    sorted.find((entry) => entry.homepage === "lead" && entry.hero) ??
     sorted.find((entry) => entry.hero) ??
-    sorted[0];
+    null;
   const available = sorted.filter((entry) => entry.path !== lead?.path);
   const promoted = available
-    .filter((entry) => entry.homepage === "secondary")
+    .filter((entry) => entry.homepage === "secondary" && entry.hero)
     .sort((a, b) => (a.homepageOrder ?? 99) - (b.homepageOrder ?? 99));
   const secondary = [...promoted];
   for (const entry of available) {
     if (secondary.length >= 4) {
       break;
+    }
+    if (!entry.hero) {
+      continue;
     }
     if (!secondary.some((candidate) => candidate.path === entry.path)) {
       secondary.push(entry);

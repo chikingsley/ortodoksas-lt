@@ -172,7 +172,11 @@ function unavailableLinkPlaceholder(content: string, source: string) {
 export function localizeMediaUrl(value: string | null, path?: string) {
   return (
     (path ? mediaAssignments.get(path) : null) ??
-    (value ? (mediaAliases.get(value) ?? value) : null)
+    (value
+      ? (mediaAliases.get(value) ??
+        mediaAliases.get(normalizeMediaUrl(value)) ??
+        null)
+      : null)
   );
 }
 
@@ -184,7 +188,7 @@ export function localizeMediaHtml(value: string) {
         !(
           mediaAliases.has(source) ||
           mediaAliases.has(normalizeMediaUrl(source))
-        ) && unresolvedMedia.has(normalizeMediaUrl(source))
+        )
     );
     if (unresolvedSource) {
       return unavailableMediaPlaceholder(tag, unresolvedSource);

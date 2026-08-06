@@ -1276,7 +1276,14 @@ svg {
     width: 100%;
     padding-block: 10px 8px;
     margin: 10px 0 0;
-    border-top: 0;
+    border-top: 1px solid var(--green);
+  }
+  .locale-switcher a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
   }
   .mobile-menu {
     display: block;
@@ -1286,8 +1293,9 @@ svg {
   .mobile-menu summary {
     display: grid;
     gap: 4px;
-    width: 30px;
-    padding: 5px;
+    width: 44px;
+    min-height: 44px;
+    padding: 10px;
     cursor: pointer;
     list-style: none;
   }
@@ -1295,7 +1303,7 @@ svg {
     display: none;
   }
   .mobile-menu summary span {
-    width: 20px;
+    width: 24px;
     height: 1.5px;
     background: var(--ink);
   }
@@ -1312,6 +1320,8 @@ svg {
     box-shadow: 0 12px 28px rgba(0, 39, 31, 0.15);
   }
   .mobile-menu nav a {
+    align-content: center;
+    min-height: 44px;
     padding: 11px 8px;
     font:
       600 17px "Playfair Display",
