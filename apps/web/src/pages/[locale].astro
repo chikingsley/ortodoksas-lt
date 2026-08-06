@@ -22,7 +22,7 @@ const localizedCopy = localeUi[locale];
 ---
 
 <SiteLayout title={`${language.title} · ortodoksas.lt`} description={entries.length ? `${entries.length} ${localizedCopy.articles.toLocaleLowerCase(locale)} · ${language.title}.` : language.message} canonicalPath={`/${locale}`} lang={locale} locale={locale}>
-  <main class="site-width language-shell">
+  <main class:list={["site-width", "language-shell", { "language-empty": !entries.length }]}>
     {entries.length ? <>
       <PageIntro description={`${entries.length} ${localizedCopy.articles.toLocaleLowerCase(locale)} · ${localizedCopy.provenance}`} eyebrow={`${language.name} · ${locale.toUpperCase()}`} title={language.title} />
       <ArchiveList entries={entries} fallbackSection={language.name} id="articles" locale={locale} />

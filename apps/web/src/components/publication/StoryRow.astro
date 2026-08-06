@@ -18,20 +18,22 @@ const { entry, locale = "lt", variant = "supporting" } = Astro.props;
       <div class="eyebrow">{entry.section}</div>
       <h2><a href={entry.path}>{entry.title}</a></h2>
       <p>{entry.description}</p>
+      {entry.published ? <div class="story-meta"><time datetime={entry.published}>{formatDate(entry.published, locale)}</time></div> : null}
       <a class="story-link" href={entry.path}>Skaityti <span aria-hidden="true">→</span></a>
     </div>
   </article>
 ) : variant === "compact" ? (
   <article>
     {entry.hero ? <EditorialImage class="secondary-image" href={entry.path} label={`Atverti: ${entry.title}`} loading="eager" src={entry.hero} /> : null}
-    <div><div class="eyebrow">{entry.section}</div><h2><a href={entry.path}>{entry.title}</a></h2></div>
+    <div><div class="eyebrow">{entry.section}</div><h2><a href={entry.path}>{entry.title}</a></h2>{entry.published ? <div class="story-meta"><time datetime={entry.published}>{formatDate(entry.published, locale)}</time></div> : null}</div>
   </article>
 ) : (
   <article>
     {entry.hero ? <EditorialImage class="section-thumb" href={entry.path} label={`Atverti: ${entry.title}`} src={entry.hero} /> : null}
     <div>
-      <time datetime={entry.published ?? undefined}>{formatDate(entry.published, locale)}</time>
+      <div class="eyebrow">{entry.section}</div>
       <h3><a href={entry.path}>{entry.title}</a></h3>
+      <time datetime={entry.published ?? undefined}>{formatDate(entry.published, locale)}</time>
       <p>{entry.description}</p>
     </div>
   </article>

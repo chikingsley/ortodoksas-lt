@@ -5,14 +5,16 @@ import SiteLayout from "../layouts/SiteLayout.astro";
 import { articles, sections } from "../lib/publication";
 
 const years = [...new Set(articles.map((entry) => entry.published?.slice(0, 4)).filter((year): year is string => Boolean(year)))].sort((a, b) => b.localeCompare(a));
+const labels = [...new Set(articles.flatMap((entry) => entry.labels).filter(Boolean))].sort((a, b) => a.localeCompare(b, "lt"));
 ---
 
 <SiteLayout title="Archyvas · ortodoksas.lt" description="Visas atkurtas ortodoksas.lt straipsnių, pamokslų ir Bažnyčios gyvenimo archyvas." canonicalPath="/archyvas">
   <main class="site-width archive-page">
     <PageIntro description={`${articles.length.toLocaleString("lt-LT")} atkurti straipsniai, pamokslai, paskaitos ir Bažnyčios gyvenimo naujienos.`} eyebrow="2012–2026" title="Publikacijų archyvas" />
     <form class="archive-controls" id="archive-controls" action="/archyvas" method="get">
-      <label class="archive-search"><span aria-hidden="true">⌕</span><span class="sr-only">Ieškoti archyve</span><input id="archive-query" name="q" placeholder="Ieškoti pagal pavadinimą ar temą" type="search" /></label>
+      <label class="archive-search"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4.2 4.2"></path></svg><span class="sr-only">Ieškoti archyve</span><input id="archive-query" name="q" placeholder="Ieškoti pagal pavadinimą ar temą" type="search" /></label>
       <select aria-label="Tema" id="archive-section" name="tema"><option value="">Visos temos</option>{sections.map((section) => <option value={section}>{section}</option>)}</select>
+      <select aria-label="Žyma" id="archive-label" name="zyma"><option value="">Visos žymos</option>{labels.map((label) => <option value={label}>{label}</option>)}</select>
       <select aria-label="Metai" id="archive-year" name="metai"><option value="">Visi metai</option>{years.map((year) => <option value={year}>{year}</option>)}</select>
     </form>
     <p class="results-line"><strong id="archive-count">{articles.length.toLocaleString("lt-LT")}</strong> rezultatai</p>
@@ -24,15 +26,17 @@ const years = [...new Set(articles.map((entry) => entry.published?.slice(0, 4)).
 <script is:inline>
   const query = document.querySelector("#archive-query");
   const section = document.querySelector("#archive-section");
+  const label = document.querySelector("#archive-label");
   const year = document.querySelector("#archive-year");
   const count = document.querySelector("#archive-count");
   const rows = [...document.querySelectorAll("#archive-list article")];
   const normalize = (value) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase();
   const update = () => {
     const q = normalize(query.value);
+    const selectedLabel = normalize(label.value);
     let visible = 0;
     rows.forEach((row) => {
-      const match = (!q || row.dataset.search.includes(q)) && (!section.value || row.dataset.section === section.value) && (!year.value || row.dataset.year === year.value);
+      const match = (!q || row.dataset.search.includes(q)) && (!section.value || row.dataset.section === section.value) && (!selectedLabel || row.dataset.labels.split("||").includes(selectedLabel)) && (!year.value || row.dataset.year === year.value);
       row.hidden = !match;
       if (match) visible += 1;
     });
@@ -40,14 +44,16 @@ const years = [...new Set(articles.map((entry) => entry.published?.slice(0, 4)).
     const params = new URLSearchParams();
     if (query.value) params.set("q", query.value);
     if (section.value) params.set("tema", section.value);
+    if (label.value) params.set("zyma", label.value);
     if (year.value) params.set("metai", year.value);
     history.replaceState(null, "", `${location.pathname}${params.toString() ? `?${params}` : ""}`);
   };
   const params = new URLSearchParams(location.search);
   query.value = params.get("q") || "";
   section.value = params.get("tema") || "";
+  label.value = params.get("zyma") || "";
   year.value = params.get("metai") || "";
-  [query, section, year].forEach((field) => field.addEventListener("input", update));
-  [section, year].forEach((field) => field.addEventListener("change", update));
+  [query, section, label, year].forEach((field) => field.addEventListener("input", update));
+  [section, label, year].forEach((field) => field.addEventListener("change", update));
   update();
 </script>

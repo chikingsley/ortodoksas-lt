@@ -20,7 +20,7 @@ homepageRoutes.put("/", async (context) => {
     leadId?: string | null;
     secondaryIds?: string[];
   };
-  const secondaryIds = (payload.secondaryIds ?? []).slice(0, 3);
+  const secondaryIds = (payload.secondaryIds ?? []).slice(0, 4);
   const timestamp = Date.now();
   await getDatabase(context.env.DB)
     .delete(homepagePlacements)

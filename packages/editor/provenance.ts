@@ -1,6 +1,5 @@
-import type { JSONContent } from "@tiptap/core";
-
 import type { TiptapDocument } from "@ortodoksas-lt/content/article";
+import type { JSONContent } from "@tiptap/core";
 
 export interface ContentChange {
   afterValue: string | null;
@@ -12,6 +11,13 @@ export interface ContentChange {
 
 type FieldProvenance = "generated" | "manual" | "missing" | "source";
 
+const provenanceAttributeNames = new Set([
+  "altProvenance",
+  "captionProvenance",
+  "sourceAlt",
+  "sourceCaption",
+]);
+
 const textContent = (node: JSONContent | undefined): string =>
   node?.content?.map((child) => child.text ?? textContent(child)).join("") ??
   "";
@@ -20,11 +26,11 @@ const comparableNode = (node: JSONContent | undefined): JSONContent | null => {
   if (!node) {
     return null;
   }
-  const attrs = { ...node.attrs };
-  delete attrs.altProvenance;
-  delete attrs.captionProvenance;
-  delete attrs.sourceAlt;
-  delete attrs.sourceCaption;
+  const attrs = Object.fromEntries(
+    Object.entries(node.attrs ?? {}).filter(
+      ([name]) => !provenanceAttributeNames.has(name)
+    )
+  );
   return {
     ...node,
     ...(Object.keys(attrs).length > 0 ? { attrs } : { attrs: undefined }),

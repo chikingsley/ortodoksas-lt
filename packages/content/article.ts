@@ -55,8 +55,8 @@ export const createArticleSchema = z.object({
   sourceCapture: z.string().trim().max(4096).optional(),
   sourceHtml: z.string().optional(),
   sourceUrl: z.string().trim().max(4096).optional(),
-  summary: z.string().trim().max(600).default(""),
   status: articleStatusSchema.default("draft"),
+  summary: z.string().trim().max(600).default(""),
   title: z.string().trim().min(1).max(240),
   translationGroupId: z.string().uuid().optional(),
   translationKind: translationKindSchema.default("original"),
@@ -65,18 +65,17 @@ export const createArticleSchema = z.object({
 export type CreateArticleInput = z.infer<typeof createArticleSchema>;
 export type TiptapDocument = z.infer<typeof tiptapDocumentSchema>;
 
-export const updateArticleSchema = createArticleSchema
-  .pick({
-    body: true,
-    heroSourceUrl: true,
-    kind: true,
-    labels: true,
-    language: true,
-    publishedAt: true,
-    section: true,
-    slug: true,
-    summary: true,
-    title: true,
-    translationKind: true,
-    status: true,
-  });
+export const updateArticleSchema = createArticleSchema.pick({
+  body: true,
+  heroSourceUrl: true,
+  kind: true,
+  labels: true,
+  language: true,
+  publishedAt: true,
+  section: true,
+  slug: true,
+  status: true,
+  summary: true,
+  title: true,
+  translationKind: true,
+});

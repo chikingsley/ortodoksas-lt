@@ -1,3 +1,4 @@
+import { getSectionOptions } from "@ortodoksas-lt/content/sections";
 import {
   ArrowDown,
   ChevronLeft,
@@ -34,7 +35,7 @@ interface ArticleRowProps {
 }
 
 const PAGE_SIZE = 30;
-const SUPPORTING_SLOTS = ["first", "second", "third"] as const;
+const SUPPORTING_SLOTS = ["first", "second", "third", "fourth"] as const;
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
   day: "2-digit",
   month: "short",
@@ -97,7 +98,7 @@ export const ArticleInventory = ({ articles, catalogState, onOpen }: Props) => {
   const [page, setPage] = useState(1);
   const [homepageOpen, setHomepageOpen] = useState(false);
   const [leadId, setLeadId] = useState("");
-  const [secondaryIds, setSecondaryIds] = useState(["", "", ""]);
+  const [secondaryIds, setSecondaryIds] = useState(["", "", "", ""]);
   const [homepageState, setHomepageState] = useState<
     "idle" | "saving" | "saved" | "error"
   >("idle");
@@ -121,7 +122,7 @@ export const ArticleInventory = ({ articles, catalogState, onOpen }: Props) => {
             .sort((left, right) => left.position - right.position);
           setLeadId(lead?.articleId ?? "");
           setSecondaryIds(
-            [0, 1, 2].map((index) => secondary[index]?.articleId ?? "")
+            [0, 1, 2, 3].map((index) => secondary[index]?.articleId ?? "")
           );
         }
       )
@@ -139,11 +140,7 @@ export const ArticleInventory = ({ articles, catalogState, onOpen }: Props) => {
   );
   const sections = useMemo(
     () =>
-      Array.from(
-        new Set(
-          inventoryArticles.map((article) => article.section).filter(Boolean)
-        )
-      ).sort((left, right) => left.localeCompare(right, "lt")),
+      getSectionOptions(inventoryArticles.map((article) => article.section)),
     [inventoryArticles]
   );
   const filtered = useMemo(() => {
@@ -208,6 +205,14 @@ export const ArticleInventory = ({ articles, catalogState, onOpen }: Props) => {
   );
   const saveHomepage = useCallback(async () => {
     setHomepageState("saving");
+    const selectedIds = [leadId, ...secondaryIds].filter(Boolean);
+    const hasMissingImage = selectedIds.some(
+      (id) => !inventoryArticles.find((article) => article.id === id)?.hero
+    );
+    if (hasMissingImage) {
+      setHomepageState("error");
+      return;
+    }
     const response = await fetch("/api/homepage", {
       body: JSON.stringify({
         leadId: leadId || null,
@@ -217,7 +222,7 @@ export const ArticleInventory = ({ articles, catalogState, onOpen }: Props) => {
       method: "PUT",
     });
     setHomepageState(response.ok ? "saved" : "error");
-  }, [leadId, secondaryIds]);
+  }, [inventoryArticles, leadId, secondaryIds]);
 
   return (
     <div className="inventory-page">
@@ -250,7 +255,7 @@ export const ArticleInventory = ({ articles, catalogState, onOpen }: Props) => {
           <div>
             <strong>Homepage placements</strong>
             <span>
-              Choose one lead story and up to three supporting stories.
+              Choose one lead story and up to four supporting stories.
             </span>
           </div>
           <label>
@@ -288,7 +293,9 @@ export const ArticleInventory = ({ articles, catalogState, onOpen }: Props) => {
             <span>Homepage layout saved.</span>
           ) : null}
           {homepageState === "error" ? (
-            <span>Homepage layout request failed.</span>
+            <span>
+              Homepage placements require a valid image and a successful save.
+            </span>
           ) : null}
         </section>
       ) : null}

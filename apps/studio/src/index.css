@@ -1087,6 +1087,7 @@
   margin: 14px 0 6px;
 }
 .review-inspector select,
+.review-inspector input,
 .review-inspector code,
 .review-inspector textarea {
   display: block;
@@ -1099,6 +1100,25 @@
 }
 .review-inspector textarea {
   resize: vertical;
+}
+.section-combobox small {
+  display: block;
+  margin-top: 6px;
+  font-size: 11px;
+  line-height: 1.35;
+  color: #607069;
+}
+.section-combobox > [data-slot="input-group"] {
+  width: 100%;
+}
+.section-combobox-add {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 6px;
+  margin-top: 7px;
+}
+.section-combobox-create {
+  margin-top: 5px;
 }
 .review-version-meta {
   margin-top: 10px !important;

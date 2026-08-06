@@ -34,9 +34,6 @@ const articleSchema = {
   type="article"
 >
   <main class="article-page localized-article">
-    <div class="site-width article-breadcrumbs">
-      <a href={`/${locale}`}>{copy.home}</a><span aria-hidden="true">›</span><span>{copy.edition}</span>
-    </div>
     <article class="reading-column">
       <header class="article-header">
         <div class="eyebrow">{copy.edition}</div>
@@ -44,7 +41,7 @@ const articleSchema = {
         {page.published ? <div class="article-byline"><time datetime={page.published}>{formatDate(page.published, locale)}</time><span>{page.origin === "editorial" ? copy.institution : copy.provenance}</span></div> : null}
         {page.hero ? <EditorialImage class="article-hero" priority src={page.hero} /> : null}
       </header>
-      <div class="prose" set:html={cleanHtml(page.html)}></div>
+      <div class="prose" set:html={cleanHtml(page.html, page.hero, true)}></div>
       {page.labels.length > 0 ? <footer class="article-tags">{page.labels.map((label) => <span>{label}</span>)}</footer> : null}
     </article>
     {page.origin !== "editorial" ? <aside class="site-width archive-note">

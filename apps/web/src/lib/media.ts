@@ -26,6 +26,11 @@ interface UnresolvedMedia {
   schemaVersion: number;
 }
 
+interface UnavailableLinks {
+  schemaVersion: number;
+  urls: string[];
+}
+
 const altAttributePattern = /\balt=(?:"([^"]*)"|'([^']*)')/i;
 const mediaAttributePattern = /\b(src|poster|srcset)=(?:"([^"]+)"|'([^']+)')/gi;
 const mediaTagPattern = /<(?:img|source)\b[^>]*>/gi;
@@ -35,6 +40,10 @@ const whitespacePattern = /\s+/;
 const manifestUrl = resolve(process.cwd(), "public/media/manifest.json");
 const assignmentsUrl = resolve(process.cwd(), "public/media/assignments.json");
 const unresolvedUrl = resolve(process.cwd(), "public/media/unresolved.json");
+const unavailableLinksUrl = resolve(
+  process.cwd(),
+  "public/media/unavailable-links.json"
+);
 
 function normalizeMediaUrl(value: string) {
   return value.replaceAll("&amp;", "&").replaceAll("&#38;", "&");
@@ -117,6 +126,22 @@ function loadUnresolvedMedia() {
 
 const unresolvedMedia = loadUnresolvedMedia();
 
+function loadUnavailableLinks() {
+  try {
+    const links = JSON.parse(
+      readFileSync(unavailableLinksUrl, "utf8")
+    ) as UnavailableLinks;
+    if (links.schemaVersion !== 1 || !Array.isArray(links.urls)) {
+      return new Set<string>();
+    }
+    return new Set(links.urls.map(normalizeMediaUrl));
+  } catch {
+    return new Set<string>();
+  }
+}
+
+const unavailableLinks = loadUnavailableLinks();
+
 function mediaSourcesFromTag(tag: string) {
   const sources: string[] = [];
   for (const match of tag.matchAll(mediaAttributePattern)) {
@@ -137,7 +162,11 @@ function unavailableMediaPlaceholder(tag: string, source: string) {
   const altMatch = tag.match(altAttributePattern);
   const alt = (altMatch?.[1] ?? altMatch?.[2] ?? "").trim();
   const description = alt ? `<span>${escapeText(alt)}</span>` : "";
-  return `<span class="archive-media-unavailable" role="img" aria-label="Archyvo vaizdas atkuriamas" data-original-src="${escapeAttribute(source)}"><strong>Archyvo vaizdas atkuriamas</strong>${description}</span>`;
+  return `<span class="archive-media-unavailable" role="img" aria-label="Vaizdas nepasiekiamas" data-original-src="${escapeAttribute(source)}"><strong>Vaizdas nepasiekiamas</strong>${description}</span>`;
+}
+
+function unavailableLinkPlaceholder(content: string, source: string) {
+  return `<span class="archive-link-unavailable" data-original-href="${escapeAttribute(source)}">${content}<span class="archive-link-unavailable-label">Nuoroda nepasiekiama</span></span>`;
 }
 
 export function localizeMediaUrl(value: string | null, path?: string) {
@@ -186,7 +215,7 @@ export function localizeMediaHtml(value: string) {
       }
     );
   });
-  return localizedTags.replace(
+  const localizedLinks = localizedTags.replace(
     linkedMediaAttributePattern,
     (attribute, doubleQuoted, singleQuoted) => {
       const raw = doubleQuoted ?? singleQuoted;
@@ -195,6 +224,22 @@ export function localizeMediaHtml(value: string) {
         mediaAliases.get(normalizeMediaUrl(raw)) ??
         raw;
       return localized === raw ? attribute : `href="${localized}"`;
+    }
+  );
+
+  return localizedLinks.replace(
+    /<a\b([^>]*?)\bhref=("|')([^"']+)\2([^>]*)>([\s\S]*?)<\/a>/gi,
+    (match, _before, _quote, source, _after, content) => {
+      const normalizedSource = normalizeMediaUrl(source);
+      if (
+        !(
+          unresolvedMedia.has(normalizedSource) ||
+          unavailableLinks.has(normalizedSource)
+        )
+      ) {
+        return match;
+      }
+      return unavailableLinkPlaceholder(content, source);
     }
   );
 }

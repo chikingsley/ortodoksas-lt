@@ -1,5 +1,6 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
+import { getSectionOptions } from "@ortodoksas-lt/content/sections";
 import { marked } from "marked";
 import { localizeMediaHtml, localizeMediaUrl } from "./media";
 
@@ -60,10 +61,16 @@ export interface LocalizedArticle extends CatalogEntry {
   locale: Locale;
 }
 
-const pagesDirectory = resolve(process.cwd(), "public/content/pages");
+const contentRoot =
+  process.env.PUBLIC_CONTENT_SOURCE === "canonical"
+    ? resolve(process.cwd(), "public/.canonical-content")
+    : resolve(process.cwd(), "public/content");
+const pagesDirectory = resolve(contentRoot, "pages");
 const localesDirectory = resolve(process.cwd(), "public/content/locales");
 const editorialDirectory = resolve(process.cwd(), "public/content/editorial");
 const safeLocaleFilePattern = /^pages\/[A-Za-z0-9._-]+\.json$/;
+const imageSourcePattern = /\bsrc\s*=\s*["']([^"']+)["']/i;
+const firstMediaTablePattern = /<table\b[\s\S]*?<img\b[^>]*>[\s\S]*?<\/table>/i;
 const contentFiles = readdirSync(pagesDirectory, { encoding: "utf8" }).filter(
   (file) => file.endsWith(".json")
 );
@@ -85,10 +92,7 @@ const recoveredPages = contentFiles
     html: localizeMediaHtml(page.html),
   }));
 
-const catalogValue = readJson<CatalogEntry[]>(
-  pagesDirectory,
-  "../catalog.json"
-);
+const catalogValue = readJson<CatalogEntry[]>(contentRoot, "catalog.json");
 const recoveredCatalog = (catalogValue ?? []).map((entry) => ({
   ...entry,
   hero: localizeMediaUrl(entry.hero, entry.path),
@@ -218,9 +222,9 @@ export const articles = catalog
     return right - left;
   });
 
-export const sections = [
-  ...new Set(articles.map((entry) => entry.section)),
-].sort((a, b) => a.localeCompare(b, "lt"));
+export const sections = getSectionOptions(
+  articles.map((entry) => entry.section)
+);
 
 export const localeUi: Record<
   SiteLocale,
@@ -469,8 +473,12 @@ export function excerpt(value: string, length = 180) {
     : text;
 }
 
-export function cleanHtml(value: string) {
-  return value
+export function cleanHtml(
+  value: string,
+  hero?: string | null,
+  removeFirstMedia = false
+) {
+  const cleaned = value
     .replace(/<script[\s\S]*?<\/script>/gi, "")
     .replace(/<style[\s\S]*?<\/style>/gi, "")
     .replace(/<(iframe|frame|object|form)\b[\s\S]*?<\/\1\s*>/gi, "")
@@ -482,6 +490,24 @@ export function cleanHtml(value: string) {
       /\s+(?:href|src|data|action|formaction)\s*=\s*(?:"\s*(?:javascript|vbscript|file):[^"]*"|'\s*(?:javascript|vbscript|file):[^']*')/gi,
       ""
     );
+  if (!hero) {
+    return cleaned;
+  }
+  const heroName =
+    decodeURIComponent(hero).split("?")[0]?.split("/").pop() ?? "";
+  if (!heroName) {
+    return cleaned;
+  }
+  const deduped = removeFirstMedia
+    ? cleaned.replace(firstMediaTablePattern, "")
+    : cleaned;
+  return deduped.replace(/<img\b[^>]*>/gi, (tag) => {
+    const source = tag.match(imageSourcePattern)?.[1];
+    const sourceName = source
+      ? (decodeURIComponent(source).split("?")[0]?.split("/").pop() ?? "")
+      : undefined;
+    return sourceName === heroName ? "" : tag;
+  });
 }
 
 export function escapeXml(value: string) {

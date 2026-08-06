@@ -22,7 +22,7 @@ export function selectHomepageArticles<T extends HomepageEntry>(entries: T[]) {
     .sort((a, b) => (a.homepageOrder ?? 99) - (b.homepageOrder ?? 99));
   const secondary = [...promoted];
   for (const entry of available) {
-    if (secondary.length >= 3) {
+    if (secondary.length >= 4) {
       break;
     }
     if (!secondary.some((candidate) => candidate.path === entry.path)) {
@@ -33,6 +33,6 @@ export function selectHomepageArticles<T extends HomepageEntry>(entries: T[]) {
   return {
     lead,
     remaining: sorted.filter((entry) => !used.has(entry.path)),
-    secondary: secondary.slice(0, 3),
+    secondary: secondary.slice(0, 4),
   };
 }

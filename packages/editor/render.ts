@@ -1,6 +1,5 @@
-import { renderToHTMLString } from "@tiptap/static-renderer/pm/html-string";
-
 import type { TiptapDocument } from "@ortodoksas-lt/content/article";
+import { renderToHTMLString } from "@tiptap/static-renderer/pm/html-string";
 import {
   resolveRecoveredMediaUrl,
   resolveTiptapMediaUrls,

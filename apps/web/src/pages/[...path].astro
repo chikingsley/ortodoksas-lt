@@ -13,6 +13,13 @@ export function getStaticPaths() {
 const { page } = Astro.props as { page: ContentPage };
 const description = page.description || `${page.title} · ortodoksas.lt`;
 const canonicalPath = page.path;
+const bodyHtml =
+  page.path === "/p/biblioteka.html"
+    ? cleanHtml(page.html, page.hero).replace(
+        /^\s*<div>\s*<\/div>\s*<table[\s\S]*?<\/table>/i,
+        ""
+      )
+    : cleanHtml(page.html, page.hero, page.kind === "article");
 const articleSchema = page.kind === "article" ? {
   headline: page.title,
   datePublished: page.published ?? undefined,
@@ -32,10 +39,6 @@ const articleSchema = page.kind === "article" ? {
   jsonLd={articleSchema}
 >
   <main class="article-page">
-    <div class="site-width article-breadcrumbs">
-      <a href="/">Pradžia</a><span aria-hidden="true">›</span>
-      <a href={page.kind === "article" ? `/tema/${page.section.toLocaleLowerCase("lt").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}` : "/archyvas"}>{page.kind === "page" ? "Informacija" : page.section}</a>
-    </div>
     <article class="reading-column">
       <header class="article-header">
         <div class="eyebrow">{page.kind === "page" ? "ortodoksas.lt" : page.section}</div>
@@ -43,7 +46,7 @@ const articleSchema = page.kind === "article" ? {
         {page.published ? <div class="article-byline"><time datetime={page.published}>{formatDate(page.published)}</time><span>{page.origin === "editorial" ? "ortodoksas.lt redakcijos publikacija" : `Atkurta iš ${page.capture?.slice(0, 4) ?? "viešojo"} m. archyvo kopijos`}</span></div> : null}
         {page.hero ? <EditorialImage class="article-hero" priority src={page.hero} /> : null}
       </header>
-      <div class="prose" set:html={cleanHtml(page.html)} />
+      <div class="prose" set:html={bodyHtml} />
       {page.labels.length > 0 ? <footer class="article-tags">{page.labels.map((label) => <span>{label}</span>)}</footer> : null}
     </article>
     {page.origin !== "editorial" ? <aside class="site-width archive-note">

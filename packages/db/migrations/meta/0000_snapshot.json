@@ -64,12 +64,8 @@
           "name": "article_baselines_article_id_articles_id_fk",
           "tableFrom": "article_baselines",
           "tableTo": "articles",
-          "columnsFrom": [
-            "article_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["article_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -141,10 +137,7 @@
       "indexes": {
         "article_content_changes_article_idx": {
           "name": "article_content_changes_article_idx",
-          "columns": [
-            "article_id",
-            "created_at"
-          ],
+          "columns": ["article_id", "created_at"],
           "isUnique": false
         }
       },
@@ -153,12 +146,8 @@
           "name": "article_content_changes_article_id_articles_id_fk",
           "tableFrom": "article_content_changes",
           "tableTo": "articles",
-          "columnsFrom": [
-            "article_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["article_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -223,10 +212,7 @@
       "indexes": {
         "article_revisions_article_version_unique": {
           "name": "article_revisions_article_version_unique",
-          "columns": [
-            "article_id",
-            "version"
-          ],
+          "columns": ["article_id", "version"],
           "isUnique": true
         }
       },
@@ -235,12 +221,8 @@
           "name": "article_revisions_article_id_articles_id_fk",
           "tableFrom": "article_revisions",
           "tableTo": "articles",
-          "columnsFrom": [
-            "article_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["article_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -416,25 +398,17 @@
       "indexes": {
         "articles_language_slug_unique": {
           "name": "articles_language_slug_unique",
-          "columns": [
-            "language",
-            "slug"
-          ],
+          "columns": ["language", "slug"],
           "isUnique": true
         },
         "articles_status_updated_idx": {
           "name": "articles_status_updated_idx",
-          "columns": [
-            "status",
-            "updated_at"
-          ],
+          "columns": ["status", "updated_at"],
           "isUnique": false
         },
         "articles_translation_group_idx": {
           "name": "articles_translation_group_idx",
-          "columns": [
-            "translation_group_id"
-          ],
+          "columns": ["translation_group_id"],
           "isUnique": false
         }
       },
@@ -443,12 +417,8 @@
           "name": "articles_hero_media_id_media_assets_id_fk",
           "tableFrom": "articles",
           "tableTo": "media_assets",
-          "columnsFrom": [
-            "hero_media_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["hero_media_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -521,10 +491,7 @@
       "indexes": {
         "homepage_placements_slot_position_idx": {
           "name": "homepage_placements_slot_position_idx",
-          "columns": [
-            "slot",
-            "position"
-          ],
+          "columns": ["slot", "position"],
           "isUnique": false
         }
       },
@@ -533,12 +500,8 @@
           "name": "homepage_placements_article_id_articles_id_fk",
           "tableFrom": "homepage_placements",
           "tableTo": "articles",
-          "columnsFrom": [
-            "article_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["article_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -575,9 +538,7 @@
       "indexes": {
         "media_aliases_media_id_idx": {
           "name": "media_aliases_media_id_idx",
-          "columns": [
-            "media_id"
-          ],
+          "columns": ["media_id"],
           "isUnique": false
         }
       },
@@ -586,12 +547,8 @@
           "name": "media_aliases_media_id_media_assets_id_fk",
           "tableFrom": "media_aliases",
           "tableTo": "media_assets",
-          "columnsFrom": [
-            "media_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["media_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -732,16 +689,12 @@
       "indexes": {
         "media_assets_r2_key_unique": {
           "name": "media_assets_r2_key_unique",
-          "columns": [
-            "r2_key"
-          ],
+          "columns": ["r2_key"],
           "isUnique": true
         },
         "media_assets_sha256_unique": {
           "name": "media_assets_sha256_unique",
-          "columns": [
-            "sha256"
-          ],
+          "columns": ["sha256"],
           "isUnique": true
         }
       },

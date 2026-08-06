@@ -103,8 +103,8 @@ components:
 The system adopts the U.S. Web Design System 3 foundations for spacing, responsive widths, grid behavior, site margins, and structural borders. This is a foundation rather than a visual theme: the client palette, Playfair Display, Arimo, institutional marks, editorial hierarchy, and C composition remain the product's own identity.
 
 - **Spacing:** Use USWDS spacing-unit values only: 4, 8, 12, 16, 20, 24, 32, 40, 48, and 64px for this publication surface.
-- **Responsive widths:** Use the named USWDS widths `mobile-lg` 480px, `tablet` 640px, `tablet-lg` 880px, `desktop` 1024px, and `desktop-lg` 1200px. Author mobile-first rules and change composition only at these widths.
-- **Grid and margins:** Use the USWDS 12-column model, 16px site margins below `desktop`, 32px site margins from `desktop`, a 24px standard column gap, a 32px large column gap, and a 1200px maximum publication container.
+- **Responsive widths:** Use 640px as the mobile-to-tablet composition change, 1024px as the tablet-to-desktop composition change, and 1200px as the publication max-width. These match the practical BBC GEL/Guardian reflow model while preserving this publication's fixed outer contract.
+- **Grid and margins:** Use a 1200px maximum publication container, 32px gutters from tablet upward, 16px gutters below tablet, a 24px standard column gap, and a 32px large column gap.
 - **Borders:** Use a 1px structural border. A 2px line belongs to focus or an explicit selection state.
 - **Current location:** Mark the current destination with `aria-current="page"`. The visual state uses green text plus one 2px gold indicator contained inside the navigation item.
 - **Keyboard focus:** Use a 2px library-blue outline with a 4px offset and at least 3:1 contrast against adjacent colors.
@@ -114,9 +114,22 @@ The system adopts the U.S. Web Design System 3 foundations for spacing, responsi
 - `SectionHeader` owns one bottom structural border.
 - `StoryList` items own one bottom structural border; the final item removes it.
 - `PageHeader` uses spacing alone when the following component already owns a top border.
+- `InstitutionalMasthead` owns the single green divider immediately above desktop navigation or mobile language choices; those rows draw no second outer divider.
 - Adjacent components never both draw the same boundary.
 - Background changes count as a boundary and do not receive an additional separator.
 - Every margin, padding, gap, gutter, and responsive width must resolve to the adopted tokens above.
+
+### Editorial Metadata Order
+
+- Every story uses the same reading order: section/kicker, headline, standfirst when available, date metadata, then the read action.
+- Dates belong below the headline in story cards and archive rows. Mobile reflow preserves this order.
+- The lead story, supporting stories, section stories, archive rows, and localized stories all use this rule.
+
+### Control Primitive Policy
+
+- Fixed finite choices use a native select or the shadcn/Base UI Select primitive.
+- Searchable finite choices use the shadcn/Base UI Combobox primitive.
+- Free-form creation uses a separate Input and explicit action beside the Combobox. The Combobox itself remains a selector.
 
 ## Overview
 
@@ -193,9 +206,21 @@ The palette combines ecclesial authority, ceremonial warmth, and paper-like neut
 
 The principal container reaches the USWDS `desktop-lg` width of 1200px. Site margins are 16px below `desktop` and 32px from `desktop`; standard and large column gaps are 24px and 32px. Public pages use 1px hairline-separated modules and the adopted USWDS spacing units. Reading pages narrow to a centered measure near 72ex while hero media may occupy the full publication container.
 
-Wide editorial layouts use asymmetric grids for hierarchy: the homepage first viewport currently uses an approximately 56/44 lead-and-brief composition, followed by a four-cell service band, a three-card recent-story grid with archive rail, and two-column section lists. This story order and first-viewport composition are homepage behaviors; other surfaces inherit the visual tokens, editorial density, and responsive principles rather than that exact sequence.
+Wide editorial layouts use asymmetric grids for hierarchy: the homepage first viewport uses an approximately 57/43 lead-and-brief composition, followed by a four-cell service band, a three-card recent-story grid with archive rail, and two-column section lists. The brief rail contains four stories. This story order and first-viewport composition are homepage behaviors; other surfaces inherit the visual tokens, editorial density, and responsive principles rather than that exact sequence.
 
-Below `desktop` at 1024px, major asymmetric grids stack, supporting briefs form three columns, service links form two columns, and archive controls simplify. Below `tablet` at 640px, the masthead wraps into a compact two-row identity, desktop navigation becomes a menu, editorial cards become thumbnail-and-copy rows, archive months collapse to one archive destination, and content grids resolve to one column. Images keep fixed editorial aspect ratios and `object-fit: cover` to preserve rhythm across variable source material.
+Below `desktop` at 1024px, major asymmetric grids stack, supporting briefs form four columns, service links form two columns, and archive controls simplify. Below `tablet` at 640px, the masthead retains one identity row, languages occupy one compact utility row, desktop navigation becomes a menu, editorial cards become thumbnail-and-copy rows, archive months collapse to one archive destination, and content grids resolve to one column. Images keep fixed editorial aspect ratios and `object-fit: cover` to preserve rhythm across variable source material.
+
+### Homepage Media Contract
+
+- Lead source target: at least 1600 × 990px, landscape, displayed at a 1.62:1 crop on desktop and 1.55:1 on phones.
+- Supporting source target: at least 800 × 550px, landscape, displayed at a 1.45:1 crop. The desktop brief rail renders four 175px-wide crops at the 1200px container.
+- Recent-card source target: at least 840 × 590px, displayed at a 1.42:1 crop.
+- Every promoted story requires a valid image. The publishing workflow blocks a homepage placement whose image fails media validation.
+- Lead titles target 45–90 characters and summaries target 110–220 characters. Supporting titles target 30–75 characters and summaries target 55–110 characters. Responsive wrapping remains the final constraint; editorial guidance avoids destructive truncation.
+
+### Editorial Taxonomy
+
+The recovered publication supplies five historical sections: `Tikėjimas ir kultūra`, `Naujienos`, `Bažnyčios gyvenimas`, `Pamokslai`, and `Šventasis Raštas`. Studio presents these as the canonical starting list through a searchable section combobox. Editors may type a deliberate new section; saving the article adds that value to subsequent Studio and public-archive section filters. Labels remain separate article metadata and participate in archive text search.
 
 **The Surface-Specific Story Rule.** Preserve the homepage journey from institutional identity through lead and briefs, services, recent stories, and archive; carry the shared system to other pages without turning that journey into a universal template.
 
@@ -215,7 +240,7 @@ The system is flat and paper-like by default. White, cool-bone, green, and blue 
 
 The dominant form language is square and rectilinear. Image frames, cards, callouts, fields, service cells, and navigation remain crisp-edged. One-pixel rules express structure; one contained two-pixel indicator expresses the current navigation destination. Full pills belong to article tags, and circles belong to the archive arrow control and the framed footer emblem.
 
-Chain motifs create the signature organic geometry: narrow vertical crops sit at the edge of the hero and service cells, while a gold grid motif enters the library field as a partially cropped institutional texture.
+Chain motifs create the signature organic geometry: exact ceremonial-gold vertical crops separate adjacent service cells, while a gold grid motif enters the library field as a partially cropped institutional texture. Supplied motif orientation remains unchanged.
 
 **The Reserved Curve Rule.** Curves signal a compact token, circular action, or emblem container; editorial surfaces retain square corners.
 
@@ -225,7 +250,10 @@ Chain motifs create the signature organic geometry: narrow vertical crops sit at
 
 - **Identity:** Place the Ecumenical Patriarchate emblem at the far left, followed by the client Exarchate crest with its Arimo wordmark, a hairline divider, and the visible `ortodoksas.lt` wordmark.
 - **Typography:** Set the publication name in bold Playfair with a compact uppercase Arimo descriptor.
-- **Responsive behavior:** Preserve both institutional marks and the publication identity; let the reusable Exarchate lockup move to its own row on small screens.
+- **Sizing:** Render the Ecumenical Patriarchate emblem and the crest portion of the Exarchate lockup at the same optical height: 52px on desktop and 40px on mobile.
+- **Responsive behavior:** Preserve both institutional marks, the hairline, and the publication identity in one compact identity row. Place the language choices below the masthead's single green divider.
+
+- **Page intro spacing:** Use 48px above and 32px below the desktop archive/page intro; use 32px above and 24px below on mobile.
 
 ### Navigation
 
@@ -249,7 +277,8 @@ Chain motifs create the signature organic geometry: narrow vertical crops sit at
 ### Service Links
 
 - **Shape:** Full-width rectilinear cells inside the patriarchal-green band.
-- **Color:** White text, ceremonial-gold line icon, translucent white dividers, and a faint gold chain crop at the far edge.
+- **Color:** White text, ceremonial-gold line icon, and the exact client ceremonial-gold chain between adjacent cells. One gold hairline separates the two mobile rows.
+- **Icon size:** Use a 34px ceremonial-gold line icon, matching the height of the title-and-description block.
 - **Hover / Focus:** Deepen the green fill on hover and retain the universal blue focus outline.
 
 ### Inputs / Fields

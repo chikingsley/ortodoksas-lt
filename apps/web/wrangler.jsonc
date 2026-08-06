@@ -35,7 +35,8 @@
   "r2_buckets": [
     {
       "binding": "MEDIA",
-      "bucket_name": "ortodoksas-studio-media"
+      "bucket_name": "ortodoksas-studio-media",
+      "remote": true
     }
   ],
   "d1_databases": [

@@ -28,6 +28,7 @@ import {
 import { SimpleEditor } from "@/components/tiptap-templates/simple/simple-editor";
 import { Button } from "@/components/ui/button";
 
+import { SectionCombobox } from "./section-combobox";
 import type { CatalogArticle, SourceArticle } from "./types";
 
 interface Props {
@@ -115,6 +116,7 @@ export const ArticleEditor = ({ article, onBack }: Props) => {
   const [saveState, setSaveState] = useState<
     "saved" | "dirty" | "saving" | "error"
   >("saved");
+  const [section, setSection] = useState(article.section);
   const [source, setSource] = useState<SourceArticle | null>(null);
   const [sourceReviewOpen, setSourceReviewOpen] = useState(false);
   const [status, setStatus] = useState<StoredArticle["status"]>("draft");
@@ -164,6 +166,7 @@ export const ArticleEditor = ({ article, onBack }: Props) => {
         setArticleId(canonical.id);
         setLanguage(canonical.language);
         setHeroMediaId(canonical.heroMediaId);
+        setSection(canonical.section);
         setStatus(canonical.status);
         setSummary(canonical.summary);
         setTitle(canonical.title);
@@ -213,6 +216,10 @@ export const ArticleEditor = ({ article, onBack }: Props) => {
     },
     []
   );
+  const updateSection = useCallback((value: string) => {
+    setSection(value);
+    setSaveState("dirty");
+  }, []);
 
   const loadRevisions = useCallback(async (id: string): Promise<void> => {
     const response = await fetch(`/api/articles/${id}/revisions`);
@@ -236,7 +243,7 @@ export const ArticleEditor = ({ article, onBack }: Props) => {
         labels: article.labels,
         language,
         publishedAt: article.published ? Date.parse(article.published) : null,
-        section: article.section,
+        section: section.trim(),
         slug: getSlug(article.path),
         status: nextStatus,
         summary,
@@ -294,6 +301,7 @@ export const ArticleEditor = ({ article, onBack }: Props) => {
       body,
       language,
       loadRevisions,
+      section,
       summary,
       source,
       title,
@@ -647,6 +655,12 @@ export const ArticleEditor = ({ article, onBack }: Props) => {
                 <option value="uk">Ukrainian</option>
                 <option value="be">Belarusian</option>
               </select>
+              <label htmlFor="review-section">Section</label>
+              <SectionCombobox
+                id="review-section"
+                onChange={updateSection}
+                value={section}
+              />
               <span className="review-inspector-label">Public path</span>
               <code>/{getSlug(article.path)}</code>
             </section>

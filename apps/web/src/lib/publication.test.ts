@@ -50,4 +50,23 @@ describe("selectHomepageArticles", () => {
     expect(result.lead?.path).toBe("/newer");
     expect(result.secondary[0]?.path).toBe("/older");
   });
+
+  it("fills four supporting placements and keeps later stories in the feed", () => {
+    const result = selectHomepageArticles([
+      article("/lead", "2026-08-06", "lead"),
+      article("/one", "2026-08-05"),
+      article("/two", "2026-08-04"),
+      article("/three", "2026-08-03"),
+      article("/four", "2026-08-02"),
+      article("/five", "2026-08-01"),
+    ]);
+
+    expect(result.secondary.map((entry) => entry.path)).toEqual([
+      "/one",
+      "/two",
+      "/three",
+      "/four",
+    ]);
+    expect(result.remaining.map((entry) => entry.path)).toEqual(["/five"]);
+  });
 });

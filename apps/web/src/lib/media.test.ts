@@ -31,8 +31,41 @@ describe("localizeMediaHtml", () => {
         `<img src="${issue.originalUrl}" alt="Archive evidence">`
       );
       expect(localized).toContain('class="archive-media-unavailable"');
-      expect(localized).toContain('aria-label="Archyvo vaizdas atkuriamas"');
+      expect(localized).toContain('aria-label="Vaizdas nepasiekiamas"');
       expect(localized).toContain("data-original-src=");
     }
+  });
+
+  it("removes the click target for a known unavailable media link", () => {
+    const queue = JSON.parse(
+      readFileSync(
+        resolve(process.cwd(), "public/media/unresolved.json"),
+        "utf8"
+      )
+    ) as { issues: Array<{ originalUrl: string }> };
+    const source = queue.issues[0]?.originalUrl;
+    expect(source).toBeTruthy();
+    const localized = localizeMediaHtml(
+      `<a href="${source}">Original image</a>`
+    );
+    expect(localized).toContain("archive-link-unavailable");
+    expect(localized).toContain("Nuoroda nepasiekiama");
+    expect(localized).not.toContain(`<a href="${source}"`);
+  });
+
+  it("removes the click target for a confirmed dead external link", () => {
+    const links = JSON.parse(
+      readFileSync(
+        resolve(process.cwd(), "public/media/unavailable-links.json"),
+        "utf8"
+      )
+    ) as { urls: string[] };
+    const [source] = links.urls;
+    const localized = localizeMediaHtml(
+      `<p><a href="${source}">Source</a></p>`
+    );
+    expect(localized).toContain("archive-link-unavailable");
+    expect(localized).toContain("Nuoroda nepasiekiama");
+    expect(localized).not.toContain(`<a href="${source}"`);
   });
 });

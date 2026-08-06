@@ -16,7 +16,6 @@ const locales = [
   ["uk", "UA", "/uk"],
   ["be", "BY", "/be"],
 ] as const;
-const pathname = Astro.url.pathname;
 const navItems = localized
   ? [
       [copy.home, `/${locale}`],
@@ -32,15 +31,14 @@ const navItems = localized
       ["Archyvas", "/archyvas"],
     ];
 const isActive = (href: string) =>
-  pathname === href ||
-  (href !== "/" && (pathname.startsWith(`${href}/`) || pathname.startsWith(href.replace(/\.html$/, ""))));
+  Astro.url.pathname === href ||
+  (href !== "/" && (Astro.url.pathname.startsWith(`${href}/`) || Astro.url.pathname.startsWith(href.replace(/\.html$/, ""))));
 ---
 
 <header class="site-header">
   <div class="site-width masthead">
     <a class="institution-brand" href={localized ? `/${locale}` : "/"} aria-label={`${copy.home} · ortodoksas.lt`}>
       <img class="patriarchate-emblem" src="/assets/brand/source/ecumenical-patriarchate-emblem.svg" alt="Visuotinis Patriarchatas" width="64" height="64" />
-      <span class="mobile-row-break" aria-hidden="true"></span>
       <InstitutionalLockup class="exarchate-lockup" />
     </a>
     <span class="masthead-rule" aria-hidden="true"></span>
@@ -49,7 +47,7 @@ const isActive = (href: string) =>
       <span>Bažnyčios leidinys</span>
     </a>
     <nav class="locale-switcher" aria-label={copy.languages}>
-      {locales.map(([code, label, href]) => <a class={pathname === href || (href !== "/" && pathname.startsWith(`${href}/`)) ? "active" : undefined} href={href} lang={code}>{label}</a>)}
+      {locales.map(([code, label, href]) => <a aria-current={code === locale ? "page" : undefined} class={code === locale ? "active" : undefined} href={href} lang={code}>{label}</a>)}
     </nav>
     <details class="mobile-menu">
       <summary aria-label="Atverti meniu"><span></span><span></span><span></span></summary>

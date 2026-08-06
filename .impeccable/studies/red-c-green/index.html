@@ -7,14 +7,14 @@
     <style>
       @font-face {
         font-family: "Playfair Display";
-        src: url("/assets/brand/fonts/PlayfairDisplay-Variable.ttf") format("truetype");
+        src: url("../../../apps/web/public/assets/brand/fonts/PlayfairDisplay-Variable.ttf") format("truetype");
         font-weight: 400 900;
         font-display: swap;
       }
 
       @font-face {
         font-family: Arimo;
-        src: url("/assets/brand/fonts/Arimo-Variable.ttf") format("truetype");
+        src: url("../../../apps/web/public/assets/brand/fonts/Arimo-Variable.ttf") format("truetype");
         font-weight: 400 700;
         font-display: swap;
       }
@@ -241,7 +241,7 @@
       .home-hero {
         position: relative;
         display: grid;
-        grid-template-columns: minmax(0, 1.45fr) minmax(330px, 1fr);
+        grid-template-columns: minmax(0, 1.35fr) minmax(420px, 1fr);
         gap: var(--space-4);
         padding-top: var(--space-3);
       }
@@ -256,7 +256,7 @@
       .section-label {
         margin-top: var(--space-105);
         color: var(--green);
-        font-size: 10px;
+        font-size: 0.6875rem;
         font-weight: 700;
         letter-spacing: 0.08em;
         text-transform: uppercase;
@@ -272,7 +272,7 @@
       h1 {
         max-width: 21ch;
         margin: 5px 0 9px;
-        font: 700 clamp(30px, 3vw, 39px) / 1.01 var(--font-editorial);
+        font: 700 clamp(2.375rem, 3.2vw, 2.875rem) / 1.01 var(--font-editorial);
         letter-spacing: -0.025em;
       }
 
@@ -280,25 +280,26 @@
         max-width: 66ch;
         margin-bottom: var(--space-105);
         color: var(--muted);
-        font: 14px/1.46 var(--font-editorial);
+        font: 1rem/1.5 var(--font-editorial);
       }
 
       .story-link {
         color: var(--green);
-        font-size: 10px;
+        font-size: 0.75rem;
         font-weight: 700;
       }
 
       .secondary-stories {
         display: grid;
-        grid-template-rows: repeat(3, minmax(0, 1fr));
+        grid-template-rows: repeat(4, auto);
+        align-content: space-between;
       }
 
       .secondary-story {
         display: grid;
-        grid-template-columns: 160px 1fr;
+        grid-template-columns: 175px 1fr;
         gap: var(--space-2);
-        align-items: center;
+        align-items: start;
         padding: var(--space-2) 0;
         border-bottom: 1px solid var(--line);
       }
@@ -308,7 +309,7 @@
       }
 
       .secondary-story img {
-        width: 160px;
+        width: 175px;
         height: auto;
         aspect-ratio: 1.45;
         object-fit: cover;
@@ -320,14 +321,14 @@
 
       .secondary-story h2 {
         margin: 4px 0 7px;
-        font: 700 20px/1.06 var(--font-editorial);
+        font: 700 1.25rem/1.08 var(--font-editorial);
         letter-spacing: -0.018em;
       }
 
       .secondary-story p {
-        margin-bottom: 7px;
+        margin-bottom: 0;
         color: var(--muted);
-        font: 11px/1.35 var(--font-editorial);
+        font: 0.875rem/1.4 var(--font-editorial);
       }
 
       .service-band {
@@ -346,14 +347,23 @@
         gap: var(--space-105);
         align-items: center;
         min-height: 72px;
-        padding: var(--space-105) var(--space-2);
+        padding: var(--space-105) calc(var(--space-4) + var(--space-1)) var(--space-105) var(--space-2);
         overflow: hidden;
         color: #fff;
-        border-left: 1px solid rgb(255 255 255 / 25%);
       }
 
-      .service-grid a:first-child {
-        border-left: 0;
+      .service-grid a:not(:last-child)::after {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 20px;
+        content: "";
+        background: url("../../../apps/web/public/assets/brand/production/canva-patterns/motif-gold-chain.png") center / cover;
+      }
+
+      body[data-motif="off"] .service-grid a::after {
+        display: none;
       }
 
       .service-grid a:hover {
@@ -362,8 +372,8 @@
 
       .service-grid svg {
         flex: 0 0 26px;
-        width: 26px;
-        height: 26px;
+        width: 34px;
+        height: 34px;
         fill: none;
         stroke: var(--gold);
         stroke-linecap: round;
@@ -689,6 +699,10 @@
       }
 
       @media (max-width: 639px) {
+        header {
+          border-bottom: 1px solid var(--green);
+        }
+
         .page {
           width: 100%;
         }
@@ -702,6 +716,7 @@
           gap: var(--space-1);
           min-height: 0;
           padding-block: var(--space-105) var(--space-1);
+          border-bottom: 0;
         }
 
         .patriarchate-emblem {
@@ -742,7 +757,7 @@
           width: 100%;
           padding-top: var(--space-1);
           margin: 2px 0 0;
-          border-top: 1px solid var(--line);
+          border-top: 0;
         }
 
         .menu-button {
@@ -781,11 +796,15 @@
         h1 {
           max-width: 19ch;
           margin-top: 5px;
-          font-size: clamp(32px, 8.2vw, 40px);
+          font-size: clamp(2.125rem, 9vw, 2.625rem);
         }
 
         .lead-copy {
-          display: none;
+          display: -webkit-box;
+          overflow: hidden;
+          font-size: 0.9375rem;
+          -webkit-box-orient: vertical;
+          -webkit-line-clamp: 3;
         }
 
         .lead-story .story-link {
@@ -810,12 +829,16 @@
           padding: var(--space-105) var(--space-2);
         }
 
-        .service-grid a:nth-child(odd) {
-          border-left: 0;
+        .service-grid a::after {
+          display: none;
         }
 
-        .service-grid a:nth-child(-n + 2) {
-          border-bottom: 1px solid rgb(255 255 255 / 25%);
+        .service-grid a:nth-child(odd)::after {
+          display: block;
+        }
+
+        .service-grid a:nth-child(n + 3) {
+          border-top: 1px solid var(--gold);
         }
 
         .lower {
@@ -938,8 +961,8 @@
       <header>
         <div class="site-width masthead">
           <a class="institution" href="#" aria-label="Visuotinis Patriarchatas ir Egzarchatas Lietuvoje">
-            <img class="patriarchate-emblem" src="/assets/brand/source/ecumenical-patriarchate-emblem.svg" alt="Visuotinis Patriarchatas" width="46" height="46" />
-            <span class="exarchate"><img src="/assets/brand/production/exarchate-crest-client.png" alt="" /><span class="exarchate-wordmark"><span>VISUOTINIO</span><span>PATRIARCHATO</span><span>EGZARCHATAS</span><span>LIETUVOJE</span></span></span>
+            <img class="patriarchate-emblem" src="../../../apps/web/public/assets/brand/source/ecumenical-patriarchate-emblem.svg" alt="Visuotinis Patriarchatas" width="46" height="46" />
+            <span class="exarchate"><img src="../../../apps/web/public/assets/brand/production/exarchate-crest-client.png" alt="" /><span class="exarchate-wordmark"><span>VISUOTINIO</span><span>PATRIARCHATO</span><span>EGZARCHATAS</span><span>LIETUVOJE</span></span></span>
           </a>
           <span class="identity-rule" aria-hidden="true"></span>
           <a class="publication" href="#"><strong>ortodoksas.lt</strong><span>Bažnyčios leidinys</span></a>
@@ -960,15 +983,16 @@
       <section class="site-width home-hero">
         <article class="lead-story">
           <img class="lead-image" src="../../mocks/assets/hero-antalija.jpg" alt="Antalijos bažnyčios interjeras" width="960" height="593" />
-          <div class="section-label">Aktualijos</div>
+          <div class="section-label">Naujienos</div>
           <h1>Antalijos krikščionių atgimimas: kaip vyskupas ramią „pensiją“ iškeitė į misiją</h1>
           <p class="lead-copy">Vos prieš kelerius metus Antalijos pakrantėse tebuvo saujelė stačiatikių bendruomenių, o šiandien čia veikia gyva parapija ir misija.</p>
           <a class="story-link" href="#">Skaityti daugiau →</a>
         </article>
         <div class="secondary-stories">
-          <article class="secondary-story"><img src="../../mocks/assets/card-bulgaria.jpg" alt="Bulgarijos vienuolynas" width="420" height="295" /><div><div class="section-label">Kelionės</div><h2>Bulgarijos šventosios vietos netoli kurortų</h2><p>Vienuolynai ir šventovės, kurias verta aplankyti.</p><a class="story-link" href="#">Skaityti →</a></div></article>
-          <article class="secondary-story"><img src="../../mocks/assets/card-pazaislis.jpg" alt="Pažaislio vienuolynas" width="420" height="295" /><div><div class="section-label">Piligrimystės</div><h2>Piligrimystė į Pažaislį (2026)</h2><p>Paskelbta data ir programa didžiajam piligriminiam žygiui.</p><a class="story-link" href="#">Skaityti →</a></div></article>
-          <article class="secondary-story"><img src="../../mocks/assets/card-sermon.jpg" alt="Pamaldos šventovėje" width="420" height="295" /><div><div class="section-label">Pamokslai</div><h2>Dievo artumas kasdienybėje</h2><p>Naujas sekmadienio pamokslas ir Evangelijos skaitiniai.</p><a class="story-link" href="#">Skaityti →</a></div></article>
+          <article class="secondary-story"><img src="../../mocks/assets/card-bulgaria.jpg" alt="Bulgarijos vienuolynas" width="420" height="295" /><div><div class="section-label">Bažnyčios gyvenimas</div><h2>Bulgarijos šventosios vietos netoli kurortų</h2><p>Vienuolynai ir šventovės, kurias verta aplankyti.</p></div></article>
+          <article class="secondary-story"><img src="../../mocks/assets/card-pazaislis.jpg" alt="Pažaislio vienuolynas" width="420" height="295" /><div><div class="section-label">Bažnyčios gyvenimas</div><h2>Piligrimystė į Pažaislį (2026)</h2><p>Paskelbta data ir programa didžiajam piligriminiam žygiui.</p></div></article>
+          <article class="secondary-story"><img src="../../mocks/assets/card-sermon.jpg" alt="Pamaldos šventovėje" width="420" height="295" /><div><div class="section-label">Pamokslai</div><h2>Dievo artumas kasdienybėje</h2><p>Naujas sekmadienio pamokslas ir Evangelijos skaitiniai.</p></div></article>
+          <article class="secondary-story"><img src="../../../apps/web/public/media/files/557dec1277f57aff1371fa403ee1994fe029d435a6644af1db60731fd71d7266.jpg" alt="Arkadijaus vienuolyno varpinė" width="1200" height="630" /><div><div class="section-label">Tikėjimas ir kultūra</div><h2>Arkadijaus vienuolynas – „Kretos Pilėnai“</h2><p>Jaudinanti ir įkvepianti vieta bei jos istorija.</p></div></article>
         </div>
       </section>
 
@@ -985,7 +1009,7 @@
         <div>
           <div class="section-heading"><h2>Naujausi straipsniai</h2><a href="#">Visi straipsniai →</a></div>
           <div class="cards">
-            <article class="card"><img src="../../mocks/assets/card-sermon.jpg" alt="Pamaldos šventovėje" width="420" height="295" /><div class="section-label">Dvasinis gyvenimas</div><h3>Pasninko prasmė šiandien: apsivalymas, ne dieta</h3></article>
+            <article class="card"><img src="../../mocks/assets/card-sermon.jpg" alt="Pamaldos šventovėje" width="420" height="295" /><div class="section-label">Tikėjimas ir kultūra</div><h3>Pasninko prasmė šiandien: apsivalymas, ne dieta</h3></article>
             <article class="card"><img src="../../mocks/assets/card-pazaislis.jpg" alt="Pažaislio vienuolynas" width="420" height="295" /><div class="section-label">Bažnyčios gyvenimas</div><h3>Piligrimystė, bendrystė ir kelias</h3></article>
             <article class="card"><img src="../../mocks/assets/card-bulgaria.jpg" alt="Bulgarijos vienuolynas" width="420" height="295" /><div class="section-label">Kelionės</div><h3>Šventosios vietos ir gyva tradicija</h3></article>
           </div>
@@ -995,7 +1019,7 @@
 
       <section class="site-width library-callout">
         <div><h2>Biblioteka</h2><p>Biblijos komentarai ir „Kasdienė duona“, natos, troparai ir kondakai, žodynas ir katekizmas.</p><a class="story-link" href="#">Atverti biblioteką →</a></div>
-        <img src="/assets/brand/production/canva-patterns/pattern-gold-grid.png" alt="" />
+        <img src="../../../apps/web/public/assets/brand/production/canva-patterns/pattern-gold-grid.png" alt="" />
       </section>
 
       <footer class="site-footer">
@@ -1012,6 +1036,7 @@
     </main>
 
     <script>
+      document.body.dataset.motif = new URLSearchParams(location.search).get("motif") === "off" ? "off" : "on";
       const menuButton = document.querySelector(".menu-button");
       const menuSheet = document.querySelector(".mobile-menu-sheet");
       const menuClose = document.querySelector(".sheet-close");

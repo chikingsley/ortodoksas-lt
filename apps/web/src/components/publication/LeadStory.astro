@@ -1,5 +1,5 @@
 ---
-import type { CatalogEntry } from "../../lib/publication";
+import { formatDate, type CatalogEntry } from "../../lib/publication";
 import EditorialImage from "../media/EditorialImage.astro";
 
 interface Props {
@@ -14,5 +14,6 @@ const { entry } = Astro.props;
   <div class="eyebrow">{entry.section}</div>
   <h1><a href={entry.path}>{entry.title}</a></h1>
   <p>{entry.description}</p>
+  {entry.published ? <div class="story-meta"><time datetime={entry.published}>{formatDate(entry.published)}</time></div> : null}
   <a class="story-link" href={entry.path}>Skaityti daugiau <span aria-hidden="true">→</span></a>
 </article>
