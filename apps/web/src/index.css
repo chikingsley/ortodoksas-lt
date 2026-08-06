@@ -1099,7 +1099,7 @@ svg {
 }
 .footer-exarchate {
   --institutional-lockup-width: 145px;
-  color: var(--white);
+  --institutional-lockup-color: var(--white);
 }
 .footer-brand {
   font:

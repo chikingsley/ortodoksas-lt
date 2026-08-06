@@ -1,5 +1,8 @@
+import { mediaAssets } from "@ortodoksas-lt/db";
+import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 
+import { getDatabase } from "../db";
 import type { StudioEnvironment } from "../types";
 
 const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
@@ -25,7 +28,7 @@ interface MediaRecord {
   id: string;
   mime_type: string;
   r2_key: string;
-  sha256: string;
+  sha256: string | null;
   width: number | null;
 }
 
@@ -74,6 +77,7 @@ const mediaResponse = (record: MediaRecord) => ({
 export const mediaRoutes = new Hono<StudioEnvironment>();
 
 mediaRoutes.post("/", async (context) => {
+  const database = getDatabase(context.env.DB);
   const contentLength = Number.parseInt(
     context.req.header("content-length") ?? "0",
     10
@@ -108,13 +112,24 @@ mediaRoutes.post("/", async (context) => {
 
   const digest = await crypto.subtle.digest("SHA-256", bytes);
   const sha256 = toHex(digest);
-  const existing = await context.env.DB.prepare(
-    `SELECT id, r2_key, file_name, mime_type, byte_size, width, height,
-      alt_text, caption, sha256, alt_text_provenance, caption_provenance
-    FROM media_assets WHERE sha256 = ? LIMIT 1`
-  )
-    .bind(sha256)
-    .first<MediaRecord>();
+  const [existing] = await database
+    .select({
+      alt_text: mediaAssets.altText,
+      alt_text_provenance: mediaAssets.altTextProvenance,
+      byte_size: mediaAssets.byteSize,
+      caption: mediaAssets.caption,
+      caption_provenance: mediaAssets.captionProvenance,
+      file_name: mediaAssets.fileName,
+      height: mediaAssets.height,
+      id: mediaAssets.id,
+      mime_type: mediaAssets.mimeType,
+      r2_key: mediaAssets.r2Key,
+      sha256: mediaAssets.sha256,
+      width: mediaAssets.width,
+    })
+    .from(mediaAssets)
+    .where(eq(mediaAssets.sha256, sha256))
+    .limit(1);
   if (existing) {
     return context.json({ media: mediaResponse(existing), reused: true });
   }
@@ -137,27 +152,18 @@ mediaRoutes.post("/", async (context) => {
     sha256: digest,
   });
 
-  await context.env.DB.prepare(
-    `INSERT INTO media_assets (
-      id, r2_key, file_name, mime_type, byte_size, width, height, alt_text,
-      caption, credit, created_at, updated_at, sha256, source_url, provenance,
-      alt_text_provenance, caption_provenance
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, '', '', '', ?, ?, ?, NULL,
-      'uploaded', 'missing', 'missing')`
-  )
-    .bind(
-      id,
-      key,
-      fileName,
-      mimeType,
-      bytes.byteLength,
-      imageInfo.width,
-      imageInfo.height,
-      timestamp,
-      timestamp,
-      sha256
-    )
-    .run();
+  await database.insert(mediaAssets).values({
+    byteSize: bytes.byteLength,
+    createdAt: timestamp,
+    fileName,
+    height: imageInfo.height,
+    id,
+    mimeType,
+    r2Key: key,
+    sha256,
+    updatedAt: timestamp,
+    width: imageInfo.width,
+  });
 
   const record: MediaRecord = {
     alt_text: "",
@@ -178,11 +184,16 @@ mediaRoutes.post("/", async (context) => {
 });
 
 mediaRoutes.get("/:id", async (context) => {
-  const record = await context.env.DB.prepare(
-    "SELECT r2_key, byte_size, mime_type FROM media_assets WHERE id = ? LIMIT 1"
-  )
-    .bind(context.req.param("id"))
-    .first<{ byte_size: number; mime_type: string; r2_key: string }>();
+  const database = getDatabase(context.env.DB);
+  const [record] = await database
+    .select({
+      byte_size: mediaAssets.byteSize,
+      mime_type: mediaAssets.mimeType,
+      r2_key: mediaAssets.r2Key,
+    })
+    .from(mediaAssets)
+    .where(eq(mediaAssets.id, context.req.param("id")))
+    .limit(1);
   if (!record) {
     return context.json({ error: "Media unavailable" }, 404);
   }

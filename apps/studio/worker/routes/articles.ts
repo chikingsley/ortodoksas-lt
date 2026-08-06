@@ -3,16 +3,22 @@ import {
   type TiptapDocument,
   updateArticleSchema,
 } from "@ortodoksas-lt/content/article";
-import { articleRevisions, articles } from "@ortodoksas-lt/db";
+import {
+  articleBaselines,
+  articleContentChanges,
+  articleRevisions,
+  articles,
+  mediaAliases,
+  mediaAssets,
+} from "@ortodoksas-lt/db";
 import {
   annotateArticleBody,
-  type ContentChange,
   getChangeKind,
 } from "@ortodoksas-lt/editor/provenance";
 import { getArticleQualityIssues } from "@ortodoksas-lt/editor/quality";
-import { desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, inArray } from "drizzle-orm";
 import { Hono } from "hono";
-import { getDatabase } from "../db";
+import { getDatabase, type StudioDatabase } from "../db";
 import type { StudioEnvironment } from "../types";
 
 export const articleRoutes = new Hono<StudioEnvironment>();
@@ -35,7 +41,7 @@ const textChangeProvenance = (
   beforeValue.trim() === afterValue ? "normalized" : "manual";
 
 const attachMediaRecords = async (
-  database: D1Database,
+  database: StudioDatabase,
   body: TiptapDocument
 ): Promise<TiptapDocument> => {
   const content = await Promise.all(
@@ -52,15 +58,12 @@ const attachMediaRecords = async (
         source,
         source.replace(WAYBACK_URL_PATTERN, "$1"),
       ].filter((value, index, values) => values.indexOf(value) === index);
-      const media = await database
-        .prepare(
-          `SELECT media_assets.id FROM media_aliases
-          JOIN media_assets ON media_assets.id = media_aliases.media_id
-          WHERE media_aliases.alias IN (${candidates.map(() => "?").join(", ")})
-          LIMIT 1`
-        )
-        .bind(...candidates)
-        .first<{ id: string }>();
+      const [media] = await database
+        .select({ id: mediaAssets.id })
+        .from(mediaAliases)
+        .innerJoin(mediaAssets, eq(mediaAssets.id, mediaAliases.mediaId))
+        .where(inArray(mediaAliases.alias, candidates))
+        .limit(1);
       if (!media) {
         return node;
       }
@@ -78,44 +81,19 @@ const attachMediaRecords = async (
 };
 
 const findMediaId = async (
-  database: D1Database,
+  database: StudioDatabase,
   source: string | undefined
 ): Promise<string | null> => {
   if (!source) {
     return null;
   }
-  const media = await database
-    .prepare("SELECT media_id FROM media_aliases WHERE alias = ? LIMIT 1")
-    .bind(source)
-    .first<{ media_id: string }>();
-  return media?.media_id ?? null;
+  const [media] = await database
+    .select({ mediaId: mediaAliases.mediaId })
+    .from(mediaAliases)
+    .where(eq(mediaAliases.alias, source))
+    .limit(1);
+  return media?.mediaId ?? null;
 };
-
-const changeStatements = (
-  database: D1Database,
-  articleId: string,
-  changes: ContentChange[],
-  timestamp: number
-): D1PreparedStatement[] =>
-  changes.map((change) =>
-    database
-      .prepare(
-        `INSERT INTO article_content_changes (
-          id, article_id, field_path, change_kind, provenance, before_value,
-          after_value, created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-      )
-      .bind(
-        crypto.randomUUID(),
-        articleId,
-        change.fieldPath,
-        change.changeKind,
-        change.provenance,
-        change.beforeValue,
-        change.afterValue,
-        timestamp
-      )
-  );
 
 articleRoutes.get("/", async (context) => {
   const database = getDatabase(context.env.DB);
@@ -164,41 +142,54 @@ articleRoutes.get("/source", async (context) => {
 });
 
 articleRoutes.get("/media-links/pending", async (context) => {
-  const result = await context.env.DB.prepare(
-    `SELECT DISTINCT articles.id
-    FROM articles, json_tree(articles.body_json) AS node
-    WHERE node.type = 'object'
-      AND json_extract(node.value, '$.type') = 'figure'
-      AND COALESCE(json_extract(node.value, '$.attrs.mediaId'), '') = ''
-    ORDER BY articles.id`
-  ).all<{ id: string }>();
-  return context.json({ articleIds: result.results.map((row) => row.id) });
+  const database = getDatabase(context.env.DB);
+  const rows = await database
+    .select({ bodyJson: articles.bodyJson, id: articles.id })
+    .from(articles)
+    .orderBy(asc(articles.id));
+  const articleIds = rows
+    .filter((row) => {
+      const body = JSON.parse(row.bodyJson) as TiptapDocument;
+      return (body.content ?? []).some(
+        (node) => node.type === "figure" && !node.attrs?.mediaId
+      );
+    })
+    .map((row) => row.id);
+  return context.json({ articleIds });
 });
 
 articleRoutes.post("/:id/media-links", async (context) => {
   const id = context.req.param("id");
-  const article = await context.env.DB.prepare(
-    "SELECT body_json FROM articles WHERE id = ? LIMIT 1"
-  )
-    .bind(id)
-    .first<{ body_json: string }>();
+  const database = getDatabase(context.env.DB);
+  const [article] = await database
+    .select({ bodyJson: articles.bodyJson })
+    .from(articles)
+    .where(eq(articles.id, id))
+    .limit(1);
   if (!article) {
     return context.json({ error: "Article unavailable" }, 404);
   }
-  const current = JSON.parse(article.body_json) as TiptapDocument;
-  const linked = await attachMediaRecords(context.env.DB, current);
+  const current = JSON.parse(article.bodyJson) as TiptapDocument;
+  const linked = await attachMediaRecords(database, current);
   const bodyJson = JSON.stringify(linked);
-  if (bodyJson === article.body_json) {
+  if (bodyJson === article.bodyJson) {
     return context.json({ changed: false, id });
   }
-  await context.env.DB.batch([
-    context.env.DB.prepare(
-      "UPDATE articles SET body_json = ?, updated_at = ? WHERE id = ?"
-    ).bind(bodyJson, Date.now(), id),
-    context.env.DB.prepare(
-      `UPDATE article_revisions SET body_json = ?
-      WHERE article_id = ? AND version = 1 AND body_json = ?`
-    ).bind(bodyJson, id, article.body_json),
+  await database.batch([
+    database
+      .update(articles)
+      .set({ bodyJson, updatedAt: Date.now() })
+      .where(eq(articles.id, id)),
+    database
+      .update(articleRevisions)
+      .set({ bodyJson })
+      .where(
+        and(
+          eq(articleRevisions.articleId, id),
+          eq(articleRevisions.version, 1),
+          eq(articleRevisions.bodyJson, article.bodyJson)
+        )
+      ),
   ]);
   return context.json({ changed: true, id });
 });
@@ -235,45 +226,67 @@ articleRoutes.get("/:id/revisions", async (context) => {
 
 articleRoutes.get("/:id/baseline", async (context) => {
   const articleId = context.req.param("id");
+  const database = getDatabase(context.env.DB);
   const [baseline, changes] = await Promise.all([
-    context.env.DB.prepare(
-      `SELECT title, summary, body_json, source_hash, converter_version, created_at
-      FROM article_baselines WHERE article_id = ? LIMIT 1`
-    )
-      .bind(articleId)
-      .first(),
-    context.env.DB.prepare(
-      `SELECT field_path, change_kind, provenance, before_value, after_value,
-        created_at FROM article_content_changes
-      WHERE article_id = ? ORDER BY field_path`
-    )
-      .bind(articleId)
-      .all(),
+    database
+      .select({
+        body_json: articleBaselines.bodyJson,
+        converter_version: articleBaselines.converterVersion,
+        created_at: articleBaselines.createdAt,
+        source_hash: articleBaselines.sourceHash,
+        summary: articleBaselines.summary,
+        title: articleBaselines.title,
+      })
+      .from(articleBaselines)
+      .where(eq(articleBaselines.articleId, articleId))
+      .limit(1)
+      .then((rows) => rows[0]),
+    database
+      .select({
+        after_value: articleContentChanges.afterValue,
+        before_value: articleContentChanges.beforeValue,
+        change_kind: articleContentChanges.changeKind,
+        created_at: articleContentChanges.createdAt,
+        field_path: articleContentChanges.fieldPath,
+        provenance: articleContentChanges.provenance,
+      })
+      .from(articleContentChanges)
+      .where(eq(articleContentChanges.articleId, articleId))
+      .orderBy(asc(articleContentChanges.fieldPath)),
   ]);
   if (!baseline) {
     return context.json({ error: "Conversion baseline unavailable" }, 404);
   }
-  return context.json({ baseline, changes: changes.results });
+  return context.json({ baseline, changes });
 });
 
 articleRoutes.post("/:id/revisions/:version/restore", async (context) => {
   const id = context.req.param("id");
   const version = Number.parseInt(context.req.param("version"), 10);
-  const revision = await context.env.DB.prepare(
-    `SELECT body_json, metadata_json FROM article_revisions
-    WHERE article_id = ? AND version = ? LIMIT 1`
-  )
-    .bind(id, version)
-    .first<{ body_json: string; metadata_json: string }>();
+  const database = getDatabase(context.env.DB);
+  const [revision] = await database
+    .select({
+      body_json: articleRevisions.bodyJson,
+      metadata_json: articleRevisions.metadataJson,
+    })
+    .from(articleRevisions)
+    .where(
+      and(
+        eq(articleRevisions.articleId, id),
+        eq(articleRevisions.version, version)
+      )
+    )
+    .limit(1);
   if (revision === null) {
     return context.json({ error: "Revision unavailable" }, 404);
   }
 
-  const latest = await context.env.DB.prepare(
-    "SELECT MAX(version) AS version FROM article_revisions WHERE article_id = ?"
-  )
-    .bind(id)
-    .first<{ version: number | null }>();
+  const [latest] = await database
+    .select({ version: articleRevisions.version })
+    .from(articleRevisions)
+    .where(eq(articleRevisions.articleId, id))
+    .orderBy(desc(articleRevisions.version))
+    .limit(1);
   const nextVersion = (latest?.version ?? 0) + 1;
   const metadata = JSON.parse(revision.metadata_json) as {
     language: string;
@@ -283,12 +296,15 @@ articleRoutes.post("/:id/revisions/:version/restore", async (context) => {
     title: string;
   };
   const timestamp = Date.now();
-  const baseline = await context.env.DB.prepare(
-    `SELECT title, summary, body_json FROM article_baselines
-    WHERE article_id = ? LIMIT 1`
-  )
-    .bind(id)
-    .first<{ body_json: string; summary: string; title: string }>();
+  const [baseline] = await database
+    .select({
+      body_json: articleBaselines.bodyJson,
+      summary: articleBaselines.summary,
+      title: articleBaselines.title,
+    })
+    .from(articleBaselines)
+    .where(eq(articleBaselines.articleId, id))
+    .limit(1);
   const restoredDocument = JSON.parse(revision.body_json) as TiptapDocument;
   const annotated = baseline
     ? annotateArticleBody(
@@ -319,38 +335,46 @@ articleRoutes.post("/:id/revisions/:version/restore", async (context) => {
     });
   }
   const restoredBodyJson = JSON.stringify(annotated.body);
-  await context.env.DB.batch([
-    context.env.DB.prepare(
-      `UPDATE articles SET language = ?, slug = ?, title = ?, summary = ?,
-       body_json = ?, status = ?, updated_at = ? WHERE id = ?`
-    ).bind(
-      metadata.language,
-      metadata.slug,
-      metadata.title,
-      metadata.summary,
-      restoredBodyJson,
-      metadata.status,
-      timestamp,
-      id
-    ),
-    context.env.DB.prepare(
-      `INSERT INTO article_revisions
-       (id, article_id, version, body_json, metadata_json, editor_id, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`
-    ).bind(
-      crypto.randomUUID(),
-      id,
-      nextVersion,
-      restoredBodyJson,
-      revision.metadata_json,
-      context.var.editor.id,
-      timestamp
-    ),
-    context.env.DB.prepare(
-      "DELETE FROM article_content_changes WHERE article_id = ?"
-    ).bind(id),
-    ...changeStatements(context.env.DB, id, changes, timestamp),
+  await database.batch([
+    database
+      .update(articles)
+      .set({
+        bodyJson: restoredBodyJson,
+        language: metadata.language,
+        slug: metadata.slug,
+        status: metadata.status,
+        summary: metadata.summary,
+        title: metadata.title,
+        updatedAt: timestamp,
+      })
+      .where(eq(articles.id, id)),
+    database.insert(articleRevisions).values({
+      articleId: id,
+      bodyJson: restoredBodyJson,
+      createdAt: timestamp,
+      editorId: context.var.editor.id,
+      id: crypto.randomUUID(),
+      metadataJson: revision.metadata_json,
+      version: nextVersion,
+    }),
+    database
+      .delete(articleContentChanges)
+      .where(eq(articleContentChanges.articleId, id)),
   ]);
+  if (changes.length > 0) {
+    await database.insert(articleContentChanges).values(
+      changes.map((change) => ({
+        afterValue: change.afterValue,
+        articleId: id,
+        beforeValue: change.beforeValue,
+        changeKind: change.changeKind,
+        createdAt: timestamp,
+        fieldPath: change.fieldPath,
+        id: crypto.randomUUID(),
+        provenance: change.provenance,
+      }))
+    );
+  }
 
   return context.json({
     article: { ...metadata, bodyJson: restoredBodyJson, id },
@@ -384,12 +408,10 @@ articleRoutes.post("/", async (context) => {
     title: parsed.data.title,
   };
   const annotated = annotateArticleBody(parsed.data.body, baseline.body);
-  const body = await attachMediaRecords(context.env.DB, annotated.body);
+  const database = getDatabase(context.env.DB);
+  const body = await attachMediaRecords(database, annotated.body);
   const bodyJson = JSON.stringify(body);
-  const heroMediaId = await findMediaId(
-    context.env.DB,
-    parsed.data.heroSourceUrl
-  );
+  const heroMediaId = await findMediaId(database, parsed.data.heroSourceUrl);
   const baselineBodyJson = JSON.stringify(baseline.body);
   const changes = [...annotated.changes];
   if (baseline.title !== parsed.data.title) {
@@ -411,76 +433,74 @@ articleRoutes.post("/", async (context) => {
     });
   }
 
-  await context.env.DB.batch([
-    context.env.DB.prepare(
-      `INSERT INTO articles (
-      id, translation_group_id, source_article_id, language, slug, title,
-      summary, body_json, hero_media_id, status, translation_kind, published_at,
-      kind, labels_json, section, source_capture, source_html, source_url,
-      created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-    ).bind(
-      id,
-      translationGroupId,
-      parsed.data.sourceArticleId ?? null,
-      parsed.data.language,
-      parsed.data.slug,
-      parsed.data.title,
-      parsed.data.summary,
+  await database.batch([
+    database.insert(articles).values({
       bodyJson,
+      createdAt: timestamp,
       heroMediaId,
-      parsed.data.status,
-      parsed.data.translationKind,
-      parsed.data.publishedAt ?? null,
-      parsed.data.kind,
-      JSON.stringify(parsed.data.labels),
-      parsed.data.section,
-      parsed.data.sourceCapture ?? null,
-      parsed.data.sourceHtml ?? null,
-      parsed.data.sourceUrl ?? null,
-      timestamp,
-      timestamp
-    ),
-    context.env.DB.prepare(
-      `INSERT INTO article_revisions (
-      id, article_id, version, body_json, metadata_json, editor_id, created_at
-    ) VALUES (?, ?, 1, ?, ?, ?, ?)`
-    ).bind(
-      crypto.randomUUID(),
       id,
+      kind: parsed.data.kind,
+      labelsJson: JSON.stringify(parsed.data.labels),
+      language: parsed.data.language,
+      publishedAt: parsed.data.publishedAt ?? null,
+      section: parsed.data.section,
+      slug: parsed.data.slug,
+      sourceArticleId: parsed.data.sourceArticleId ?? null,
+      sourceCapture: parsed.data.sourceCapture ?? null,
+      sourceHtml: parsed.data.sourceHtml ?? null,
+      sourceUrl: parsed.data.sourceUrl ?? null,
+      status: parsed.data.status,
+      summary: parsed.data.summary,
+      title: parsed.data.title,
+      translationGroupId,
+      translationKind: parsed.data.translationKind,
+      updatedAt: timestamp,
+    }),
+    database.insert(articleRevisions).values({
+      articleId: id,
       bodyJson,
-      JSON.stringify({
+      createdAt: timestamp,
+      editorId: context.var.editor.id,
+      id: crypto.randomUUID(),
+      metadataJson: JSON.stringify({
         language: parsed.data.language,
         slug: parsed.data.slug,
         status: parsed.data.status,
         summary: parsed.data.summary,
         title: parsed.data.title,
       }),
-      context.var.editor.id,
-      timestamp
-    ),
-    context.env.DB.prepare(
-      `INSERT INTO article_baselines (
-        article_id, title, summary, body_json, source_hash, converter_version,
-        created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?)`
-    ).bind(
-      id,
-      baseline.title,
-      baseline.summary,
-      baselineBodyJson,
-      await hashText(
+      version: 1,
+    }),
+    database.insert(articleBaselines).values({
+      articleId: id,
+      bodyJson: baselineBodyJson,
+      converterVersion: baseline.converterVersion,
+      createdAt: timestamp,
+      sourceHash: await hashText(
         JSON.stringify({
           body: baseline.body,
           summary: baseline.summary,
           title: baseline.title,
         })
       ),
-      baseline.converterVersion,
-      timestamp
-    ),
-    ...changeStatements(context.env.DB, id, changes, timestamp),
+      summary: baseline.summary,
+      title: baseline.title,
+    }),
   ]);
+  if (changes.length > 0) {
+    await database.insert(articleContentChanges).values(
+      changes.map((change) => ({
+        afterValue: change.afterValue,
+        articleId: id,
+        beforeValue: change.beforeValue,
+        changeKind: change.changeKind,
+        createdAt: timestamp,
+        fieldPath: change.fieldPath,
+        id: crypto.randomUUID(),
+        provenance: change.provenance,
+      }))
+    );
+  }
 
   return context.json(
     { heroMediaId, id, status: parsed.data.status, version: 1 },
@@ -513,42 +533,39 @@ articleRoutes.put("/:id", async (context) => {
       );
     }
   }
-  const existing = await context.env.DB.prepare(
-    `SELECT articles.id, articles.hero_media_id,
-      article_baselines.body_json AS baseline_body_json,
-      article_baselines.title AS baseline_title,
-      article_baselines.summary AS baseline_summary
-    FROM articles LEFT JOIN article_baselines
-      ON article_baselines.article_id = articles.id
-    WHERE articles.id = ? LIMIT 1`
-  )
-    .bind(id)
-    .first<{
-      baseline_body_json: string | null;
-      baseline_summary: string | null;
-      baseline_title: string | null;
-      hero_media_id: string | null;
-      id: string;
-    }>();
+  const database = getDatabase(context.env.DB);
+  const [existing] = await database
+    .select({
+      baseline_body_json: articleBaselines.bodyJson,
+      baseline_summary: articleBaselines.summary,
+      baseline_title: articleBaselines.title,
+      hero_media_id: articles.heroMediaId,
+      id: articles.id,
+    })
+    .from(articles)
+    .leftJoin(articleBaselines, eq(articleBaselines.articleId, articles.id))
+    .where(eq(articles.id, id))
+    .limit(1);
   if (existing === null) {
     return context.json({ error: "Article unavailable" }, 404);
   }
 
-  const latestRevision = await context.env.DB.prepare(
-    "SELECT MAX(version) AS version FROM article_revisions WHERE article_id = ?"
-  )
-    .bind(id)
-    .first<{ version: number | null }>();
+  const [latestRevision] = await database
+    .select({ version: articleRevisions.version })
+    .from(articleRevisions)
+    .where(eq(articleRevisions.articleId, id))
+    .orderBy(desc(articleRevisions.version))
+    .limit(1);
   const version = (latestRevision?.version ?? 0) + 1;
   const timestamp = Date.now();
   const baselineBody = existing.baseline_body_json
     ? (JSON.parse(existing.baseline_body_json) as TiptapDocument)
     : parsed.data.body;
   const annotated = annotateArticleBody(parsed.data.body, baselineBody);
-  const body = await attachMediaRecords(context.env.DB, annotated.body);
+  const body = await attachMediaRecords(database, annotated.body);
   const bodyJson = JSON.stringify(body);
   const heroMediaId =
-    (await findMediaId(context.env.DB, parsed.data.heroSourceUrl)) ??
+    (await findMediaId(database, parsed.data.heroSourceUrl)) ??
     existing.hero_media_id;
   const changes = [...annotated.changes];
   if (
@@ -589,46 +606,52 @@ articleRoutes.put("/:id", async (context) => {
     title: parsed.data.title,
   });
 
-  await context.env.DB.batch([
-    context.env.DB.prepare(
-      `UPDATE articles SET language = ?, slug = ?, title = ?, summary = ?,
-        body_json = ?, hero_media_id = ?, status = ?, translation_kind = ?,
-        published_at = ?, kind = ?, labels_json = ?, section = ?, updated_at = ?
-      WHERE id = ?`
-    ).bind(
-      parsed.data.language,
-      parsed.data.slug,
-      parsed.data.title,
-      parsed.data.summary,
+  await database.batch([
+    database
+      .update(articles)
+      .set({
+        bodyJson,
+        heroMediaId,
+        kind: parsed.data.kind,
+        labelsJson: JSON.stringify(parsed.data.labels),
+        language: parsed.data.language,
+        publishedAt: parsed.data.publishedAt ?? null,
+        section: parsed.data.section,
+        slug: parsed.data.slug,
+        status: parsed.data.status,
+        summary: parsed.data.summary,
+        title: parsed.data.title,
+        translationKind: parsed.data.translationKind,
+        updatedAt: timestamp,
+      })
+      .where(eq(articles.id, id)),
+    database.insert(articleRevisions).values({
+      articleId: id,
       bodyJson,
-      heroMediaId,
-      parsed.data.status,
-      parsed.data.translationKind,
-      parsed.data.publishedAt ?? null,
-      parsed.data.kind,
-      JSON.stringify(parsed.data.labels),
-      parsed.data.section,
-      timestamp,
-      id
-    ),
-    context.env.DB.prepare(
-      `INSERT INTO article_revisions (
-        id, article_id, version, body_json, metadata_json, editor_id, created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?)`
-    ).bind(
-      crypto.randomUUID(),
-      id,
-      version,
-      bodyJson,
+      createdAt: timestamp,
+      editorId: context.var.editor.id,
+      id: crypto.randomUUID(),
       metadataJson,
-      context.var.editor.id,
-      timestamp
-    ),
-    context.env.DB.prepare(
-      "DELETE FROM article_content_changes WHERE article_id = ?"
-    ).bind(id),
-    ...changeStatements(context.env.DB, id, changes, timestamp),
+      version,
+    }),
+    database
+      .delete(articleContentChanges)
+      .where(eq(articleContentChanges.articleId, id)),
   ]);
+  if (changes.length > 0) {
+    await database.insert(articleContentChanges).values(
+      changes.map((change) => ({
+        afterValue: change.afterValue,
+        articleId: id,
+        beforeValue: change.beforeValue,
+        changeKind: change.changeKind,
+        createdAt: timestamp,
+        fieldPath: change.fieldPath,
+        id: crypto.randomUUID(),
+        provenance: change.provenance,
+      }))
+    );
+  }
 
   return context.json({ heroMediaId, id, status: parsed.data.status, version });
 });
