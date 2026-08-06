@@ -35,7 +35,7 @@ export const StudioSidebar = () => (
   <aside className="studio-sidebar">
     <div className="studio-brand">
       <div>
-        <strong>ortodoksas.lt</strong>
+        <strong>Ortodoksas.lt</strong>
         <span>Studio</span>
       </div>
     </div>
