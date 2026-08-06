@@ -99,7 +99,7 @@ svg {
   justify-content: start;
   min-height: 94px;
   padding-block: 8px;
-  border-bottom: 0;
+  border-bottom: 1px solid var(--green);
 }
 .institution-brand {
   display: flex;
@@ -169,7 +169,7 @@ svg {
   display: none;
 }
 .primary-nav {
-  border-bottom: 0;
+  border-bottom: 1px solid #9ca29e;
 }
 .nav-scroll {
   display: flex;
@@ -340,10 +340,8 @@ svg {
   top: 22px;
   right: -27px;
   width: 18px;
-  height: 560px;
-  background:
-    url("/assets/brand/production/canva-patterns/motif-green-chain.png") center
-    top / 18px 36px repeat-y;
+  height: 500px;
+  object-fit: fill;
 }
 
 .service-band {
@@ -362,14 +360,18 @@ svg {
   align-items: center;
   min-height: 66px;
   padding: 11px 20px;
-  overflow: visible;
+  overflow: hidden;
+  border-right: 1px solid rgba(255, 255, 255, 0.3);
+}
+.service-grid > a:first-child {
+  border-left: 1px solid rgba(255, 255, 255, 0.3);
 }
 .service-grid > a:hover {
   background: var(--green-deep);
 }
 .service-icon {
-  width: 34px;
-  height: 34px;
+  width: 30px;
+  height: 30px;
   color: var(--gold);
 }
 .service-grid strong,
@@ -391,14 +393,11 @@ svg {
 .service-grid > a > img {
   position: absolute;
   top: 0;
-  right: -10px;
-  z-index: 2;
-  width: 20px;
+  right: -9px;
+  width: 18px;
   height: 100%;
   object-fit: fill;
-}
-.service-grid > a:last-child > img {
-  display: none;
+  opacity: 0.42;
 }
 
 .mobile-secondary-list {
@@ -416,8 +415,9 @@ svg {
   gap: 20px;
   align-items: flex-end;
   justify-content: space-between;
-  padding-bottom: 0;
+  padding-bottom: 11px;
   margin-bottom: 20px;
+  border-bottom: 2px solid var(--green);
 }
 .section-heading h2 {
   margin: 0;
@@ -493,6 +493,7 @@ svg {
   font-size: 11px;
   color: #444944;
   text-transform: capitalize;
+  border-bottom: 1px solid var(--line);
 }
 .archive-panel > a:hover {
   color: var(--green);
@@ -507,7 +508,7 @@ svg {
   padding-block: 48px;
 }
 .section-row {
-  border-top: 0;
+  border-top: 1px solid var(--line);
 }
 .section-articles {
   display: grid;
@@ -584,7 +585,7 @@ svg {
   top: -35px;
   right: -20px;
   width: 300px;
-  opacity: 0.9;
+  opacity: 0.55;
 }
 
 .article-breadcrumbs {
@@ -767,6 +768,7 @@ svg {
   gap: 8px;
   padding-top: 24px;
   margin-top: 44px;
+  border-top: 1px solid var(--line);
 }
 .article-tags span {
   padding: 7px 11px;
@@ -867,7 +869,7 @@ svg {
   white-space: nowrap;
 }
 .archive-list {
-  border-top: 0;
+  border-top: 2px solid var(--green);
 }
 .archive-list article {
   display: grid;
@@ -957,6 +959,7 @@ svg {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 0 44px;
+  border-top: 2px solid var(--green);
 }
 .search-results article {
   padding: 25px 0;
@@ -1059,6 +1062,7 @@ svg {
   color: var(--green);
   text-transform: uppercase;
   letter-spacing: 0.1em;
+  border-top: 1px solid var(--line);
 }
 .category-page {
   padding-bottom: 70px;
@@ -1142,6 +1146,7 @@ svg {
   color: #8fb0a8;
   text-transform: uppercase;
   letter-spacing: 0.1em;
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 :focus-visible {
