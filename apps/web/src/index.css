@@ -99,7 +99,7 @@ svg {
   justify-content: start;
   min-height: 94px;
   padding-block: 8px;
-  border-bottom: 1px solid var(--green);
+  border-bottom: 0;
 }
 .institution-brand {
   display: flex;
@@ -169,7 +169,7 @@ svg {
   display: none;
 }
 .primary-nav {
-  border-bottom: 1px solid #9ca29e;
+  border-bottom: 0;
 }
 .nav-scroll {
   display: flex;
@@ -212,7 +212,7 @@ svg {
   display: grid;
   grid-template-columns: minmax(0, 1.34fr) minmax(390px, 1fr);
   gap: 32px;
-  padding-block: 22px 26px;
+  padding-block: 28px 26px;
 }
 .lead-image,
 .secondary-image,
@@ -601,7 +601,7 @@ svg {
 }
 .reading-column {
   width: min(790px, calc(100% - 48px));
-  margin: 36px auto 70px;
+  margin: 28px auto 70px;
 }
 .article-header {
   text-align: center;
@@ -796,7 +796,7 @@ svg {
 
 .page-intro {
   max-width: 800px;
-  padding: 48px 0 32px;
+  padding: 28px 0 32px;
 }
 .page-intro.compact {
   padding-bottom: 22px;
@@ -1276,7 +1276,7 @@ svg {
     width: 100%;
     padding-block: 10px 8px;
     margin: 10px 0 0;
-    border-top: 1px solid var(--green);
+    border-top: 0;
   }
   .locale-switcher a {
     display: inline-flex;
@@ -1337,7 +1337,7 @@ svg {
   .home-hero {
     gap: 22px;
     width: 100%;
-    padding-top: 0;
+    padding-top: 20px;
   }
   .lead-image {
     aspect-ratio: 1.35;
@@ -1477,10 +1477,10 @@ svg {
   }
   .reading-column {
     width: min(100% - 28px, 790px);
-    margin-top: 24px;
+    margin-top: 20px;
   }
   .page-intro {
-    padding: 32px 0 24px;
+    padding: 20px 0 24px;
   }
   .language-shell.language-empty {
     padding-block: 32px 80px;
