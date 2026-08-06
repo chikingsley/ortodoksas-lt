@@ -1,61 +1,46 @@
 import {
   ArchiveRestore,
   BookOpenText,
-  ChevronDown,
   FileText,
   Globe2,
   Home,
   Image,
   Languages,
-  PanelLeftClose,
 } from "lucide-react";
 
 const navGroups = [
   {
     items: [
-      { active: true, icon: BookOpenText, label: "Straipsniai" },
-      { icon: FileText, label: "Puslapiai" },
-      { icon: Image, label: "Medija" },
+      { active: true, icon: BookOpenText, label: "Articles" },
+      { icon: FileText, label: "Pages" },
+      { icon: Image, label: "Media" },
     ],
-    label: "Turinys",
+    label: "Content",
   },
   {
     items: [
-      { icon: Home, label: "Pagrindinis puslapis" },
-      { icon: Languages, label: "Vertimai" },
-      { icon: Globe2, label: "Publikavimas" },
+      { icon: Home, label: "Homepage" },
+      { icon: Languages, label: "Translations" },
+      { icon: Globe2, label: "Publishing" },
     ],
-    label: "Leidyba",
+    label: "Publication",
   },
   {
-    items: [{ icon: ArchiveRestore, label: "Archyvo perkėlimas" }],
-    label: "Sistema",
+    items: [{ icon: ArchiveRestore, label: "Archive migration" }],
+    label: "System",
   },
 ] as const;
 
 export const StudioSidebar = () => (
   <aside className="studio-sidebar">
     <div className="studio-brand">
-      <img
-        alt="Lietuvos egzarchato herbas"
-        height="42"
-        src="/brand/exarchate-crest.png"
-        width="36"
-      />
       <div>
         <strong>ortodoksas.lt</strong>
-        <span>Redakcija</span>
+        <span>Studio</span>
       </div>
-      <button
-        aria-label="Suskleisti navigaciją"
-        className="icon-button"
-        type="button"
-      >
-        <PanelLeftClose />
-      </button>
     </div>
 
-    <nav aria-label="Redakcijos navigacija" className="studio-nav">
+    <nav aria-label="Editorial navigation" className="studio-nav">
       {navGroups.map((group) => (
         <div className="nav-group" key={group.label}>
           <p>{group.label}</p>
@@ -76,13 +61,12 @@ export const StudioSidebar = () => (
       ))}
     </nav>
 
-    <button className="editor-identity" type="button">
+    <div className="editor-identity">
       <span className="avatar">SR</span>
       <span>
-        <strong>Simonas Redaktorius</strong>
-        <small>Vyriausiasis redaktorius</small>
+        <strong>Development editor</strong>
+        <small>Editor access</small>
       </span>
-      <ChevronDown />
-    </button>
+    </div>
   </aside>
 );

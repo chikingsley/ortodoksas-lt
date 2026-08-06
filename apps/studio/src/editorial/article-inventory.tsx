@@ -6,9 +6,17 @@ import {
   CircleCheck,
   FilePlus2,
   Filter,
+  House,
+  Save,
   Search,
 } from "lucide-react";
-import { type ChangeEvent, useCallback, useMemo, useState } from "react";
+import {
+  type ChangeEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 import { Button } from "@/components/ui/button";
 
@@ -26,7 +34,8 @@ interface ArticleRowProps {
 }
 
 const PAGE_SIZE = 30;
-const dateFormatter = new Intl.DateTimeFormat("lt-LT", {
+const SUPPORTING_SLOTS = ["first", "second", "third"] as const;
+const dateFormatter = new Intl.DateTimeFormat("en-US", {
   day: "2-digit",
   month: "short",
   year: "numeric",
@@ -45,7 +54,7 @@ const ArticleRow = ({ article, onOpen }: ArticleRowProps) => {
   return (
     <tr>
       <td className="checkbox-cell">
-        <input aria-label={`Pažymėti ${article.title}`} type="checkbox" />
+        <input aria-label={`Select ${article.title}`} type="checkbox" />
       </td>
       <td>
         <button className="article-link" onClick={openArticle} type="button">
@@ -66,11 +75,11 @@ const ArticleRow = ({ article, onOpen }: ArticleRowProps) => {
         <span className="language-code">{getLanguage(article.path)}</span>
       </td>
       <td>
-        <span className="section-label">{article.section || "Kita"}</span>
+        <span className="section-label">{article.section || "Other"}</span>
       </td>
       <td>
         <span className="status-label">
-          <CircleCheck /> Publikuota
+          <CircleCheck /> {article.status}
         </span>
       </td>
       <td className="date-cell">
@@ -84,8 +93,40 @@ const ArticleRow = ({ article, onOpen }: ArticleRowProps) => {
 
 export const ArticleInventory = ({ articles, catalogState, onOpen }: Props) => {
   const [query, setQuery] = useState("");
-  const [section, setSection] = useState("Visi skyriai");
+  const [section, setSection] = useState("All sections");
   const [page, setPage] = useState(1);
+  const [homepageOpen, setHomepageOpen] = useState(false);
+  const [leadId, setLeadId] = useState("");
+  const [secondaryIds, setSecondaryIds] = useState(["", "", ""]);
+  const [homepageState, setHomepageState] = useState<
+    "idle" | "saving" | "saved" | "error"
+  >("idle");
+
+  useEffect(() => {
+    fetch("/api/homepage")
+      .then((response) => response.json())
+      .then(
+        (data: {
+          placements: Array<{
+            articleId: string;
+            position: number;
+            slot: string;
+          }>;
+        }) => {
+          const lead = data.placements.find(
+            (placement) => placement.slot === "lead"
+          );
+          const secondary = data.placements
+            .filter((placement) => placement.slot === "secondary")
+            .sort((left, right) => left.position - right.position);
+          setLeadId(lead?.articleId ?? "");
+          setSecondaryIds(
+            [0, 1, 2].map((index) => secondary[index]?.articleId ?? "")
+          );
+        }
+      )
+      .catch(() => setHomepageState("error"));
+  }, []);
 
   const inventoryArticles = useMemo(
     () =>
@@ -109,7 +150,7 @@ export const ArticleInventory = ({ articles, catalogState, onOpen }: Props) => {
     const normalized = query.trim().toLocaleLowerCase("lt");
     return inventoryArticles.filter((article) => {
       const matchesSection =
-        section === "Visi skyriai" || article.section === section;
+        section === "All sections" || article.section === section;
       const matchesQuery =
         normalized.length === 0 ||
         `${article.title} ${article.description} ${article.labels.join(" ")}`
@@ -142,39 +183,138 @@ export const ArticleInventory = ({ articles, catalogState, onOpen }: Props) => {
     () => setPage((value) => Math.min(pageCount, value + 1)),
     [pageCount]
   );
+  const toggleHomepage = useCallback(
+    () => setHomepageOpen((open) => !open),
+    []
+  );
+  const updateLead = useCallback((event: ChangeEvent<HTMLSelectElement>) => {
+    setLeadId(event.target.value);
+    setHomepageState("idle");
+  }, []);
+  const updateSecondary = useCallback(
+    (event: ChangeEvent<HTMLSelectElement>) => {
+      const position = Number.parseInt(
+        event.target.dataset.position ?? "0",
+        10
+      );
+      setSecondaryIds((current) =>
+        current.map((value, index) =>
+          index === position ? event.target.value : value
+        )
+      );
+      setHomepageState("idle");
+    },
+    []
+  );
+  const saveHomepage = useCallback(async () => {
+    setHomepageState("saving");
+    const response = await fetch("/api/homepage", {
+      body: JSON.stringify({
+        leadId: leadId || null,
+        secondaryIds: secondaryIds.filter(Boolean),
+      }),
+      headers: { "content-type": "application/json" },
+      method: "PUT",
+    });
+    setHomepageState(response.ok ? "saved" : "error");
+  }, [leadId, secondaryIds]);
 
   return (
     <div className="inventory-page">
       <header className="page-header">
         <div>
-          <p className="eyebrow">Turinys</p>
+          <p className="eyebrow">Content</p>
           <div className="title-row">
-            <h1>Straipsniai</h1>
+            <h1>Articles</h1>
             <span className="count-pill">
-              {inventoryArticles.length.toLocaleString("lt-LT")}
+              {inventoryArticles.length.toLocaleString("en-US")}
             </span>
           </div>
           <p>
-            Visas publikacijos archyvas ir dabartinis redakcinis darbas vienoje
-            vietoje.
+            The complete publication archive and current editorial work in one
+            place.
           </p>
         </div>
-        <Button className="primary-action" size="lg">
-          <FilePlus2 data-icon="inline-start" /> Naujas straipsnis
-        </Button>
+        <div className="page-header-actions">
+          <Button onClick={toggleHomepage} size="lg" variant="outline">
+            <House data-icon="inline-start" /> Homepage layout
+          </Button>
+          <Button className="primary-action" size="lg">
+            <FilePlus2 data-icon="inline-start" /> New article
+          </Button>
+        </div>
       </header>
 
-      <section aria-label="Straipsnių inventorius" className="inventory-panel">
+      {homepageOpen ? (
+        <section aria-label="Homepage layout" className="homepage-editor">
+          <div>
+            <strong>Homepage placements</strong>
+            <span>
+              Choose one lead story and up to three supporting stories.
+            </span>
+          </div>
+          <label>
+            Lead story
+            <select onChange={updateLead} value={leadId}>
+              <option value="">Automatic latest story</option>
+              {inventoryArticles.map((article) => (
+                <option key={article.id} value={article.id}>
+                  {article.title}
+                </option>
+              ))}
+            </select>
+          </label>
+          {SUPPORTING_SLOTS.map((slot, position) => (
+            <label key={slot}>
+              Supporting story {position + 1}
+              <select
+                data-position={position}
+                onChange={updateSecondary}
+                value={secondaryIds[position]}
+              >
+                <option value="">Automatic</option>
+                {inventoryArticles.map((article) => (
+                  <option key={article.id} value={article.id}>
+                    {article.title}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ))}
+          <Button disabled={homepageState === "saving"} onClick={saveHomepage}>
+            <Save /> {homepageState === "saving" ? "Saving…" : "Save layout"}
+          </Button>
+          {homepageState === "saved" ? (
+            <span>Homepage layout saved.</span>
+          ) : null}
+          {homepageState === "error" ? (
+            <span>Homepage layout request failed.</span>
+          ) : null}
+        </section>
+      ) : null}
+
+      <section aria-label="Article inventory" className="inventory-panel">
         <div className="status-tabs" role="tablist">
           <button aria-selected="true" role="tab" type="button">
-            Visi <span>{inventoryArticles.length.toLocaleString("lt-LT")}</span>
+            All <span>{inventoryArticles.length.toLocaleString("en-US")}</span>
           </button>
           <button role="tab" type="button">
-            Publikuoti{" "}
-            <span>{inventoryArticles.length.toLocaleString("lt-LT")}</span>
+            Published{" "}
+            <span>
+              {inventoryArticles
+                .filter((article) => article.status === "published")
+                .length.toLocaleString("en-US")}
+            </span>
           </button>
           <button role="tab" type="button">
-            Juodraščiai <span>0</span>
+            Drafts{" "}
+            <span>
+              {
+                inventoryArticles.filter(
+                  (article) => article.status === "draft"
+                ).length
+              }
+            </span>
           </button>
         </div>
 
@@ -182,18 +322,18 @@ export const ArticleInventory = ({ articles, catalogState, onOpen }: Props) => {
           <label className="search-field">
             <Search />
             <input
-              aria-label="Ieškoti straipsnių"
+              aria-label="Search articles"
               onChange={updateQuery}
-              placeholder="Ieškoti pagal pavadinimą, tekstą ar žymą…"
+              placeholder="Search by title, text, or tag…"
               type="search"
               value={query}
             />
             <kbd>⌘ K</kbd>
           </label>
           <label className="select-field">
-            <span className="sr-only">Skyrius</span>
+            <span className="sr-only">Section</span>
             <select onChange={updateSection} value={section}>
-              <option>Visi skyriai</option>
+              <option>All sections</option>
               {sections.map((item) => (
                 <option key={item}>{item}</option>
               ))}
@@ -201,7 +341,7 @@ export const ArticleInventory = ({ articles, catalogState, onOpen }: Props) => {
             <ChevronsUpDown />
           </label>
           <button className="tool-button" type="button">
-            <Filter /> Daugiau filtrų
+            <Filter /> More filters
           </button>
         </div>
 
@@ -210,17 +350,17 @@ export const ArticleInventory = ({ articles, catalogState, onOpen }: Props) => {
             <thead>
               <tr>
                 <th className="checkbox-cell">
-                  <input aria-label="Pažymėti visus" type="checkbox" />
+                  <input aria-label="Select all" type="checkbox" />
                 </th>
                 <th>
                   <button type="button">
-                    Straipsnis <ArrowDown />
+                    Article <ArrowDown />
                   </button>
                 </th>
-                <th>Kalba</th>
-                <th>Skyrius</th>
-                <th>Būsena</th>
-                <th>Publikuota</th>
+                <th>Language</th>
+                <th>Section</th>
+                <th>Status</th>
+                <th>Published</th>
               </tr>
             </thead>
             <tbody>
@@ -234,25 +374,23 @@ export const ArticleInventory = ({ articles, catalogState, onOpen }: Props) => {
             </tbody>
           </table>
           {catalogState === "loading" ? (
-            <div className="table-state">Įkeliamas visas archyvas…</div>
+            <div className="table-state">Loading the complete archive…</div>
           ) : null}
           {catalogState === "error" ? (
             <div className="table-state error">
-              Archyvo įkelti nepavyko. Atnaujinkite puslapį.
+              The archive could not be loaded. Refresh the page.
             </div>
           ) : null}
           {catalogState === "ready" && visible.length === 0 ? (
-            <div className="table-state">
-              Pagal šiuos filtrus straipsnių nerasta.
-            </div>
+            <div className="table-state">No articles match these filters.</div>
           ) : null}
         </div>
 
         <footer className="table-footer">
           <p>
-            Rodomi {filtered.length === 0 ? 0 : (safePage - 1) * PAGE_SIZE + 1}–
-            {Math.min(safePage * PAGE_SIZE, filtered.length)} iš{" "}
-            {filtered.length.toLocaleString("lt-LT")}
+            Showing {filtered.length === 0 ? 0 : (safePage - 1) * PAGE_SIZE + 1}
+            –{Math.min(safePage * PAGE_SIZE, filtered.length)} iš{" "}
+            {filtered.length.toLocaleString("en-US")}
           </p>
           <div>
             <button

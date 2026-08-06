@@ -1,0 +1,14 @@
+{
+  "name": "@ortodoksas-lt/content",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./article": "./article.ts",
+    "./media-url": "./media-url.ts"
+  },
+  "dependencies": {
+    "@tiptap/core": "^3.29.2",
+    "zod": "^4.4.3"
+  }
+}

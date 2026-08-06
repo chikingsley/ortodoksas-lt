@@ -36,8 +36,9 @@ pnpm studio:down
 
 - `src` contains the editor-facing React application.
 - `worker` contains API routes, data access, publishing, conversion, and media operations.
-- `shared` contains contracts used by the browser editor and Worker renderer.
-- `migrations` contains the D1 schema history.
+- `../../packages/content` contains contracts shared by both applications.
+- `../../packages/editor` contains the shared Tiptap schema and renderer.
+- `../../packages/db` contains the Drizzle schema and D1 migration history.
 - `test` runs inside the Workers runtime with the real Wrangler configuration.
 
 The first implementation phase establishes corpus fixtures, automatic article-quality checks, semantic Tiptap figures, article persistence, revisions, media uploads, and publishing behavior. Each Tiptap extension corresponds to content observed in the publication archive.

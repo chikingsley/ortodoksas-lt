@@ -1,0 +1,54 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "ortodoksas-lt-web",
+  "main": "./worker/index.ts",
+  "compatibility_date": "2026-08-05",
+  "compatibility_flags": ["nodejs_compat"],
+  "vars": {
+    "ENVIRONMENT": "development"
+  },
+  "assets": {
+    "binding": "ASSETS",
+    "directory": "./dist",
+    "html_handling": "none",
+    "not_found_handling": "404-page",
+    "run_worker_first": [
+      "/api/*",
+      "/media/files/*",
+      "/",
+      "/en",
+      "/en/*",
+      "/ru",
+      "/ru/*",
+      "/uk",
+      "/uk/*",
+      "/be",
+      "/be/*",
+      "/archyvas",
+      "/archyvas/",
+      "/paieska",
+      "/paieska/",
+      "/tema/*",
+      "/404"
+    ]
+  },
+  "r2_buckets": [
+    {
+      "binding": "MEDIA",
+      "bucket_name": "ortodoksas-studio-media"
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "ortodoksas-studio",
+      "database_id": "989ce1b7-0555-47e3-a635-0e79cdf21e07",
+      "migrations_dir": "../../packages/db/migrations"
+    }
+  ],
+  "observability": {
+    "enabled": true,
+    "logs": { "head_sampling_rate": 1 },
+    "traces": { "enabled": true, "head_sampling_rate": 0.01 }
+  }
+}

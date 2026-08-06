@@ -1,5 +1,5 @@
+import { Figure } from "@ortodoksas-lt/editor/figure";
 import { ReactNodeViewRenderer } from "@tiptap/react";
-import { Figure } from "../../../../shared/editor/figure";
 
 import { FigureNodeView } from "./figure-node";
 

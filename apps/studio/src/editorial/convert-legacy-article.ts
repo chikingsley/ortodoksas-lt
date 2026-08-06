@@ -1,12 +1,12 @@
-import { generateJSON } from "@tiptap/html";
 import {
   type TiptapDocument,
   tiptapDocumentSchema,
-} from "../../shared/content/article";
-import { resolveRecoveredMediaUrl } from "../../shared/content/media-url";
-import { canonicalizeTiptapDocument } from "../../shared/editor/canonicalize";
-import { articleContentExtensions } from "../../shared/editor/extensions";
-import { annotateArticleBody } from "../../shared/editor/provenance";
+} from "@ortodoksas-lt/content/article";
+import { resolveRecoveredMediaUrl } from "@ortodoksas-lt/content/media-url";
+import { canonicalizeTiptapDocument } from "@ortodoksas-lt/editor/canonicalize";
+import { articleContentExtensions } from "@ortodoksas-lt/editor/extensions";
+import { annotateArticleBody } from "@ortodoksas-lt/editor/provenance";
+import { generateJSON } from "@tiptap/html";
 import {
   type NormalizedLegacyArticle,
   normalizeLegacyHtml,

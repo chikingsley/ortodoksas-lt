@@ -1,3 +1,10 @@
+import { tiptapDocumentSchema } from "@ortodoksas-lt/content/article";
+import {
+  resolveRecoveredMediaUrl,
+  resolveTiptapMediaUrls,
+} from "@ortodoksas-lt/content/media-url";
+import { getArticleQualityIssues } from "@ortodoksas-lt/editor/quality";
+import { renderArticleDocument } from "@ortodoksas-lt/editor/render";
 import type { JSONContent } from "@tiptap/core";
 import {
   ArrowLeft,
@@ -18,18 +25,9 @@ import {
   useMemo,
   useState,
 } from "react";
-
 import { SimpleEditor } from "@/components/tiptap-templates/simple/simple-editor";
 import { Button } from "@/components/ui/button";
-import { tiptapDocumentSchema } from "../../shared/content/article";
-import {
-  resolveRecoveredMediaUrl,
-  resolveTiptapMediaUrls,
-} from "../../shared/content/media-url";
-import { getArticleQualityIssues } from "../../shared/editor/quality";
-import { renderArticleDocument } from "../../shared/editor/render";
 
-import { convertLegacyArticle } from "./convert-legacy-article";
 import type { CatalogArticle, SourceArticle } from "./types";
 
 interface Props {
@@ -38,19 +36,41 @@ interface Props {
 }
 
 interface StoredArticle {
-  body_json: string;
-  hero_media_id: string | null;
+  bodyJson: string;
+  heroMediaId: string | null;
   id: string;
+  kind: "article" | "page";
+  labelsJson: string;
   language: string;
+  publishedAt: number | null;
+  section: string;
   slug: string;
+  sourceCapture: string | null;
+  sourceHtml: string | null;
+  sourceUrl: string | null;
   status: "draft" | "scheduled" | "published" | "archived";
   summary: string;
   title: string;
-  translation_kind: "original" | "human" | "machine";
+  translationKind: "original" | "human" | "machine";
 }
 
-interface SourceResponse {
-  article: StoredArticle | null;
+interface ArticleResponse {
+  article: StoredArticle;
+}
+
+interface BaselineResponse {
+  baseline: {
+    body_json: string;
+  };
+  changes: ContentChange[];
+}
+
+interface ContentChange {
+  after_value: string | null;
+  before_value: string | null;
+  change_kind: "added" | "changed" | "removed";
+  field_path: string;
+  provenance: "generated" | "manual" | "normalized";
 }
 
 interface Revision {
@@ -81,6 +101,8 @@ export const ArticleEditor = ({ article, onBack }: Props) => {
   const [articleId, setArticleId] = useState<string | null>(null);
   const [baselineBody, setBaselineBody] = useState<JSONContent>(EMPTY_DOCUMENT);
   const [body, setBody] = useState<JSONContent>(EMPTY_DOCUMENT);
+  const [changes, setChanges] = useState<ContentChange[]>([]);
+  const [changesOpen, setChangesOpen] = useState(false);
   const [heroMediaId, setHeroMediaId] = useState<string | null>(null);
   const [language, setLanguage] = useState("lt");
   const [loadState, setLoadState] = useState<"loading" | "ready" | "error">(
@@ -102,60 +124,58 @@ export const ArticleEditor = ({ article, onBack }: Props) => {
 
   useEffect(() => {
     const controller = new AbortController();
-    // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: loading reconciles source conversion with an optional canonical record
     const loadArticle = async (): Promise<void> => {
       setLoadState("loading");
       try {
-        const [sourceResponse, storedResponse] = await Promise.all([
-          fetch(`/content/pages/${encodeURIComponent(article.file)}`, {
+        const [storedResponse, baselineResponse] = await Promise.all([
+          fetch(`/api/articles/${article.id}`, { signal: controller.signal }),
+          fetch(`/api/articles/${article.id}/baseline`, {
             signal: controller.signal,
           }),
-          fetch(
-            `/api/articles/source?key=${encodeURIComponent(article.file)}`,
-            { signal: controller.signal }
-          ),
         ]);
-        if (!(sourceResponse.ok && storedResponse.ok)) {
+        if (!(storedResponse.ok && baselineResponse.ok)) {
           throw new Error("Article request failed");
         }
 
-        const sourceRecord = (await sourceResponse.json()) as SourceArticle;
-        const storedRecord = (await storedResponse.json()) as SourceResponse;
-        const converted = convertLegacyArticle(
-          sourceRecord.html,
-          sourceRecord.hero
-        );
-        const canonical = storedRecord.article;
+        const { article: canonical } =
+          (await storedResponse.json()) as ArticleResponse;
+        const { baseline, changes: baselineChanges } =
+          (await baselineResponse.json()) as BaselineResponse;
+        const sourceRecord: SourceArticle = {
+          ...article,
+          capture: canonical.sourceCapture ?? article.capture,
+          html: canonical.sourceHtml ?? "",
+          labels: JSON.parse(canonical.labelsJson) as string[],
+          section: canonical.section,
+          source: canonical.sourceUrl ?? article.source,
+        };
 
         setSource(sourceRecord);
-        setBaselineBody(converted.body);
-        setWarnings(converted.warnings);
+        setBaselineBody(
+          tiptapDocumentSchema.parse(JSON.parse(baseline.body_json))
+        );
+        setChanges(baselineChanges);
+        setWarnings([]);
         setBody(
           resolveTiptapMediaUrls(
-            canonical
-              ? tiptapDocumentSchema.parse(JSON.parse(canonical.body_json))
-              : converted.body
+            tiptapDocumentSchema.parse(JSON.parse(canonical.bodyJson))
           )
         );
-        setArticleId(canonical?.id ?? null);
-        setLanguage(canonical?.language ?? "lt");
-        setHeroMediaId(canonical?.hero_media_id ?? null);
-        setStatus(canonical?.status ?? "draft");
-        setSummary(canonical?.summary ?? "");
-        setTitle(canonical?.title ?? article.title);
-        if (canonical) {
-          const revisionResponse = await fetch(
-            `/api/articles/${canonical.id}/revisions`,
-            { signal: controller.signal }
-          );
-          if (revisionResponse.ok) {
-            const data = (await revisionResponse.json()) as {
-              revisions: Revision[];
-            };
-            setRevisions(data.revisions);
-          }
-        } else {
-          setRevisions([]);
+        setArticleId(canonical.id);
+        setLanguage(canonical.language);
+        setHeroMediaId(canonical.heroMediaId);
+        setStatus(canonical.status);
+        setSummary(canonical.summary);
+        setTitle(canonical.title);
+        const revisionResponse = await fetch(
+          `/api/articles/${canonical.id}/revisions`,
+          { signal: controller.signal }
+        );
+        if (revisionResponse.ok) {
+          const data = (await revisionResponse.json()) as {
+            revisions: Revision[];
+          };
+          setRevisions(data.revisions);
         }
         setLoadState("ready");
         setSaveState("saved");
@@ -169,7 +189,7 @@ export const ArticleEditor = ({ article, onBack }: Props) => {
 
     loadArticle().catch(() => setLoadState("error"));
     return () => controller.abort();
-  }, [article.file, article.title]);
+  }, [article]);
 
   const updateBody = useCallback((nextBody: JSONContent) => {
     setBody(nextBody);
@@ -212,7 +232,11 @@ export const ArticleEditor = ({ article, onBack }: Props) => {
       const payload = {
         body,
         heroSourceUrl: article.hero ?? undefined,
+        kind: article.kind,
+        labels: article.labels,
         language,
+        publishedAt: article.published ? Date.parse(article.published) : null,
+        section: article.section,
         slug: getSlug(article.path),
         status: nextStatus,
         summary,
@@ -254,13 +278,17 @@ export const ArticleEditor = ({ article, onBack }: Props) => {
       setStatus(nextStatus);
       setSaveState("saved");
       await loadRevisions(result.id);
+      const changesResponse = await fetch(
+        `/api/articles/${result.id}/baseline`
+      );
+      if (changesResponse.ok) {
+        const data = (await changesResponse.json()) as BaselineResponse;
+        setChanges(data.changes);
+      }
       return result.id;
     },
     [
-      article.file,
-      article.hero,
-      article.path,
-      article.title,
+      article,
       articleId,
       baselineBody,
       body,
@@ -280,15 +308,18 @@ export const ArticleEditor = ({ article, onBack }: Props) => {
     setSourceReviewOpen(true);
   }, []);
   const closeSourceReview = useCallback(() => setSourceReviewOpen(false), []);
+  const openChanges = useCallback(() => setChangesOpen(true), []);
+  const closeChanges = useCallback(() => setChangesOpen(false), []);
 
   useEffect(() => {
-    if (!(previewOpen || sourceReviewOpen)) {
+    if (!(changesOpen || previewOpen || sourceReviewOpen)) {
       return;
     }
     const closeOnEscape = (event: KeyboardEvent): void => {
       if (event.key === "Escape") {
         setPreviewOpen(false);
         setSourceReviewOpen(false);
+        setChangesOpen(false);
       }
     };
     document.addEventListener("keydown", closeOnEscape);
@@ -297,7 +328,7 @@ export const ArticleEditor = ({ article, onBack }: Props) => {
       document.removeEventListener("keydown", closeOnEscape);
       document.body.style.overflow = "";
     };
-  }, [previewOpen, sourceReviewOpen]);
+  }, [changesOpen, previewOpen, sourceReviewOpen]);
 
   const toggleHistory = useCallback(() => {
     setHistoryOpen((open) => !open);
@@ -319,7 +350,7 @@ export const ArticleEditor = ({ article, onBack }: Props) => {
         };
         setBody(
           resolveTiptapMediaUrls(
-            tiptapDocumentSchema.parse(JSON.parse(data.article.body_json))
+            tiptapDocumentSchema.parse(JSON.parse(data.article.bodyJson))
           )
         );
         setLanguage(data.article.language);
@@ -335,12 +366,11 @@ export const ArticleEditor = ({ article, onBack }: Props) => {
   );
   const restoreRevisionFromButton = useCallback(
     (event: MouseEvent<HTMLButtonElement>) => {
-      const version = Number.parseInt(
-        event.currentTarget.dataset.version ?? "",
-        10
-      );
-      if (Number.isFinite(version)) {
-        restoreRevision(version).catch(() => setRestoringVersion(null));
+      const { version } = event.currentTarget.dataset;
+      if (version) {
+        restoreRevision(Number.parseInt(version, 10)).catch(() =>
+          setRestoringVersion(null)
+        );
       }
     },
     [restoreRevision]
@@ -470,7 +500,10 @@ export const ArticleEditor = ({ article, onBack }: Props) => {
                 </select>
               </div>
               <Button onClick={openSourceReview} variant="outline">
-                Compare conversion
+                View source
+              </Button>
+              <Button onClick={openChanges} variant="outline">
+                Changes ({changes.length})
               </Button>
             </section>
 
@@ -594,7 +627,10 @@ export const ArticleEditor = ({ article, onBack }: Props) => {
                 </ul>
               ) : null}
               <Button onClick={openSourceReview} variant="outline">
-                Compare source and result
+                View conversion source
+              </Button>
+              <Button onClick={openChanges} variant="outline">
+                View {changes.length} changes
               </Button>
             </section>
             <section>
@@ -707,6 +743,61 @@ export const ArticleEditor = ({ article, onBack }: Props) => {
                 </ol>
               </footer>
             ) : null}
+          </div>
+        </div>
+      ) : null}
+
+      {changesOpen ? (
+        <div
+          aria-label="Article changes"
+          aria-modal="true"
+          className="review-overlay"
+          role="dialog"
+        >
+          <div className="review-compare-window">
+            <header>
+              <div>
+                <strong>Changes from imported baseline</strong>
+                <span>
+                  Every saved editorial difference with its provenance
+                </span>
+              </div>
+              <button
+                aria-label="Close changes"
+                autoFocus
+                onClick={closeChanges}
+                type="button"
+              >
+                <X />
+              </button>
+            </header>
+            {changes.length === 0 ? (
+              <div className="review-editor-state">
+                The canonical article matches its imported baseline.
+              </div>
+            ) : (
+              <ol className="review-change-list">
+                {changes.map((change) => (
+                  <li key={`${change.field_path}-${change.change_kind}`}>
+                    <div>
+                      <code>{change.field_path}</code>
+                      <span>{change.change_kind}</span>
+                      <span>{change.provenance}</span>
+                    </div>
+                    <dl>
+                      <div>
+                        <dt>Before</dt>
+                        <dd>{change.before_value || "Empty"}</dd>
+                      </div>
+                      <div>
+                        <dt>After</dt>
+                        <dd>{change.after_value || "Empty"}</dd>
+                      </div>
+                    </dl>
+                  </li>
+                ))}
+              </ol>
+            )}
           </div>
         </div>
       ) : null}

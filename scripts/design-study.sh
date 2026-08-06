@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-project_dir="/home/simon/github/ortodoksas-revival"
+project_dir="/home/simon/github/ortodoksas-lt"
 unit="ortodoksas-red-c-study.service"
 route="ortodoksas-red-c"
 port="4175"

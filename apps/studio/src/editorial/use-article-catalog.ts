@@ -15,14 +15,54 @@ export const useArticleCatalog = (): CatalogState => {
   useEffect(() => {
     const controller = new AbortController();
 
-    fetch("/content/catalog.json", { signal: controller.signal })
+    fetch("/api/articles", { signal: controller.signal })
       .then((response) => {
         if (!response.ok) {
           throw new Error("Catalog request failed");
         }
-        return response.json() as Promise<CatalogArticle[]>;
+        return response.json() as Promise<{
+          articles: Array<{
+            capture: string | null;
+            description: string;
+            file: string | null;
+            heroMediaId: string | null;
+            id: string;
+            kind: string;
+            labelsJson: string;
+            language: string;
+            path: string;
+            publishedAt: number | null;
+            section: string;
+            source: string | null;
+            status: CatalogArticle["status"];
+            title: string;
+          }>;
+        }>;
       })
-      .then((articles) => setCatalog({ articles, state: "ready" }))
+      .then(({ articles }) =>
+        setCatalog({
+          articles: articles.map((article) => ({
+            capture: article.capture ?? "",
+            description: article.description,
+            file: article.file ?? article.id,
+            hero: article.heroMediaId
+              ? `/api/media/${article.heroMediaId}`
+              : null,
+            id: article.id,
+            kind: article.kind === "page" ? "page" : "article",
+            labels: JSON.parse(article.labelsJson) as string[],
+            path: `/${article.path}`,
+            published: article.publishedAt
+              ? new Date(article.publishedAt).toISOString()
+              : null,
+            section: article.section,
+            source: article.source ?? "",
+            status: article.status,
+            title: article.title,
+          })),
+          state: "ready",
+        })
+      )
       .catch((error: unknown) => {
         if (error instanceof DOMException && error.name === "AbortError") {
           return;

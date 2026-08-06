@@ -1,7 +1,19 @@
+packages:
+  - apps/*
+  - packages/*
+
 allowBuilds:
+  '@parcel/watcher': true
   esbuild: true
   sharp: true
   workerd: true
+minimumReleaseAgeExclude:
+  - '@cloudflare/vite-plugin@1.51.0'
+  - '@cloudflare/vitest-pool-workers@0.20.2'
+  - miniflare@5.20260801.0-alpha
+  - ultracite@7.10.1
+  - wrangler@4.119.0
+  - tsx@4.23.8
 peerDependencyRules:
   allowAny:
     - vite

@@ -5,11 +5,12 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { basename, join } from "node:path";
 
 const PROJECT_ROOT = new URL("../", import.meta.url).pathname;
-const REVIVAL_PUBLIC =
-  process.env.ORTODOKSAS_REVIVAL_PUBLIC ??
-  "/home/simon/github/ortodoksas-revival/public";
-const MANIFEST_PATH = join(REVIVAL_PUBLIC, "media/manifest.json");
+const WEB_PUBLIC =
+  process.env.ORTODOKSAS_WEB_PUBLIC ??
+  "/home/simon/github/ortodoksas-lt/apps/web/public";
+const MANIFEST_PATH = join(WEB_PUBLIC, "media/manifest.json");
 const STATE_PATH = join(PROJECT_ROOT, ".wrangler/media-import-state.json");
+const STATE_SOURCE_PATH = process.env.MEDIA_IMPORT_STATE_PATH ?? STATE_PATH;
 const SQL_DIR = join(PROJECT_ROOT, ".wrangler/media-seed");
 const BUCKET = "ortodoksas-studio-media";
 const WRANGLER = join(PROJECT_ROOT, "node_modules/.bin/wrangler");
@@ -19,6 +20,7 @@ const ARCHIVE_MEDIA_PATTERN =
   /^https:\/\/web\.archive\.org\/web\/\d+[a-z_]*\/(https:\/\/blogger\.googleusercontent\.com\/.+)$/u;
 const BLOGGER_SIZE_PARAMETER_PATTERN = /[=][^/?#]+$/u;
 const BLOGGER_SIZE_PATH_PATTERN = /\/s\d+(?:-[a-z0-9-]+)?\//u;
+const BLOGGER_WIDTH_PATH_PATTERN = /\/w\d+(?:-h\d+)?(?:-[a-z0-9-]+)?\//u;
 
 const flags = new Set(process.argv.slice(2));
 const readNumberFlag = (name, fallback) => {
@@ -32,6 +34,7 @@ const limit = readNumberFlag("--limit", Number.POSITIVE_INFINITY);
 const shouldUpload = flags.has("--upload");
 const shouldVerify = flags.has("--verify");
 const shouldSeed = flags.has("--seed");
+const shouldReseed = flags.has("--reseed");
 
 if (!(shouldUpload || shouldVerify || shouldSeed)) {
   throw new Error("Choose at least one phase: --upload, --verify, or --seed");
@@ -39,20 +42,41 @@ if (!(shouldUpload || shouldVerify || shouldSeed)) {
 
 const manifest = JSON.parse(await readFile(MANIFEST_PATH, "utf8"));
 const media = manifest.media.slice(0, limit);
+const manifestHash = createHash("sha256")
+  .update(JSON.stringify(manifest.media))
+  .digest("hex");
 await mkdir(join(PROJECT_ROOT, ".wrangler"), { recursive: true });
 
-const state = await readFile(STATE_PATH, "utf8")
+const state = await readFile(STATE_SOURCE_PATH, "utf8")
   .then(JSON.parse)
   .catch(() => ({ seededChunks: [], uploaded: [], verified: [] }));
 const uploaded = new Set(state.uploaded);
 const verified = new Set(state.verified);
-const seededChunks = new Set(state.seededChunks);
+const preverified = new Set(
+  (process.env.MEDIA_PREVERIFIED_SHA256 ?? "")
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean)
+);
+for (const sha256 of preverified) {
+  if (!media.some((entry) => entry.sha256 === sha256)) {
+    throw new Error(
+      `Preverified digest is absent from the manifest: ${sha256}`
+    );
+  }
+  uploaded.add(sha256);
+  verified.add(sha256);
+}
+const seededChunks = new Set(
+  state.manifestHash === manifestHash ? state.seededChunks : []
+);
 
 const persistState = async () => {
   await writeFile(
     STATE_PATH,
     `${JSON.stringify(
       {
+        manifestHash,
         seededChunks: [...seededChunks].sort((a, b) => a - b),
         uploaded: [...uploaded].sort(),
         verified: [...verified].sort(),
@@ -162,7 +186,7 @@ const mimeTypeFor = (entry) => {
   return `image/${entry.format}`;
 };
 
-const localPathFor = (entry) => join(REVIVAL_PUBLIC, entry.path);
+const localPathFor = (entry) => join(WEB_PUBLIC, entry.path);
 const keyFor = (entry) => `archive/${basename(entry.path)}`;
 const normalizedAlias = (value) => {
   const direct = value.match(ARCHIVE_MEDIA_PATTERN)?.[1] ?? value;
@@ -171,6 +195,7 @@ const normalizedAlias = (value) => {
   }
   return direct
     .replace(BLOGGER_SIZE_PATH_PATTERN, "/s0/")
+    .replace(BLOGGER_WIDTH_PATH_PATTERN, "/s0/")
     .replace(BLOGGER_SIZE_PARAMETER_PATTERN, "");
 };
 
@@ -261,8 +286,10 @@ const sqlValue = (value) =>
     : `'${String(value).replaceAll("'", "''")}'`;
 
 if (shouldSeed) {
-  const eligible = media.filter((entry) => verified.has(entry.sha256));
-  if (eligible.length !== media.length) {
+  const eligible = shouldReseed
+    ? media
+    : media.filter((entry) => verified.has(entry.sha256));
+  if (!shouldReseed && eligible.length !== media.length) {
     throw new Error(
       `Verify every selected object before seeding D1 (${eligible.length}/${media.length})`
     );
@@ -274,7 +301,7 @@ if (shouldSeed) {
     chunks.push(eligible.slice(index, index + chunkSize));
   }
   for (const [chunkIndex, entries] of chunks.entries()) {
-    if (seededChunks.has(chunkIndex)) {
+    if (seededChunks.has(chunkIndex) && !shouldReseed) {
       continue;
     }
     const lines = ["PRAGMA foreign_keys = ON;"];
@@ -282,9 +309,11 @@ if (shouldSeed) {
       const id = `media_${entry.sha256}`;
       const fileName = basename(entry.path);
       const timestamp = Date.parse(manifest.generatedAt);
-      lines.push(
-        `INSERT OR IGNORE INTO media_assets (id, r2_key, file_name, mime_type, byte_size, width, height, alt_text, caption, credit, created_at, updated_at, sha256, source_url, provenance, alt_text_provenance, caption_provenance) VALUES (${sqlValue(id)}, ${sqlValue(keyFor(entry))}, ${sqlValue(fileName)}, ${sqlValue(mimeTypeFor(entry))}, ${entry.bytes}, ${entry.width ?? "NULL"}, ${entry.height ?? "NULL"}, '', '', '', ${timestamp}, ${timestamp}, ${sqlValue(entry.sha256)}, ${sqlValue(entry.acquiredFrom)}, 'recovered', 'missing', 'missing');`
-      );
+      if (!shouldReseed) {
+        lines.push(
+          `INSERT OR IGNORE INTO media_assets (id, r2_key, file_name, mime_type, byte_size, width, height, alt_text, caption, credit, created_at, updated_at, sha256, source_url, provenance, alt_text_provenance, caption_provenance) VALUES (${sqlValue(id)}, ${sqlValue(keyFor(entry))}, ${sqlValue(fileName)}, ${sqlValue(mimeTypeFor(entry))}, ${entry.bytes}, ${entry.width ?? "NULL"}, ${entry.height ?? "NULL"}, '', '', '', ${timestamp}, ${timestamp}, ${sqlValue(entry.sha256)}, ${sqlValue(entry.acquiredFrom)}, 'recovered', 'missing', 'missing');`
+        );
+      }
       const sourceAliases = [entry.acquiredFrom, ...entry.aliases];
       const aliases = new Set([
         ...sourceAliases,
@@ -292,7 +321,7 @@ if (shouldSeed) {
       ]);
       for (const alias of aliases) {
         lines.push(
-          `INSERT OR IGNORE INTO media_aliases (alias, media_id, created_at) VALUES (${sqlValue(alias)}, ${sqlValue(id)}, ${timestamp});`
+          `INSERT OR IGNORE INTO media_aliases (alias, media_id, created_at) SELECT ${sqlValue(alias)}, id, ${timestamp} FROM media_assets WHERE id = ${sqlValue(id)};`
         );
       }
     }

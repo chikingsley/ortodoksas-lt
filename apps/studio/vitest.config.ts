@@ -9,7 +9,7 @@ export default defineConfig({
   plugins: [
     cloudflareTest(async () => {
       const migrations = await readD1Migrations(
-        path.join(import.meta.dirname, "migrations")
+        path.join(import.meta.dirname, "../../packages/db/migrations")
       );
 
       return {

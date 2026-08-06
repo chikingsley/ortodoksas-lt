@@ -1,0 +1,28 @@
+{
+  "name": "@ortodoksas-lt/editor",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./canonicalize": "./canonicalize.ts",
+    "./extensions": "./extensions.ts",
+    "./figure": "./figure.ts",
+    "./provenance": "./provenance.ts",
+    "./quality": "./quality.ts",
+    "./render": "./render.ts"
+  },
+  "dependencies": {
+    "@ortodoksas-lt/content": "workspace:*",
+    "@tiptap/core": "^3.29.2",
+    "@tiptap/extension-highlight": "^3.29.2",
+    "@tiptap/extension-image": "^3.29.2",
+    "@tiptap/extension-list": "^3.29.2",
+    "@tiptap/extension-subscript": "^3.29.2",
+    "@tiptap/extension-superscript": "^3.29.2",
+    "@tiptap/extension-text-align": "^3.29.2",
+    "@tiptap/extension-typography": "^3.29.2",
+    "@tiptap/html": "3.29.2",
+    "@tiptap/starter-kit": "^3.29.2",
+    "@tiptap/static-renderer": "^3.29.2"
+  }
+}

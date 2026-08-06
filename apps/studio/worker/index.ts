@@ -2,6 +2,7 @@ import { Hono } from "hono";
 
 import { fakeAuth } from "./middleware/fake-auth";
 import { articleRoutes } from "./routes/articles";
+import { homepageRoutes } from "./routes/homepage";
 import { mediaRoutes } from "./routes/media";
 import type { StudioEnvironment } from "./types";
 
@@ -23,7 +24,7 @@ app.use("/api/*", fakeAuth);
 
 app.get("/api/health", (context) =>
   context.json({
-    contentSchema: 1,
+    contentSchema: 2,
     service: "ortodoksas-studio",
     status: "ready",
   })
@@ -37,6 +38,7 @@ app.get("/api/session", (context) =>
 );
 
 app.route("/api/articles", articleRoutes);
+app.route("/api/homepage", homepageRoutes);
 app.route("/api/media", mediaRoutes);
 
 app.notFound((context) => context.json({ error: "Route unavailable" }, 404));

@@ -1,7 +1,7 @@
 import {
   isBloggerMediaUrl,
   resolveRecoveredMediaUrl,
-} from "../../shared/content/media-url";
+} from "@ortodoksas-lt/content/media-url";
 
 const INVISIBLE_IMAGE_SIZE = 2;
 const EMPTY_SPACE_PATTERN = /^[\s\u00a0]*$/;
@@ -79,17 +79,42 @@ const normalizeImage = (
   }
 };
 
-const flattenLayoutTable = (table: HTMLTableElement): void => {
+const normalizeLayoutTable = (table: HTMLTableElement): void => {
   const { ownerDocument } = table;
-  const replacement = ownerDocument.createElement("div");
   const images = [...table.querySelectorAll("img")];
-  const text = table.textContent?.replace(REPEATED_SPACE_PATTERN, " ").trim();
+  if (images.length === 0) {
+    const text = table.textContent?.replace(REPEATED_SPACE_PATTERN, " ").trim();
+    table.replaceWith(createParagraph(ownerDocument, text ?? ""));
+    return;
+  }
+
+  const replacement = ownerDocument.createElement("div");
+  const imageCells = new Set(images.map((image) => image.closest("td")));
+  const caption = [...table.querySelectorAll("td")]
+    .filter((cell) => !imageCells.has(cell))
+    .map((cell) =>
+      cell.textContent?.replace(REPEATED_SPACE_PATTERN, " ").trim()
+    )
+    .filter(Boolean)
+    .join(" ");
 
   for (const image of images) {
-    replacement.append(image.cloneNode(true));
-  }
-  if (text) {
-    replacement.append(createParagraph(ownerDocument, text));
+    const figure = ownerDocument.createElement("figure");
+    figure.setAttribute(
+      "data-alt-provenance",
+      image.getAttribute("alt") ? "source" : "missing"
+    );
+    figure.setAttribute(
+      "data-caption-provenance",
+      caption ? "source" : "missing"
+    );
+    figure.setAttribute("data-source-alt", image.getAttribute("alt") ?? "");
+    figure.setAttribute("data-source-caption", caption);
+    figure.append(image.cloneNode(true));
+    const figcaption = ownerDocument.createElement("figcaption");
+    figcaption.textContent = caption;
+    figure.append(figcaption);
+    replacement.append(figure);
   }
   table.replaceWith(replacement);
 };
@@ -107,6 +132,36 @@ const removeEmptyElements = (body: HTMLElement): void => {
     const hasMedia = candidate.querySelector("img, video, audio") !== null;
     if (!hasMedia && EMPTY_SPACE_PATTERN.test(candidate.textContent ?? "")) {
       candidate.remove();
+    }
+  }
+};
+
+const normalizeFigures = (body: HTMLElement): void => {
+  for (const figure of [...body.querySelectorAll("figure")]) {
+    const { ownerDocument } = figure;
+    const image = figure.querySelector("img");
+    if (!image) {
+      figure.replaceWith(...figure.childNodes);
+      continue;
+    }
+
+    if (!figure.querySelector("figcaption")) {
+      const figcaption = ownerDocument.createElement("figcaption");
+      figure.append(figcaption);
+    }
+
+    if (!figure.hasAttribute("data-alt-provenance")) {
+      figure.setAttribute(
+        "data-alt-provenance",
+        image.getAttribute("alt") ? "source" : "missing"
+      );
+    }
+    if (!figure.hasAttribute("data-caption-provenance")) {
+      const caption = figure.querySelector("figcaption")?.textContent?.trim();
+      figure.setAttribute(
+        "data-caption-provenance",
+        caption ? "source" : "missing"
+      );
     }
   }
 };
@@ -141,10 +196,10 @@ export const normalizeLegacyHtml = (
   }
 
   for (const table of [...body.querySelectorAll("table")]) {
-    flattenLayoutTable(table);
-    warnings.push("A legacy table was flattened for visual inspection.");
+    normalizeLayoutTable(table);
   }
 
+  normalizeFigures(body);
   unwrapPresentationalContainers(body);
   removeEmptyElements(body);
 

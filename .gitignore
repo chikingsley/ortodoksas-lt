@@ -11,14 +11,14 @@ node_modules
 .astro/
 dist
 dist-ssr
-recovery/
+/recovery/
 *.local
 .wrangler/
 .dev.vars*
 worker-configuration.d.ts.tmp
 
 # The verified recovery mirror remains local while R2 serves deployed media.
-public/media/files/
+apps/web/public/media/files/
 
 # Canva ZIP extraction workspace; curated brand assets live under public/assets.
 Orth_inst-template-feed.zip.sb-*/

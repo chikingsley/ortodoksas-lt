@@ -1,15 +1,8 @@
 {
   "files": [],
-  "compilerOptions": {
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "paths": { "@/*": ["./src/*"] },
-    "skipLibCheck": true,
-    "target": "ES2023"
-  },
   "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" },
-    { "path": "./tsconfig.worker.json" }
+    { "path": "./apps/web" },
+    { "path": "./apps/studio" },
+    { "path": "./packages/db" }
   ]
 }

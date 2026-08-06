@@ -179,6 +179,34 @@ describe("studio Worker", () => {
       ],
     });
 
+    const homepageResponse = await exports.default.fetch(
+      "https://studio.test/api/homepage",
+      {
+        body: JSON.stringify({
+          leadId: created.id,
+          secondaryIds: [created.id],
+        }),
+        headers: { "content-type": "application/json" },
+        method: "PUT",
+      }
+    );
+    expect(homepageResponse.status).toBe(200);
+    await expect(homepageResponse.json()).resolves.toEqual({
+      leadId: created.id,
+      secondaryIds: [created.id],
+    });
+
+    const homepageReadResponse = await exports.default.fetch(
+      "https://studio.test/api/homepage"
+    );
+    expect(homepageReadResponse.status).toBe(200);
+    await expect(homepageReadResponse.json()).resolves.toMatchObject({
+      placements: [
+        { articleId: created.id, position: 0, slot: "lead" },
+        { articleId: created.id, position: 0, slot: "secondary" },
+      ],
+    });
+
     const restoreResponse = await exports.default.fetch(
       `https://studio.test/api/articles/${created.id}/revisions/1/restore`,
       { method: "POST" }

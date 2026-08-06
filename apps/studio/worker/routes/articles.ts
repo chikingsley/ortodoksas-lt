@@ -1,16 +1,18 @@
-import { Hono } from "hono";
-
 import {
   createArticleSchema,
   type TiptapDocument,
   updateArticleSchema,
-} from "../../shared/content/article";
+} from "@ortodoksas-lt/content/article";
+import { articleRevisions, articles } from "@ortodoksas-lt/db";
 import {
   annotateArticleBody,
   type ContentChange,
   getChangeKind,
-} from "../../shared/editor/provenance";
-import { getArticleQualityIssues } from "../../shared/editor/quality";
+} from "@ortodoksas-lt/editor/provenance";
+import { getArticleQualityIssues } from "@ortodoksas-lt/editor/quality";
+import { desc, eq } from "drizzle-orm";
+import { Hono } from "hono";
+import { getDatabase } from "../db";
 import type { StudioEnvironment } from "../types";
 
 export const articleRoutes = new Hono<StudioEnvironment>();
@@ -22,6 +24,12 @@ const toHex = (value: ArrayBuffer): string =>
 
 const hashText = async (value: string): Promise<string> =>
   toHex(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value)));
+
+const textChangeProvenance = (
+  beforeValue: string,
+  afterValue: string
+): "manual" | "normalized" =>
+  beforeValue.trim() === afterValue ? "normalized" : "manual";
 
 const attachMediaRecords = async (
   database: D1Database,
@@ -102,14 +110,31 @@ const changeStatements = (
   );
 
 articleRoutes.get("/", async (context) => {
-  const result = await context.env.DB.prepare(
-    `SELECT id, slug, language, title, summary, status, translation_kind,
-      published_at, updated_at
-    FROM articles
-    ORDER BY updated_at DESC`
-  ).all();
+  const database = getDatabase(context.env.DB);
+  const result = await database
+    .select({
+      capture: articles.sourceCapture,
+      description: articles.summary,
+      file: articles.sourceArticleId,
+      heroMediaId: articles.heroMediaId,
+      id: articles.id,
+      kind: articles.kind,
+      labelsJson: articles.labelsJson,
+      language: articles.language,
+      path: articles.slug,
+      publishedAt: articles.publishedAt,
+      section: articles.section,
+      slug: articles.slug,
+      source: articles.sourceUrl,
+      status: articles.status,
+      title: articles.title,
+      translationKind: articles.translationKind,
+      updatedAt: articles.updatedAt,
+    })
+    .from(articles)
+    .orderBy(desc(articles.updatedAt));
 
-  return context.json({ articles: result.results });
+  return context.json({ articles: result });
 });
 
 articleRoutes.get("/source", async (context) => {
@@ -118,27 +143,65 @@ articleRoutes.get("/source", async (context) => {
     return context.json({ error: "Source key is required" }, 400);
   }
 
-  const article = await context.env.DB.prepare(
-    "SELECT * FROM articles WHERE source_article_id = ? LIMIT 1"
-  )
-    .bind(sourceKey)
-    .first();
+  const database = getDatabase(context.env.DB);
+  const article = await database.query.articles.findFirst({
+    where: eq(articles.sourceArticleId, sourceKey),
+  });
 
-  if (article === null) {
+  if (!article) {
     return context.json({ article: null });
   }
 
   return context.json({ article });
 });
 
-articleRoutes.get("/:id", async (context) => {
-  const article = await context.env.DB.prepare(
-    "SELECT * FROM articles WHERE id = ? LIMIT 1"
-  )
-    .bind(context.req.param("id"))
-    .first();
+articleRoutes.get("/media-links/pending", async (context) => {
+  const result = await context.env.DB.prepare(
+    `SELECT DISTINCT articles.id
+    FROM articles, json_tree(articles.body_json) AS node
+    WHERE node.type = 'object'
+      AND json_extract(node.value, '$.type') = 'figure'
+      AND COALESCE(json_extract(node.value, '$.attrs.mediaId'), '') = ''
+    ORDER BY articles.id`
+  ).all<{ id: string }>();
+  return context.json({ articleIds: result.results.map((row) => row.id) });
+});
 
-  if (article === null) {
+articleRoutes.post("/:id/media-links", async (context) => {
+  const id = context.req.param("id");
+  const article = await context.env.DB.prepare(
+    "SELECT body_json FROM articles WHERE id = ? LIMIT 1"
+  )
+    .bind(id)
+    .first<{ body_json: string }>();
+  if (!article) {
+    return context.json({ error: "Article unavailable" }, 404);
+  }
+  const current = JSON.parse(article.body_json) as TiptapDocument;
+  const linked = await attachMediaRecords(context.env.DB, current);
+  const bodyJson = JSON.stringify(linked);
+  if (bodyJson === article.body_json) {
+    return context.json({ changed: false, id });
+  }
+  await context.env.DB.batch([
+    context.env.DB.prepare(
+      "UPDATE articles SET body_json = ?, updated_at = ? WHERE id = ?"
+    ).bind(bodyJson, Date.now(), id),
+    context.env.DB.prepare(
+      `UPDATE article_revisions SET body_json = ?
+      WHERE article_id = ? AND version = 1 AND body_json = ?`
+    ).bind(bodyJson, id, article.body_json),
+  ]);
+  return context.json({ changed: true, id });
+});
+
+articleRoutes.get("/:id", async (context) => {
+  const database = getDatabase(context.env.DB);
+  const article = await database.query.articles.findFirst({
+    where: eq(articles.id, context.req.param("id")),
+  });
+
+  if (!article) {
     return context.json({ error: "Article unavailable" }, 404);
   }
 
@@ -146,14 +209,20 @@ articleRoutes.get("/:id", async (context) => {
 });
 
 articleRoutes.get("/:id/revisions", async (context) => {
-  const result = await context.env.DB.prepare(
-    `SELECT id, version, metadata_json, editor_id, created_at
-    FROM article_revisions WHERE article_id = ? ORDER BY version DESC`
-  )
-    .bind(context.req.param("id"))
-    .all();
+  const database = getDatabase(context.env.DB);
+  const result = await database
+    .select({
+      created_at: articleRevisions.createdAt,
+      editor_id: articleRevisions.editorId,
+      id: articleRevisions.id,
+      metadata_json: articleRevisions.metadataJson,
+      version: articleRevisions.version,
+    })
+    .from(articleRevisions)
+    .where(eq(articleRevisions.articleId, context.req.param("id")))
+    .orderBy(desc(articleRevisions.version));
 
-  return context.json({ revisions: result.results });
+  return context.json({ revisions: result });
 });
 
 articleRoutes.get("/:id/baseline", async (context) => {
@@ -226,7 +295,7 @@ articleRoutes.post("/:id/revisions/:version/restore", async (context) => {
       beforeValue: baseline.title,
       changeKind: getChangeKind(baseline.title, metadata.title),
       fieldPath: "title",
-      provenance: "manual",
+      provenance: textChangeProvenance(baseline.title, metadata.title),
     });
   }
   if (
@@ -238,7 +307,7 @@ articleRoutes.post("/:id/revisions/:version/restore", async (context) => {
       beforeValue: baseline.summary || null,
       changeKind: getChangeKind(baseline.summary, metadata.summary),
       fieldPath: "summary",
-      provenance: "manual",
+      provenance: textChangeProvenance(baseline.summary, metadata.summary),
     });
   }
   const restoredBodyJson = JSON.stringify(annotated.body);
@@ -276,7 +345,7 @@ articleRoutes.post("/:id/revisions/:version/restore", async (context) => {
   ]);
 
   return context.json({
-    article: { ...metadata, body_json: restoredBodyJson, id },
+    article: { ...metadata, bodyJson: restoredBodyJson, id },
     restoredFrom: version,
     version: nextVersion,
   });
@@ -321,7 +390,7 @@ articleRoutes.post("/", async (context) => {
       beforeValue: baseline.title,
       changeKind: "changed",
       fieldPath: "title",
-      provenance: "manual",
+      provenance: textChangeProvenance(baseline.title, parsed.data.title),
     });
   }
   if (baseline.summary !== parsed.data.summary) {
@@ -330,7 +399,7 @@ articleRoutes.post("/", async (context) => {
       beforeValue: baseline.summary || null,
       changeKind: getChangeKind(baseline.summary, parsed.data.summary),
       fieldPath: "summary",
-      provenance: "manual",
+      provenance: textChangeProvenance(baseline.summary, parsed.data.summary),
     });
   }
 
@@ -338,9 +407,10 @@ articleRoutes.post("/", async (context) => {
     context.env.DB.prepare(
       `INSERT INTO articles (
       id, translation_group_id, source_article_id, language, slug, title,
-      summary, body_json, hero_media_id, status, translation_kind, created_at,
-      updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'draft', ?, ?, ?)`
+      summary, body_json, hero_media_id, status, translation_kind, published_at,
+      kind, labels_json, section, source_capture, source_html, source_url,
+      created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).bind(
       id,
       translationGroupId,
@@ -351,7 +421,15 @@ articleRoutes.post("/", async (context) => {
       parsed.data.summary,
       bodyJson,
       heroMediaId,
+      parsed.data.status,
       parsed.data.translationKind,
+      parsed.data.publishedAt ?? null,
+      parsed.data.kind,
+      JSON.stringify(parsed.data.labels),
+      parsed.data.section,
+      parsed.data.sourceCapture ?? null,
+      parsed.data.sourceHtml ?? null,
+      parsed.data.sourceUrl ?? null,
       timestamp,
       timestamp
     ),
@@ -366,7 +444,7 @@ articleRoutes.post("/", async (context) => {
       JSON.stringify({
         language: parsed.data.language,
         slug: parsed.data.slug,
-        status: "draft",
+        status: parsed.data.status,
         summary: parsed.data.summary,
         title: parsed.data.title,
       }),
@@ -396,7 +474,10 @@ articleRoutes.post("/", async (context) => {
     ...changeStatements(context.env.DB, id, changes, timestamp),
   ]);
 
-  return context.json({ heroMediaId, id, status: "draft", version: 1 }, 201);
+  return context.json(
+    { heroMediaId, id, status: parsed.data.status, version: 1 },
+    201
+  );
 });
 
 articleRoutes.put("/:id", async (context) => {
@@ -471,7 +552,10 @@ articleRoutes.put("/:id", async (context) => {
       beforeValue: existing.baseline_title,
       changeKind: "changed",
       fieldPath: "title",
-      provenance: "manual",
+      provenance: textChangeProvenance(
+        existing.baseline_title,
+        parsed.data.title
+      ),
     });
   }
   if (
@@ -483,7 +567,10 @@ articleRoutes.put("/:id", async (context) => {
       beforeValue: existing.baseline_summary || null,
       changeKind: getChangeKind(existing.baseline_summary, parsed.data.summary),
       fieldPath: "summary",
-      provenance: "manual",
+      provenance: textChangeProvenance(
+        existing.baseline_summary,
+        parsed.data.summary
+      ),
     });
   }
   const metadataJson = JSON.stringify({
@@ -498,7 +585,7 @@ articleRoutes.put("/:id", async (context) => {
     context.env.DB.prepare(
       `UPDATE articles SET language = ?, slug = ?, title = ?, summary = ?,
         body_json = ?, hero_media_id = ?, status = ?, translation_kind = ?,
-        updated_at = ?
+        published_at = ?, kind = ?, labels_json = ?, section = ?, updated_at = ?
       WHERE id = ?`
     ).bind(
       parsed.data.language,
@@ -509,6 +596,10 @@ articleRoutes.put("/:id", async (context) => {
       heroMediaId,
       parsed.data.status,
       parsed.data.translationKind,
+      parsed.data.publishedAt ?? null,
+      parsed.data.kind,
+      JSON.stringify(parsed.data.labels),
+      parsed.data.section,
       timestamp,
       id
     ),

@@ -1,11 +1,11 @@
+import { resolveRecoveredMediaUrl } from "@ortodoksas-lt/content/media-url";
+import { canonicalizeTiptapDocument } from "@ortodoksas-lt/editor/canonicalize";
+import { articleContentExtensions } from "@ortodoksas-lt/editor/extensions";
+import { getArticleQualityIssues } from "@ortodoksas-lt/editor/quality";
+import { renderArticleBody } from "@ortodoksas-lt/editor/render";
 import { generateJSON } from "@tiptap/html/server";
 import { DOMParser as LinkedomDOMParser } from "linkedom";
 import { describe, expect, it } from "vitest";
-import { resolveRecoveredMediaUrl } from "../shared/content/media-url";
-import { canonicalizeTiptapDocument } from "../shared/editor/canonicalize";
-import { articleContentExtensions } from "../shared/editor/extensions";
-import { getArticleQualityIssues } from "../shared/editor/quality";
-import { renderArticleBody } from "../shared/editor/render";
 import { convertLegacyArticle } from "../src/editorial/convert-legacy-article";
 import { normalizeLegacyHtml } from "../src/editorial/normalize-legacy-html";
 
@@ -42,10 +42,12 @@ describe("convertLegacyHtml", () => {
         state: "pending_import",
       },
     ]);
-    expect(result.normalizedHtml).toContain("Church caption");
-    expect(result.warnings).toContain(
-      "A legacy table was flattened for visual inspection."
+    expect(result.normalizedHtml).toContain("<figure");
+    expect(result.normalizedHtml).toContain(
+      "<figcaption>Church caption</figcaption>"
     );
+    expect(result.normalizedHtml).toContain("Church caption");
+    expect(result.warnings).toHaveLength(0);
   });
 
   it("removes tracking pixels and unsafe links", () => {
@@ -158,7 +160,6 @@ describe("convertLegacyHtml", () => {
     expect(issues).toContain("Replace the truncated summary.");
     expect(issues).toContain("Remove empty paragraph 1.");
     expect(issues).toContain("Add alternative text to figure 2.");
-    expect(issues).toContain("Add a caption to figure 2.");
   });
 
   it("flags placeholder copy and duplicated blocks before publication", () => {
