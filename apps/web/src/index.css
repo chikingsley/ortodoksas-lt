@@ -99,7 +99,7 @@ svg {
   justify-content: start;
   min-height: 94px;
   padding-block: 8px;
-  border-bottom: 0;
+  border-bottom: 1px solid var(--green);
 }
 .institution-brand {
   display: flex;
@@ -1239,7 +1239,7 @@ svg {
     column-gap: 8px;
     min-height: auto;
     padding: 10px 0 0;
-    border-bottom: 0;
+    border-bottom: 1px solid var(--green);
   }
   .institution-brand {
     display: flex;
