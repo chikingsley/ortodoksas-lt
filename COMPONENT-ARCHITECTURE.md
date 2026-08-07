@@ -21,6 +21,8 @@ This is the implementation checklist for the public publication UI. A checked it
 ## Data and validation
 
 - [ ] Keep locale UI copy in the client-safe `locale-ui.ts` boundary.
+- [x] Locale URLs use explicit prefixes (`/`, `/en`, `/ru`, `/uk`, `/be`); language links preserve an equivalent article path when that counterpart exists and fall back to the edition home otherwise.
+- [x] `hreflang` links are emitted only for equivalent, actually available pages; empty language shells do not receive invented article alternates.
 - [ ] Keep canonical article/media data separate from presentation components.
 - [ ] Add visual acceptance screenshots for desktop, mobile, and the open mobile sheet for each migrated surface.
 - [ ] Run Ultracite, TypeScript, `git diff --check`, and the static build for every surface migration.

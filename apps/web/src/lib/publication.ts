@@ -350,6 +350,55 @@ export function getLocalizedPage(locale: Locale, path: string) {
   return localizedArticles[locale].find((page) => page.path === path);
 }
 
+const localePrefixes = localeShells.map((locale) => `/${locale}`);
+
+function unprefixLocalePath(path: string) {
+  const normalized = path === "" ? "/" : path;
+  for (const prefix of localePrefixes) {
+    if (normalized === prefix) {
+      return "/";
+    }
+    if (normalized.startsWith(`${prefix}/`)) {
+      return normalized.slice(prefix.length) || "/";
+    }
+  }
+  return normalized;
+}
+
+function hasLocalizedPath(locale: Locale, path: string) {
+  return localizedArticles[locale].some((entry) => entry.path === path);
+}
+
+/** Return UI destinations, falling back to each edition home when no counterpart exists. */
+export function getLocaleLinks(currentPath: string) {
+  const path = unprefixLocalePath(currentPath);
+  return {
+    be: hasLocalizedPath("be", path) ? `/be${path}` : "/be",
+    en: hasLocalizedPath("en", path) ? `/en${path}` : "/en",
+    lt: getPage(path) ? path : "/",
+    ru: hasLocalizedPath("ru", path) ? `/ru${path}` : "/ru",
+    uk: hasLocalizedPath("uk", path) ? `/uk${path}` : "/uk",
+  } as const;
+}
+
+/** Return only equivalent pages suitable for reciprocal hreflang annotations. */
+export function getLocaleAlternates(currentPath: string) {
+  const path = unprefixLocalePath(currentPath);
+  const alternates: Array<{ href: string; locale: SiteLocale }> = [];
+  if (path === "/" || getPage(path)) {
+    alternates.push({ href: path, locale: "lt" });
+  }
+  for (const locale of localeShells) {
+    if (path === "/" || hasLocalizedPath(locale, path)) {
+      alternates.push({
+        href: `/${locale}${path === "/" ? "" : path}`,
+        locale,
+      });
+    }
+  }
+  return alternates;
+}
+
 export function getPage(path: string) {
   return pages.find((page) => page.path === path);
 }

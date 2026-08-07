@@ -6,12 +6,20 @@
 }
 
 .publication-masthead {
+  position: relative;
+}
+
+.publication-masthead-row {
   display: grid;
-  grid-template-columns: max-content max-content max-content 1fr max-content;
+  grid-template-columns: max-content max-content max-content 1fr;
   align-items: center;
   min-height: 94px;
   padding-block: 8px;
-  border-bottom: 1px solid var(--green);
+}
+
+.publication-masthead-divider {
+  height: 1px;
+  background: var(--green);
 }
 
 .publication-institution-brand {
@@ -59,11 +67,11 @@
 }
 
 .publication-languages {
+  position: absolute;
+  top: 6px;
+  right: 0;
   display: flex;
   gap: 16px;
-  align-self: flex-start;
-  justify-self: end;
-  margin-top: 6px;
 }
 
 .publication-languages a {
@@ -155,6 +163,9 @@
 @media (max-width: 640px) {
   .publication-masthead {
     position: relative;
+  }
+
+  .publication-masthead-row {
     grid-template-columns: 151px 1px minmax(0, 1fr) 44px;
     column-gap: 8px;
     min-height: auto;
@@ -189,11 +200,10 @@
   }
 
   .publication-languages {
-    grid-column: 1 / -1;
+    position: static;
     justify-content: center;
     width: 100%;
     padding-block: 10px 8px;
-    margin: 10px 0 0;
   }
 
   .publication-languages a {

@@ -19,14 +19,15 @@ import "./publication-header.css";
 interface Props {
   currentPath: string;
   locale?: SiteLocale;
+  localeLinks: Record<SiteLocale, string>;
 }
 
 const locales = [
-  ["lt", "LT", "/"],
-  ["en", "EN", "/en"],
-  ["ru", "RU", "/ru"],
-  ["uk", "UA", "/uk"],
-  ["be", "BY", "/be"],
+  ["lt", "LT"],
+  ["en", "EN"],
+  ["ru", "RU"],
+  ["uk", "UA"],
+  ["be", "BY"],
 ] as const;
 
 function isActive(currentPath: string, href: string) {
@@ -37,6 +38,7 @@ function isActive(currentPath: string, href: string) {
 
 export default function PublicationHeader({
   currentPath,
+  localeLinks,
   locale = "lt",
 }: Props) {
   const copy = localeUi[locale];
@@ -59,40 +61,83 @@ export default function PublicationHeader({
   return (
     <header className="publication-header">
       <div className="site-width publication-masthead">
-        <a
-          aria-label={`${copy.home} · ortodoksas.lt`}
-          className="publication-institution-brand"
-          href={localized ? `/${locale}` : "/"}
-        >
-          <img
-            alt="Visuotinis Patriarchatas"
-            className="publication-patriarchate-emblem"
-            height="64"
-            src="/assets/brand/source/ecumenical-patriarchate-emblem.svg"
-            width="64"
-          />
-          <img
-            alt="Visuotinio patriarchato egzarchatas Lietuvoje"
-            className="publication-exarchate-lockup"
-            height="301"
-            src="/assets/brand/production/exarchate-lockup-client.png"
-            width="807"
-          />
-        </a>
-        <span aria-hidden="true" className="publication-masthead-rule" />
-        <a
-          className="publication-wordmark"
-          href={localized ? `/${locale}` : "/"}
-        >
-          <strong>ortodoksas.lt</strong>
-          <span>Bažnyčios leidinys</span>
-        </a>
+        <div className="publication-masthead-row">
+          <a
+            aria-label={`${copy.home} · ortodoksas.lt`}
+            className="publication-institution-brand"
+            href={localized ? `/${locale}` : "/"}
+          >
+            <img
+              alt="Visuotinis Patriarchatas"
+              className="publication-patriarchate-emblem"
+              height="64"
+              src="/assets/brand/source/ecumenical-patriarchate-emblem.svg"
+              width="64"
+            />
+            <img
+              alt="Visuotinio patriarchato egzarchatas Lietuvoje"
+              className="publication-exarchate-lockup"
+              height="301"
+              src="/assets/brand/production/exarchate-lockup-client.png"
+              width="807"
+            />
+          </a>
+          <span aria-hidden="true" className="publication-masthead-rule" />
+          <a
+            className="publication-wordmark"
+            href={localized ? `/${locale}` : "/"}
+          >
+            <strong>ortodoksas.lt</strong>
+            <span>Bažnyčios leidinys</span>
+          </a>
+          <div className="publication-mobile-trigger">
+            <Sheet>
+              <SheetTrigger
+                render={
+                  <button
+                    aria-label="Atverti meniu"
+                    className="publication-menu-button"
+                    type="button"
+                  />
+                }
+              >
+                <MenuIcon aria-hidden="true" />
+              </SheetTrigger>
+              <SheetContent className="publication-mobile-sheet" side="right">
+                <SheetHeader>
+                  <SheetTitle>ortodoksas.lt</SheetTitle>
+                </SheetHeader>
+                <nav
+                  aria-label={copy.edition}
+                  className="publication-mobile-links"
+                >
+                  {items.map(([label, href]) => (
+                    <a
+                      aria-current={
+                        isActive(currentPath, href) ? "page" : undefined
+                      }
+                      className={
+                        isActive(currentPath, href) ? "active" : undefined
+                      }
+                      href={href}
+                      key={href}
+                    >
+                      {label}
+                    </a>
+                  ))}
+                  <a href="/paieska">Paieška</a>
+                </nav>
+              </SheetContent>
+            </Sheet>
+          </div>
+        </div>
+        <div aria-hidden="true" className="publication-masthead-divider" />
         <nav aria-label={copy.languages} className="publication-languages">
-          {locales.map(([code, label, href]) => (
+          {locales.map(([code, label]) => (
             <a
               aria-current={code === locale ? "page" : undefined}
               className={code === locale ? "active" : undefined}
-              href={href}
+              href={localeLinks[code]}
               key={code}
               lang={code}
             >
@@ -100,46 +145,6 @@ export default function PublicationHeader({
             </a>
           ))}
         </nav>
-        <div className="publication-mobile-trigger">
-          <Sheet>
-            <SheetTrigger
-              render={
-                <button
-                  aria-label="Atverti meniu"
-                  className="publication-menu-button"
-                  type="button"
-                />
-              }
-            >
-              <MenuIcon aria-hidden="true" />
-            </SheetTrigger>
-            <SheetContent className="publication-mobile-sheet" side="right">
-              <SheetHeader>
-                <SheetTitle>ortodoksas.lt</SheetTitle>
-              </SheetHeader>
-              <nav
-                aria-label={copy.edition}
-                className="publication-mobile-links"
-              >
-                {items.map(([label, href]) => (
-                  <a
-                    aria-current={
-                      isActive(currentPath, href) ? "page" : undefined
-                    }
-                    className={
-                      isActive(currentPath, href) ? "active" : undefined
-                    }
-                    href={href}
-                    key={href}
-                  >
-                    {label}
-                  </a>
-                ))}
-                <a href="/paieska">Paieška</a>
-              </nav>
-            </SheetContent>
-          </Sheet>
-        </div>
       </div>
       <nav aria-label={copy.edition} className="publication-primary-nav">
         <div className="site-width publication-nav-inner">

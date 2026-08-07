@@ -2,7 +2,7 @@
 import "../index.css";
 import SiteFooter from "../components/layout/SiteFooter.astro";
 import SiteHeader from "../components/layout/SiteHeader.astro";
-import type { SiteLocale } from "../lib/publication";
+import { getLocaleAlternates, type SiteLocale } from "../lib/publication";
 
 interface AlternateLink {
   href: string;
@@ -35,6 +35,12 @@ const {
 const siteUrl = Astro.site ?? new URL("https://ortodoksas.grassinside.com");
 const canonical = new URL(canonicalPath, siteUrl).toString();
 const socialImage = image?.startsWith("/") ? new URL(image, siteUrl).toString() : image;
+const resolvedAlternates = alternates.length
+  ? alternates
+  : getLocaleAlternates(canonicalPath).map(({ href, locale }) => ({
+      href: new URL(href, siteUrl).toString(),
+      hreflang: locale,
+    }));
 const baseSchema = {
   "@context": "https://schema.org",
   "@type": type === "article" ? "Article" : "WebSite",
@@ -57,7 +63,7 @@ const baseSchema = {
     <title>{title}</title>
     <link rel="canonical" href={canonical} />
     <link rel="alternate" type="application/rss+xml" title="ortodoksas.lt RSS" href={new URL("/rss.xml", siteUrl).toString()} />
-    {alternates.map((alternate) => <link rel="alternate" hreflang={alternate.hreflang} href={alternate.href} />)}
+    {resolvedAlternates.map((alternate) => <link rel="alternate" hreflang={alternate.hreflang} href={alternate.href} />)}
     <meta property="og:type" content={type} />
     <meta property="og:site_name" content="ortodoksas.lt" />
     <meta property="og:title" content={title} />
