@@ -21,7 +21,7 @@
     "preview:status": "bash scripts-preview.sh status",
     "preview:up": "bash scripts-preview.sh up",
     "test": "pnpm test:react && pnpm test:worker",
-    "test:react": "vitest run --config vitest.config.ts --exclude src/app.test.tsx",
+    "test:react": "vitest run --config vitest.config.ts",
     "test:worker": "vitest run --config vitest.worker.config.ts",
     "typecheck": "tsc -b"
   },
@@ -33,7 +33,6 @@
     "@ortodoksas-lt/content": "workspace:*",
     "@ortodoksas-lt/db": "workspace:*",
     "@ortodoksas-lt/editor": "workspace:*",
-    "@tanstack/react-router": "^1.170.19",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.2",
