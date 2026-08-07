@@ -252,8 +252,8 @@ Chain motifs create the signature organic geometry: exact ceremonial-gold vertic
 - **Typography:** Set the publication name in bold Playfair with a compact uppercase Arimo descriptor.
 - **Sizing:** Render the Ecumenical Patriarchate emblem and the crest portion of the Exarchate lockup at the same optical height: 52px on desktop and 40px on mobile.
 - **Responsive behavior:** Preserve both institutional marks, the hairline, and the publication identity in one compact identity row. Place the language choices below the masthead's single green divider.
-- **Desktop rhythm:** Use a 96px identity row, place languages 20px from its top edge, follow it with the single 1px green divider and a 48px primary-navigation row, then use 24px before homepage content.
-- **Mobile rhythm:** Use a 68px identity row: the 44px menu target plus 12px vertical padding determines the row while the 40px marks center inside it. Follow it with the single 1px green divider and one 48px language row, then use 16px before homepage content.
+- **Desktop rhythm:** Use an 80px identity row, place languages 16px from its top edge, follow it with the single 1px green divider and a 48px primary-navigation row, then use 24px before homepage content.
+- **Mobile rhythm:** Use a 60px identity row: the 44px menu target plus 8px vertical padding determines the row while the 40px marks center inside it. Follow it with the single 1px green divider and one 44px language row, then use 8px before homepage content.
 - **Scrolling:** The document owns vertical scrolling. Publication components create no nested vertical scroller and reserve no scrollbar gutter.
 
 - **Page intro spacing:** Use 48px above and 32px below the desktop archive/page intro; use 32px above and 24px below on mobile.
@@ -266,9 +266,9 @@ Chain motifs create the signature organic geometry: exact ceremonial-gold vertic
 
 ### Motifs
 
-- **Story rail:** Use one undistorted green chain line, positioned 4px beyond the right edge of the desktop story rail. Remove it when the desktop story rail collapses.
-- **Service band:** Use one full-color ceremonial-gold chain at the right edge of every service cell. The motif itself owns that boundary, so the same edge receives no extra border.
-- **Assets:** Preserve the client PNG extractions as provenance masters. Production SVG traces retain the supplied geometry and exact palette while allowing responsive rendering without raster stretching.
+- **Story rail:** Use the single-column green chain SVG at its intrinsic ratio, positioned 4px beyond the right edge of the desktop story rail. Remove it when the desktop story rail collapses.
+- **Service band:** Use the pixel-faithful ceremonial-gold chain continuously at grid-column boundaries. Desktop shows the four quarter boundaries; mobile shows the center and outer-right boundaries. The motif itself owns each boundary.
+- **Assets:** Preserve the client PNG extractions as the production masters. The vectorization comparison remains an audit artifact until an identity-owner SVG export supersedes it.
 
 ### Story Links
 
