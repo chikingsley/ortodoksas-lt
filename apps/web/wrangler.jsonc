@@ -4,8 +4,14 @@
   "main": "./worker/index.ts",
   "compatibility_date": "2026-08-05",
   "compatibility_flags": ["nodejs_compat"],
+  "routes": [
+    {
+      "pattern": "ortodoksas.grassinside.com",
+      "custom_domain": true
+    }
+  ],
   "vars": {
-    "ENVIRONMENT": "development"
+    "ENVIRONMENT": "production"
   },
   "assets": {
     "binding": "ASSETS",

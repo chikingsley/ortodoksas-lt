@@ -3,11 +3,21 @@ import "./institutional-marks.css";
 
 interface Props {
   className?: string;
+  tone?: "default" | "reverse";
 }
 
-export default function InstitutionalMarks({ className }: Props) {
+export default function InstitutionalMarks({
+  className,
+  tone = "default",
+}: Props) {
   return (
-    <span className={cn("institutional-marks", className)}>
+    <span
+      className={cn(
+        "institutional-marks",
+        `institutional-marks--${tone}`,
+        className
+      )}
+    >
       <img
         alt="Visuotinis Patriarchatas"
         className="institutional-marks__patriarchate"
@@ -15,13 +25,28 @@ export default function InstitutionalMarks({ className }: Props) {
         src="/assets/brand/source/ecumenical-patriarchate-emblem.svg"
         width="64"
       />
-      <img
-        alt="Visuotinio patriarchato egzarchatas Lietuvoje"
+      <span
+        aria-label="Visuotinio patriarchato egzarchatas Lietuvoje"
         className="institutional-marks__exarchate"
-        height="301"
-        src="/assets/brand/production/exarchate-lockup-client.png"
-        width="807"
-      />
+        role="img"
+      >
+        <img
+          alt=""
+          className="institutional-marks__exarchate-crest"
+          height="408"
+          src="/assets/brand/production/exarchate-crest-client.png"
+          width="387"
+        />
+        <span
+          aria-hidden="true"
+          className="institutional-marks__exarchate-wordmark"
+        >
+          <span>VISUOTINIO</span>
+          <span>PATRIARCHATO</span>
+          <span>EGZARCHATAS</span>
+          <span>LIETUVOJE</span>
+        </span>
+      </span>
     </span>
   );
 }

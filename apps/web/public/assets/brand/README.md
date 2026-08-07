@@ -20,7 +20,7 @@ This folder contains the client-supplied Exarchate identity, the Canva reference
 - `source/ecumenical-patriarchate-emblem-2048.png`: transparent 2,048 px render of that vector
 - `source/ecumenical-patriarchate-emblem-official-raster.png`: 512 px raster served by the Ecumenical Patriarchate's official website
 
-The production interface renders the client-supplied Exarchate lockup and the verified Patriarchate vector through the shared `InstitutionalMarks` component. The masthead and footer therefore preserve one asset, order, proportion, gap, and optical-height contract. An original vector supplied by the identity owner can supersede the Exarchate raster later.
+The production interface composes the accepted transparent Exarchate crest with a live Arimo 700 wordmark through the shared `InstitutionalMarks` component. The header uses the client green wordmark; the deep-green footer uses the approved reverse white wordmark. Both surfaces preserve one asset, order, proportion, gap, and optical-height contract. The client full-lockup PNG remains the visual source reference. An original vector supplied by the identity owner can supersede the crest raster later.
 
 The Canva decorations remain transparent PNGs as their pixel-faithful masters. The green story-rail trace isolates one column from the supplied chain geometry for the approved narrow edge treatment. The broader vectorization trial remains an audit comparison until an identity-owner export supersedes it. Treat the supplied samples as bounded decorative panels and vertical motifs. Preserve their orientation, proportions, and colors.
 
