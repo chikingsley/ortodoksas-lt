@@ -9,7 +9,7 @@ This is the implementation checklist for the public publication UI. A checked it
 - [x] `SiteHeader.astro` is the server boundary and passes `currentPath`, `locale`, and resolved locale destinations into the hydrated header.
 - [x] `DESIGN.md` owns colors, type, spacing, borders, active-state, and boundary rules.
 - [x] Astro routes and `SiteHeader.astro` are the sole public shell; the superseded Vite/TanStack entrypoint, duplicate Astro navigation components, and orphaned header CSS are removed.
-- [ ] `SiteFooter` uses the same institutional mark contract as the masthead.
+- [x] `SiteFooter` and `PublicationHeader` render the same `InstitutionalMarks` component and optical-height contract.
 
 ## Public surfaces
 

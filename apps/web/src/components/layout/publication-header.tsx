@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/sheet";
 import { localeUi } from "@/lib/locale-ui";
 import type { SiteLocale } from "@/lib/publication";
+import InstitutionalMarks from "./institutional-marks";
 import "./publication-header.css";
 
 interface Props {
@@ -67,20 +68,7 @@ export default function PublicationHeader({
             className="publication-institution-brand"
             href={localized ? `/${locale}` : "/"}
           >
-            <img
-              alt="Visuotinis Patriarchatas"
-              className="publication-patriarchate-emblem"
-              height="64"
-              src="/assets/brand/source/ecumenical-patriarchate-emblem.svg"
-              width="64"
-            />
-            <img
-              alt="Visuotinio patriarchato egzarchatas Lietuvoje"
-              className="publication-exarchate-lockup"
-              height="301"
-              src="/assets/brand/production/exarchate-lockup-client.png"
-              width="807"
-            />
+            <InstitutionalMarks />
           </a>
           <span aria-hidden="true" className="publication-masthead-rule" />
           <a

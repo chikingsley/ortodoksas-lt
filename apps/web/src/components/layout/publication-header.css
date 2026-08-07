@@ -23,21 +23,8 @@
 }
 
 .publication-institution-brand {
-  display: flex;
-  gap: 14px;
-  align-items: center;
+  display: inline-flex;
   width: 199px;
-}
-
-.publication-patriarchate-emblem {
-  flex: 0 0 auto;
-  width: 52px;
-  height: 52px;
-}
-
-.publication-exarchate-lockup {
-  width: 133px;
-  height: auto;
 }
 
 .publication-masthead-rule {
@@ -173,17 +160,11 @@
   }
 
   .publication-institution-brand {
-    gap: 8px;
+    --institutional-exarchate-width: 103px;
+    --institutional-marks-gap: 8px;
+    --institutional-patriarchate-size: 40px;
+
     width: 151px;
-  }
-
-  .publication-patriarchate-emblem {
-    width: 40px;
-    height: 40px;
-  }
-
-  .publication-exarchate-lockup {
-    width: 103px;
   }
 
   .publication-masthead-rule {

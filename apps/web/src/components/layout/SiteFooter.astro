@@ -1,7 +1,8 @@
 ---
 import { localeUi } from "../../lib/locale-ui";
 import type { SiteLocale } from "../../lib/publication";
-import InstitutionalLockup from "../InstitutionalLockup.astro";
+import InstitutionalMarks from "./institutional-marks";
+import "./site-footer.css";
 
 interface Props {
   locale?: SiteLocale;
@@ -15,10 +16,7 @@ const localized = locale !== "lt";
 <footer class="site-footer">
   <div class="site-width footer-grid">
     <div class="footer-identity">
-      <div class="footer-marks">
-        <img src="/assets/brand/source/ecumenical-patriarchate-emblem.svg" alt="" width="52" height="52" />
-        <InstitutionalLockup class="footer-exarchate" />
-      </div>
+      <InstitutionalMarks className="footer-institutional-marks" />
       <div><div class="footer-brand">ortodoksas.lt</div><p>{copy.footerDescription}</p></div>
     </div>
     <div>
