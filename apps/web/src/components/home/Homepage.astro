@@ -1,0 +1,74 @@
+---
+import type { HomepageModel } from "../../lib/homepage";
+import ArchivePanel from "../archive/ArchivePanel.astro";
+import ArticleCard from "../publication/ArticleCard.astro";
+import LeadStory from "../publication/LeadStory.astro";
+import SectionHeader from "../publication/SectionHeader.astro";
+import StoryRow from "../publication/StoryRow.astro";
+import LibraryCallout from "./LibraryCallout.astro";
+import ServiceBand from "./ServiceBand.astro";
+
+interface Props {
+  model: HomepageModel;
+}
+
+const { model } = Astro.props;
+---
+
+<main>
+  {model.lead ? (
+    <section class="site-width home-hero">
+      <LeadStory entry={model.lead} />
+      <div class="secondary-stories">
+        {model.secondary.map((entry) => <StoryRow entry={entry} />)}
+      </div>
+      <span class="hero-motif" aria-hidden="true" />
+    </section>
+  ) : null}
+
+  <ServiceBand />
+
+  <section
+    class="site-width mobile-secondary-list"
+    aria-label="Naujausi straipsniai"
+  >
+    <SectionHeader title="Naujausi straipsniai" />
+    {model.secondary.map((entry) => (
+      <StoryRow entry={entry} variant="compact" />
+    ))}
+  </section>
+
+  <section class="site-width home-lower" id="articles">
+    <div>
+      <SectionHeader
+        href="/archyvas"
+        linkLabel="Visi straipsniai"
+        title="Naujausi straipsniai"
+      />
+      <div class="article-grid">
+        {model.recent.map((entry) => <ArticleCard entry={entry} />)}
+      </div>
+    </div>
+    <ArchivePanel months={model.archiveMonths} />
+  </section>
+
+  {model.sectionGroups.map((section) => (
+    <section class="site-width content-section section-row">
+      <SectionHeader
+        href={section.href}
+        linkLabel="Daugiau"
+        title={section.title}
+      />
+      <div class="section-articles">
+        {section.articles.map((entry) => (
+          <StoryRow entry={entry} variant="section" />
+        ))}
+      </div>
+    </section>
+  ))}
+
+  <LibraryCallout
+    description={model.library.description}
+    title={model.library.title}
+  />
+</main>

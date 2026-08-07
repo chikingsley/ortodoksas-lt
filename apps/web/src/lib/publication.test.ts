@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { selectHomepageArticles } from "./homepage";
+import { buildHomepageModel, selectHomepageArticles } from "./homepage";
+import type { CatalogEntry } from "./publication";
 
 interface Article {
   hero: string | null;
@@ -21,6 +22,24 @@ function article(
     ...(homepageOrder === undefined ? {} : { homepageOrder }),
     path,
     published,
+  };
+}
+
+function catalogEntry(
+  path: string,
+  published: string | null,
+  overrides: Partial<CatalogEntry> = {}
+): CatalogEntry {
+  return {
+    description: `${path} description`,
+    hero: `/media/${path}.jpg`,
+    kind: "article",
+    labels: [],
+    path,
+    published,
+    section: "Naujienos",
+    title: path,
+    ...overrides,
   };
 }
 
@@ -68,5 +87,42 @@ describe("selectHomepageArticles", () => {
       "/four",
     ]);
     expect(result.remaining.map((entry) => entry.path)).toEqual(["/five"]);
+  });
+
+  it("builds archive, section, recent-story, and library presentation data", () => {
+    const articles = [
+      catalogEntry("/lead", "2026-08-06", { homepage: "lead" }),
+      catalogEntry("/one", "2026-08-05"),
+      catalogEntry("/two", "2026-08-04"),
+      catalogEntry("/three", "2026-08-03"),
+      catalogEntry("/four", "2026-08-02"),
+      catalogEntry("/five", "2026-08-01"),
+      catalogEntry("/six", "2026-07-31"),
+      catalogEntry("/seven", "2026-07-30"),
+    ];
+    const library = catalogEntry("/p/biblioteka.html", null, {
+      description: "Library description",
+      kind: "page",
+      title: "Biblioteka",
+    });
+
+    const model = buildHomepageModel({
+      articles,
+      catalog: [...articles, library],
+      sections: ["Naujienos"],
+    });
+
+    expect(model.lead?.path).toBe("/lead");
+    expect(model.recent.map((entry) => entry.path)).toEqual([
+      "/five",
+      "/six",
+      "/seven",
+    ]);
+    expect(model.archiveMonths).toEqual([
+      ["2026 m. rugpjūtis", 6],
+      ["2026 m. liepa", 2],
+    ]);
+    expect(model.sectionGroups[0]?.articles).toHaveLength(4);
+    expect(model.library.description).toBe("Library description");
   });
 });

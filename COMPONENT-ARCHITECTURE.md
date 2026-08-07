@@ -13,7 +13,7 @@ This is the implementation checklist for the public publication UI. A checked it
 
 ## Public surfaces
 
-- [ ] Homepage: compose the shared shell, service links, lead/supporting story cards, archive rail, and library callout from reusable publication components.
+- [x] Homepage: `Homepage` composes the shared shell, service band, lead/supporting story cards, archive rail, section groups, and library callout from reusable publication components and a tested view model.
 - [ ] Archive: compose the shared shell, section controls, archive rows, and pagination from reusable primitives.
 - [ ] Search: compose the shared shell, query control, result rows, and empty/error states from reusable primitives.
 - [ ] Article: compose the shared shell, breadcrumb/context, article header, media, body, related stories, and share actions from reusable primitives.

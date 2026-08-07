@@ -1,83 +1,13 @@
 ---
-import ArchivePanel from "../components/archive/ArchivePanel.astro";
-import ArticleCard from "../components/publication/ArticleCard.astro";
-import LeadStory from "../components/publication/LeadStory.astro";
-import SectionHeader from "../components/publication/SectionHeader.astro";
-import StoryRow from "../components/publication/StoryRow.astro";
+import Homepage from "../components/home/Homepage.astro";
 import SiteLayout from "../layouts/SiteLayout.astro";
-import { selectHomepageArticles } from "../lib/homepage";
-import { articles, catalog, sectionSlug, sections } from "../lib/publication";
+import { buildHomepageModel } from "../lib/homepage";
+import { articles, catalog, sections } from "../lib/publication";
 
-const { lead, secondary, remaining } = selectHomepageArticles(articles);
-const standalone = new Map(catalog.filter((entry) => entry.kind === "page").map((entry) => [entry.path, entry]));
 const pageDescription = "Viskas apie Ortodoksų Bažnyčią Lietuvoje ir pasaulyje, taip pat apie ortodoksų tikėjimą ir gyvenimą.";
-const archiveMonths = new Map<string, number>();
-for (const article of articles) {
-  if (!article.published) continue;
-  const date = new Date(article.published);
-  const key = new Intl.DateTimeFormat("lt-LT", { month: "long", year: "numeric" }).format(date);
-  archiveMonths.set(key, (archiveMonths.get(key) ?? 0) + 1);
-}
-const serviceLinks = [
-  { href: "/p/bendruomenes_21.html", title: "Pamaldos", detail: "Tvarkaraščiai ir bendruomenės", icon: "church" },
-  { href: "/p/kalendorius.html", title: "Kalendorius", detail: "Šventės ir pasninkai", icon: "calendar" },
-  { href: "/p/biblioteka.html", title: "Biblioteka", detail: "Straipsniai ir knygos", icon: "book" },
-  { href: "/p/paremti.html", title: "Paremti", detail: "Prisidėkite prie misijos", icon: "heart" },
-];
+const model = buildHomepageModel({ articles, catalog, sections });
 ---
 
 <SiteLayout canonicalPath="/" title="ortodoksas.lt" description={pageDescription}>
-  <main>
-    {lead ? <section class="site-width home-hero">
-      <LeadStory entry={lead} />
-      <div class="secondary-stories">
-        {secondary.map((entry) => <StoryRow entry={entry} />)}
-      </div>
-      <span class="hero-motif" aria-hidden="true"></span>
-    </section> : null}
-
-    <section class="service-band" aria-label="Praktinė informacija">
-      <div class="site-width service-grid">
-        {serviceLinks.map((service) => <a href={service.href}>
-          <svg class="service-icon" aria-hidden="true" viewBox="0 0 32 32">
-            {service.icon === "church" ? <><path d="M16 3v7M12.5 6.5h7M8 27h16M10 27V14l6-4 6 4v13M14 27v-7h4v7"></path></> : null}
-            {service.icon === "calendar" ? <><rect x="6" y="8" width="20" height="18" rx="1"></rect><path d="M10 5v6M22 5v6M6 13h20M11 18h3M18 18h3M11 22h3M18 22h3"></path></> : null}
-            {service.icon === "book" ? <><path d="M5 7h8a3 3 0 0 1 3 3v17a4 4 0 0 0-4-4H5zM27 7h-8a3 3 0 0 0-3 3v17a4 4 0 0 1 4-4h7z"></path></> : null}
-            {service.icon === "heart" ? <path d="M16 27S6 21 6 13.5A5.5 5.5 0 0 1 16 10a5.5 5.5 0 0 1 10 3.5C26 21 16 27 16 27Z"></path> : null}
-          </svg>
-          <span><strong>{service.title}</strong><small>{service.detail}</small></span>
-        </a>)}
-        <span class="service-motif service-motif-1" aria-hidden="true"></span>
-        <span class="service-motif service-motif-2" aria-hidden="true"></span>
-        <span class="service-motif service-motif-3" aria-hidden="true"></span>
-        <span class="service-motif service-motif-4" aria-hidden="true"></span>
-      </div>
-    </section>
-
-    <section class="site-width mobile-secondary-list" aria-label="Naujausi straipsniai">
-      <SectionHeader title="Naujausi straipsniai" />
-      {secondary.map((entry) => <StoryRow entry={entry} variant="compact" />)}
-    </section>
-
-    <section class="site-width home-lower" id="articles">
-      <div>
-        <SectionHeader href="/archyvas" linkLabel="Visi straipsniai" title="Naujausi straipsniai" />
-        <div class="article-grid">{remaining.slice(0, 3).map((entry) => <ArticleCard entry={entry} />)}</div>
-      </div>
-      <ArchivePanel months={[...archiveMonths.entries()]} />
-    </section>
-
-    {sections.slice(0, 2).map((section) => {
-      const sectionArticles = articles.filter((entry) => entry.section === section && entry.path !== lead?.path).slice(0, 4);
-      return sectionArticles.length ? <section class="site-width content-section section-row">
-        <SectionHeader href={`/tema/${sectionSlug(section)}`} linkLabel="Daugiau" title={section} />
-        <div class="section-articles">{sectionArticles.map((entry) => <StoryRow entry={entry} variant="section" />)}</div>
-      </section> : null;
-    })}
-
-    <section class="site-width library-callout">
-      <div><h2>{standalone.get("/p/biblioteka.html")?.title ?? "Biblioteka"}</h2><p>{standalone.get("/p/biblioteka.html")?.description ?? "Atkurtų tekstų, paskaitų ir liturginės medžiagos rinkinys."}</p><a class="text-link" href="/p/biblioteka.html">Atverti biblioteką <span aria-hidden="true">→</span></a></div>
-      <img src="/assets/brand/production/canva-patterns/pattern-gold-grid.png" alt="" />
-    </section>
-  </main>
+  <Homepage model={model} />
 </SiteLayout>
