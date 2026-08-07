@@ -2,6 +2,18 @@ import { env, SELF } from "cloudflare:test";
 import { describe, expect, it } from "vitest";
 
 describe("Worker API", () => {
+  it("redirects a legacy localized slug to its readable canonical URL", async () => {
+    const response = await SELF.fetch(
+      "https://example.test/uk/2022/05/blog-post_15.html",
+      { redirect: "manual" }
+    );
+
+    expect(response.status).toBe(301);
+    expect(response.headers.get("location")).toBe(
+      "https://example.test/uk/2022/05/istoriya-konstantynopolskoho-patriarkhatu-u-lytvi.html"
+    );
+  });
+
   it("streams recovered R2 media with byte ranges", async () => {
     const fileName = `${"a".repeat(64)}.mp4`;
     await env.MEDIA.put(`archive/${fileName}`, "abcdef", {
@@ -28,7 +40,7 @@ describe("Worker API", () => {
 
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({
-      environment: "development",
+      environment: "production",
       status: "ok",
     });
   });

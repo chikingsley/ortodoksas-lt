@@ -1,4 +1,5 @@
 import {
+  type AnySQLiteColumn,
   index,
   integer,
   sqliteTable,
@@ -69,12 +70,52 @@ export const articles = sqliteTable(
     title: text("title").notNull(),
     translationGroupId: text("translation_group_id").notNull(),
     translationKind: text("translation_kind").notNull().default("original"),
+    translationReviewedAt: integer("translation_reviewed_at"),
+    translationReviewedBy: text("translation_reviewed_by"),
+    translationReviewStatus: text("translation_review_status")
+      .notNull()
+      .default("not_required"),
+    translationSourceArticleId: text(
+      "translation_source_article_id"
+    ).references((): AnySQLiteColumn => articles.id, { onDelete: "set null" }),
+    translationSourceHash: text("translation_source_hash"),
     updatedAt: integer("updated_at").notNull(),
   },
   (table) => [
     uniqueIndex("articles_language_slug_unique").on(table.language, table.slug),
     index("articles_status_updated_idx").on(table.status, table.updatedAt),
     index("articles_translation_group_idx").on(table.translationGroupId),
+  ]
+);
+
+export const translationRuns = sqliteTable(
+  "translation_runs",
+  {
+    characterCount: integer("character_count").notNull().default(0),
+    completedAt: integer("completed_at"),
+    createdAt: integer("created_at").notNull(),
+    error: text("error"),
+    id: text("id").primaryKey(),
+    model: text("model").notNull(),
+    provider: text("provider").notNull(),
+    sourceArticleId: text("source_article_id")
+      .notNull()
+      .references(() => articles.id, { onDelete: "cascade" }),
+    sourceHash: text("source_hash").notNull(),
+    sourceLanguage: text("source_language").notNull(),
+    status: text("status").notNull().default("queued"),
+    targetArticleId: text("target_article_id").references(() => articles.id, {
+      onDelete: "set null",
+    }),
+    targetLanguage: text("target_language").notNull(),
+  },
+  (table) => [
+    index("translation_runs_source_idx").on(
+      table.sourceArticleId,
+      table.targetLanguage,
+      table.createdAt
+    ),
+    index("translation_runs_status_idx").on(table.status, table.createdAt),
   ]
 );
 

@@ -11,10 +11,60 @@ const localeAliases = new Map([
   ["/uk", "/uk.html"],
   ["/be", "/be.html"],
 ]);
+const localizedLegacyRedirects = new Map([
+  [
+    "/ru/2022/05/blog-post_10.html",
+    "/ru/2022/05/pochemu-ya-ne-mogu-nazyvat-kirilla-ottsom.html",
+  ],
+  [
+    "/ru/2022/05/blog-post_11.html",
+    "/ru/2022/05/duhovenstvo-pokidaet-moskovskiy-patriarhat.html",
+  ],
+  [
+    "/ru/2022/05/blog-post_19.html",
+    "/ru/2022/05/pismo-pravoslavnyh-miryan-mitropolitu.html",
+  ],
+  [
+    "/ru/2022/05/blog-post_50.html",
+    "/ru/2022/05/konstantinopolskiy-patriarhat-v-litve.html",
+  ],
+  [
+    "/ru/2022/07/blog-post.html",
+    "/ru/2022/07/v-selyavko-obrashchenie-litovskoy-eparhii-k-prezidentu.html",
+  ],
+  [
+    "/ru/2022/07/blog-post_27.html",
+    "/ru/2022/07/v-selyavko-zachem-litve-yurisdiktsiya-konstantinopolya.html",
+  ],
+  ["/uk/2022/05/blog-post.html", "/uk/2022/05/vitayemo.html"],
+  [
+    "/uk/2022/05/blog-post_15.html",
+    "/uk/2022/05/istoriya-konstantynopolskoho-patriarkhatu-u-lytvi.html",
+  ],
+  [
+    "/uk/2022/05/blog-post_16.html",
+    "/uk/2022/05/serbska-tserkva-vidnovlyuye-spilkuvannya-z-ohridom.html",
+  ],
+  [
+    "/uk/2022/05/blog-post_18.html",
+    "/uk/2022/05/lyst-pravoslavnykh-myrian-lytovskomu-mytropolytu.html",
+  ],
+  [
+    "/uk/2022/05/blog-post_21.html",
+    "/uk/2022/05/posol-lytvy-vidvidav-vselenskyi-patriarkhat.html",
+  ],
+  ["/uk/2022/06/22.html", "/uk/2022/06/psalom-22-lytovskoyu.html"],
+]);
 const trailingSlash = /\/$/;
 const mediaPathPattern = /^\/media\/files\/([0-9a-f]{64}\.[a-z0-9]+)$/i;
 const mediaIdPattern = /^\/api\/media\/([^/]+)$/u;
 const mediaCacheControl = "public, max-age=31536000, immutable";
+const supportedLanguages = new Set(["be", "en", "lt", "ru", "uk"]);
+
+const requestedLanguage = (url: URL) => {
+  const language = url.searchParams.get("language") ?? "lt";
+  return supportedLanguages.has(language) ? language : "lt";
+};
 
 const publicArticle = (article: typeof articles.$inferSelect) => ({
   bodyHtml: renderArticleBody(
@@ -37,6 +87,7 @@ const publicArticle = (article: typeof articles.$inferSelect) => ({
 async function servePublicationApi(request: Request, env: Env) {
   const database = drizzle(env.DB);
   const url = new URL(request.url);
+  const language = requestedLanguage(url);
   if (url.pathname === "/api/publication") {
     const path = url.searchParams.get("path")?.replace(/^\/+|\.html$/gu, "");
     if (!path) {
@@ -48,7 +99,13 @@ async function servePublicationApi(request: Request, env: Env) {
     const article = await database
       .select()
       .from(articles)
-      .where(and(eq(articles.slug, path), eq(articles.status, "published")))
+      .where(
+        and(
+          eq(articles.slug, path),
+          eq(articles.language, language),
+          eq(articles.status, "published")
+        )
+      )
       .limit(1);
     return article[0]
       ? Response.json({ article: publicArticle(article[0]) })
@@ -59,7 +116,9 @@ async function servePublicationApi(request: Request, env: Env) {
     database
       .select()
       .from(articles)
-      .where(eq(articles.status, "published"))
+      .where(
+        and(eq(articles.language, language), eq(articles.status, "published"))
+      )
       .orderBy(desc(articles.publishedAt))
       .limit(24),
     database
@@ -245,6 +304,10 @@ function cleanRouteAlias(pathname: string) {
 export default {
   fetch(request, env) {
     const url = new URL(request.url);
+    const localizedRedirect = localizedLegacyRedirects.get(url.pathname);
+    if (localizedRedirect && request.method === "GET") {
+      return Response.redirect(new URL(localizedRedirect, url), 301);
+    }
     const mediaMatch = url.pathname.match(mediaPathPattern);
     if (mediaMatch?.[1]) {
       return serveMedia(request, env, mediaMatch[1]);

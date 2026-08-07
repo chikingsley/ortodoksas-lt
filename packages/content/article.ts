@@ -13,6 +13,13 @@ export const articleStatusSchema = z.enum([
 
 export const translationKindSchema = z.enum(["original", "human", "machine"]);
 
+export const translationReviewStatusSchema = z.enum([
+  "not_required",
+  "pending",
+  "approved",
+  "changes_requested",
+]);
+
 const tiptapMarkSchema = z.looseObject({
   attrs: z.record(z.string(), z.unknown()).optional(),
   type: z.string().min(1),
@@ -60,22 +67,50 @@ export const createArticleSchema = z.object({
   title: z.string().trim().min(1).max(240),
   translationGroupId: z.string().uuid().optional(),
   translationKind: translationKindSchema.default("original"),
+  translationReviewedAt: z.number().int().nonnegative().nullable().optional(),
+  translationReviewedBy: z.string().trim().min(1).max(200).optional(),
+  translationReviewStatus:
+    translationReviewStatusSchema.default("not_required"),
+  translationSourceArticleId: z.string().uuid().optional(),
+  translationSourceHash: z
+    .string()
+    .regex(/^[0-9a-f]{64}$/u)
+    .optional(),
 });
 
 export type CreateArticleInput = z.infer<typeof createArticleSchema>;
 export type TiptapDocument = z.infer<typeof tiptapDocumentSchema>;
 
-export const updateArticleSchema = createArticleSchema.pick({
-  body: true,
-  heroSourceUrl: true,
-  kind: true,
-  labels: true,
-  language: true,
-  publishedAt: true,
-  section: true,
-  slug: true,
-  status: true,
-  summary: true,
-  title: true,
-  translationKind: true,
-});
+export const updateArticleSchema = createArticleSchema
+  .pick({
+    body: true,
+    heroSourceUrl: true,
+    kind: true,
+    labels: true,
+    language: true,
+    publishedAt: true,
+    section: true,
+    slug: true,
+    status: true,
+    summary: true,
+    title: true,
+    translationGroupId: true,
+    translationKind: true,
+    translationReviewedAt: true,
+    translationReviewedBy: true,
+    translationReviewStatus: true,
+    translationSourceArticleId: true,
+    translationSourceHash: true,
+  })
+  .extend({
+    translationReviewedAt: z.number().int().nonnegative().nullable().optional(),
+    translationReviewedBy: z.string().trim().min(1).max(200).optional(),
+    translationReviewStatus: translationReviewStatusSchema.optional(),
+    translationSourceArticleId: z.string().uuid().optional(),
+    translationSourceHash: z
+      .string()
+      .regex(/^[0-9a-f]{64}$/u)
+      .optional(),
+  });
+
+export type UpdateArticleInput = z.infer<typeof updateArticleSchema>;

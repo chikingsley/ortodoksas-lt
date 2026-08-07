@@ -5,10 +5,10 @@ import { tiptapDocumentSchema } from "@ortodoksas-lt/content/article";
 import { renderArticleBody } from "@ortodoksas-lt/editor/render";
 
 const execFileAsync = promisify(execFile);
-const outputRoot =
-  process.env.CANONICAL_CONTENT_DIR ?? "public/.canonical-content";
+const outputRoot = process.env.CANONICAL_CONTENT_DIR ?? ".canonical-content";
 const wrangler = "node_modules/.bin/wrangler";
 const config = "wrangler.jsonc";
+const localizedPagePrefix = /^pages\//u;
 
 interface Row {
   body_json: string;
@@ -23,6 +23,7 @@ interface Row {
   source_url: string | null;
   summary: string;
   title: string;
+  translation_group_id: string;
 }
 
 interface WranglerResult {
@@ -42,6 +43,7 @@ interface ExportPage {
   section: string;
   source: string;
   title: string;
+  translationGroupId: string;
 }
 
 async function query(sql: string) {
@@ -65,20 +67,18 @@ async function query(sql: string) {
 }
 
 const rows = await query(
-  "SELECT body_json, hero_media_id, kind, labels_json, language, published_at, section, source_capture, source_url, summary, title, slug FROM articles WHERE language = 'lt' AND (status = 'published' OR kind = 'page') ORDER BY published_at DESC"
+  "SELECT body_json, hero_media_id, kind, labels_json, language, published_at, section, source_capture, source_url, summary, title, slug, translation_group_id FROM articles WHERE status = 'published' OR kind = 'page' ORDER BY published_at DESC"
 );
 
 await rm(outputRoot, { force: true, recursive: true });
-await mkdir(`${outputRoot}/pages`, { recursive: true });
-
-const pages = rows.map((row) => {
+const pageFromRow = (row: Row, localized = false) => {
   const body = tiptapDocumentSchema.parse(JSON.parse(row.body_json));
   const path = `/${row.slug}.html`;
-  const file = `${row.slug.replaceAll("/", "--")}.json`;
+  const fileName = `${row.slug.replaceAll("/", "--")}.json`;
   const page: ExportPage = {
     capture: row.source_capture ?? "",
     description: row.summary,
-    file,
+    file: localized ? `pages/${fileName}` : fileName,
     hero: row.hero_media_id ? `/api/media/${row.hero_media_id}` : null,
     html: renderArticleBody(body),
     kind: row.kind,
@@ -90,16 +90,52 @@ const pages = rows.map((row) => {
     section: row.section,
     source: row.source_url ?? "",
     title: row.title,
+    translationGroupId: row.translation_group_id,
   };
   return page;
-});
-await Promise.all(
-  pages.map((page) =>
-    writeFile(`${outputRoot}/pages/${page.file}`, `${JSON.stringify(page)}\n`)
+};
+
+const writeEdition = async (language: string, localized: boolean) => {
+  const editionRoot = localized
+    ? `${outputRoot}/locales/${language}`
+    : outputRoot;
+  const pagesRoot = `${editionRoot}/pages`;
+  await mkdir(pagesRoot, { recursive: true });
+  const pages = rows
+    .filter((row) => row.language === language)
+    .map((row) => pageFromRow(row, localized));
+  await Promise.all(
+    pages.map((page) =>
+      writeFile(
+        `${pagesRoot}/${page.file.replace(localizedPagePrefix, "")}`,
+        `${JSON.stringify(page)}\n`
+      )
+    )
+  );
+  const catalog = pages.map(({ html: _html, ...entry }) => entry);
+  await writeFile(
+    `${editionRoot}/catalog.json`,
+    `${JSON.stringify(catalog)}\n`
+  );
+  return pages.length;
+};
+
+const editions = [
+  ["lt", false],
+  ["en", true],
+  ["ru", true],
+  ["uk", true],
+  ["be", true],
+] as const;
+const editionCounts = await Promise.all(
+  editions.map(
+    async ([language, localized]) =>
+      [language, await writeEdition(language, localized)] as const
   )
 );
-const catalog = pages.map(({ html: _html, ...entry }) => entry);
-await writeFile(`${outputRoot}/catalog.json`, `${JSON.stringify(catalog)}\n`);
+const counts = new Map(editionCounts);
 process.stdout.write(
-  `Exported ${rows.length} canonical Lithuanian records to ${outputRoot}\n`
+  `Exported ${rows.length} canonical records (${[...counts.entries()]
+    .map(([language, count]) => `${language}:${count}`)
+    .join(", ")}) to ${outputRoot}\n`
 );

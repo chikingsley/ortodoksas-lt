@@ -6,10 +6,10 @@ import { getLocalizedArticles, localeShells, type Locale } from "../lib/publicat
 import { localeUi } from "../lib/locale-ui";
 
 const copy: Record<Locale, { name: string; title: string; message: string }> = {
-  en: { name: "English", title: "English edition", message: "No recovered English publications are available yet. The Lithuanian archive remains the source edition while translated material is being prepared." },
-  ru: { name: "Русский", title: "Русское издание", message: "В восстановленном архиве пока нет публикаций на русском языке. Литовский архив остаётся исходным изданием до подготовки переводов." },
-  uk: { name: "Українська", title: "Українське видання", message: "У відновленому архіві поки немає публікацій українською мовою. Литовський архів залишається основним виданням до підготовки перекладів." },
-  be: { name: "Беларуская", title: "Беларускае выданне", message: "У адноўленым архіве пакуль няма публікацый на беларускай мове. Літоўскі архіў застаецца зыходным выданнем да падрыхтоўкі перакладаў." },
+  en: { name: "English", title: "English edition", message: "English publications are being prepared. Browse the Lithuanian source edition in the meantime." },
+  ru: { name: "Русский", title: "Русское издание", message: "Публикации на русском языке готовятся. Литовское издание доступно как исходное." },
+  uk: { name: "Українська", title: "Українське видання", message: "Публікації українською мовою готуються. Литовське видання доступне як вихідне." },
+  be: { name: "Беларуская", title: "Беларускае выданне", message: "Публікацыі на беларускай мове рыхтуюцца. Літоўскае выданне даступнае як зыходнае." },
 };
 
 export function getStaticPaths() {
@@ -25,13 +25,12 @@ const localizedCopy = localeUi[locale];
 <SiteLayout title={`${language.title} · ortodoksas.lt`} description={entries.length ? `${entries.length} ${localizedCopy.articles.toLocaleLowerCase(locale)} · ${language.title}.` : language.message} canonicalPath={`/${locale}`} lang={locale} locale={locale}>
   <main class:list={["site-width", "language-shell", { "language-empty": !entries.length }]}>
     {entries.length ? <>
-      <PageIntro description={`${entries.length} ${localizedCopy.articles.toLocaleLowerCase(locale)} · ${localizedCopy.provenance}`} eyebrow={`${language.name} · ${locale.toUpperCase()}`} title={language.title} />
+      <PageIntro description={`${entries.length} ${localizedCopy.articles.toLocaleLowerCase(locale)} · ${language.title}`} eyebrow={`${language.name} · ${locale.toUpperCase()}`} title={language.title} />
       <ArchiveList entries={entries} fallbackSection={language.name} id="articles" locale={locale} />
     </> : <div class="shell-card">
       <div class="eyebrow">{language.name} · {locale.toUpperCase()}</div>
       <h1>{language.title}</h1>
       <p>{language.message}</p>
-      <p class="shell-note">Authentic recovered content only · Autentiškas atkurtas turinys</p>
       <a class="text-link" href="/">{localizedCopy.backToLithuanian} →</a>
     </div>}
   </main>

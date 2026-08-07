@@ -671,23 +671,6 @@ svg {
   border: 1px solid var(--line);
   border-radius: 999px;
 }
-.archive-note {
-  display: flex;
-  gap: 17px;
-  align-items: center;
-  padding: 22px 25px;
-  margin-bottom: 70px;
-  color: var(--muted);
-  border-block: 1px solid var(--line);
-}
-.archive-note p {
-  margin: 0;
-  font:
-    15px / 1.45 "Playfair Display",
-    Georgia,
-    serif;
-}
-
 .page-intro {
   max-width: 800px;
   padding: 28px 0 32px;

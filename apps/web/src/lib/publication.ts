@@ -1,7 +1,6 @@
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { getSectionOptions } from "@ortodoksas-lt/content/sections";
-import { marked } from "marked";
 import { localeUi } from "./locale-ui";
 
 import { localizeMediaHtml, localizeMediaUrl } from "./media";
@@ -21,41 +20,11 @@ export interface CatalogEntry {
   section: string;
   source?: string;
   title: string;
+  translationGroupId?: string;
 }
 
 export interface ContentPage extends CatalogEntry {
   html: string;
-}
-
-export interface LocalizedMedia {
-  alt: string | null;
-  type: string;
-  url: string;
-}
-
-export interface LocalizedProvenance {
-  digest: string;
-  original: string;
-  timestamp: string;
-  url: string;
-}
-
-export interface LocalizedCatalogEntry {
-  date: string | null;
-  description: string;
-  file: string;
-  internalLinks: Array<{ path: string; text: string; url: string }>;
-  kind: "article";
-  labels: string[];
-  locale: Locale;
-  media: LocalizedMedia[];
-  path: string;
-  provenance: LocalizedProvenance;
-  title: string;
-}
-
-export interface LocalizedContentPage extends LocalizedCatalogEntry {
-  body: string;
 }
 
 export interface LocalizedArticle extends CatalogEntry {
@@ -63,13 +32,9 @@ export interface LocalizedArticle extends CatalogEntry {
   locale: Locale;
 }
 
-const contentRoot =
-  process.env.PUBLIC_CONTENT_SOURCE === "canonical"
-    ? resolve(process.cwd(), "public/.canonical-content")
-    : resolve(process.cwd(), "public/content");
+const contentRoot = resolve(process.cwd(), ".canonical-content");
 const pagesDirectory = resolve(contentRoot, "pages");
-const localesDirectory = resolve(process.cwd(), "public/content/locales");
-const editorialDirectory = resolve(process.cwd(), "public/content/editorial");
+const localesDirectory = resolve(contentRoot, "locales");
 const safeLocaleFilePattern = /^pages\/[A-Za-z0-9._-]+\.json$/;
 const imageSourcePattern = /\bsrc\s*=\s*["']([^"']+)["']/i;
 const firstMediaTablePattern = /<table\b[\s\S]*?<img\b[^>]*>[\s\S]*?<\/table>/i;
@@ -106,95 +71,6 @@ export type Locale = (typeof localeShells)[number];
 
 export type SiteLocale = "lt" | Locale;
 
-interface EditorialSource {
-  body?: unknown;
-  description?: unknown;
-  hero?: unknown;
-  homepage?: unknown;
-  homepage_order?: unknown;
-  published?: unknown;
-  section?: unknown;
-  slug?: unknown;
-  title?: unknown;
-}
-
-const editorialSlugPattern = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
-
-function parseEditorialArticle(
-  directory: string,
-  file: string,
-  locale: SiteLocale
-): LocalizedArticle[] {
-  const source = readJson<EditorialSource>(directory, file);
-  const fileSlug = file.slice(0, -5);
-  const slug = typeof source?.slug === "string" ? source.slug : fileSlug;
-  if (
-    !source ||
-    typeof source.title !== "string" ||
-    typeof source.body !== "string" ||
-    !editorialSlugPattern.test(slug) ||
-    slug !== fileSlug
-  ) {
-    return [];
-  }
-  const section =
-    typeof source.section === "string" && source.section.trim()
-      ? source.section.trim()
-      : "Naujienos";
-  const html = marked.parse(source.body, { async: false }) as string;
-  const description =
-    typeof source.description === "string" && source.description.trim()
-      ? source.description.trim()
-      : html
-          .replace(/<[^>]+>/g, " ")
-          .replace(/\s+/g, " ")
-          .trim()
-          .slice(0, 180);
-  return [
-    {
-      description,
-      file: `public/content/editorial/${locale}/${file}`,
-      hero:
-        typeof source.hero === "string" ? localizeMediaUrl(source.hero) : null,
-      homepage:
-        source.homepage === "lead" || source.homepage === "secondary"
-          ? source.homepage
-          : "feed",
-      homepageOrder:
-        typeof source.homepage_order === "number"
-          ? source.homepage_order
-          : undefined,
-      html: localizeMediaHtml(html),
-      kind: "article" as const,
-      labels: [section],
-      locale: locale === "lt" ? undefined : locale,
-      origin: "editorial" as const,
-      path: `/e/${slug}.html`,
-      published: typeof source.published === "string" ? source.published : null,
-      section,
-      title: source.title,
-    } as LocalizedArticle,
-  ];
-}
-
-function loadEditorialArticles(locale: SiteLocale): LocalizedArticle[] {
-  const directory = join(editorialDirectory, locale);
-  if (!existsSync(directory)) {
-    return [];
-  }
-  return readdirSync(directory, { encoding: "utf8" })
-    .filter((file) => file.endsWith(".json"))
-    .flatMap((file) => parseEditorialArticle(directory, file, locale));
-}
-
-const editorialArticles = {
-  be: loadEditorialArticles("be"),
-  en: loadEditorialArticles("en"),
-  lt: loadEditorialArticles("lt"),
-  ru: loadEditorialArticles("ru"),
-  uk: loadEditorialArticles("uk"),
-};
-
 function assertUniquePaths(entries: CatalogEntry[], label: string) {
   const paths = new Set<string>();
   for (const entry of entries) {
@@ -207,12 +83,12 @@ function assertUniquePaths(entries: CatalogEntry[], label: string) {
 }
 
 export const pages = assertUniquePaths(
-  [...recoveredPages, ...editorialArticles.lt],
+  recoveredPages,
   "Lithuanian publication"
 ) as ContentPage[];
 
 export const catalog = assertUniquePaths(
-  [...recoveredCatalog, ...editorialArticles.lt],
+  recoveredCatalog,
   "Lithuanian catalog"
 );
 
@@ -236,31 +112,22 @@ const localeDateLocales: Record<SiteLocale, string> = {
   uk: "uk-UA",
 };
 
-function isLocalizedCatalogEntry(
-  value: unknown,
-  locale: Locale
-): value is LocalizedCatalogEntry {
+function isCanonicalLocaleCatalogEntry(
+  value: unknown
+): value is CatalogEntry & { file: string; translationGroupId: string } {
   if (!value || typeof value !== "object") {
     return false;
   }
-  const entry = value as Partial<LocalizedCatalogEntry>;
+  const entry = value as Partial<CatalogEntry>;
   return (
-    entry.locale === locale &&
     entry.kind === "article" &&
     typeof entry.path === "string" &&
     entry.path.startsWith("/") &&
     typeof entry.file === "string" &&
     typeof entry.title === "string" &&
     typeof entry.description === "string" &&
-    Array.isArray(entry.labels) &&
-    Array.isArray(entry.media) &&
-    entry.media.every((media) =>
-      Boolean(
-        media && typeof media.type === "string" && typeof media.url === "string"
-      )
-    ) &&
-    typeof entry.date === "string" &&
-    Boolean(entry.provenance && typeof entry.provenance.original === "string")
+    typeof entry.translationGroupId === "string" &&
+    Array.isArray(entry.labels)
   );
 }
 
@@ -279,51 +146,30 @@ function loadLocalizedArticles(locale: Locale): LocalizedArticle[] {
   return localeCatalogValue
     .flatMap((rawEntry) => {
       if (
-        !(
-          isLocalizedCatalogEntry(rawEntry, locale) &&
-          isSafeLocaleFile(rawEntry.file)
-        )
+        isCanonicalLocaleCatalogEntry(rawEntry) &&
+        isSafeLocaleFile(rawEntry.file)
       ) {
-        return [];
+        const page = readJson<ContentPage>(
+          join(localesDirectory, locale),
+          rawEntry.file
+        );
+        if (
+          !page ||
+          page.path !== rawEntry.path ||
+          typeof page.html !== "string"
+        ) {
+          return [];
+        }
+        return [
+          {
+            ...page,
+            hero: localizeMediaUrl(page.hero, page.path),
+            html: localizeMediaHtml(page.html),
+            locale,
+          },
+        ];
       }
-      const page = readJson<unknown>(
-        join(localesDirectory, locale),
-        rawEntry.file
-      );
-      if (!page || typeof page !== "object") {
-        return [];
-      }
-      const content = page as Partial<LocalizedContentPage>;
-      if (
-        content.locale !== locale ||
-        content.path !== rawEntry.path ||
-        typeof content.body !== "string"
-      ) {
-        return [];
-      }
-      const hero = localizeMediaUrl(
-        rawEntry.media.find(
-          (media) => media.type === "image" && typeof media.url === "string"
-        )?.url ?? null,
-        rawEntry.path
-      );
-      return [
-        {
-          capture: rawEntry.provenance.timestamp,
-          description: rawEntry.description,
-          file: rawEntry.file,
-          hero,
-          html: localizeMediaHtml(content.body),
-          kind: "article" as const,
-          labels: rawEntry.labels,
-          locale,
-          path: rawEntry.path,
-          published: rawEntry.date,
-          section: rawEntry.labels[0] ?? "",
-          source: rawEntry.provenance.original,
-          title: rawEntry.title,
-        },
-      ];
+      return [];
     })
     .sort(
       (a, b) => Date.parse(b.published ?? "") - Date.parse(a.published ?? "")
@@ -334,7 +180,7 @@ export const localizedArticles = Object.fromEntries(
   localeShells.map((locale) => [
     locale,
     assertUniquePaths(
-      [...loadLocalizedArticles(locale), ...editorialArticles[locale]],
+      loadLocalizedArticles(locale),
       `${locale} publication`
     ).sort(
       (a, b) => Date.parse(b.published ?? "") - Date.parse(a.published ?? "")
@@ -365,19 +211,47 @@ function unprefixLocalePath(path: string) {
   return normalized;
 }
 
-function hasLocalizedPath(locale: Locale, path: string) {
-  return localizedArticles[locale].some((entry) => entry.path === path);
+function getCurrentArticle(currentPath: string) {
+  const path = unprefixLocalePath(currentPath);
+  const locale = localeShells.find(
+    (candidate) =>
+      currentPath === `/${candidate}` ||
+      currentPath.startsWith(`/${candidate}/`)
+  );
+  return locale ? getLocalizedPage(locale, path) : getPage(path);
+}
+
+function getCounterpart(locale: SiteLocale, currentPath: string) {
+  const path = unprefixLocalePath(currentPath);
+  const current = getCurrentArticle(currentPath);
+  const candidates = locale === "lt" ? pages : localizedArticles[locale];
+  if (current?.translationGroupId) {
+    const grouped = candidates.find(
+      (entry) => entry.translationGroupId === current.translationGroupId
+    );
+    if (grouped) {
+      return grouped;
+    }
+  }
+  return candidates.find((entry) => entry.path === path);
 }
 
 /** Return UI destinations, falling back to each edition home when no counterpart exists. */
 export function getLocaleLinks(currentPath: string) {
-  const path = unprefixLocalePath(currentPath);
+  if (unprefixLocalePath(currentPath) === "/") {
+    return { be: "/be", en: "/en", lt: "/", ru: "/ru", uk: "/uk" };
+  }
+  const be = getCounterpart("be", currentPath);
+  const en = getCounterpart("en", currentPath);
+  const lt = getCounterpart("lt", currentPath);
+  const ru = getCounterpart("ru", currentPath);
+  const uk = getCounterpart("uk", currentPath);
   return {
-    be: hasLocalizedPath("be", path) ? `/be${path}` : "/be",
-    en: hasLocalizedPath("en", path) ? `/en${path}` : "/en",
-    lt: getPage(path) ? path : "/",
-    ru: hasLocalizedPath("ru", path) ? `/ru${path}` : "/ru",
-    uk: hasLocalizedPath("uk", path) ? `/uk${path}` : "/uk",
+    be: be ? `/be${be.path}` : "/be",
+    en: en ? `/en${en.path}` : "/en",
+    lt: lt?.path ?? "/",
+    ru: ru ? `/ru${ru.path}` : "/ru",
+    uk: uk ? `/uk${uk.path}` : "/uk",
   } as const;
 }
 
@@ -385,13 +259,17 @@ export function getLocaleLinks(currentPath: string) {
 export function getLocaleAlternates(currentPath: string) {
   const path = unprefixLocalePath(currentPath);
   const alternates: Array<{ href: string; locale: SiteLocale }> = [];
-  if (path === "/" || getPage(path)) {
-    alternates.push({ href: path, locale: "lt" });
+  const lithuanian =
+    path === "/" ? undefined : getCounterpart("lt", currentPath);
+  if (path === "/" || lithuanian) {
+    alternates.push({ href: lithuanian?.path ?? "/", locale: "lt" });
   }
   for (const locale of localeShells) {
-    if (path === "/" || hasLocalizedPath(locale, path)) {
+    const counterpart =
+      path === "/" ? undefined : getCounterpart(locale, currentPath);
+    if (path === "/" || counterpart) {
       alternates.push({
-        href: `/${locale}${path === "/" ? "" : path}`,
+        href: `/${locale}${counterpart?.path ?? ""}`,
         locale,
       });
     }
@@ -408,9 +286,7 @@ export function formatDate(
   locale: SiteLocale = "lt"
 ) {
   if (!value) {
-    return locale === "lt"
-      ? "Archyvo publikacija"
-      : localeUi[locale].provenance;
+    return localeUi[locale].undated;
   }
   return new Intl.DateTimeFormat(localeDateLocales[locale], {
     day: "numeric",

@@ -87,28 +87,34 @@ Status: `accepted`
 
 Exit criteria:
 
-- Archived media is local, hashed, provenance-tracked, and resumable.
+- Recovered media is local, hashed, source-tracked, and resumable.
 - Responsive derivatives and deterministic fallbacks exist.
 - The original logo has a faithful SVG master and raster/favicon derivatives.
-- Authentic locale content is preserved separately from generated translation.
+- Existing localized editions are imported into D1 as approved human
+  translations and linked to Lithuanian counterparts by translation group.
 - Generated translation records source hash, model, date, and review state.
 - Language navigation and `hreflang` represent available counterparts only.
 - Simon accepts the translation publication policy.
 
 ## G5: CMS and Publishing
 
-Status: `evidence-ready`
+Status: `active`
 
-Selected baseline: Decap CMS with GitHub and a Cloudflare Worker OAuth proxy.
+Selected baseline: custom Studio with Tiptap, Drizzle, D1, and R2.
 
 Exit criteria:
 
-- The stack uses open-source software and zero recurring paid services.
 - A client can sign in, create, preview, revise, publish, and unpublish an article.
-- Multilingual fields and editorial workflow operate through the CMS UI.
-- Publishing merges content to Git and triggers a Cloudflare Workers build.
+- Multilingual relationships and editorial workflow operate through Studio.
+- Publishing exports canonical D1 content and triggers the Astro/Worker build.
 - A failed build preserves the previous production deployment.
 - Simon or the client completes the publishing acceptance exercise.
+
+Remaining work:
+
+- Add Clerk during the production-authentication phase.
+- Localize the approved Studio interface into Lithuanian.
+- Prove edit, preview, publish, and public-update behavior against D1/R2.
 
 ## G6: Production Acceptance
 

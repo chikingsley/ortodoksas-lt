@@ -1,6 +1,7 @@
 import {
   createArticleSchema,
   type TiptapDocument,
+  type UpdateArticleInput,
   updateArticleSchema,
 } from "@ortodoksas-lt/content/article";
 import {
@@ -39,6 +40,32 @@ const textChangeProvenance = (
   afterValue: string
 ): "manual" | "normalized" =>
   beforeValue.trim() === afterValue ? "normalized" : "manual";
+
+const translationMetadataUpdate = (data: UpdateArticleInput) => {
+  const update: {
+    translationReviewStatus?: UpdateArticleInput["translationReviewStatus"];
+    translationReviewedAt?: number | null;
+    translationReviewedBy?: string;
+    translationSourceArticleId?: string;
+    translationSourceHash?: string;
+  } = {};
+  if (data.translationReviewStatus !== undefined) {
+    update.translationReviewStatus = data.translationReviewStatus;
+  }
+  if (data.translationReviewedAt !== undefined) {
+    update.translationReviewedAt = data.translationReviewedAt;
+  }
+  if (data.translationReviewedBy !== undefined) {
+    update.translationReviewedBy = data.translationReviewedBy;
+  }
+  if (data.translationSourceArticleId !== undefined) {
+    update.translationSourceArticleId = data.translationSourceArticleId;
+  }
+  if (data.translationSourceHash !== undefined) {
+    update.translationSourceHash = data.translationSourceHash;
+  }
+  return update;
+};
 
 const attachMediaRecords = async (
   database: StudioDatabase,
@@ -114,7 +141,13 @@ articleRoutes.get("/", async (context) => {
       source: articles.sourceUrl,
       status: articles.status,
       title: articles.title,
+      translationGroupId: articles.translationGroupId,
       translationKind: articles.translationKind,
+      translationReviewedAt: articles.translationReviewedAt,
+      translationReviewedBy: articles.translationReviewedBy,
+      translationReviewStatus: articles.translationReviewStatus,
+      translationSourceArticleId: articles.translationSourceArticleId,
+      translationSourceHash: articles.translationSourceHash,
       updatedAt: articles.updatedAt,
     })
     .from(articles)
@@ -454,6 +487,12 @@ articleRoutes.post("/", async (context) => {
       title: parsed.data.title,
       translationGroupId,
       translationKind: parsed.data.translationKind,
+      translationReviewedAt: parsed.data.translationReviewedAt ?? null,
+      translationReviewedBy: parsed.data.translationReviewedBy ?? null,
+      translationReviewStatus: parsed.data.translationReviewStatus,
+      translationSourceArticleId:
+        parsed.data.translationSourceArticleId ?? null,
+      translationSourceHash: parsed.data.translationSourceHash ?? null,
       updatedAt: timestamp,
     }),
     database.insert(articleRevisions).values({
@@ -621,7 +660,9 @@ articleRoutes.put("/:id", async (context) => {
         status: parsed.data.status,
         summary: parsed.data.summary,
         title: parsed.data.title,
+        translationGroupId: parsed.data.translationGroupId,
         translationKind: parsed.data.translationKind,
+        ...translationMetadataUpdate(parsed.data),
         updatedAt: timestamp,
       })
       .where(eq(articles.id, id)),

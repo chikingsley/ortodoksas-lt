@@ -5,9 +5,8 @@
   "type": "module",
   "scripts": {
     "articles:import": "tsx scripts/content/import-articles.ts",
-    "build": "pnpm content:export && PUBLIC_CONTENT_SOURCE=canonical pnpm --filter @ortodoksas-lt/web build && pnpm --filter @ortodoksas-lt/studio build",
-    "build:canonical": "pnpm content:export && PUBLIC_CONTENT_SOURCE=canonical pnpm --filter @ortodoksas-lt/web build",
-    "build:legacy": "pnpm --filter @ortodoksas-lt/web build && pnpm --filter @ortodoksas-lt/studio build",
+    "build": "pnpm content:export && pnpm --filter @ortodoksas-lt/web build && pnpm --filter @ortodoksas-lt/studio build",
+    "build:canonical": "pnpm content:export && pnpm --filter @ortodoksas-lt/web build",
     "check": "pnpm --filter @ortodoksas-lt/db check && pnpm --filter @ortodoksas-lt/web check && pnpm --filter @ortodoksas-lt/studio check",
     "content:export": "pnpm --filter @ortodoksas-lt/web exec tsx scripts/export-canonical.ts",
     "dev:studio": "pnpm --filter @ortodoksas-lt/studio dev",

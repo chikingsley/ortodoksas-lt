@@ -14,7 +14,7 @@ dist-ssr
 /recovery/
 *.local
 .wrangler/
-apps/web/public/.canonical-content/
+apps/web/.canonical-content/
 .dev.vars*
 worker-configuration.d.ts.tmp
 
