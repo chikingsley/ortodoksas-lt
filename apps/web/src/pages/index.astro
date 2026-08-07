@@ -33,7 +33,7 @@ const serviceLinks = [
       <div class="secondary-stories">
         {secondary.map((entry) => <StoryRow entry={entry} />)}
       </div>
-      <img class="hero-motif" src="/assets/brand/production/canva-patterns/motif-green-chain.png" alt="" />
+      <span class="hero-motif" aria-hidden="true"></span>
     </section> : null}
 
     <section class="service-band" aria-label="Praktinė informacija">
@@ -46,7 +46,7 @@ const serviceLinks = [
             {service.icon === "heart" ? <path d="M16 27S6 21 6 13.5A5.5 5.5 0 0 1 16 10a5.5 5.5 0 0 1 10 3.5C26 21 16 27 16 27Z"></path> : null}
           </svg>
           <span><strong>{service.title}</strong><small>{service.detail}</small></span>
-          <img src="/assets/brand/production/canva-patterns/motif-gold-chain.png" alt="" />
+          <img src="/assets/brand/production/canva-patterns/motif-gold-chain-line.svg" alt="" />
         </a>)}
       </div>
     </section>

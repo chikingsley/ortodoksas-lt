@@ -6,7 +6,7 @@ This is the implementation checklist for the public publication UI. A checked it
 
 - [x] `PublicationHeader` owns the masthead, language state, desktop navigation, and mobile sheet.
 - [x] `NavigationMenu` and `Sheet` come from generated shadcn/Base UI source primitives in `apps/web/src/components/ui`.
-- [x] `SiteHeader.astro` is the server boundary and passes only `currentPath` and `locale` into the hydrated header.
+- [x] `SiteHeader.astro` is the server boundary and passes `currentPath`, `locale`, and resolved locale destinations into the hydrated header.
 - [x] `DESIGN.md` owns colors, type, spacing, borders, active-state, and boundary rules.
 - [ ] `SiteFooter` uses the same institutional mark contract as the masthead.
 

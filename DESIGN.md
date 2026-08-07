@@ -252,6 +252,9 @@ Chain motifs create the signature organic geometry: exact ceremonial-gold vertic
 - **Typography:** Set the publication name in bold Playfair with a compact uppercase Arimo descriptor.
 - **Sizing:** Render the Ecumenical Patriarchate emblem and the crest portion of the Exarchate lockup at the same optical height: 52px on desktop and 40px on mobile.
 - **Responsive behavior:** Preserve both institutional marks, the hairline, and the publication identity in one compact identity row. Place the language choices below the masthead's single green divider.
+- **Desktop rhythm:** Use a 96px identity row, place languages 20px from its top edge, follow it with the single 1px green divider and a 48px primary-navigation row, then use 24px before homepage content.
+- **Mobile rhythm:** Use a 68px identity row: the 44px menu target plus 12px vertical padding determines the row while the 40px marks center inside it. Follow it with the single 1px green divider and one 48px language row, then use 16px before homepage content.
+- **Scrolling:** The document owns vertical scrolling. Publication components create no nested vertical scroller and reserve no scrollbar gutter.
 
 - **Page intro spacing:** Use 48px above and 32px below the desktop archive/page intro; use 32px above and 24px below on mobile.
 
@@ -260,6 +263,12 @@ Chain motifs create the signature organic geometry: exact ceremonial-gold vertic
 - **Style:** Center Playfair navigation inside a 48px row under a neutral hairline.
 - **States:** Hover and active labels turn green; the active item receives a thin gold underline. The mobile menu uses a three-line trigger and a white, hairline-divided overlay.
 - **Languages:** Keep multilingual switches compact in Arimo, with the same green-and-gold active treatment.
+
+### Motifs
+
+- **Story rail:** Use one undistorted green chain line, positioned 4px beyond the right edge of the desktop story rail. Remove it when the desktop story rail collapses.
+- **Service band:** Use one full-color ceremonial-gold chain at the right edge of every service cell. The motif itself owns that boundary, so the same edge receives no extra border.
+- **Assets:** Preserve the client PNG extractions as provenance masters. Production SVG traces retain the supplied geometry and exact palette while allowing responsive rendering without raster stretching.
 
 ### Story Links
 

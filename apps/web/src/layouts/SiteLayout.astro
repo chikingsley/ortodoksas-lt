@@ -83,7 +83,7 @@ const baseSchema = {
     FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
     -->
     <div class="site-shell">
-      <SiteHeader locale={locale} />
+      <SiteHeader currentPath={canonicalPath} locale={locale} />
       <slot />
       <SiteFooter locale={locale} />
     </div>

@@ -3,11 +3,12 @@ import PublicationHeader from "./publication-header";
 import { getLocaleLinks, type SiteLocale } from "../../lib/publication";
 
 interface Props {
+  currentPath: string;
   locale?: SiteLocale;
 }
 
-const { locale = "lt" } = Astro.props;
-const localeLinks = getLocaleLinks(Astro.url.pathname);
+const { currentPath, locale = "lt" } = Astro.props;
+const localeLinks = getLocaleLinks(currentPath);
 ---
 
-<PublicationHeader client:load currentPath={Astro.url.pathname} locale={locale} localeLinks={localeLinks} />
+<PublicationHeader client:load currentPath={currentPath} locale={locale} localeLinks={localeLinks} />

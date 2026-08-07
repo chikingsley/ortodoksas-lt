@@ -212,7 +212,7 @@ svg {
   display: grid;
   grid-template-columns: minmax(0, 1.34fr) minmax(390px, 1fr);
   gap: 32px;
-  padding-block: 28px 26px;
+  padding-block: 24px;
 }
 .lead-image,
 .secondary-image,
@@ -337,11 +337,13 @@ svg {
 }
 .hero-motif {
   position: absolute;
-  top: 22px;
-  right: -27px;
-  width: 18px;
-  height: 500px;
-  object-fit: fill;
+  top: 24px;
+  right: -20px;
+  bottom: 24px;
+  width: 16px;
+  background:
+    url("/assets/brand/production/canva-patterns/motif-green-chain-line.svg")
+    top center / 16px auto repeat-y;
 }
 
 .service-band {
@@ -361,10 +363,6 @@ svg {
   min-height: 66px;
   padding: 11px 20px;
   overflow: hidden;
-  border-right: 1px solid rgba(255, 255, 255, 0.3);
-}
-.service-grid > a:first-child {
-  border-left: 1px solid rgba(255, 255, 255, 0.3);
 }
 .service-grid > a:hover {
   background: var(--green-deep);
@@ -393,11 +391,10 @@ svg {
 .service-grid > a > img {
   position: absolute;
   top: 0;
-  right: -9px;
-  width: 18px;
+  right: 0;
+  width: auto;
   height: 100%;
-  object-fit: fill;
-  opacity: 0.42;
+  object-fit: contain;
 }
 
 .mobile-secondary-list {
@@ -1205,9 +1202,6 @@ svg {
   .service-grid > a:nth-child(n + 3) {
     border-top: 0;
   }
-  .service-grid > a:nth-child(2n) > img {
-    display: none;
-  }
   .home-lower {
     grid-template-columns: 1fr;
   }
@@ -1337,7 +1331,7 @@ svg {
   .home-hero {
     gap: 22px;
     width: 100%;
-    padding-top: 20px;
+    padding-block: 16px;
   }
   .lead-image {
     aspect-ratio: 1.35;
@@ -1384,7 +1378,7 @@ svg {
   }
   .service-grid > a {
     min-height: 66px;
-    padding: 11px 14px;
+    padding: 11px 24px 11px 14px;
   }
   .service-grid small {
     max-width: 15ch;
