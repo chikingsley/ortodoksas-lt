@@ -21,7 +21,7 @@ export default defineConfig({
     }),
   ],
   test: {
-    exclude: ["test/conversion.spec.ts"],
+    exclude: ["test/article-content.spec.ts"],
     include: ["test/**/*.spec.ts"],
     setupFiles: ["./test/apply-migrations.ts"],
   },

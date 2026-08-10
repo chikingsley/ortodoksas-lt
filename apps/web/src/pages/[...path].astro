@@ -1,7 +1,7 @@
 ---
 import EditorialImage from "../components/media/EditorialImage.astro";
 import SiteLayout from "../layouts/SiteLayout.astro";
-import { cleanHtml, formatDate, pages, type ContentPage } from "../lib/publication";
+import { cleanHtml, formatDate, hasLeadFigure, pages, type ContentPage } from "../lib/publication";
 
 export function getStaticPaths() {
   return pages.map((page) => ({
@@ -13,13 +13,18 @@ export function getStaticPaths() {
 const { page } = Astro.props as { page: ContentPage };
 const description = page.description || `${page.title} · ortodoksas.lt`;
 const canonicalPath = page.path;
+const bodyOwnsLeadImage = hasLeadFigure(page.html);
 const bodyHtml =
   page.path === "/p/biblioteka.html"
     ? cleanHtml(page.html, page.hero).replace(
         /^\s*<div>\s*<\/div>\s*<table[\s\S]*?<\/table>/i,
         ""
       )
-    : cleanHtml(page.html, page.hero, page.kind === "article");
+    : cleanHtml(
+        page.html,
+        bodyOwnsLeadImage ? null : page.hero,
+        page.kind === "article"
+      );
 const articleSchema = page.kind === "article" ? {
   headline: page.title,
   datePublished: page.published ?? undefined,
@@ -44,7 +49,7 @@ const articleSchema = page.kind === "article" ? {
         <div class="eyebrow">{page.kind === "page" ? "ortodoksas.lt" : page.section}</div>
         <h1>{page.title}</h1>
         {page.published ? <div class="article-byline"><time datetime={page.published}>{formatDate(page.published)}</time></div> : null}
-        {page.hero ? <EditorialImage class="article-hero" priority src={page.hero} /> : null}
+        {page.hero && !bodyOwnsLeadImage ? <EditorialImage class="article-hero" priority src={page.hero} /> : null}
       </header>
       <div class="prose" set:html={bodyHtml} />
       {page.labels.length > 0 ? <footer class="article-tags">{page.labels.map((label) => <span>{label}</span>)}</footer> : null}

@@ -6,7 +6,8 @@
   "exports": {
     "./article": "./article.ts",
     "./media-url": "./media-url.ts",
-    "./sections": "./sections.ts"
+    "./sections": "./sections.ts",
+    "./translation": "./translation.ts"
   },
   "dependencies": {
     "@tiptap/core": "^3.29.2",

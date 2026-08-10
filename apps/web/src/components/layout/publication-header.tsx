@@ -45,11 +45,7 @@ export default function PublicationHeader({
   const copy = localeUi[locale];
   const localized = locale !== "lt";
   const items: [string, string][] = localized
-    ? [
-        [copy.home, `/${locale}`],
-        [copy.archive, `/${locale}#articles`],
-        ["LT", "/"],
-      ]
+    ? [[copy.articles, `/${locale}`]]
     : [
         ["Pradžia", "/"],
         ["Pamaldos", "/p/bendruomenes_21.html"],

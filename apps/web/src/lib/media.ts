@@ -36,6 +36,7 @@ const mediaAttributePattern = /\b(src|poster|srcset)=(?:"([^"]+)"|'([^']+)')/gi;
 const mediaTagPattern = /<(?:img|source)\b[^>]*>/gi;
 const linkedMediaAttributePattern = /\bhref=(?:"([^"]+)"|'([^']+)')/gi;
 const whitespacePattern = /\s+/;
+const mediaApiPattern = /^\/api\/media\/[A-Za-z0-9_-]+(?:\?[^\s]*)?$/u;
 
 const manifestUrl = resolve(process.cwd(), "public/media/manifest.json");
 const assignmentsUrl = resolve(process.cwd(), "public/media/assignments.json");
@@ -47,6 +48,10 @@ const unavailableLinksUrl = resolve(
 
 function normalizeMediaUrl(value: string) {
   return value.replaceAll("&amp;", "&").replaceAll("&#38;", "&");
+}
+
+function isPublishedMediaUrl(value: string) {
+  return mediaApiPattern.test(normalizeMediaUrl(value));
 }
 
 function escapeAttribute(value: string) {
@@ -170,13 +175,20 @@ function unavailableLinkPlaceholder(content: string, source: string) {
 }
 
 export function localizeMediaUrl(value: string | null, path?: string) {
+  const assignment = path ? mediaAssignments.get(path) : null;
+  if (assignment) {
+    return assignment;
+  }
+  if (!value) {
+    return null;
+  }
+  if (isPublishedMediaUrl(value)) {
+    return value;
+  }
   return (
-    (path ? mediaAssignments.get(path) : null) ??
-    (value
-      ? (mediaAliases.get(value) ??
-        mediaAliases.get(normalizeMediaUrl(value)) ??
-        null)
-      : null)
+    mediaAliases.get(value) ??
+    mediaAliases.get(normalizeMediaUrl(value)) ??
+    null
   );
 }
 
@@ -186,6 +198,7 @@ export function localizeMediaHtml(value: string) {
     const unresolvedSource = sources.find(
       (source) =>
         !(
+          isPublishedMediaUrl(source) ||
           mediaAliases.has(source) ||
           mediaAliases.has(normalizeMediaUrl(source))
         )

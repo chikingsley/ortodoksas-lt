@@ -1,3 +1,8 @@
+import type {
+  TranslationKind,
+  TranslationReviewStatus,
+} from "@ortodoksas-lt/content/translation";
+
 export interface CatalogArticle {
   capture: string;
   description: string;
@@ -6,12 +11,16 @@ export interface CatalogArticle {
   id: string;
   kind: "article" | "page";
   labels: string[];
+  language: string;
   path: string;
   published: string | null;
   section: string;
   source: string;
   status: "draft" | "scheduled" | "published" | "archived";
   title: string;
+  translationGroupId: string;
+  translationKind: TranslationKind;
+  translationReviewStatus: TranslationReviewStatus;
 }
 
 export interface SourceArticle extends CatalogArticle {

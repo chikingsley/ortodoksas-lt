@@ -382,12 +382,11 @@
       "source": "https://i.ytimg.com/vi/-yhTXcxABxU/hqdefault.jpg"
     },
     {
-      "confidence": 1,
-      "evidence": "editorial-fallback:brand-supplied-grid",
-      "fallback": true,
-      "mediaPath": "/media/files/459c92427a0df487c67c6f6800d48a950bdcef47720b42ed6e67cb33a63262a1.png",
       "path": "/2013/08/svc-dievo-gimdytojos-uzmigimo-sventes.html",
-      "source": "brand://editorial-fallback/grid"
+      "confidence": 0.99,
+      "evidence": "article-image:first-content-image:canonical-body",
+      "mediaPath": "/media/files/023d1343c196f3cd9301770bdf0ee76575e0a997fdce1b08a2a0feb0b81bce0d.jpg",
+      "source": "https://scontent-phx1-1.xx.fbcdn.net/v/t39.30808-6/509121903_23979854921680226_2528381692029035024_n.jpg?stp=dst-jpg_s552x414_tt6&_nc_cat=109&ccb=1-7&_nc_sid=9bae5a&_nc_ohc=bqfJfYjDy-AQ7kNvwEU1C5-&_nc_oc=AdrjKEoQxOBxJRNRLwSsfsIwc8nyK-NYxjnPnzcaNu1thFqFby1n5hm9-qhkOja7BqfihxM6cg2dc0vS60nQmVQy&_nc_zt=23&_nc_ht=scontent-phx1-1.xx&edm=AN6CN6oEAAAA&_nc_gid=paNKOXYIlHqQKX-K01Vp5A&oh=00_AQGrApB768IvLLh_45yMwfDC3v3Lk5U_bo8B4MLBno7FTg&oe=6A79AA61"
     },
     {
       "confidence": 1,
@@ -398,12 +397,11 @@
       "source": "brand://editorial-fallback/grid"
     },
     {
-      "confidence": 1,
-      "evidence": "editorial-fallback:brand-supplied-grid",
-      "fallback": true,
-      "mediaPath": "/media/files/459c92427a0df487c67c6f6800d48a950bdcef47720b42ed6e67cb33a63262a1.png",
       "path": "/2013/09/sv-grigalius-nazianzietis-apie-santuoka.html",
-      "source": "brand://editorial-fallback/grid"
+      "confidence": 0.99,
+      "evidence": "article-image:first-content-image:canonical-body",
+      "mediaPath": "/media/files/064e691cf501aa989b55ede81d89b1193b4f8c8275afb22892755eab7a3ef4ce.jpg",
+      "source": "https://web.archive.org/web/20130426204440id_/http://marccortez.com/wp-content/uploads/2013/01/gregory_of_nazianzus1.jpg"
     },
     {
       "confidence": 1,
@@ -546,12 +544,11 @@
       "source": "brand://editorial-fallback/grid"
     },
     {
-      "confidence": 1,
-      "evidence": "editorial-fallback:brand-supplied-grid",
-      "fallback": true,
-      "mediaPath": "/media/files/459c92427a0df487c67c6f6800d48a950bdcef47720b42ed6e67cb33a63262a1.png",
       "path": "/2013/12/kodel-reikia-aukoti-vargsams.html",
-      "source": "brand://editorial-fallback/grid"
+      "confidence": 0.99,
+      "evidence": "article-image:first-content-image:canonical-body",
+      "mediaPath": "/media/files/c5c430e3e34724f74436742ced9bd64bf7c6ca35cabb915c178244d206b571be.jpg",
+      "source": "https://scontent-phx1-1.xx.fbcdn.net/v/t39.30808-6/646373053_34009075198735683_6529119243224532251_n.jpg?_nc_cat=107&ccb=1-7&_nc_sid=9bae5a&_nc_ohc=9EnpzHALhrsQ7kNvwFa6sT_&_nc_oc=AdoHSPeX_ep7CNXY7J2U6MLWQ3quYaX9tErZash4z_aEFNJvnhnL03zsKn75xHW-qb1xLqRZVg0C0jsEnQr4p8Xb&_nc_zt=23&_nc_ht=scontent-phx1-1.xx&edm=AN6CN6oEAAAA&_nc_gid=bnpE5FMON3-Lc6AcGKmCcw&oh=00_AQGqbu1FY1-SkYmcgKU002DIQSVsC4dpv4LHHneUdQacrA&oe=6A79B4E5"
     },
     {
       "confidence": 1,
@@ -1102,12 +1099,11 @@
       "source": "https://i.ytimg.com/vi/ujGKa9OypyI/hqdefault.jpg"
     },
     {
-      "confidence": 1,
-      "evidence": "editorial-fallback:brand-supplied-grid",
-      "fallback": true,
-      "mediaPath": "/media/files/459c92427a0df487c67c6f6800d48a950bdcef47720b42ed6e67cb33a63262a1.png",
       "path": "/2014/10/paskaita-apie-naujuosius-pagonis.html",
-      "source": "brand://editorial-fallback/grid"
+      "confidence": 0.99,
+      "evidence": "article-image:first-content-image:canonical-body",
+      "mediaPath": "/media/files/2cc6b199a30b5ed22c977b1c702153a1eda78559b6b27ad78c24aa98f7b319d4.jpg",
+      "source": "https://scontent-phx1-1.xx.fbcdn.net/v/t39.30808-6/555802586_10236686260995040_48691880458314632_n.jpg?stp=dst-jpg_s552x414_tt6&_nc_cat=106&ccb=1-7&_nc_sid=405ec2&_nc_ohc=AulFybZDX4QQ7kNvwGbmLF2&_nc_oc=AdoKDV5eiecOOrN1ygiVGRrmdXj2A1tmYi7b_yf1NyU35Z11Nnz6xTUizfNgE_NqnWwA-O9Es783u0snjPjbSxa1&_nc_zt=23&_nc_ht=scontent-phx1-1.xx&edm=AN6CN6oEAAAA&_nc_gid=wPusXCYs8tY-4Gs1yoOMlA&oh=00_AQFq_kw1I-2xgvmI0pH0NFf7XgGLNGOnt_jxHTT6rVnQ0w&oe=6A79B07A"
     },
     {
       "confidence": 1,
@@ -1859,12 +1855,11 @@
       "source": "brand://editorial-fallback/grid"
     },
     {
-      "confidence": 1,
-      "evidence": "editorial-fallback:brand-supplied-grid",
-      "fallback": true,
-      "mediaPath": "/media/files/459c92427a0df487c67c6f6800d48a950bdcef47720b42ed6e67cb33a63262a1.png",
       "path": "/2015/05/konferencijos-sventieji-ir-nelabieji.html",
-      "source": "brand://editorial-fallback/grid"
+      "confidence": 0.99,
+      "evidence": "article-image:first-content-image:canonical-body",
+      "mediaPath": "/media/files/63155946c4811ed7f476abffba832d9debf3535c20bdad35fe88fc1b8296fdf4.jpg",
+      "source": "https://scontent-phx1-1.xx.fbcdn.net/v/t39.30808-6/653119491_26836411615944385_7905593253743506349_n.jpg?stp=dst-jpg_p394x394_tt6&_nc_cat=109&ccb=1-7&_nc_sid=0763e1&_nc_ohc=bFzH2mzqx3kQ7kNvwEq-SRS&_nc_oc=AdokaJscPtjDfvvtOOD5vkblWwZzu_hK3xZJDts3g5jDPq7dUyRpOfSfylB0zReAE7KHzIIzpOsKJt0XewdJvSdA&_nc_zt=23&_nc_ht=scontent-phx1-1.xx&edm=AN6CN6oEAAAA&_nc_gid=_tvqjAQqIBWvMoNPeHKPJg&oh=00_AQEaCUxu2BCmikt-sH4rHQVbrWMY4mhky5v0FGiLtBUesg&oe=6A798341"
     },
     {
       "confidence": 1,

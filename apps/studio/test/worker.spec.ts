@@ -1,3 +1,4 @@
+import { env } from "cloudflare:test";
 import { exports } from "cloudflare:workers";
 import { describe, expect, it } from "vitest";
 
@@ -215,6 +216,88 @@ describe("studio Worker", () => {
     await expect(restoreResponse.json()).resolves.toMatchObject({
       restoredFrom: 1,
       version: 2,
+    });
+  });
+
+  it("treats recovered media linking as normalization", async () => {
+    const mediaId = "media_normalized_source_test";
+    const sourceUrl = "https://example.test/recovered-source.jpg";
+    const timestamp = Date.now();
+    await env.DB.prepare(
+      `INSERT INTO media_assets (
+        id, alt_text, alt_text_provenance, byte_size, caption,
+        caption_provenance, created_at, credit, file_name, mime_type,
+        provenance, r2_key, updated_at
+      ) VALUES (?, '', 'missing', 1, '', 'missing', ?, '', 'source.jpg',
+        'image/jpeg', 'recovered', 'test/source.jpg', ?)`
+    )
+      .bind(mediaId, timestamp, timestamp)
+      .run();
+    await env.DB.prepare(
+      "INSERT INTO media_aliases (alias, created_at, media_id) VALUES (?, ?, ?)"
+    )
+      .bind(sourceUrl, timestamp, mediaId)
+      .run();
+
+    const body = {
+      content: [
+        {
+          attrs: {
+            alt: "Source description",
+            altProvenance: "source",
+            src: sourceUrl,
+          },
+          type: "figure",
+        },
+      ],
+      type: "doc",
+    };
+    const createResponse = await exports.default.fetch(
+      "https://studio.test/api/articles",
+      {
+        body: JSON.stringify({
+          baseline: {
+            body,
+            converterVersion: "legacy-html-v1",
+            summary: "Complete source summary.",
+            title: "Recovered media source",
+          },
+          body,
+          language: "lt",
+          slug: "recovered-media-source",
+          summary: "Complete source summary.",
+          title: "Recovered media source",
+        }),
+        headers: { "content-type": "application/json" },
+        method: "POST",
+      }
+    );
+    expect(createResponse.status).toBe(201);
+    const created = (await createResponse.json()) as { id: string };
+
+    const baselineResponse = await exports.default.fetch(
+      `https://studio.test/api/articles/${created.id}/baseline`
+    );
+    expect(baselineResponse.status).toBe(200);
+    await expect(baselineResponse.json()).resolves.toMatchObject({
+      changes: [],
+    });
+
+    const articleResponse = await exports.default.fetch(
+      `https://studio.test/api/articles/${created.id}`
+    );
+    const article = (await articleResponse.json()) as {
+      article: { bodyJson: string };
+    };
+    expect(JSON.parse(article.article.bodyJson)).toMatchObject({
+      content: [
+        {
+          attrs: {
+            mediaId,
+            src: `/api/media/${mediaId}`,
+          },
+        },
+      ],
     });
   });
 });

@@ -1,4 +1,11 @@
-import { lazy, Suspense, useCallback, useEffect, useState } from "react";
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 import { ArticleInventory } from "@/editorial/article-inventory";
 import { StudioSidebar } from "@/editorial/studio-sidebar";
@@ -39,6 +46,16 @@ const App = () => {
     window.history.replaceState(null, "", window.location.pathname);
     setSelectedArticle(null);
   }, []);
+  const translations = useMemo(
+    () =>
+      selectedArticle
+        ? catalog.articles.filter(
+            (article) =>
+              article.translationGroupId === selectedArticle.translationGroupId
+          )
+        : [],
+    [catalog.articles, selectedArticle]
+  );
 
   return (
     <div
@@ -58,6 +75,8 @@ const App = () => {
               article={selectedArticle}
               key={selectedArticle.file}
               onBack={closeArticle}
+              onOpenTranslation={openArticle}
+              translations={translations}
             />
           </Suspense>
         ) : (

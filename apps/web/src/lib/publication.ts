@@ -1,6 +1,10 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { getSectionOptions } from "@ortodoksas-lt/content/sections";
+import type {
+  TranslationKind,
+  TranslationReviewStatus,
+} from "@ortodoksas-lt/content/translation";
 import { localeUi } from "./locale-ui";
 
 import { localizeMediaHtml, localizeMediaUrl } from "./media";
@@ -14,13 +18,14 @@ export interface CatalogEntry {
   homepageOrder?: number;
   kind: "article" | "page";
   labels: string[];
-  origin?: "editorial" | "recovered";
   path: string;
   published: string | null;
   section: string;
   source?: string;
   title: string;
   translationGroupId?: string;
+  translationKind?: TranslationKind;
+  translationReviewStatus?: TranslationReviewStatus;
 }
 
 export interface ContentPage extends CatalogEntry {
@@ -38,6 +43,12 @@ const localesDirectory = resolve(contentRoot, "locales");
 const safeLocaleFilePattern = /^pages\/[A-Za-z0-9._-]+\.json$/;
 const imageSourcePattern = /\bsrc\s*=\s*["']([^"']+)["']/i;
 const firstMediaTablePattern = /<table\b[\s\S]*?<img\b[^>]*>[\s\S]*?<\/table>/i;
+const standaloneStrongHeadingPattern =
+  /<p>\s*<strong>([^<]{1,180})<\/strong>\s*<\/p>/gi;
+const youtubeIframePattern = /<iframe\b[^>]*><\/iframe\s*>/gi;
+const youtubeEmbedSourcePattern =
+  /\bsrc\s*=\s*["'](https:\/\/www\.youtube-nocookie\.com\/embed\/[A-Za-z0-9_-]+(?:\?[^"']*)?)["']/i;
+const leadFigurePattern = /<figure\b[^>]*\bdata-figure-role=["']lead["']/i;
 const contentFiles = readdirSync(pagesDirectory, { encoding: "utf8" }).filter(
   (file) => file.endsWith(".json")
 );
@@ -50,7 +61,7 @@ function readJson<T>(base: string, file: string) {
   }
 }
 
-const recoveredPages = contentFiles
+const canonicalPages = contentFiles
   .map((file) => readJson<ContentPage>(pagesDirectory, file))
   .filter((page): page is ContentPage => Boolean(page && page.path !== "/"))
   .map((page) => ({
@@ -60,7 +71,7 @@ const recoveredPages = contentFiles
   }));
 
 const catalogValue = readJson<CatalogEntry[]>(contentRoot, "catalog.json");
-const recoveredCatalog = (catalogValue ?? []).map((entry) => ({
+const canonicalCatalog = (catalogValue ?? []).map((entry) => ({
   ...entry,
   hero: localizeMediaUrl(entry.hero, entry.path),
 }));
@@ -83,12 +94,12 @@ function assertUniquePaths(entries: CatalogEntry[], label: string) {
 }
 
 export const pages = assertUniquePaths(
-  recoveredPages,
+  canonicalPages,
   "Lithuanian publication"
 ) as ContentPage[];
 
 export const catalog = assertUniquePaths(
-  recoveredCatalog,
+  canonicalCatalog,
   "Lithuanian catalog"
 );
 
@@ -236,6 +247,10 @@ function getCounterpart(locale: SiteLocale, currentPath: string) {
   return candidates.find((entry) => entry.path === path);
 }
 
+export function getLithuanianCounterpart(currentPath: string) {
+  return getCounterpart("lt", currentPath);
+}
+
 /** Return UI destinations, falling back to each edition home when no counterpart exists. */
 export function getLocaleLinks(currentPath: string) {
   if (unprefixLocalePath(currentPath) === "/") {
@@ -323,17 +338,30 @@ export function cleanHtml(
   hero?: string | null,
   removeFirstMedia = false
 ) {
+  const trustedYoutubeFrames: string[] = [];
   const cleaned = value
     .replace(/<script[\s\S]*?<\/script>/gi, "")
     .replace(/<style[\s\S]*?<\/style>/gi, "")
+    .replace(/\s+on[a-z]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, "")
+    .replace(youtubeIframePattern, (frame) => {
+      if (!youtubeEmbedSourcePattern.test(frame)) {
+        return "";
+      }
+      const index = trustedYoutubeFrames.push(frame) - 1;
+      return `<!--canonical-youtube-${index}-->`;
+    })
     .replace(/<(iframe|frame|object|form)\b[\s\S]*?<\/\1\s*>/gi, "")
     .replace(/<(?:iframe|frame|object|embed|form)\b[^>]*\/?\s*>/gi, "")
     .replace(/<link\b[^>]*>/gi, "")
     .replace(/<base\b[^>]*>/gi, "")
-    .replace(/\s+on[a-z]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, "")
     .replace(
       /\s+(?:href|src|data|action|formaction)\s*=\s*(?:"\s*(?:javascript|vbscript|file):[^"]*"|'\s*(?:javascript|vbscript|file):[^']*')/gi,
       ""
+    )
+    .replace(standaloneStrongHeadingPattern, "<h2>$1</h2>")
+    .replace(
+      /<!--canonical-youtube-(\d+)-->/g,
+      (_token, index: string) => trustedYoutubeFrames[Number(index)] ?? ""
     );
   if (!hero) {
     return cleaned;
@@ -353,6 +381,10 @@ export function cleanHtml(
       : undefined;
     return sourceName === heroName ? "" : tag;
   });
+}
+
+export function hasLeadFigure(value: string) {
+  return leadFigurePattern.test(value);
 }
 
 export function escapeXml(value: string) {

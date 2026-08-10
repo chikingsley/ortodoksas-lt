@@ -75,8 +75,9 @@
   five publication languages, including Belarusian.
 - DeepL and focused editorial/LLM review provide a second opinion for supported
   languages and terminology-sensitive articles.
-- Every generated article begins in `pending` review state. Publication requires
-  an explicit approval action.
+- Machine translations may publish with an explicit "Automatically translated
+  from Lithuanian" disclosure. Editorial review upgrades the disclosure to
+  "Reviewed by an editor" without changing the publication model.
 - Batch translation records provider, model, character count, source hash,
   completion state, and resulting article ID.
 

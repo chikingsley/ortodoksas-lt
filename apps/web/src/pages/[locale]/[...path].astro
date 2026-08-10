@@ -1,7 +1,9 @@
 ---
 import EditorialImage from "../../components/media/EditorialImage.astro";
+import { getSectionLabel } from "@ortodoksas-lt/content/sections";
 import SiteLayout from "../../layouts/SiteLayout.astro";
-import { cleanHtml, formatDate, getLocalizedArticles, localeShells, type Locale, type LocalizedArticle } from "../../lib/publication";
+import { getTranslationDisplayState } from "@ortodoksas-lt/content/translation";
+import { cleanHtml, formatDate, getLithuanianCounterpart, getLocalizedArticles, localeShells, type Locale, type LocalizedArticle } from "../../lib/publication";
 import { localeUi } from "../../lib/locale-ui";
 
 export function getStaticPaths() {
@@ -14,6 +16,14 @@ export function getStaticPaths() {
 const { locale, page } = Astro.props as { locale: Locale; page: LocalizedArticle };
 const copy = localeUi[locale];
 const canonicalPath = `/${locale}${page.path}`;
+const original = getLithuanianCounterpart(canonicalPath);
+const translationState = getTranslationDisplayState({
+  kind: page.translationKind ?? "human",
+  reviewStatus: page.translationReviewStatus ?? "approved",
+});
+const translationDisclosure = translationState === "editor_reviewed"
+  ? copy.editorReviewedTranslation
+  : copy.automaticTranslation;
 const articleSchema = {
   articleSection: page.section,
   dateModified: page.published ?? undefined,
@@ -37,9 +47,15 @@ const articleSchema = {
   <main class="article-page localized-article">
     <article class="reading-column">
       <header class="article-header">
-        <div class="eyebrow">{copy.edition}</div>
+        <div class="eyebrow">{getSectionLabel(page.section, locale)}</div>
         <h1>{page.title}</h1>
         {page.published ? <div class="article-byline"><time datetime={page.published}>{formatDate(page.published, locale)}</time></div> : null}
+        {original && translationState !== "original" ? (
+          <p class="translation-disclosure">
+            {translationDisclosure}
+            <a href={original.path}>{copy.viewOriginal}</a>
+          </p>
+        ) : null}
         {page.hero ? <EditorialImage class="article-hero" priority src={page.hero} /> : null}
       </header>
       <div class="prose" set:html={cleanHtml(page.html, page.hero, true)}></div>

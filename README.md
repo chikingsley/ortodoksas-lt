@@ -10,13 +10,18 @@ the shared content system.
 - `packages/content` — canonical article contracts and media URL handling.
 - `packages/editor` — shared Tiptap schema, rendering, provenance, and quality gates.
 - `packages/db` — Drizzle schema and immutable D1 migrations.
-- `scripts/content` — resumable migration into canonical D1 records.
-- `scripts/recovery` — active unresolved-media recovery, queue, registry, and
-  integrity tooling.
 
-Both apps use the same D1 database and R2 media bucket. D1 stores one article
-model, its pristine conversion baseline, current field-level changes, revision
-history, and homepage placements. R2 stores immutable media objects.
+Both apps use the same D1 database and R2 media bucket. D1 is the canonical
+source for articles, editorial baselines, field-level changes, revision history,
+and homepage placements. R2 is the canonical source for media objects.
+
+The historical crawl and migration evidence lives in the public
+[`chikingsley/ortodoksas-lt-source-archive`](https://huggingface.co/datasets/chikingsley/ortodoksas-lt-source-archive)
+dataset. Generated D1 exports and local media mirrors stay outside Git and the
+Cloudflare asset bundle. Git retains the compact media manifest, assignment,
+and unavailable-source registries that validate R2-backed rendering. The
+ignored local `recovery/` directory is the upload staging copy and can be
+removed after the public dataset has been verified.
 
 ## Commands
 
@@ -25,7 +30,6 @@ pnpm install
 pnpm check
 pnpm dev:web
 pnpm dev:studio
-pnpm articles:import -- --dry-run
 ```
 
 Ultracite/Biome owns formatting and linting. TypeScript owns type checking.

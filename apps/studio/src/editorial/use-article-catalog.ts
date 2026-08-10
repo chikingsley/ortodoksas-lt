@@ -36,6 +36,9 @@ export const useArticleCatalog = (): CatalogState => {
             source: string | null;
             status: CatalogArticle["status"];
             title: string;
+            translationGroupId: string;
+            translationKind: CatalogArticle["translationKind"];
+            translationReviewStatus: CatalogArticle["translationReviewStatus"];
           }>;
         }>;
       })
@@ -51,6 +54,7 @@ export const useArticleCatalog = (): CatalogState => {
             id: article.id,
             kind: article.kind === "page" ? "page" : "article",
             labels: JSON.parse(article.labelsJson) as string[],
+            language: article.language,
             path: `/${article.path}`,
             published: article.publishedAt
               ? new Date(article.publishedAt).toISOString()
@@ -59,6 +63,9 @@ export const useArticleCatalog = (): CatalogState => {
             source: article.source ?? "",
             status: article.status,
             title: article.title,
+            translationGroupId: article.translationGroupId,
+            translationKind: article.translationKind,
+            translationReviewStatus: article.translationReviewStatus,
           })),
           state: "ready",
         })

@@ -1,9 +1,12 @@
-import { getSectionOptions } from "@ortodoksas-lt/content/sections";
+import {
+  getSectionLabel,
+  getSectionOptions,
+  type SectionLocale,
+} from "@ortodoksas-lt/content/sections";
 import {
   ArrowDown,
   ChevronLeft,
   ChevronRight,
-  ChevronsUpDown,
   CircleCheck,
   FilePlus2,
   Filter,
@@ -21,7 +24,10 @@ import {
 
 import { Button } from "@/components/ui/button";
 
+import { formatPublicationStatus } from "./format-publication-status";
+import { formatTranslationLabel } from "./translation-label";
 import type { CatalogArticle } from "./types";
+import { ValueCombobox, type ValueOption } from "./value-combobox";
 
 interface Props {
   articles: CatalogArticle[];
@@ -36,18 +42,12 @@ interface ArticleRowProps {
 
 const PAGE_SIZE = 30;
 const SUPPORTING_SLOTS = ["first", "second", "third", "fourth"] as const;
+const AUTOMATIC_PLACEMENT = "automatic";
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
   day: "2-digit",
   month: "short",
   year: "numeric",
 });
-
-const getLanguage = (path: string) => {
-  const [, language] = path.split("/");
-  return ["en", "ru", "uk", "be"].includes(language ?? "")
-    ? language?.toUpperCase()
-    : "LT";
-};
 
 const ArticleRow = ({ article, onOpen }: ArticleRowProps) => {
   const openArticle = useCallback(() => onOpen(article), [article, onOpen]);
@@ -73,14 +73,31 @@ const ArticleRow = ({ article, onOpen }: ArticleRowProps) => {
         </button>
       </td>
       <td>
-        <span className="language-code">{getLanguage(article.path)}</span>
+        <div className="translation-identity">
+          <span className="language-code">
+            {article.language.toUpperCase()}
+          </span>
+          <span className="translation-badge">
+            {formatTranslationLabel(
+              article.translationKind,
+              article.translationReviewStatus
+            )}
+          </span>
+        </div>
       </td>
       <td>
-        <span className="section-label">{article.section || "Other"}</span>
+        <span className="section-label">
+          {article.section
+            ? getSectionLabel(
+                article.section,
+                article.language as SectionLocale
+              )
+            : "Other"}
+        </span>
       </td>
       <td>
         <span className="status-label">
-          <CircleCheck /> {article.status}
+          <CircleCheck /> {formatPublicationStatus(article.status)}
         </span>
       </td>
       <td className="date-cell">
@@ -89,6 +106,41 @@ const ArticleRow = ({ article, onOpen }: ArticleRowProps) => {
           : "—"}
       </td>
     </tr>
+  );
+};
+
+interface HomepagePlacementFieldProps {
+  label: string;
+  onChange: (position: number, value: string) => void;
+  options: ValueOption[];
+  position: number;
+  value: string;
+}
+
+const HomepagePlacementField = ({
+  label,
+  onChange,
+  options,
+  position,
+  value,
+}: HomepagePlacementFieldProps) => {
+  const inputId = `homepage-supporting-${position}`;
+  const updatePlacement = useCallback(
+    (nextValue: string) => onChange(position, nextValue),
+    [onChange, position]
+  );
+
+  return (
+    <label htmlFor={inputId}>
+      {label}
+      <ValueCombobox
+        ariaLabel={label}
+        id={inputId}
+        onChange={updatePlacement}
+        options={options}
+        value={value || AUTOMATIC_PLACEMENT}
+      />
+    </label>
   );
 };
 
@@ -143,6 +195,30 @@ export const ArticleInventory = ({ articles, catalogState, onOpen }: Props) => {
       getSectionOptions(inventoryArticles.map((article) => article.section)),
     [inventoryArticles]
   );
+  const articleOptions = useMemo<ValueOption[]>(
+    () => [
+      { label: "Automatic", value: AUTOMATIC_PLACEMENT },
+      ...inventoryArticles.map((article) => ({
+        label: article.title,
+        value: article.id,
+      })),
+    ],
+    [inventoryArticles]
+  );
+  const leadOptions = useMemo<ValueOption[]>(
+    () => [
+      { label: "Automatic latest story", value: AUTOMATIC_PLACEMENT },
+      ...articleOptions.slice(1),
+    ],
+    [articleOptions]
+  );
+  const sectionOptions = useMemo<ValueOption[]>(
+    () => [
+      { label: "All sections", value: "All sections" },
+      ...sections.map((item) => ({ label: item, value: item })),
+    ],
+    [sections]
+  );
   const filtered = useMemo(() => {
     const normalized = query.trim().toLocaleLowerCase("lt");
     return inventoryArticles.filter((article) => {
@@ -168,8 +244,8 @@ export const ArticleInventory = ({ articles, catalogState, onOpen }: Props) => {
     setQuery(event.target.value);
     setPage(1);
   }, []);
-  const updateSection = useCallback((event: ChangeEvent<HTMLSelectElement>) => {
-    setSection(event.target.value);
+  const updateSection = useCallback((value: string) => {
+    setSection(value);
     setPage(1);
   }, []);
   const previousPage = useCallback(
@@ -184,25 +260,19 @@ export const ArticleInventory = ({ articles, catalogState, onOpen }: Props) => {
     () => setHomepageOpen((open) => !open),
     []
   );
-  const updateLead = useCallback((event: ChangeEvent<HTMLSelectElement>) => {
-    setLeadId(event.target.value);
+  const updateLead = useCallback((value: string) => {
+    setLeadId(value === AUTOMATIC_PLACEMENT ? "" : value);
     setHomepageState("idle");
   }, []);
-  const updateSecondary = useCallback(
-    (event: ChangeEvent<HTMLSelectElement>) => {
-      const position = Number.parseInt(
-        event.target.dataset.position ?? "0",
-        10
-      );
-      setSecondaryIds((current) =>
-        current.map((value, index) =>
-          index === position ? event.target.value : value
-        )
-      );
-      setHomepageState("idle");
-    },
-    []
-  );
+  const updateSecondary = useCallback((position: number, value: string) => {
+    const nextValue = value === AUTOMATIC_PLACEMENT ? "" : value;
+    setSecondaryIds((current) =>
+      current.map((currentValue, index) =>
+        index === position ? nextValue : currentValue
+      )
+    );
+    setHomepageState("idle");
+  }, []);
   const saveHomepage = useCallback(async () => {
     setHomepageState("saving");
     const selectedIds = [leadId, ...secondaryIds].filter(Boolean);
@@ -258,33 +328,25 @@ export const ArticleInventory = ({ articles, catalogState, onOpen }: Props) => {
               Choose one lead story and up to four supporting stories.
             </span>
           </div>
-          <label>
+          <label htmlFor="homepage-lead-story">
             Lead story
-            <select onChange={updateLead} value={leadId}>
-              <option value="">Automatic latest story</option>
-              {inventoryArticles.map((article) => (
-                <option key={article.id} value={article.id}>
-                  {article.title}
-                </option>
-              ))}
-            </select>
+            <ValueCombobox
+              ariaLabel="Lead story"
+              id="homepage-lead-story"
+              onChange={updateLead}
+              options={leadOptions}
+              value={leadId || AUTOMATIC_PLACEMENT}
+            />
           </label>
           {SUPPORTING_SLOTS.map((slot, position) => (
-            <label key={slot}>
-              Supporting story {position + 1}
-              <select
-                data-position={position}
-                onChange={updateSecondary}
-                value={secondaryIds[position]}
-              >
-                <option value="">Automatic</option>
-                {inventoryArticles.map((article) => (
-                  <option key={article.id} value={article.id}>
-                    {article.title}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <HomepagePlacementField
+              key={slot}
+              label={`Supporting story ${position + 1}`}
+              onChange={updateSecondary}
+              options={articleOptions}
+              position={position}
+              value={secondaryIds[position] ?? ""}
+            />
           ))}
           <Button disabled={homepageState === "saving"} onClick={saveHomepage}>
             <Save /> {homepageState === "saving" ? "Saving…" : "Save layout"}
@@ -337,16 +399,13 @@ export const ArticleInventory = ({ articles, catalogState, onOpen }: Props) => {
             />
             <kbd>⌘ K</kbd>
           </label>
-          <label className="select-field">
-            <span className="sr-only">Section</span>
-            <select onChange={updateSection} value={section}>
-              <option>All sections</option>
-              {sections.map((item) => (
-                <option key={item}>{item}</option>
-              ))}
-            </select>
-            <ChevronsUpDown />
-          </label>
+          <ValueCombobox
+            ariaLabel="Filter by section"
+            className="inventory-section-combobox"
+            onChange={updateSection}
+            options={sectionOptions}
+            value={section}
+          />
           <button className="tool-button" type="button">
             <Filter /> More filters
           </button>

@@ -2,7 +2,7 @@
 
 ## Scope
 
-Every recovered article enters Studio as source evidence plus a draft canonical Tiptap document. Automatic checks evaluate canonical structure, copy boundaries, media metadata, and publication readiness whenever the document changes.
+Every imported or newly created article enters Studio as one canonical Tiptap document. Imported records retain their original source for comparison. Automatic checks evaluate canonical structure, copy boundaries, media metadata, and publication readiness whenever the document changes.
 
 ## Summary
 

@@ -28,12 +28,18 @@ import {
 import { SimpleEditor } from "@/components/tiptap-templates/simple/simple-editor";
 import { Button } from "@/components/ui/button";
 
-import { SectionCombobox } from "./section-combobox";
+import { AutoResizeTextarea } from "./auto-resize-textarea";
+import { formatPublicationStatus } from "./format-publication-status";
+import { LanguageSelect } from "./language-select";
+import { SectionSelect } from "./section-select";
+import { formatTranslationLabel } from "./translation-label";
 import type { CatalogArticle, SourceArticle } from "./types";
 
 interface Props {
   article: CatalogArticle;
   onBack: () => void;
+  onOpenTranslation: (article: CatalogArticle) => void;
+  translations: CatalogArticle[];
 }
 
 interface StoredArticle {
@@ -52,7 +58,17 @@ interface StoredArticle {
   status: "draft" | "scheduled" | "published" | "archived";
   summary: string;
   title: string;
+  translationGroupId: string;
   translationKind: "original" | "human" | "machine";
+  translationReviewedAt: number | null;
+  translationReviewedBy: string | null;
+  translationReviewStatus:
+    | "approved"
+    | "changes_requested"
+    | "not_required"
+    | "pending";
+  translationSourceArticleId: string | null;
+  translationSourceHash: string | null;
 }
 
 interface ArticleResponse {
@@ -82,6 +98,18 @@ interface Revision {
   version: number;
 }
 
+interface PersistArticleInput {
+  articleId: string | null;
+  baseline: {
+    body: JSONContent;
+    converterVersion: string;
+    summary: string;
+    title: string;
+  };
+  payload: Record<string, unknown>;
+  sourceArticleId: string;
+}
+
 const EMPTY_DOCUMENT: JSONContent = {
   content: [{ type: "paragraph" }],
   type: "doc",
@@ -89,6 +117,47 @@ const EMPTY_DOCUMENT: JSONContent = {
 const LEADING_SLASH_PATTERN = /^\/+/;
 const LITHUANIAN_PREFIX_PATTERN = /^lt\//;
 const TRAILING_SLASH_PATTERN = /\/$/;
+const CHANGE_FIGURE_FIELD_PATTERN = /^body\.figure\[(\d+)\]\.(alt|caption)$/u;
+const WWW_PREFIX_PATTERN = /^www\./u;
+const EDITION_LANGUAGES = ["lt", "en", "ru", "uk", "be"] as const;
+
+const CHANGE_FIELD_LABELS: Record<string, string> = {
+  summary: "Summary",
+  title: "Title",
+};
+
+const formatChangeField = (fieldPath: string): string => {
+  const directLabel = CHANGE_FIELD_LABELS[fieldPath];
+  if (directLabel) {
+    return directLabel;
+  }
+  const figureMatch = CHANGE_FIGURE_FIELD_PATTERN.exec(fieldPath);
+  if (figureMatch) {
+    const [, figureNumber, field] = figureMatch;
+    return `Figure ${figureNumber} ${field === "alt" ? "alternative text" : "caption"}`;
+  }
+  return fieldPath;
+};
+
+const formatChangeProvenance = (
+  provenance: ContentChange["provenance"]
+): string =>
+  ({
+    generated: "Automated",
+    manual: "Editor",
+    normalized: "System cleanup",
+  })[provenance];
+
+const formatSourceName = (sourceUrl: string | undefined): string => {
+  if (!sourceUrl) {
+    return "Original website";
+  }
+  try {
+    return new URL(sourceUrl).hostname.replace(WWW_PREFIX_PATTERN, "");
+  } catch {
+    return "Original website";
+  }
+};
 
 const getSlug = (path: string): string =>
   path
@@ -96,9 +165,28 @@ const getSlug = (path: string): string =>
     .replace(LITHUANIAN_PREFIX_PATTERN, "")
     .replace(TRAILING_SLASH_PATTERN, "");
 
+const persistArticle = ({
+  articleId,
+  baseline,
+  payload,
+  sourceArticleId,
+}: PersistArticleInput): Promise<Response> =>
+  fetch(articleId ? `/api/articles/${articleId}` : "/api/articles", {
+    body: JSON.stringify(
+      articleId ? payload : { ...payload, baseline, sourceArticleId }
+    ),
+    headers: { "content-type": "application/json" },
+    method: articleId ? "PUT" : "POST",
+  });
+
 // The page coordinates a complete article, conversion, preview, and revision workflow.
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: keeping the workflow state colocated makes save and preview transitions explicit
-export const ArticleEditor = ({ article, onBack }: Props) => {
+export function ArticleEditor({
+  article,
+  onBack,
+  onOpenTranslation,
+  translations,
+}: Props) {
   const [articleId, setArticleId] = useState<string | null>(null);
   const [baselineBody, setBaselineBody] = useState<JSONContent>(EMPTY_DOCUMENT);
   const [body, setBody] = useState<JSONContent>(EMPTY_DOCUMENT);
@@ -122,6 +210,27 @@ export const ArticleEditor = ({ article, onBack }: Props) => {
   const [status, setStatus] = useState<StoredArticle["status"]>("draft");
   const [summary, setSummary] = useState("");
   const [title, setTitle] = useState(article.title);
+  const [translationGroupId, setTranslationGroupId] = useState(
+    article.translationGroupId
+  );
+  const [translationKind, setTranslationKind] = useState(
+    article.translationKind
+  );
+  const [translationReviewedAt, setTranslationReviewedAt] = useState<
+    number | null
+  >(null);
+  const [translationReviewedBy, setTranslationReviewedBy] = useState<
+    string | null
+  >(null);
+  const [translationReviewStatus, setTranslationReviewStatus] = useState(
+    article.translationReviewStatus
+  );
+  const [translationSourceArticleId, setTranslationSourceArticleId] = useState<
+    string | null
+  >(null);
+  const [translationSourceHash, setTranslationSourceHash] = useState<
+    string | null
+  >(null);
   const [warnings, setWarnings] = useState<string[]>([]);
 
   useEffect(() => {
@@ -170,6 +279,13 @@ export const ArticleEditor = ({ article, onBack }: Props) => {
         setStatus(canonical.status);
         setSummary(canonical.summary);
         setTitle(canonical.title);
+        setTranslationGroupId(canonical.translationGroupId);
+        setTranslationKind(canonical.translationKind);
+        setTranslationReviewedAt(canonical.translationReviewedAt);
+        setTranslationReviewedBy(canonical.translationReviewedBy);
+        setTranslationReviewStatus(canonical.translationReviewStatus);
+        setTranslationSourceArticleId(canonical.translationSourceArticleId);
+        setTranslationSourceHash(canonical.translationSourceHash);
         const revisionResponse = await fetch(
           `/api/articles/${canonical.id}/revisions`,
           { signal: controller.signal }
@@ -209,13 +325,10 @@ export const ArticleEditor = ({ article, onBack }: Props) => {
     },
     []
   );
-  const updateLanguage = useCallback(
-    (event: ChangeEvent<HTMLSelectElement>) => {
-      setLanguage(event.target.value);
-      setSaveState("dirty");
-    },
-    []
-  );
+  const updateLanguage = useCallback((value: string) => {
+    setLanguage(value);
+    setSaveState("dirty");
+  }, []);
   const updateSection = useCallback((value: string) => {
     setSection(value);
     setSaveState("dirty");
@@ -230,12 +343,24 @@ export const ArticleEditor = ({ article, onBack }: Props) => {
   }, []);
 
   const save = useCallback(
-    async (nextStatus: StoredArticle["status"]): Promise<string | null> => {
+    async (
+      nextStatus: StoredArticle["status"],
+      reviewOverride?: {
+        reviewedAt: number;
+        reviewedBy: string;
+        status: StoredArticle["translationReviewStatus"];
+      }
+    ): Promise<string | null> => {
       if (!title.trim()) {
         setSaveState("error");
         return null;
       }
       setSaveState("saving");
+      const reviewMetadata = reviewOverride ?? {
+        reviewedAt: translationReviewedAt,
+        reviewedBy: translationReviewedBy,
+        status: translationReviewStatus,
+      };
       const payload = {
         body,
         heroSourceUrl: article.hero ?? undefined,
@@ -248,29 +373,25 @@ export const ArticleEditor = ({ article, onBack }: Props) => {
         status: nextStatus,
         summary,
         title,
-        translationKind: "original" as const,
+        translationGroupId,
+        translationKind,
+        translationReviewedAt: reviewMetadata.reviewedAt,
+        translationReviewedBy: reviewMetadata.reviewedBy ?? undefined,
+        translationReviewStatus: reviewMetadata.status,
+        translationSourceArticleId: translationSourceArticleId ?? undefined,
+        translationSourceHash: translationSourceHash ?? undefined,
       };
-      const response = await fetch(
-        articleId ? `/api/articles/${articleId}` : "/api/articles",
-        {
-          body: JSON.stringify(
-            articleId
-              ? payload
-              : {
-                  ...payload,
-                  baseline: {
-                    body: baselineBody,
-                    converterVersion: "legacy-html-v1",
-                    summary: source?.description ?? "",
-                    title: source?.title ?? article.title,
-                  },
-                  sourceArticleId: article.file,
-                }
-          ),
-          headers: { "content-type": "application/json" },
-          method: articleId ? "PUT" : "POST",
-        }
-      );
+      const response = await persistArticle({
+        articleId,
+        baseline: {
+          body: baselineBody,
+          converterVersion: "legacy-html-v1",
+          summary: source?.description ?? "",
+          title: source?.title ?? article.title,
+        },
+        payload,
+        sourceArticleId: article.file,
+      });
       if (!response.ok) {
         setSaveState("error");
         return null;
@@ -283,6 +404,11 @@ export const ArticleEditor = ({ article, onBack }: Props) => {
       setArticleId(result.id);
       setHeroMediaId(result.heroMediaId);
       setStatus(nextStatus);
+      if (reviewOverride) {
+        setTranslationReviewedAt(reviewOverride.reviewedAt);
+        setTranslationReviewedBy(reviewOverride.reviewedBy);
+        setTranslationReviewStatus(reviewOverride.status);
+      }
       setSaveState("saved");
       await loadRevisions(result.id);
       const changesResponse = await fetch(
@@ -305,11 +431,36 @@ export const ArticleEditor = ({ article, onBack }: Props) => {
       summary,
       source,
       title,
+      translationGroupId,
+      translationKind,
+      translationReviewedAt,
+      translationReviewedBy,
+      translationReviewStatus,
+      translationSourceArticleId,
+      translationSourceHash,
     ]
   );
   const saveDraft = useCallback(() => {
     save("draft").catch(() => setSaveState("error"));
   }, [save]);
+  const markEditorReviewed = useCallback(() => {
+    save(status, {
+      reviewedAt: Date.now(),
+      reviewedBy: "studio-editor",
+      status: "approved",
+    }).catch(() => setSaveState("error"));
+  }, [save, status]);
+  const openTranslation = useCallback(
+    (event: MouseEvent<HTMLButtonElement>) => {
+      const counterpart = translations.find(
+        (candidate) => candidate.id === event.currentTarget.dataset.articleId
+      );
+      if (counterpart) {
+        onOpenTranslation(counterpart);
+      }
+    },
+    [onOpenTranslation, translations]
+  );
   const openPreview = useCallback(() => setPreviewOpen(true), []);
   const closePreview = useCallback(() => setPreviewOpen(false), []);
   const openSourceReview = useCallback(() => {
@@ -365,6 +516,13 @@ export const ArticleEditor = ({ article, onBack }: Props) => {
         setStatus(data.article.status);
         setSummary(data.article.summary);
         setTitle(data.article.title);
+        setTranslationGroupId(data.article.translationGroupId);
+        setTranslationKind(data.article.translationKind);
+        setTranslationReviewedAt(data.article.translationReviewedAt);
+        setTranslationReviewedBy(data.article.translationReviewedBy);
+        setTranslationReviewStatus(data.article.translationReviewStatus);
+        setTranslationSourceArticleId(data.article.translationSourceArticleId);
+        setTranslationSourceHash(data.article.translationSourceHash);
         setSaveState("saved");
         await loadRevisions(articleId);
       }
@@ -411,7 +569,7 @@ export const ArticleEditor = ({ article, onBack }: Props) => {
   const saveMessage = {
     dirty: "Unsaved changes",
     error: "Save failed — try again",
-    saved: articleId ? "Saved to Studio" : "Archive source loaded",
+    saved: articleId ? "Saved to Studio" : "Source loaded",
     saving: "Saving…",
   }[saveState];
 
@@ -446,15 +604,50 @@ export const ArticleEditor = ({ article, onBack }: Props) => {
         </div>
       </header>
 
+      <nav aria-label="Article translations" className="review-translation-bar">
+        <span>Translations</span>
+        <div>
+          {EDITION_LANGUAGES.map((editionLanguage) => {
+            const counterpart = translations.find(
+              (candidate) => candidate.language === editionLanguage
+            );
+            return counterpart ? (
+              <button
+                aria-current={
+                  counterpart.id === article.id ? "page" : undefined
+                }
+                data-article-id={counterpart.id}
+                key={editionLanguage}
+                onClick={openTranslation}
+                type="button"
+              >
+                <strong>{editionLanguage.toUpperCase()}</strong>
+                <small>
+                  {formatTranslationLabel(
+                    counterpart.translationKind,
+                    counterpart.translationReviewStatus
+                  )}
+                </small>
+              </button>
+            ) : (
+              <span className="translation-missing" key={editionLanguage}>
+                <strong>{editionLanguage.toUpperCase()}</strong>
+                <small>Missing</small>
+              </span>
+            );
+          })}
+        </div>
+      </nav>
+
       {loadState === "loading" ? (
         <div className="review-editor-state">
-          <LoaderCircle className="spin" /> Converting the archived article…
+          <LoaderCircle className="spin" /> Loading article…
         </div>
       ) : null}
       {loadState === "error" ? (
         <div className="review-editor-state error">
-          The archived article could not be loaded. Return to the inventory and
-          try another record.
+          The article could not be loaded. Return to the inventory and try
+          another record.
         </div>
       ) : null}
 
@@ -463,10 +656,9 @@ export const ArticleEditor = ({ article, onBack }: Props) => {
           <main className="review-editor-document">
             <div className="review-article-fields">
               <label htmlFor="review-title">Title</label>
-              <textarea
+              <AutoResizeTextarea
                 id="review-title"
                 onChange={updateTitle}
-                rows={2}
                 value={title}
               />
               <label htmlFor="review-summary">Summary</label>
@@ -495,23 +687,19 @@ export const ArticleEditor = ({ article, onBack }: Props) => {
               </div>
               <div>
                 <span>Language</span>
-                <select
-                  aria-label="Article language"
-                  onChange={updateLanguage}
-                  value={language}
-                >
-                  <option value="lt">Lithuanian</option>
-                  <option value="en">English</option>
-                  <option value="ru">Russian</option>
-                  <option value="uk">Ukrainian</option>
-                  <option value="be">Belarusian</option>
-                </select>
+                <LanguageSelect onChange={updateLanguage} value={language} />
               </div>
               <Button onClick={openSourceReview} variant="outline">
-                View source
+                Compare source
               </Button>
-              <Button onClick={openChanges} variant="outline">
-                Changes ({changes.length})
+              <Button
+                disabled={changes.length === 0}
+                onClick={openChanges}
+                variant="outline"
+              >
+                {changes.length === 0
+                  ? "No editorial changes"
+                  : `Changes (${changes.length})`}
               </Button>
             </section>
 
@@ -519,7 +707,6 @@ export const ArticleEditor = ({ article, onBack }: Props) => {
               <section className="review-hero-field">
                 <div>
                   <strong>Lead image</strong>
-                  <span>Recovered archive image</span>
                 </div>
                 {article.hero ? (
                   <img
@@ -556,12 +743,23 @@ export const ArticleEditor = ({ article, onBack }: Props) => {
                 <div>
                   <dt>Status</dt>
                   <dd>
-                    <i /> {status.replace("_", " ")}
+                    <i /> {formatPublicationStatus(status)}
                   </dd>
                 </div>
                 <div>
                   <dt>Source</dt>
-                  <dd>Recovered archive</dd>
+                  <dd>{formatSourceName(source?.source)}</dd>
+                </div>
+                <div>
+                  <dt>Translation</dt>
+                  <dd>
+                    <span className="translation-badge">
+                      {formatTranslationLabel(
+                        translationKind,
+                        translationReviewStatus
+                      )}
+                    </span>
+                  </dd>
                 </div>
                 <div>
                   <dt>Version</dt>
@@ -573,6 +771,16 @@ export const ArticleEditor = ({ article, onBack }: Props) => {
                   Saved {new Date(revisions[0].created_at).toLocaleString()} by{" "}
                   {revisions[0].editor_id}
                 </p>
+              ) : null}
+              {translationKind !== "original" &&
+              translationReviewStatus !== "approved" ? (
+                <Button
+                  disabled={saveState === "saving"}
+                  onClick={markEditorReviewed}
+                  variant="outline"
+                >
+                  <Check /> Mark editor reviewed
+                </Button>
               ) : null}
               <button
                 className="review-history-toggle"
@@ -634,30 +842,33 @@ export const ArticleEditor = ({ article, onBack }: Props) => {
                   ))}
                 </ul>
               ) : null}
-              <Button onClick={openSourceReview} variant="outline">
-                View conversion source
-              </Button>
-              <Button onClick={openChanges} variant="outline">
-                View {changes.length} changes
-              </Button>
+              <div className="review-inspector-actions">
+                <Button onClick={openSourceReview} variant="outline">
+                  Compare source
+                </Button>
+                <Button
+                  disabled={changes.length === 0}
+                  onClick={openChanges}
+                  variant="outline"
+                >
+                  {changes.length === 0
+                    ? "No editorial changes"
+                    : `View ${changes.length} changes`}
+                </Button>
+              </div>
             </section>
             <section>
               <h2>Publication</h2>
               <label htmlFor="review-language">Language</label>
-              <select
+              <LanguageSelect
                 id="review-language"
                 onChange={updateLanguage}
                 value={language}
-              >
-                <option value="lt">Lithuanian</option>
-                <option value="en">English</option>
-                <option value="ru">Russian</option>
-                <option value="uk">Ukrainian</option>
-                <option value="be">Belarusian</option>
-              </select>
+              />
               <label htmlFor="review-section">Section</label>
-              <SectionCombobox
+              <SectionSelect
                 id="review-section"
+                language={language}
                 onChange={updateSection}
                 value={section}
               />
@@ -703,7 +914,7 @@ export const ArticleEditor = ({ article, onBack }: Props) => {
 
       {sourceReviewOpen ? (
         <div
-          aria-label="Conversion comparison"
+          aria-label="Source comparison"
           aria-modal="true"
           className="review-overlay"
           role="dialog"
@@ -711,8 +922,8 @@ export const ArticleEditor = ({ article, onBack }: Props) => {
           <div className="review-compare-window">
             <header>
               <div>
-                <strong>Conversion comparison</strong>
-                <span>Archived HTML beside the canonical editor result</span>
+                <strong>Source comparison</strong>
+                <span>Original page beside the current editor result</span>
               </div>
               <button
                 aria-label="Close comparison"
@@ -725,11 +936,11 @@ export const ArticleEditor = ({ article, onBack }: Props) => {
             </header>
             <div className="review-compare-grid">
               <section>
-                <h2>Archived source</h2>
+                <h2>Original source</h2>
                 <iframe
                   sandbox=""
                   srcDoc={source?.html ?? ""}
-                  title="Archived source"
+                  title="Original source"
                 />
               </section>
               <section>
@@ -744,8 +955,8 @@ export const ArticleEditor = ({ article, onBack }: Props) => {
             {warnings.length > 0 ? (
               <footer>
                 <div className="review-warning-heading">
-                  <strong>Import warnings</strong>
-                  <span>{warnings.length} source issues detected</span>
+                  <strong>Source notes</strong>
+                  <span>{warnings.length} issues detected</span>
                 </div>
                 <ol>
                   {warnings.map((warning, index) => (
@@ -771,10 +982,8 @@ export const ArticleEditor = ({ article, onBack }: Props) => {
           <div className="review-compare-window">
             <header>
               <div>
-                <strong>Changes from imported baseline</strong>
-                <span>
-                  Every saved editorial difference with its provenance
-                </span>
+                <strong>Editorial changes</strong>
+                <span>Original source compared with the current article</span>
               </div>
               <button
                 aria-label="Close changes"
@@ -787,24 +996,24 @@ export const ArticleEditor = ({ article, onBack }: Props) => {
             </header>
             {changes.length === 0 ? (
               <div className="review-editor-state">
-                The canonical article matches its imported baseline.
+                The current article matches its original source.
               </div>
             ) : (
               <ol className="review-change-list">
                 {changes.map((change) => (
                   <li key={`${change.field_path}-${change.change_kind}`}>
                     <div>
-                      <code>{change.field_path}</code>
+                      <strong>{formatChangeField(change.field_path)}</strong>
                       <span>{change.change_kind}</span>
-                      <span>{change.provenance}</span>
+                      <span>{formatChangeProvenance(change.provenance)}</span>
                     </div>
                     <dl>
                       <div>
-                        <dt>Before</dt>
+                        <dt>Original</dt>
                         <dd>{change.before_value || "Empty"}</dd>
                       </div>
                       <div>
-                        <dt>After</dt>
+                        <dt>Current</dt>
                         <dd>{change.after_value || "Empty"}</dd>
                       </div>
                     </dl>
@@ -817,4 +1026,4 @@ export const ArticleEditor = ({ article, onBack }: Props) => {
       ) : null}
     </div>
   );
-};
+}

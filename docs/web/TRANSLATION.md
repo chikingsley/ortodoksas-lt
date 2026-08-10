@@ -15,10 +15,11 @@ group and links directly to each available counterpart.
 - `human`
 - `machine`
 
-`translation_review_status` records its editorial state:
+`translation_review_status` records its editorial state independently from
+publication:
 
 - `not_required` for an original article
-- `pending` for a translation awaiting review
+- `pending` for an automatic translation awaiting optional editorial review
 - `approved` for a translation accepted for publication
 - `changes_requested` when review sends it back for revision
 
@@ -37,8 +38,8 @@ model, language pair, character count, status, and resulting article.
 Google Cloud Translation is the primary batch provider because it covers the
 complete LT, EN, RU, UK, and BE language set. DeepL and focused editorial or LLM
 review act as second-pass checks where language support and terminology warrant
-them. Generated text enters Studio as a draft with `pending` review status; an
-editor approves publication.
+them. Published automatic translations carry a visible source-language
+disclosure. Editorial review records the reviewer and upgrades that disclosure.
 
 ## URL policy
 

@@ -339,12 +339,16 @@ articleRoutes.post("/:id/revisions/:version/restore", async (context) => {
     .where(eq(articleBaselines.articleId, id))
     .limit(1);
   const restoredDocument = JSON.parse(revision.body_json) as TiptapDocument;
+  const restoredBody = await attachMediaRecords(database, restoredDocument);
   const annotated = baseline
     ? annotateArticleBody(
-        restoredDocument,
-        JSON.parse(baseline.body_json) as TiptapDocument
+        restoredBody,
+        await attachMediaRecords(
+          database,
+          JSON.parse(baseline.body_json) as TiptapDocument
+        )
       )
-    : { body: restoredDocument, changes: [] };
+    : { body: restoredBody, changes: [] };
   const changes = [...annotated.changes];
   if (baseline?.title !== undefined && baseline.title !== metadata.title) {
     changes.push({
@@ -440,9 +444,14 @@ articleRoutes.post("/", async (context) => {
     summary: parsed.data.summary,
     title: parsed.data.title,
   };
-  const annotated = annotateArticleBody(parsed.data.body, baseline.body);
   const database = getDatabase(context.env.DB);
-  const body = await attachMediaRecords(database, annotated.body);
+  const currentBody = await attachMediaRecords(database, parsed.data.body);
+  const comparableBaselineBody = await attachMediaRecords(
+    database,
+    baseline.body
+  );
+  const annotated = annotateArticleBody(currentBody, comparableBaselineBody);
+  const { body } = annotated;
   const bodyJson = JSON.stringify(body);
   const heroMediaId = await findMediaId(database, parsed.data.heroSourceUrl);
   const baselineBodyJson = JSON.stringify(baseline.body);
@@ -600,8 +609,13 @@ articleRoutes.put("/:id", async (context) => {
   const baselineBody = existing.baseline_body_json
     ? (JSON.parse(existing.baseline_body_json) as TiptapDocument)
     : parsed.data.body;
-  const annotated = annotateArticleBody(parsed.data.body, baselineBody);
-  const body = await attachMediaRecords(database, annotated.body);
+  const currentBody = await attachMediaRecords(database, parsed.data.body);
+  const comparableBaselineBody = await attachMediaRecords(
+    database,
+    baselineBody
+  );
+  const annotated = annotateArticleBody(currentBody, comparableBaselineBody);
+  const { body } = annotated;
   const bodyJson = JSON.stringify(body);
   const heroMediaId =
     (await findMediaId(database, parsed.data.heroSourceUrl)) ??

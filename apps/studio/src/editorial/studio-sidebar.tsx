@@ -1,5 +1,4 @@
 import {
-  ArchiveRestore,
   BookOpenText,
   FileText,
   Globe2,
@@ -24,10 +23,6 @@ const navGroups = [
       { icon: Globe2, label: "Publishing" },
     ],
     label: "Publication",
-  },
-  {
-    items: [{ icon: ArchiveRestore, label: "Archive migration" }],
-    label: "System",
   },
 ] as const;
 

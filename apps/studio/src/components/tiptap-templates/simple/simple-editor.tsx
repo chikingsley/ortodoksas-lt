@@ -3,7 +3,6 @@
 import type { JSONContent } from "@tiptap/core";
 import { FindAndReplace } from "@tiptap/extension-find-and-replace";
 import { Highlight } from "@tiptap/extension-highlight";
-import { Image } from "@tiptap/extension-image";
 import { TaskItem, TaskList } from "@tiptap/extension-list";
 import { Subscript } from "@tiptap/extension-subscript";
 import { Superscript } from "@tiptap/extension-superscript";
@@ -247,8 +246,6 @@ export function SimpleEditor({
       TaskItem.configure({ nested: true }),
       Highlight.configure({ multicolor: true }),
       EditableFigure,
-      // Old revisions may still contain plain image nodes.
-      Image,
       Typography,
       Superscript,
       Subscript,

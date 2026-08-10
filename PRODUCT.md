@@ -12,19 +12,19 @@ The primary readers are Lithuanian Orthodox Christians and people seeking reliab
 
 ## Product Purpose
 
-ortodoksas.lt is a church publication and recovered public archive. It preserves the historical publication while supporting new editorial work in Lithuanian, English, Russian, Ukrainian, and Belarusian.
+ortodoksas.lt is a multilingual church publication. It combines current editorial work with a searchable historical article collection in Lithuanian, English, Russian, Ukrainian, and Belarusian.
 
 ## Operating Context
 
-Readers arrive for current stories, service schedules, the church calendar, clergy information, library material, and archived articles. Editors work through Decap CMS, where editorial workflow creates reviewable GitHub changes before publication.
+Readers arrive for current stories, service schedules, the church calendar, clergy information, library material, and archived articles. Editors work in the custom Studio, which writes canonical articles, revisions, translations, publication state, and media relationships to D1 and R2.
 
 ## Capabilities and Constraints
 
-- Astro generates static publication routes and indexes recovered and editorial content together.
-- Decap CMS stores multilingual JSON under `public/content/editorial`.
-- Cloudflare Workers Static Assets serves the site and a narrow GitHub OAuth integration.
-- The main story and up to three secondary stories use editor-selected homepage placement, with chronological fallbacks.
-- Historical recovered content stays preserved as source material.
+- Astro generates static publication routes from a canonical D1 export.
+- The Cloudflare Worker serves static assets, D1-backed publication endpoints, and R2 media.
+- Studio uses Tiptap for article bodies and Drizzle for every D1 read and write.
+- The main story and supporting stories use editor-selected homepage placement with deterministic chronological fallback behavior.
+- The historical source archive lives outside the application repository as a public evidence dataset.
 
 ## Brand Commitments
 
@@ -36,7 +36,7 @@ Readers arrive for current stories, service schedules, the church calendar, cler
 
 ## Evidence on Hand
 
-The repository contains the client Exarchate lockup, an official Patriarchate emblem, the Canva reference export and extracted motifs, the approved C composition board, the recovered publication archive, and the current Decap/Cloudflare implementation.
+The repository contains the approved institutional marks, curated brand assets and motifs, design decisions, public Astro application, editorial Studio, shared content contracts, and Cloudflare configuration. The historical crawl and migration evidence lives in its dedicated public dataset.
 
 ## Product Principles
 

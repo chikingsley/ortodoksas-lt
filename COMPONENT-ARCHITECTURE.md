@@ -14,19 +14,20 @@ This is the implementation checklist for the public publication UI. A checked it
 ## Public surfaces
 
 - [x] Homepage: `Homepage` composes the shared shell, service band, lead/supporting story cards, archive rail, section groups, and library callout from reusable publication components and a tested view model.
-- [ ] Archive: compose the shared shell, section controls, archive rows, and pagination from reusable primitives.
-- [ ] Search: compose the shared shell, query control, result rows, and empty/error states from reusable primitives.
-- [ ] Article: compose the shared shell, breadcrumb/context, article header, media, body, related stories, and share actions from reusable primitives.
-- [ ] Localized routes: verify the same component contracts and active states for LT, EN, RU, UK, and BY.
+- [x] Archive: shared shell, archive controls, and `ArchiveList` rows.
+- [ ] Archive pagination: bound the initial render and retain filter state across pages.
+- [x] Search: shared shell, query control, result rows, and empty states.
+- [x] Article: shared shell, article header, media, body, and translation disclosure.
+- [x] Localized routes: shared shell and active-state contracts for LT, EN, RU, UK, and BE.
 
 ## Data and validation
 
-- [ ] Keep locale UI copy in the client-safe `locale-ui.ts` boundary.
+- [x] Keep locale UI copy in the client-safe `locale-ui.ts` boundary.
 - [x] Locale URLs use explicit prefixes (`/`, `/en`, `/ru`, `/uk`, `/be`); language links preserve an equivalent article path when that counterpart exists and fall back to the edition home otherwise.
 - [x] `hreflang` links are emitted only for equivalent, actually available pages; empty language shells do not receive invented article alternates.
-- [ ] Keep canonical article/media data separate from presentation components.
+- [x] Keep canonical article/media data separate from presentation components.
 - [ ] Add visual acceptance screenshots for desktop, mobile, and the open mobile sheet for each migrated surface.
-- [ ] Run Ultracite, TypeScript, `git diff --check`, and the static build for every surface migration.
+- [x] Run Ultracite, TypeScript, tests, media-integrity checks, `git diff --check`, and a static deployment dry run.
 
 ## Rules for each next slice
 

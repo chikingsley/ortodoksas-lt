@@ -82,6 +82,9 @@ const publicArticle = (article: typeof articles.$inferSelect) => ({
     : null,
   section: article.section,
   title: article.title,
+  translationGroupId: article.translationGroupId,
+  translationKind: article.translationKind,
+  translationReviewStatus: article.translationReviewStatus,
 });
 
 async function servePublicationApi(request: Request, env: Env) {

@@ -23,8 +23,6 @@ pnpm check
 pnpm build
 pnpm db:migrate:local
 pnpm cf-typegen
-pnpm media:import --upload --verify
-pnpm media:import --seed
 pnpm studio:up
 pnpm studio:status
 pnpm studio:down
@@ -41,12 +39,10 @@ pnpm studio:down
 - `../../packages/db` contains the Drizzle schema and D1 migration history.
 - `test` runs inside the Workers runtime with the real Wrangler configuration.
 
-The first implementation phase establishes corpus fixtures, automatic article-quality checks, semantic Tiptap figures, article persistence, revisions, media uploads, and publishing behavior. Each Tiptap extension corresponds to content observed in the publication archive.
+The current implementation provides automatic article-quality checks, semantic Tiptap figures, D1 article persistence, revisions, R2 media uploads, translation state, and publishing behavior. Each Tiptap extension corresponds to content present in the publication corpus.
 
-## Media and provenance
+## Media and editorial history
 
-R2 stores immutable original image bytes under content-addressed keys. D1 stores the SHA-256 digest, dimensions, MIME type, archive source, aliases, and the stable media ID used by articles. Delivery through `/api/media/:id` supports responsive widths and AVIF/WebP negotiation through Cloudflare Images while preserving the original object.
+R2 stores immutable original image bytes under content-addressed keys. D1 stores the SHA-256 digest, dimensions, MIME type, source URL, aliases, and the stable media ID used by articles. Delivery through `/api/media/:id` supports responsive widths and AVIF/WebP negotiation through Cloudflare Images while preserving the original object.
 
-The archive importer runs in three resumable phases. `--upload` hashes each local file before sending it, `--verify` downloads every object and compares its digest, and `--seed` writes media records and URL aliases after verification succeeds. The recovered local library remains the source backup.
-
-Each imported article stores an immutable pristine conversion baseline alongside the editable canonical document. D1 keeps the current field-level difference, revisions keep the complete save history, and figure attributes identify source, generated, manual, or missing alt text and captions. Missing source captions remain missing until an editor or an explicit generation step supplies one.
+Each article stores an editorial baseline alongside the editable canonical document. D1 keeps the current field-level difference, revisions keep the complete save history, and figure attributes identify source, generated, manual, or missing alt text and captions.

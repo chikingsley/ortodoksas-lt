@@ -24,6 +24,12 @@ interface Row {
   summary: string;
   title: string;
   translation_group_id: string;
+  translation_kind: "human" | "machine" | "original";
+  translation_review_status:
+    | "approved"
+    | "changes_requested"
+    | "not_required"
+    | "pending";
 }
 
 interface WranglerResult {
@@ -44,6 +50,8 @@ interface ExportPage {
   source: string;
   title: string;
   translationGroupId: string;
+  translationKind: Row["translation_kind"];
+  translationReviewStatus: Row["translation_review_status"];
 }
 
 async function query(sql: string) {
@@ -67,7 +75,7 @@ async function query(sql: string) {
 }
 
 const rows = await query(
-  "SELECT body_json, hero_media_id, kind, labels_json, language, published_at, section, source_capture, source_url, summary, title, slug, translation_group_id FROM articles WHERE status = 'published' OR kind = 'page' ORDER BY published_at DESC"
+  "SELECT body_json, hero_media_id, kind, labels_json, language, published_at, section, source_capture, source_url, summary, title, slug, translation_group_id, translation_kind, translation_review_status FROM articles WHERE status = 'published' ORDER BY published_at DESC"
 );
 
 await rm(outputRoot, { force: true, recursive: true });
@@ -91,6 +99,8 @@ const pageFromRow = (row: Row, localized = false) => {
     source: row.source_url ?? "",
     title: row.title,
     translationGroupId: row.translation_group_id,
+    translationKind: row.translation_kind,
+    translationReviewStatus: row.translation_review_status,
   };
   return page;
 };

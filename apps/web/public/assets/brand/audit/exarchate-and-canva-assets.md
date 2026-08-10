@@ -19,7 +19,7 @@ The Canva short link resolves to design `DAHQmaJK3Mo`. Direct command-line expor
 
 ## Production decision
 
-`production/exarchate-lockup-client.png` is a byte-identical copy of the whitespace-trimmed client artwork and remains the lockup reference. The public interface uses `production/exarchate-crest-client.png` with live Arimo 700 lettering in `InstitutionalLockup.astro`, following the accepted client geometry, spacing, and palette.
+`production/exarchate-lockup-client.png` is a byte-identical copy of the whitespace-trimmed client artwork and remains the lockup reference. The public interface uses `production/exarchate-crest-client.png` with live Arimo 700 lettering in the shared React `InstitutionalMarks` component, following the accepted client geometry, spacing, and palette.
 
 The crest remains a client raster because the available public vectors represent different marks. A future vector replacement requires an original file supplied or approved by the identity owner.
 

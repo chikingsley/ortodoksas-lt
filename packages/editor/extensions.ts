@@ -1,10 +1,10 @@
 import { Highlight } from "@tiptap/extension-highlight";
-import { Image } from "@tiptap/extension-image";
 import { TaskItem, TaskList } from "@tiptap/extension-list";
 import { Subscript } from "@tiptap/extension-subscript";
 import { Superscript } from "@tiptap/extension-superscript";
 import { TextAlign } from "@tiptap/extension-text-align";
 import { Typography } from "@tiptap/extension-typography";
+import { Youtube } from "@tiptap/extension-youtube";
 import { StarterKit } from "@tiptap/starter-kit";
 
 import { Figure } from "./figure";
@@ -21,8 +21,16 @@ export const articleContentExtensions = [
   TaskItem.configure({ nested: true }),
   Highlight.configure({ multicolor: true }),
   Figure,
-  // Retained for revision compatibility. New conversion and upload paths emit figures.
-  Image.configure({ allowBase64: false }),
+  Youtube.configure({
+    HTMLAttributes: {
+      class: "article-youtube",
+      loading: "lazy",
+      title: "YouTube video",
+    },
+    height: 360,
+    nocookie: true,
+    width: 640,
+  }),
   Typography,
   Superscript,
   Subscript,

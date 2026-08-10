@@ -11,7 +11,6 @@ const COMPLETE_SENTENCE_PATTERN = /[.!?…][”’"']?$/u;
 const PLACEHOLDER_PATTERN =
   /\b(?:lorem ipsum|placeholder|tbd|todo)\b|\[(?:insert|image|caption)[^\]]*\]/iu;
 const TRUNCATED_TEXT_PATTERN = /(?:\.\.\.|…)$/u;
-
 const getNodeText = (node: JSONContent): string =>
   node.text ?? (node.content ?? []).map(getNodeText).join("");
 
@@ -98,11 +97,6 @@ const getNodeIssues = (
   if (hasRepeatedHardBreaks(node)) {
     issues.push(`Replace repeated line breaks in block ${index + 1}.`);
   }
-  if (node.type === "image") {
-    issues.push(
-      `Convert legacy image ${index + 1} into a figure with a caption.`
-    );
-  }
   if (node.type === "figure") {
     issues.push(...getFigureIssues(node, index, seenSources));
   }
@@ -130,7 +124,12 @@ const getNodeIssues = (
   const previousText = nodes[index - 1]
     ? getNodeText(nodes[index - 1]).trim()
     : "";
-  if (text.length >= 20 && text === previousText) {
+  if (
+    node.type !== "figure" &&
+    node.type === nodes[index - 1]?.type &&
+    text.length >= 20 &&
+    text === previousText
+  ) {
     issues.push(`Remove duplicated block ${index + 1}.`);
   }
   return issues;
@@ -143,11 +142,23 @@ export const getArticleQualityIssues = ({
 }: ArticleQualityInput): string[] => {
   const issues = getSummaryIssues(summary);
   const nodes = body.content ?? [];
+  const hasSubstantiveMedia = nodes.some((node) => {
+    if (node.type === "youtube") {
+      return typeof node.attrs?.src === "string" && node.attrs.src.length > 0;
+    }
+    if (node.type === "figure") {
+      return typeof node.attrs?.src === "string" && node.attrs.src.length > 0;
+    }
+    return false;
+  });
 
   if (!title.trim()) {
     issues.push("Add an article title.");
   }
-  if (nodes.length === 0 || nodes.every((node) => !getNodeText(node).trim())) {
+  if (
+    nodes.length === 0 ||
+    (!hasSubstantiveMedia && nodes.every((node) => !getNodeText(node).trim()))
+  ) {
     issues.push("Add article body text.");
   }
   if (

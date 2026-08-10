@@ -20,7 +20,7 @@ Ortodoksas Studio is the staff editorial workspace for the `ortodoksas.lt` publi
 
 ## Content model
 
-Every historical and newly created article uses the same canonical article schema. Recovered Blogger content passes deterministic structural and media checks before publication. Source HTML remains available as migration evidence.
+Every historical and newly created article uses the same canonical article schema. Imported Blogger content and new editorial work pass the same deterministic structural and media checks before publication. Original source HTML remains available for comparison.
 
 Each article carries:
 
@@ -36,9 +36,9 @@ Each article carries:
 
 The Studio and public publication are separate products connected through the publishing API. Staff work entirely in the Studio browser interface. Development uses a visible fake editor identity; production authentication will use Clerk. Cloudflare Workers, D1, and R2 provide the application runtime and storage.
 
-## First implementation
+## Current implementation
 
-The first working slice contains the 2,345 recovered articles, with 19 static pages retained in the same corpus. It provides archive search and filters, the complete official Tiptap Simple Editor, deterministic legacy-HTML normalization, automatic content-quality checks, semantic image figures, source comparison, shared-renderer preview, D1 saves, numbered revisions, and restore-as-new-version history. Media import to R2, production authentication, public-site delivery, translation workflows, and homepage placement remain subsequent slices.
+The canonical corpus contains 2,375 published records in D1, including 18 public information pages. Studio provides archive search and filters, the official Tiptap Simple Editor, automatic content-quality checks, semantic image figures, source comparison, shared-renderer preview, D1 saves, numbered revisions, restore-as-new-version history, translation state, R2 media, and homepage placement. The public Astro build exports published D1 records and serves media through the R2-backed Worker. Production authentication remains the release boundary for Studio.
 
 ## Design direction
 

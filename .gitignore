@@ -18,9 +18,6 @@ apps/web/.canonical-content/
 .dev.vars*
 worker-configuration.d.ts.tmp
 
-# The verified recovery mirror remains local while R2 serves deployed media.
-apps/web/public/media/files/
-
 # Canva ZIP extraction workspace; curated brand assets live under public/assets.
 Orth_inst-template-feed.zip.sb-*/
 
