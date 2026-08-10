@@ -1,3 +1,9 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
 @font-face {
   font-family: "Arimo";
   font-style: normal;
@@ -26,11 +32,55 @@
   --muted: #555b57;
   --line: #c9c7bd;
   --white: #fff;
+  --background: var(--white);
+  --foreground: var(--ink);
+  --card: var(--white);
+  --card-foreground: var(--ink);
+  --popover: var(--white);
+  --popover-foreground: var(--ink);
+  --primary: var(--green);
+  --primary-foreground: var(--white);
+  --secondary: var(--paper);
+  --secondary-foreground: var(--ink);
+  --muted-background: var(--paper);
+  --accent: var(--paper);
+  --accent-foreground: var(--green-deep);
+  --destructive: #b42318;
+  --border: var(--line);
+  --input: var(--line);
+  --ring: var(--green);
+  --radius: 0.25rem;
   font-family: "Arimo", Arial, sans-serif;
   font-synthesis: none;
   color: var(--ink);
   background: var(--white);
   text-rendering: optimizeLegibility;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted-background);
+  --color-muted-foreground: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --font-sans: "Arimo", Arial, sans-serif;
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+  --radius-xl: calc(var(--radius) + 6px);
 }
 
 * {
@@ -719,14 +769,6 @@ svg {
     serif;
   color: var(--muted);
 }
-.archive-controls {
-  display: grid;
-  grid-template-columns: minmax(260px, 1fr) 200px 200px 140px;
-  gap: 12px;
-  padding: 18px;
-  background: var(--paper);
-}
-.archive-search,
 .search-form {
   display: flex;
   gap: 10px;
@@ -736,13 +778,10 @@ svg {
   background: var(--white);
   border: 1px solid var(--line);
 }
-.archive-search svg,
 .search-form svg {
   width: 18px;
   color: var(--green);
 }
-.archive-search input,
-.archive-controls select,
 .search-form input {
   width: 100%;
   min-height: 46px;
@@ -750,11 +789,6 @@ svg {
   outline: 0;
   background: transparent;
   border: 0;
-}
-.archive-controls select {
-  padding: 0 38px 0 16px;
-  background: var(--white);
-  border: 1px solid var(--line);
 }
 .results-line {
   margin: 24px 0 11px;
@@ -1027,12 +1061,6 @@ svg {
   .archive-panel .archive-all {
     grid-column: 1 / -1;
   }
-  .archive-controls {
-    grid-template-columns: 1fr 1fr;
-  }
-  .archive-search {
-    grid-column: 1 / -1;
-  }
 }
 
 @media (max-width: 640px) {
@@ -1213,12 +1241,6 @@ svg {
   .prose {
     font-size: 18px;
     line-height: 1.66;
-  }
-  .archive-controls {
-    grid-template-columns: 1fr;
-  }
-  .archive-search {
-    grid-column: auto;
   }
   .archive-list article {
     grid-template-columns: 1fr 32px;
