@@ -16,45 +16,43 @@ const sectionLabels: Record<
     "Bažnyčios gyvenimas": "Царкоўнае жыццё",
     Naujienos: "Навіны",
     Pamokslai: "Пропаведзі",
-    "Šventasis Raštas": "Святое Пісанне",
     "Tikėjimas ir kultūra": "Вера і культура",
+    "Šventasis Raštas": "Святое Пісанне",
   },
   en: {
     "Bažnyčios gyvenimas": "Church life",
     Naujienos: "News",
     Pamokslai: "Sermons",
-    "Šventasis Raštas": "Holy Scripture",
     "Tikėjimas ir kultūra": "Faith and culture",
+    "Šventasis Raštas": "Holy Scripture",
   },
   lt: {
     "Bažnyčios gyvenimas": "Bažnyčios gyvenimas",
     Naujienos: "Naujienos",
     Pamokslai: "Pamokslai",
-    "Šventasis Raštas": "Šventasis Raštas",
     "Tikėjimas ir kultūra": "Tikėjimas ir kultūra",
+    "Šventasis Raštas": "Šventasis Raštas",
   },
   ru: {
     "Bažnyčios gyvenimas": "Церковная жизнь",
     Naujienos: "Новости",
     Pamokslai: "Проповеди",
-    "Šventasis Raštas": "Священное Писание",
     "Tikėjimas ir kultūra": "Вера и культура",
+    "Šventasis Raštas": "Священное Писание",
   },
   uk: {
     "Bažnyčios gyvenimas": "Церковне життя",
     Naujienos: "Новини",
     Pamokslai: "Проповіді",
-    "Šventasis Raštas": "Святе Письмо",
     "Tikėjimas ir kultūra": "Віра і культура",
+    "Šventasis Raštas": "Святе Письмо",
   },
 };
 
 const isHistoricalSection = (
   section: string
 ): section is (typeof HISTORICAL_SECTIONS)[number] =>
-  HISTORICAL_SECTIONS.includes(
-    section as (typeof HISTORICAL_SECTIONS)[number]
-  );
+  HISTORICAL_SECTIONS.includes(section as (typeof HISTORICAL_SECTIONS)[number]);
 
 export const getSectionLabel = (
   section: string,

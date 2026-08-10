@@ -19,9 +19,8 @@ The historical crawl and migration evidence lives in the public
 [`chikingsley/ortodoksas-lt-source-archive`](https://huggingface.co/datasets/chikingsley/ortodoksas-lt-source-archive)
 dataset. Generated D1 exports and local media mirrors stay outside Git and the
 Cloudflare asset bundle. Git retains the compact media manifest, assignment,
-and unavailable-source registries that validate R2-backed rendering. The
-ignored local `recovery/` directory is the upload staging copy and can be
-removed after the public dataset has been verified.
+and unavailable-source registries that validate R2-backed rendering. Historical
+archive storage lives exclusively in the linked public dataset.
 
 ## Commands
 

@@ -29,7 +29,7 @@ describe("localizeMediaHtml", () => {
     expect(localized).toContain(`href="${recoveredVideo}"`);
   });
 
-  it("renders every queued unresolved body image as a recovery card", () => {
+  it("renders every queued unresolved body image as an unavailable-media card", () => {
     const queue = JSON.parse(
       readFileSync(
         resolve(process.cwd(), "public/media/unresolved.json"),

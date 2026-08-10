@@ -16,7 +16,6 @@
       "!apps/web/index.html",
       "!apps/web/public/assets/brand/**/*.svg",
       "!apps/web/public/media",
-      "!recovery",
       "!apps/web/src/app.tsx",
       "!apps/web/src/components/ui",
       "!apps/web/src/lib/content.ts",
