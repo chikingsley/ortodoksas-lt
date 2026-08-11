@@ -33,13 +33,28 @@ source body used for translation. When the source body changes, a hash mismatch
 marks the counterpart for renewed review. `translation_runs` records provider,
 model, language pair, character count, status, and resulting article.
 
+Before segment extraction and hashing, the translation source passes through a
+deterministic normalization gate. The gate removes cue-only links to legacy
+language editions and their matching summary prefixes. It preserves ordinary
+links, embedded multilingual source material, article structure, media, names,
+dates, and quotations.
+
 ## Batch provider
 
-Google Cloud Translation is the primary batch provider because it covers the
-complete LT, EN, RU, UK, and BE language set. DeepL and focused editorial or LLM
-review act as second-pass checks where language support and terminology warrant
-them. Published automatic translations carry a visible source-language
-disclosure. Editorial review records the reviewer and upgrades that disclosure.
+The approved batch candidate uses Luna for direct translation followed by an
+independent Luna review. Deterministic gates verify segment coverage, Tiptap
+structure, attributes, links, names, dates, quotations, and locale-specific
+Orthodox terminology before a result enters D1.
+
+A clean four-language benchmark found that Luna-direct plus review required
+9–13 reviewed segments per locale. TranslateGemma 12B plus the same review took
+120 seconds of local GPU time and required 22 English changes plus 71 changes in
+each of Russian, Ukrainian, and Belarusian. TranslateGemma therefore stays out
+of the default batch path. The first production batch remains bounded and
+audited before the complete backfill.
+
+Published automatic translations carry a visible source-language disclosure.
+Editorial review records the reviewer and upgrades that disclosure.
 
 ## URL policy
 

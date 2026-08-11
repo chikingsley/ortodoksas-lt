@@ -14,6 +14,7 @@ import {
 } from "@ortodoksas-lt/db";
 import {
   annotateArticleBody,
+  type ContentChange,
   getChangeKind,
 } from "@ortodoksas-lt/editor/provenance";
 import { getArticleQualityIssues } from "@ortodoksas-lt/editor/quality";
@@ -26,6 +27,7 @@ export const articleRoutes = new Hono<StudioEnvironment>();
 
 const WAYBACK_URL_PATTERN =
   /^https:\/\/web\.archive\.org\/web\/\d+[a-z_]*\/(https?:\/\/)/u;
+const CONTENT_CHANGE_INSERT_SIZE = 10;
 
 const toHex = (value: ArrayBuffer): string =>
   [...new Uint8Array(value)]
@@ -65,6 +67,33 @@ const translationMetadataUpdate = (data: UpdateArticleInput) => {
     update.translationSourceHash = data.translationSourceHash;
   }
   return update;
+};
+
+const insertContentChanges = async (
+  database: StudioDatabase,
+  articleId: string,
+  timestamp: number,
+  changes: readonly ContentChange[]
+): Promise<void> => {
+  const batchCount = Math.ceil(changes.length / CONTENT_CHANGE_INSERT_SIZE);
+  await Promise.all(
+    Array.from({ length: batchCount }, (_, batchIndex) => {
+      const start = batchIndex * CONTENT_CHANGE_INSERT_SIZE;
+      const batch = changes.slice(start, start + CONTENT_CHANGE_INSERT_SIZE);
+      return database.insert(articleContentChanges).values(
+        batch.map((change) => ({
+          afterValue: change.afterValue,
+          articleId,
+          beforeValue: change.beforeValue,
+          changeKind: change.changeKind,
+          createdAt: timestamp,
+          fieldPath: change.fieldPath,
+          id: crypto.randomUUID(),
+          provenance: change.provenance,
+        }))
+      );
+    })
+  );
 };
 
 const attachMediaRecords = async (
@@ -399,18 +428,7 @@ articleRoutes.post("/:id/revisions/:version/restore", async (context) => {
       .where(eq(articleContentChanges.articleId, id)),
   ]);
   if (changes.length > 0) {
-    await database.insert(articleContentChanges).values(
-      changes.map((change) => ({
-        afterValue: change.afterValue,
-        articleId: id,
-        beforeValue: change.beforeValue,
-        changeKind: change.changeKind,
-        createdAt: timestamp,
-        fieldPath: change.fieldPath,
-        id: crypto.randomUUID(),
-        provenance: change.provenance,
-      }))
-    );
+    await insertContentChanges(database, id, timestamp, changes);
   }
 
   return context.json({
@@ -536,18 +554,7 @@ articleRoutes.post("/", async (context) => {
     }),
   ]);
   if (changes.length > 0) {
-    await database.insert(articleContentChanges).values(
-      changes.map((change) => ({
-        afterValue: change.afterValue,
-        articleId: id,
-        beforeValue: change.beforeValue,
-        changeKind: change.changeKind,
-        createdAt: timestamp,
-        fieldPath: change.fieldPath,
-        id: crypto.randomUUID(),
-        provenance: change.provenance,
-      }))
-    );
+    await insertContentChanges(database, id, timestamp, changes);
   }
 
   return context.json(
@@ -694,18 +701,7 @@ articleRoutes.put("/:id", async (context) => {
       .where(eq(articleContentChanges.articleId, id)),
   ]);
   if (changes.length > 0) {
-    await database.insert(articleContentChanges).values(
-      changes.map((change) => ({
-        afterValue: change.afterValue,
-        articleId: id,
-        beforeValue: change.beforeValue,
-        changeKind: change.changeKind,
-        createdAt: timestamp,
-        fieldPath: change.fieldPath,
-        id: crypto.randomUUID(),
-        provenance: change.provenance,
-      }))
-    );
+    await insertContentChanges(database, id, timestamp, changes);
   }
 
   return context.json({ heroMediaId, id, status: parsed.data.status, version });

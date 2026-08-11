@@ -71,10 +71,16 @@
 
 ### Machine Translation
 
-- Google Cloud Translation is the primary batch provider because it covers all
-  five publication languages, including Belarusian.
-- DeepL and focused editorial/LLM review provide a second opinion for supported
-  languages and terminology-sensitive articles.
+- Translation sources pass through deterministic normalization before segment
+  extraction and hashing. Cue-only legacy language links are removed; ordinary
+  links and multilingual article content remain intact.
+- The approved batch candidate is Luna-direct translation followed by an
+  independent Luna review. TranslateGemma remains outside the default path
+  after its clean benchmark added GPU time and substantially increased review
+  burden across RU, UK, and BE.
+- Deterministic checks enforce complete segment coverage, exact Tiptap
+  structure, stable attributes and destinations, names, dates, quotations, and
+  locale-specific Orthodox terminology.
 - Machine translations may publish with an explicit "Automatically translated
   from Lithuanian" disclosure. Editorial review upgrades the disclosure to
   "Reviewed by an editor" without changing the publication model.
@@ -83,6 +89,6 @@
 
 ## Pending Gate Decisions
 
-- Translation credentials, budget, glossary, and reviewer assignment.
+- First bounded translation batch, terminology glossary, and reviewer sampling.
 - Clerk production authentication.
 - Production domain cutover.

@@ -9,6 +9,11 @@ const translatableAttributeNames = new Set([
   "title",
 ]);
 
+const legacyTranslationCuePattern =
+  /^(?:english translation|lietuviškas vertimas|russian translation|русский перевод|ukrainian translation|український переклад|belarusian translation|беларускі пераклад)$/iu;
+const trailingCuePunctuationPattern = /[:.]+$/u;
+const leadingCueSeparatorPattern = /^\s*[:—–-]?\s*/u;
+
 type JsonRecord = Record<string, unknown>;
 
 export interface ArticleTranslationSource {
@@ -23,6 +28,71 @@ export interface ArticleTranslationResult extends ArticleTranslationSource {
 
 const isRecord = (value: unknown): value is JsonRecord =>
   typeof value === "object" && value !== null && !Array.isArray(value);
+
+const getLinkedLegacyTranslationCue = (value: unknown): string | undefined => {
+  if (!isRecord(value) || value.type !== "paragraph") {
+    return;
+  }
+
+  const content = Array.isArray(value.content) ? value.content : [];
+  let hasLink = false;
+  let text = "";
+
+  for (const child of content) {
+    if (!isRecord(child)) {
+      return;
+    }
+    if (child.type === "hardBreak") {
+      continue;
+    }
+    if (child.type !== "text" || typeof child.text !== "string") {
+      return;
+    }
+    text += child.text;
+    if (
+      Array.isArray(child.marks) &&
+      child.marks.some((mark) => isRecord(mark) && mark.type === "link")
+    ) {
+      hasLink = true;
+    }
+  }
+
+  const cue = text.trim().replace(trailingCuePunctuationPattern, "").trim();
+  return hasLink && legacyTranslationCuePattern.test(cue) ? cue : undefined;
+};
+
+const stripLeadingCue = (value: string, cue: string): string => {
+  const prefix = value.slice(0, cue.length);
+  if (prefix.localeCompare(cue, undefined, { sensitivity: "accent" }) !== 0) {
+    return value;
+  }
+  return value.slice(cue.length).replace(leadingCueSeparatorPattern, "");
+};
+
+export const normalizeArticleTranslationSource = (
+  source: ArticleTranslationSource
+): ArticleTranslationSource => {
+  const content = source.body.content ?? [];
+  const removedCues: string[] = [];
+  const normalizedContent = content.filter((node) => {
+    const cue = getLinkedLegacyTranslationCue(node);
+    if (cue) {
+      removedCues.push(cue);
+      return false;
+    }
+    return true;
+  });
+  const summary = removedCues.reduce(stripLeadingCue, source.summary).trim();
+
+  return {
+    body: {
+      ...source.body,
+      content: normalizedContent,
+    },
+    summary,
+    title: source.title,
+  };
+};
 
 const collectNodeText = (value: unknown, output: string[]): void => {
   if (Array.isArray(value)) {
@@ -93,11 +163,12 @@ const replaceNodeText = (
 export const getArticleTranslationSegments = (
   source: ArticleTranslationSource
 ): string[] => {
-  const segments = [source.title];
-  if (source.summary.length > 0) {
-    segments.push(source.summary);
+  const normalized = normalizeArticleTranslationSource(source);
+  const segments = [normalized.title];
+  if (normalized.summary.length > 0) {
+    segments.push(normalized.summary);
   }
-  collectNodeText(source.body, segments);
+  collectNodeText(normalized.body, segments);
   return segments;
 };
 
@@ -105,7 +176,8 @@ export const applyArticleTranslations = (
   source: ArticleTranslationSource,
   translations: readonly string[]
 ): ArticleTranslationResult => {
-  const expected = getArticleTranslationSegments(source);
+  const normalized = normalizeArticleTranslationSource(source);
+  const expected = getArticleTranslationSegments(normalized);
   if (expected.length !== translations.length) {
     throw new Error(
       `Translation segment count mismatch: expected ${expected.length}, received ${translations.length}`
@@ -113,16 +185,16 @@ export const applyArticleTranslations = (
   }
 
   const cursor = { index: 0 };
-  const title = translations[cursor.index] ?? source.title;
+  const title = translations[cursor.index] ?? normalized.title;
   cursor.index += 1;
-  const summary = source.summary.length
-    ? (translations[cursor.index] ?? source.summary)
+  const summary = normalized.summary.length
+    ? (translations[cursor.index] ?? normalized.summary)
     : "";
-  if (source.summary.length) {
+  if (normalized.summary.length) {
     cursor.index += 1;
   }
   const body = replaceNodeText(
-    source.body,
+    normalized.body,
     translations,
     cursor
   ) as TiptapDocument;
