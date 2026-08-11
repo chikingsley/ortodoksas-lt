@@ -33,6 +33,8 @@ function catalogEntry(
   return {
     description: `${path} description`,
     hero: `/media/${path}.jpg`,
+    heroAlt: `${path} image`,
+    heroMediaId: `media_${path}`,
     kind: "article",
     labels: [],
     path,
@@ -145,6 +147,15 @@ describe("cleanHtml", () => {
     expect(
       cleanHtml(
         '<iframe src="https://example.com/embed"></iframe><p onclick="alert(1)">Body</p>'
+      )
+    ).toBe("<p>Body</p>");
+  });
+
+  it("suppresses a body figure already presented as the article hero", () => {
+    expect(
+      cleanHtml(
+        '<figure data-media-id="media_lead"><img alt="Lead" src="/api/media/media_lead"></figure><p>Body</p>',
+        { hero: "/media/files/lead.jpg", heroMediaId: "media_lead" }
       )
     ).toBe("<p>Body</p>");
   });

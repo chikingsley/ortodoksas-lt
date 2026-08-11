@@ -21,6 +21,8 @@ export interface CatalogEntry {
   description: string;
   file?: string;
   hero: string | null;
+  heroAlt: string;
+  heroMediaId: string | null;
   homepage?: "feed" | "lead" | "secondary";
   homepageOrder?: number;
   kind: "article" | "page";
@@ -58,6 +60,8 @@ const youtubeIframePattern = /<iframe\b[^>]*><\/iframe\s*>/gi;
 const youtubeEmbedSourcePattern =
   /\bsrc\s*=\s*["'](https:\/\/www\.youtube-nocookie\.com\/embed\/[A-Za-z0-9_-]+(?:\?[^"']*)?)["']/i;
 const leadFigurePattern = /<figure\b[^>]*\bdata-figure-role=["']lead["']/i;
+const figurePattern = /<figure\b[^>]*>[\s\S]*?<\/figure>/gi;
+const figureMediaIdPattern = /\bdata-media-id=(?:"([^"]+)"|'([^']+)')/i;
 const contentFiles = readdirSync(pagesDirectory, { encoding: "utf8" }).filter(
   (file) => file.endsWith(".json")
 );
@@ -347,11 +351,14 @@ export function excerpt(value: string, length = 180) {
     : text;
 }
 
-export function cleanHtml(
-  value: string,
-  hero?: string | null,
-  removeFirstMedia = false
-) {
+interface CleanHtmlOptions {
+  hero?: string | null;
+  heroMediaId?: string | null;
+  removeFirstMedia?: boolean;
+}
+
+export function cleanHtml(value: string, options: CleanHtmlOptions = {}) {
+  const { hero, heroMediaId, removeFirstMedia = false } = options;
   const trustedYoutubeFrames: string[] = [];
   const cleaned = value
     .replace(/<script[\s\S]*?<\/script>/gi, "")
@@ -380,14 +387,20 @@ export function cleanHtml(
   if (!hero) {
     return cleaned;
   }
+  const withoutHeroFigure = heroMediaId
+    ? cleaned.replace(figurePattern, (figure) => {
+        const mediaId = figure.match(figureMediaIdPattern);
+        return (mediaId?.[1] ?? mediaId?.[2]) === heroMediaId ? "" : figure;
+      })
+    : cleaned;
   const heroName =
     decodeURIComponent(hero).split("?")[0]?.split("/").pop() ?? "";
   if (!heroName) {
-    return cleaned;
+    return withoutHeroFigure;
   }
   const deduped = removeFirstMedia
-    ? cleaned.replace(firstMediaTablePattern, "")
-    : cleaned;
+    ? withoutHeroFigure.replace(firstMediaTablePattern, "")
+    : withoutHeroFigure;
   return deduped.replace(/<img\b[^>]*>/gi, (tag) => {
     const source = tag.match(imageSourcePattern)?.[1];
     const sourceName = source

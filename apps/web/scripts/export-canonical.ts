@@ -13,6 +13,7 @@ const localizedPagePrefix = /^pages\//u;
 
 interface Row {
   body_json: string;
+  hero_alt_text: string | null;
   hero_media_id: string | null;
   kind: "article" | "page";
   labels_json: string;
@@ -42,6 +43,8 @@ interface ExportPage {
   description: string;
   file: string;
   hero: string | null;
+  heroAlt: string;
+  heroMediaId: string | null;
   html: string;
   kind: "article" | "page";
   labels: string[];
@@ -76,7 +79,7 @@ async function query(sql: string) {
 }
 
 const rows = await query(
-  "SELECT body_json, hero_media_id, kind, labels_json, language, published_at, section, source_capture, source_url, summary, title, slug, translation_group_id, translation_kind, translation_review_status FROM articles WHERE status = 'published' ORDER BY published_at DESC"
+  "SELECT articles.body_json, hero_media.alt_text AS hero_alt_text, articles.hero_media_id, articles.kind, articles.labels_json, articles.language, articles.published_at, articles.section, articles.source_capture, articles.source_url, articles.summary, articles.title, articles.slug, articles.translation_group_id, articles.translation_kind, articles.translation_review_status FROM articles LEFT JOIN media_assets AS hero_media ON hero_media.id = articles.hero_media_id WHERE articles.status = 'published' ORDER BY articles.published_at DESC"
 );
 
 await rm(outputRoot, { force: true, recursive: true });
@@ -89,6 +92,8 @@ const pageFromRow = (row: Row, localized = false) => {
     description: row.summary,
     file: localized ? `pages/${fileName}` : fileName,
     hero: row.hero_media_id ? `/api/media/${row.hero_media_id}` : null,
+    heroAlt: row.hero_alt_text ?? "",
+    heroMediaId: row.hero_media_id,
     html: renderArticleBody(body),
     kind: row.kind,
     labels: JSON.parse(row.labels_json) as string[],
