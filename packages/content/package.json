@@ -5,6 +5,7 @@
   "type": "module",
   "exports": {
     "./article": "./article.ts",
+    "./machine-translation": "./machine-translation.ts",
     "./media-url": "./media-url.ts",
     "./sections": "./sections.ts",
     "./translation": "./translation.ts"

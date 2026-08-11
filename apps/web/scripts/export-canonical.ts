@@ -3,6 +3,7 @@ import { mkdir, rm, writeFile } from "node:fs/promises";
 import { promisify } from "node:util";
 import { tiptapDocumentSchema } from "@ortodoksas-lt/content/article";
 import { renderArticleBody } from "@ortodoksas-lt/editor/render";
+import { defaultLocale, siteLocales } from "../src/i18n/config";
 
 const execFileAsync = promisify(execFile);
 const outputRoot = process.env.CANONICAL_CONTENT_DIR ?? ".canonical-content";
@@ -130,13 +131,9 @@ const writeEdition = async (language: string, localized: boolean) => {
   return pages.length;
 };
 
-const editions = [
-  ["lt", false],
-  ["en", true],
-  ["ru", true],
-  ["uk", true],
-  ["be", true],
-] as const;
+const editions = siteLocales.map(
+  (language) => [language, language !== defaultLocale] as const
+);
 const editionCounts = await Promise.all(
   editions.map(
     async ([language, localized]) =>

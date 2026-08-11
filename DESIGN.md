@@ -292,7 +292,8 @@ Chain motifs create the signature organic geometry: exact ceremonial-gold vertic
 
 ### Inputs / Fields
 
-- **Style:** White rectangular fields inside a cool-bone control region, with a one-pixel neutral border and a 46px minimum control height.
+- **Style:** Use the generated shadcn/Base UI `InputGroup`, `Select`, and `Combobox` primitives at their standard 32px control height. Archive controls sit directly on the white page in a lightweight toolbar: one flexible search field followed by compact filters. The toolbar stacks with an 8px gap on phones, forms two columns at tablet width, and resolves to one row on desktop.
+- **Ownership:** Control shape, border, type, focus, and disabled states come from the shared primitives. Feature components may set width and responsive layout; they do not restyle control internals.
 - **Focus:** Use the universal two-pixel library-blue outline with a four-pixel offset.
 - **Icons:** Use restrained green line icons at approximately 18px.
 

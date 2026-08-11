@@ -3,7 +3,7 @@ set -euo pipefail
 
 project_dir="/home/simon/github/ortodoksas-lt/apps/web"
 unit="ortodoksas-lt-web-preview.service"
-route="ortodoksas"
+route="ortodoksas-preview"
 port="4174"
 local_url="http://127.0.0.1:${port}"
 public_url="https://${route}.grassinside.com"

@@ -5,7 +5,14 @@ import type {
   TranslationKind,
   TranslationReviewStatus,
 } from "@ortodoksas-lt/content/translation";
-import { localeUi } from "./locale-ui";
+import { siteOrigin } from "../config/site";
+import {
+  type Locale,
+  localeMetadata,
+  localeShells,
+  type SiteLocale,
+} from "../i18n/config";
+import { ui } from "../i18n/ui";
 
 import { localizeMediaHtml, localizeMediaUrl } from "./media";
 
@@ -32,10 +39,12 @@ export interface ContentPage extends CatalogEntry {
   html: string;
 }
 
-export interface LocalizedArticle extends CatalogEntry {
+export interface LocalizedPage extends CatalogEntry {
   html: string;
   locale: Locale;
 }
+
+export type LocalizedArticle = LocalizedPage & { kind: "article" };
 
 const contentRoot = resolve(process.cwd(), ".canonical-content");
 const pagesDirectory = resolve(contentRoot, "pages");
@@ -53,17 +62,20 @@ const contentFiles = readdirSync(pagesDirectory, { encoding: "utf8" }).filter(
   (file) => file.endsWith(".json")
 );
 
-function readJson<T>(base: string, file: string) {
+function readJson<T>(base: string, file: string): T {
+  const path = join(base, file);
   try {
-    return JSON.parse(readFileSync(join(base, file), "utf8")) as T;
-  } catch {
-    return null;
+    return JSON.parse(readFileSync(path, "utf8")) as T;
+  } catch (error) {
+    throw new Error(`Unable to read publication JSON: ${path}`, {
+      cause: error,
+    });
   }
 }
 
 const canonicalPages = contentFiles
   .map((file) => readJson<ContentPage>(pagesDirectory, file))
-  .filter((page): page is ContentPage => Boolean(page && page.path !== "/"))
+  .filter((page) => page.path !== "/")
   .map((page) => ({
     ...page,
     hero: localizeMediaUrl(page.hero, page.path),
@@ -71,16 +83,10 @@ const canonicalPages = contentFiles
   }));
 
 const catalogValue = readJson<CatalogEntry[]>(contentRoot, "catalog.json");
-const canonicalCatalog = (catalogValue ?? []).map((entry) => ({
+const canonicalCatalog = catalogValue.map((entry) => ({
   ...entry,
   hero: localizeMediaUrl(entry.hero, entry.path),
 }));
-
-export const localeShells = ["en", "ru", "uk", "be"] as const;
-
-export type Locale = (typeof localeShells)[number];
-
-export type SiteLocale = "lt" | Locale;
 
 function assertUniquePaths(entries: CatalogEntry[], label: string) {
   const paths = new Set<string>();
@@ -115,14 +121,6 @@ export const sections = getSectionOptions(
   articles.map((entry) => entry.section)
 );
 
-const localeDateLocales: Record<SiteLocale, string> = {
-  be: "be-BY",
-  en: "en-GB",
-  lt: "lt-LT",
-  ru: "ru-RU",
-  uk: "uk-UA",
-};
-
 function isCanonicalLocaleCatalogEntry(
   value: unknown
 ): value is CatalogEntry & { file: string; translationGroupId: string } {
@@ -131,7 +129,7 @@ function isCanonicalLocaleCatalogEntry(
   }
   const entry = value as Partial<CatalogEntry>;
   return (
-    entry.kind === "article" &&
+    (entry.kind === "article" || entry.kind === "page") &&
     typeof entry.path === "string" &&
     entry.path.startsWith("/") &&
     typeof entry.file === "string" &&
@@ -146,65 +144,66 @@ function isSafeLocaleFile(file: string) {
   return safeLocaleFilePattern.test(file);
 }
 
-function loadLocalizedArticles(locale: Locale): LocalizedArticle[] {
+function loadLocalizedPages(locale: Locale): LocalizedPage[] {
   const localeCatalogValue = readJson<unknown>(
     localesDirectory,
     `${locale}/catalog.json`
   );
   if (!Array.isArray(localeCatalogValue)) {
-    return [];
+    throw new Error(`Invalid ${locale} publication catalog: expected an array`);
   }
   return localeCatalogValue
-    .flatMap((rawEntry) => {
-      if (
-        isCanonicalLocaleCatalogEntry(rawEntry) &&
-        isSafeLocaleFile(rawEntry.file)
-      ) {
-        const page = readJson<ContentPage>(
-          join(localesDirectory, locale),
-          rawEntry.file
-        );
-        if (
-          !page ||
-          page.path !== rawEntry.path ||
-          typeof page.html !== "string"
-        ) {
-          return [];
-        }
-        return [
-          {
-            ...page,
-            hero: localizeMediaUrl(page.hero, page.path),
-            html: localizeMediaHtml(page.html),
-            locale,
-          },
-        ];
+    .map((rawEntry, index) => {
+      if (!isCanonicalLocaleCatalogEntry(rawEntry)) {
+        throw new Error(`Invalid ${locale} catalog entry at index ${index}`);
       }
-      return [];
+      if (!isSafeLocaleFile(rawEntry.file)) {
+        throw new Error(
+          `Unsafe ${locale} catalog file at index ${index}: ${rawEntry.file}`
+        );
+      }
+      const page = readJson<ContentPage>(
+        join(localesDirectory, locale),
+        rawEntry.file
+      );
+      if (page.path !== rawEntry.path || typeof page.html !== "string") {
+        throw new Error(
+          `Localized ${locale} page does not match catalog entry: ${rawEntry.path}`
+        );
+      }
+      return {
+        ...page,
+        hero: localizeMediaUrl(page.hero, page.path),
+        html: localizeMediaHtml(page.html),
+        locale,
+      };
     })
     .sort(
       (a, b) => Date.parse(b.published ?? "") - Date.parse(a.published ?? "")
     );
 }
 
-export const localizedArticles = Object.fromEntries(
+export const localizedPages = Object.fromEntries(
   localeShells.map((locale) => [
     locale,
-    assertUniquePaths(
-      loadLocalizedArticles(locale),
-      `${locale} publication`
-    ).sort(
+    assertUniquePaths(loadLocalizedPages(locale), `${locale} publication`).sort(
       (a, b) => Date.parse(b.published ?? "") - Date.parse(a.published ?? "")
     ),
   ])
-) as Record<Locale, LocalizedArticle[]>;
+) as Record<Locale, LocalizedPage[]>;
 
 export function getLocalizedArticles(locale: Locale) {
-  return localizedArticles[locale];
+  return localizedPages[locale].filter(
+    (page): page is LocalizedArticle => page.kind === "article"
+  );
+}
+
+export function getLocalizedPages(locale: Locale) {
+  return localizedPages[locale];
 }
 
 export function getLocalizedPage(locale: Locale, path: string) {
-  return localizedArticles[locale].find((page) => page.path === path);
+  return localizedPages[locale].find((page) => page.path === path);
 }
 
 const localePrefixes = localeShells.map((locale) => `/${locale}`);
@@ -235,7 +234,7 @@ function getCurrentArticle(currentPath: string) {
 function getCounterpart(locale: SiteLocale, currentPath: string) {
   const path = unprefixLocalePath(currentPath);
   const current = getCurrentArticle(currentPath);
-  const candidates = locale === "lt" ? pages : localizedArticles[locale];
+  const candidates = locale === "lt" ? pages : localizedPages[locale];
   if (current?.translationGroupId) {
     const grouped = candidates.find(
       (entry) => entry.translationGroupId === current.translationGroupId
@@ -251,10 +250,25 @@ export function getLithuanianCounterpart(currentPath: string) {
   return getCounterpart("lt", currentPath);
 }
 
-/** Return UI destinations, falling back to each edition home when no counterpart exists. */
+export function getLocalizedCounterpart(locale: Locale, sourcePath: string) {
+  return getCounterpart(locale, sourcePath);
+}
+
+export interface LocaleDestination {
+  hasCounterpart: boolean;
+  href: string;
+}
+
+/** Return edition destinations and expose when a page-level counterpart is unavailable. */
 export function getLocaleLinks(currentPath: string) {
   if (unprefixLocalePath(currentPath) === "/") {
-    return { be: "/be", en: "/en", lt: "/", ru: "/ru", uk: "/uk" };
+    return {
+      be: { hasCounterpart: true, href: "/be" },
+      en: { hasCounterpart: true, href: "/en" },
+      lt: { hasCounterpart: true, href: "/" },
+      ru: { hasCounterpart: true, href: "/ru" },
+      uk: { hasCounterpart: true, href: "/uk" },
+    };
   }
   const be = getCounterpart("be", currentPath);
   const en = getCounterpart("en", currentPath);
@@ -262,11 +276,11 @@ export function getLocaleLinks(currentPath: string) {
   const ru = getCounterpart("ru", currentPath);
   const uk = getCounterpart("uk", currentPath);
   return {
-    be: be ? `/be${be.path}` : "/be",
-    en: en ? `/en${en.path}` : "/en",
-    lt: lt?.path ?? "/",
-    ru: ru ? `/ru${ru.path}` : "/ru",
-    uk: uk ? `/uk${uk.path}` : "/uk",
+    be: { hasCounterpart: Boolean(be), href: be ? `/be${be.path}` : "/be" },
+    en: { hasCounterpart: Boolean(en), href: en ? `/en${en.path}` : "/en" },
+    lt: { hasCounterpart: Boolean(lt), href: lt?.path ?? "/" },
+    ru: { hasCounterpart: Boolean(ru), href: ru ? `/ru${ru.path}` : "/ru" },
+    uk: { hasCounterpart: Boolean(uk), href: uk ? `/uk${uk.path}` : "/uk" },
   } as const;
 }
 
@@ -301,9 +315,9 @@ export function formatDate(
   locale: SiteLocale = "lt"
 ) {
   if (!value) {
-    return localeUi[locale].undated;
+    return ui[locale].undated;
   }
-  return new Intl.DateTimeFormat(localeDateLocales[locale], {
+  return new Intl.DateTimeFormat(localeMetadata[locale].dateLocale, {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -397,5 +411,5 @@ export function escapeXml(value: string) {
 }
 
 export function absoluteUrl(path: string) {
-  return new URL(path, "https://ortodoksas.grassinside.com").toString();
+  return new URL(path, siteOrigin).toString();
 }

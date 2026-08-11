@@ -1,36 +1,30 @@
 ---
 import ArchiveList from "../components/archive/ArchiveList.astro";
 import PageIntro from "../components/publication/PageIntro.astro";
+import { type Locale, localeMetadata, localeShells } from "../i18n/config";
 import SiteLayout from "../layouts/SiteLayout.astro";
-import { getLocalizedArticles, localeShells, type Locale } from "../lib/publication";
-import { localeUi } from "../lib/locale-ui";
-
-const copy: Record<Locale, { name: string; title: string; message: string }> = {
-  en: { name: "English", title: "English edition", message: "English publications are being prepared. Browse the Lithuanian source edition in the meantime." },
-  ru: { name: "Русский", title: "Русское издание", message: "Публикации на русском языке готовятся. Литовское издание доступно как исходное." },
-  uk: { name: "Українська", title: "Українське видання", message: "Публікації українською мовою готуються. Литовське видання доступне як вихідне." },
-  be: { name: "Беларуская", title: "Беларускае выданне", message: "Публікацыі на беларускай мове рыхтуюцца. Літоўскае выданне даступнае як зыходнае." },
-};
+import { getLocalizedArticles } from "../lib/publication";
+import { ui } from "../i18n/ui";
 
 export function getStaticPaths() {
   return localeShells.map((locale) => ({ params: { locale }, props: { locale } }));
 }
 
 const { locale } = Astro.props as { locale: Locale };
-const language = copy[locale];
 const entries = getLocalizedArticles(locale);
-const localizedCopy = localeUi[locale];
+const localizedCopy = ui[locale];
+const languageName = localeMetadata[locale].languageName;
 ---
 
-<SiteLayout title={`${language.title} · ortodoksas.lt`} description={entries.length ? `${entries.length} ${localizedCopy.articles.toLocaleLowerCase(locale)} · ${language.title}.` : language.message} canonicalPath={`/${locale}`} lang={locale} locale={locale}>
+<SiteLayout title={`${localizedCopy.edition} · ortodoksas.lt`} description={entries.length ? `${entries.length} ${localizedCopy.articles.toLocaleLowerCase(locale)} · ${localizedCopy.edition}.` : localizedCopy.editionUnavailable} canonicalPath={`/${locale}`} lang={locale} locale={locale}>
   <main class:list={["site-width", "language-shell", { "language-empty": !entries.length }]}>
     {entries.length ? <>
-      <PageIntro description={`${entries.length} ${localizedCopy.articles.toLocaleLowerCase(locale)} · ${language.title}`} eyebrow={`${language.name} · ${locale.toUpperCase()}`} title={language.title} />
-      <ArchiveList entries={entries} fallbackSection={language.name} id="articles" locale={locale} />
-    </> : <div class="shell-card">
-      <div class="eyebrow">{language.name} · {locale.toUpperCase()}</div>
-      <h1>{language.title}</h1>
-      <p>{language.message}</p>
+      <PageIntro description={`${entries.length} ${localizedCopy.articles.toLocaleLowerCase(locale)} · ${localizedCopy.edition}`} eyebrow={`${languageName} · ${localeMetadata[locale].displayCode}`} title={localizedCopy.edition} />
+      <ArchiveList entries={entries} fallbackSection={languageName} id="articles" locale={locale} />
+    </> : <div class="shell-card" id="articles">
+      <div class="eyebrow">{languageName} · {localeMetadata[locale].displayCode}</div>
+      <h1>{localizedCopy.edition}</h1>
+      <p>{localizedCopy.editionUnavailable}</p>
       <a class="text-link" href="/">{localizedCopy.backToLithuanian} →</a>
     </div>}
   </main>

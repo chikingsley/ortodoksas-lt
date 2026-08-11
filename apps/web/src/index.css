@@ -101,8 +101,9 @@ a {
 }
 button,
 input,
-select {
-  font: inherit;
+select,
+textarea {
+  font-family: inherit;
 }
 img {
   display: block;
@@ -813,6 +814,9 @@ svg {
   padding: 24px 5px;
   border-bottom: 1px solid var(--line);
 }
+.archive-list article > div {
+  min-width: 0;
+}
 .archive-list time {
   display: block;
   margin-top: 9px;
@@ -834,6 +838,9 @@ svg {
     700 25px / 1.08 "Playfair Display",
     Georgia,
     serif;
+}
+.archive-list h2 a {
+  overflow-wrap: anywhere;
 }
 .archive-list p {
   display: -webkit-box;
@@ -973,11 +980,10 @@ svg {
   color: var(--green);
 }
 .language-shell {
-  min-height: 60vh;
-  padding-block: 0 120px;
+  padding-block: 0 72px;
 }
 .language-shell.language-empty {
-  padding-block: 48px 120px;
+  padding-block: 48px 72px;
 }
 .language-shell.language-empty .shell-card {
   margin-top: 0;
@@ -1220,7 +1226,7 @@ svg {
     padding: 20px 0 24px;
   }
   .language-shell.language-empty {
-    padding-block: 32px 80px;
+    padding-block: 32px 48px;
   }
   .article-header h1 {
     font-size: clamp(35px, 11vw, 50px);
@@ -1234,9 +1240,9 @@ svg {
     border: 0;
   }
   .article-hero {
-    width: 100vw;
-    margin-top: 28px;
-    margin-bottom: 34px;
+    width: calc(100% + 28px);
+    margin: 28px -14px 34px;
+    transform: none;
   }
   .prose {
     font-size: 18px;

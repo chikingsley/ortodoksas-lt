@@ -2,7 +2,9 @@
 import "../index.css";
 import SiteFooter from "../components/layout/SiteFooter.astro";
 import SiteHeader from "../components/layout/SiteHeader.astro";
-import { getLocaleAlternates, type SiteLocale } from "../lib/publication";
+import { siteOrigin } from "../config/site";
+import type { SiteLocale } from "../i18n/config";
+import { getLocaleAlternates } from "../lib/publication";
 
 interface AlternateLink {
   href: string;
@@ -32,7 +34,7 @@ const {
   alternates = [],
   jsonLd,
 } = Astro.props;
-const siteUrl = Astro.site ?? new URL("https://ortodoksas.grassinside.com");
+const siteUrl = Astro.site ?? new URL(siteOrigin);
 const canonical = new URL(canonicalPath, siteUrl).toString();
 const socialImage = image?.startsWith("/") ? new URL(image, siteUrl).toString() : image;
 const resolvedAlternates = alternates.length

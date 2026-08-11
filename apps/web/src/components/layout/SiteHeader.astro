@@ -1,6 +1,11 @@
 ---
 import PublicationHeader from "./publication-header";
-import { getLocaleLinks, type SiteLocale } from "../../lib/publication";
+import type { SiteLocale } from "../../i18n/config";
+import {
+  getLocaleLinks,
+  getLocalizedCounterpart,
+} from "../../lib/publication";
+import { getPrimaryNavigation } from "../../navigation/publication";
 
 interface Props {
   currentPath: string;
@@ -9,6 +14,10 @@ interface Props {
 
 const { currentPath, locale = "lt" } = Astro.props;
 const localeLinks = getLocaleLinks(currentPath);
+const navigationItems = getPrimaryNavigation(
+  locale,
+  (path) => locale === "lt" ? undefined : getLocalizedCounterpart(locale, path)?.path
+);
 ---
 
-<PublicationHeader client:load currentPath={currentPath} locale={locale} localeLinks={localeLinks} />
+<PublicationHeader client:load currentPath={currentPath} locale={locale} localeLinks={localeLinks} navigationItems={navigationItems} />

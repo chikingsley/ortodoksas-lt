@@ -73,6 +73,10 @@
   border-bottom: 2px solid var(--gold);
 }
 
+.publication-languages a[data-counterpart="unavailable"] {
+  opacity: 0.55;
+}
+
 .publication-primary-nav {
   display: block;
 }
@@ -113,8 +117,10 @@
 }
 
 .publication-nav-link[data-active],
-.publication-nav-link:hover {
+.publication-nav-link:hover,
+.publication-nav-link:focus {
   color: var(--green);
+  background: transparent;
 }
 
 .publication-nav-link[data-active]::after {

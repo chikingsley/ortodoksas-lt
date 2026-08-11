@@ -1,16 +1,15 @@
-import { tiptapDocumentSchema } from "@ortodoksas-lt/content/article";
-import { articles, homepagePlacements, mediaAssets } from "@ortodoksas-lt/db";
-import { renderArticleBody } from "@ortodoksas-lt/editor/render";
-import { and, asc, desc, eq } from "drizzle-orm";
+import { mediaAssets } from "@ortodoksas-lt/db";
+import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
+import { defaultLocale, siteLocales } from "../src/i18n/config";
 
-const localeAliases = new Map([
-  ["", "/index.html"],
-  ["/en", "/en.html"],
-  ["/ru", "/ru.html"],
-  ["/uk", "/uk.html"],
-  ["/be", "/be.html"],
-]);
+const localeAliases = new Map(
+  siteLocales.map((locale) =>
+    locale === defaultLocale
+      ? ["", "/index.html"]
+      : [`/${locale}`, `/${locale}.html`]
+  )
+);
 const localizedLegacyRedirects = new Map([
   [
     "/ru/2022/05/blog-post_10.html",
@@ -59,110 +58,6 @@ const trailingSlash = /\/$/;
 const mediaPathPattern = /^\/media\/files\/([0-9a-f]{64}\.[a-z0-9]+)$/i;
 const mediaIdPattern = /^\/api\/media\/([^/]+)$/u;
 const mediaCacheControl = "public, max-age=31536000, immutable";
-const supportedLanguages = new Set(["be", "en", "lt", "ru", "uk"]);
-
-const requestedLanguage = (url: URL) => {
-  const language = url.searchParams.get("language") ?? "lt";
-  return supportedLanguages.has(language) ? language : "lt";
-};
-
-const publicArticle = (article: typeof articles.$inferSelect) => ({
-  bodyHtml: renderArticleBody(
-    tiptapDocumentSchema.parse(JSON.parse(article.bodyJson))
-  ),
-  description: article.seoDescription || article.summary,
-  hero: article.heroMediaId ? `/api/media/${article.heroMediaId}` : null,
-  id: article.id,
-  kind: article.kind,
-  labels: JSON.parse(article.labelsJson) as string[],
-  language: article.language,
-  path: `/${article.slug}.html`,
-  published: article.publishedAt
-    ? new Date(article.publishedAt).toISOString()
-    : null,
-  section: article.section,
-  title: article.title,
-  translationGroupId: article.translationGroupId,
-  translationKind: article.translationKind,
-  translationReviewStatus: article.translationReviewStatus,
-});
-
-async function servePublicationApi(request: Request, env: Env) {
-  const database = drizzle(env.DB);
-  const url = new URL(request.url);
-  const language = requestedLanguage(url);
-  if (url.pathname === "/api/publication") {
-    const path = url.searchParams.get("path")?.replace(/^\/+|\.html$/gu, "");
-    if (!path) {
-      return Response.json(
-        { error: "Article path is required" },
-        { status: 400 }
-      );
-    }
-    const article = await database
-      .select()
-      .from(articles)
-      .where(
-        and(
-          eq(articles.slug, path),
-          eq(articles.language, language),
-          eq(articles.status, "published")
-        )
-      )
-      .limit(1);
-    return article[0]
-      ? Response.json({ article: publicArticle(article[0]) })
-      : Response.json({ error: "Article unavailable" }, { status: 404 });
-  }
-
-  const [published, placements] = await Promise.all([
-    database
-      .select()
-      .from(articles)
-      .where(
-        and(eq(articles.language, language), eq(articles.status, "published"))
-      )
-      .orderBy(desc(articles.publishedAt))
-      .limit(24),
-    database
-      .select()
-      .from(homepagePlacements)
-      .orderBy(asc(homepagePlacements.position)),
-  ]);
-  const byId = new Map(published.map((article) => [article.id, article]));
-  const explicitLead = placements.find(
-    (placement) => placement.slot === "lead"
-  );
-  const lead =
-    (explicitLead && byId.get(explicitLead.articleId)) ?? published[0];
-  const explicitSecondary = placements
-    .filter((placement) => placement.slot === "secondary")
-    .map((placement) => byId.get(placement.articleId))
-    .filter((article): article is typeof articles.$inferSelect =>
-      Boolean(article)
-    );
-  const secondary = [...explicitSecondary];
-  for (const article of published) {
-    if (secondary.length >= 3) {
-      break;
-    }
-    if (
-      article.id !== lead?.id &&
-      !secondary.some((item) => item.id === article.id)
-    ) {
-      secondary.push(article);
-    }
-  }
-  const used = new Set([lead?.id, ...secondary.map((article) => article.id)]);
-  return Response.json({
-    feed: published
-      .filter((article) => !used.has(article.id))
-      .map(publicArticle),
-    lead: lead ? publicArticle(lead) : null,
-    secondary: secondary.slice(0, 3).map(publicArticle),
-  });
-}
-
 function applyRangeHeaders(object: R2Object, headers: Headers) {
   const { range } = object;
   if (!range) {
@@ -202,7 +97,7 @@ async function serveMedia(request: Request, env: Env, fileName: string) {
   if (request.method === "HEAD") {
     const object = await env.MEDIA.head(key);
     if (!object) {
-      return env.ASSETS.fetch(request);
+      return serveAsset(request, env);
     }
     const headers = new Headers();
     object.writeHttpMetadata(headers);
@@ -221,7 +116,7 @@ async function serveMedia(request: Request, env: Env, fileName: string) {
     range: request.headers,
   });
   if (!object) {
-    return env.ASSETS.fetch(request);
+    return serveAsset(request, env);
   }
 
   const headers = new Headers();
@@ -304,6 +199,17 @@ function cleanRouteAlias(pathname: string) {
   }
 }
 
+async function serveAsset(request: Request, env: Env) {
+  const response = await env.ASSETS.fetch(request);
+  const headers = new Headers(response.headers);
+  headers.set("access-control-allow-origin", "*");
+  return new Response(response.body, {
+    headers,
+    status: response.status,
+    statusText: response.statusText,
+  });
+}
+
 export default {
   fetch(request, env) {
     const url = new URL(request.url);
@@ -322,18 +228,12 @@ export default {
     if (url.pathname === "/api/health") {
       return Response.json({ environment: env.ENVIRONMENT, status: "ok" });
     }
-    if (
-      request.method === "GET" &&
-      (url.pathname === "/api/homepage" || url.pathname === "/api/publication")
-    ) {
-      return servePublicationApi(request, env);
-    }
     const alias = localeAliases.get(url.pathname.replace(trailingSlash, ""));
     const routeAlias = cleanRouteAlias(url.pathname);
     if ((alias ?? routeAlias) && request.method === "GET") {
       const assetUrl = new URL(alias ?? routeAlias ?? url.pathname, url);
-      return env.ASSETS.fetch(new Request(assetUrl, request));
+      return serveAsset(new Request(assetUrl, request), env);
     }
-    return env.ASSETS.fetch(request);
+    return serveAsset(request, env);
   },
 } satisfies ExportedHandler<Env>;

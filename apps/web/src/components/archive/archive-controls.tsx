@@ -15,7 +15,11 @@ import {
   ComboboxItem,
   ComboboxList,
 } from "@/components/ui/combobox";
-import { Input } from "@/components/ui/input";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 import {
   Select,
   SelectContent,
@@ -23,7 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { SiteLocale } from "@/lib/publication";
+import type { SiteLocale } from "@/i18n/config";
 
 interface ArchiveControlsProps {
   labels: string[];
@@ -33,7 +37,8 @@ interface ArchiveControlsProps {
 }
 
 const allValue = "__all__";
-
+const filterControlText =
+  "font-sans text-base font-normal text-foreground md:text-sm";
 const copy: Record<
   SiteLocale,
   {
@@ -49,18 +54,18 @@ const copy: Record<
   }
 > = {
   be: {
-    allSections: "Усе раздзелы",
+    allSections: "Усе тэмы",
     allYears: "Усе гады",
     emptyLabels: "Меткі не знойдзены",
     label: "Метка",
     labelPlaceholder: "Усе меткі",
     search: "Пошук у архіве",
     searchPlaceholder: "Шукаць па назве або тэме",
-    section: "Раздзел",
+    section: "Тэма",
     year: "Год",
   },
   en: {
-    allSections: "All sections",
+    allSections: "All topics",
     allYears: "All years",
     emptyLabels: "No tags found",
     label: "Tag",
@@ -82,25 +87,25 @@ const copy: Record<
     year: "Metai",
   },
   ru: {
-    allSections: "Все разделы",
+    allSections: "Все темы",
     allYears: "Все годы",
     emptyLabels: "Метки не найдены",
     label: "Метка",
     labelPlaceholder: "Все метки",
     search: "Поиск по архиву",
     searchPlaceholder: "Искать по названию или теме",
-    section: "Раздел",
+    section: "Тема",
     year: "Год",
   },
   uk: {
-    allSections: "Усі розділи",
+    allSections: "Усі теми",
     allYears: "Усі роки",
     emptyLabels: "Міток не знайдено",
     label: "Мітка",
     labelPlaceholder: "Усі мітки",
     search: "Пошук в архіві",
     searchPlaceholder: "Шукати за назвою або темою",
-    section: "Розділ",
+    section: "Тема",
     year: "Рік",
   },
 };
@@ -133,6 +138,7 @@ export function ArchiveControls({
   sections,
   years,
 }: ArchiveControlsProps) {
+  const displayLocale = locale;
   const labelsForLocale = copy[locale];
   const [hydrated, setHydrated] = useState(false);
   const [label, setLabel] = useState("");
@@ -195,10 +201,14 @@ export function ArchiveControls({
 
     const count = document.querySelector("#archive-count");
     if (count) {
-      count.textContent = visible.toLocaleString(locale);
+      count.textContent = visible.toLocaleString(displayLocale);
     }
 
-    const params = new URLSearchParams();
+    const params = new URLSearchParams(window.location.search);
+    params.delete("q");
+    params.delete("tema");
+    params.delete("zyma");
+    params.delete("metai");
     if (query) {
       params.set("q", query);
     }
@@ -216,7 +226,7 @@ export function ArchiveControls({
       "",
       `${window.location.pathname}${params.size > 0 ? `?${params}` : ""}`
     );
-  }, [hydrated, label, locale, query, section, year]);
+  }, [displayLocale, hydrated, label, query, section, year]);
 
   const sectionItems = [
     { label: labelsForLocale.allSections, value: allValue },
@@ -230,29 +240,30 @@ export function ArchiveControls({
   return (
     <form
       action="/archyvas"
-      className="grid grid-cols-1 gap-3 bg-[var(--paper)] p-[18px] md:grid-cols-2 lg:grid-cols-[minmax(260px,1fr)_200px_200px_140px]"
+      className="flex flex-col gap-2 sm:grid sm:grid-cols-2 lg:flex lg:flex-row lg:items-center"
       id="archive-controls"
       method="get"
       onSubmit={handleSubmit}
+      translate="no"
     >
       <label
-        className="relative md:col-span-2 lg:col-span-1"
+        className="lg:min-w-64 lg:max-w-sm lg:flex-1"
         htmlFor="archive-query"
       >
         <span className="sr-only">{labelsForLocale.search}</span>
-        <SearchIcon
-          aria-hidden="true"
-          className="pointer-events-none absolute top-1/2 left-3 z-10 size-4 -translate-y-1/2 text-primary"
-        />
-        <Input
-          className="h-10 rounded-sm bg-background pr-3 pl-9"
-          id="archive-query"
-          name="q"
-          onChange={handleQueryChange}
-          placeholder={labelsForLocale.searchPlaceholder}
-          type="search"
-          value={query}
-        />
+        <InputGroup>
+          <InputGroupInput
+            id="archive-query"
+            name="q"
+            onChange={handleQueryChange}
+            placeholder={labelsForLocale.searchPlaceholder}
+            type="search"
+            value={query}
+          />
+          <InputGroupAddon>
+            <SearchIcon aria-hidden="true" />
+          </InputGroupAddon>
+        </InputGroup>
       </label>
 
       <Select
@@ -262,7 +273,7 @@ export function ArchiveControls({
       >
         <SelectTrigger
           aria-label={labelsForLocale.section}
-          className="h-10 w-full rounded-sm bg-background px-3"
+          className={`w-full lg:w-44 ${filterControlText}`}
         >
           <SelectValue />
         </SelectTrigger>
@@ -282,7 +293,8 @@ export function ArchiveControls({
       >
         <ComboboxInput
           aria-label={labelsForLocale.label}
-          className="h-10 w-full rounded-sm bg-background"
+          className="w-full lg:w-44"
+          inputClassName={`${filterControlText} placeholder:text-foreground`}
           placeholder={labelsForLocale.labelPlaceholder}
           showClear
         />
@@ -305,7 +317,7 @@ export function ArchiveControls({
       >
         <SelectTrigger
           aria-label={labelsForLocale.year}
-          className="h-10 w-full rounded-sm bg-background px-3"
+          className={`w-full lg:w-44 ${filterControlText}`}
         >
           <SelectValue />
         </SelectTrigger>

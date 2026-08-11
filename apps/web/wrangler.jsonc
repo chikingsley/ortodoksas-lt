@@ -50,7 +50,8 @@
       "binding": "DB",
       "database_name": "ortodoksas-studio",
       "database_id": "989ce1b7-0555-47e3-a635-0e79cdf21e07",
-      "migrations_dir": "../../packages/db/migrations"
+      "migrations_dir": "../../packages/db/migrations",
+      "remote": true
     }
   ],
   "observability": {

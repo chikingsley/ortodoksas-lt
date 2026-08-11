@@ -3,18 +3,19 @@ import EditorialImage from "../../components/media/EditorialImage.astro";
 import { getSectionLabel } from "@ortodoksas-lt/content/sections";
 import SiteLayout from "../../layouts/SiteLayout.astro";
 import { getTranslationDisplayState } from "@ortodoksas-lt/content/translation";
-import { cleanHtml, formatDate, getLithuanianCounterpart, getLocalizedArticles, localeShells, type Locale, type LocalizedArticle } from "../../lib/publication";
-import { localeUi } from "../../lib/locale-ui";
+import { type Locale, localeShells } from "../../i18n/config";
+import { cleanHtml, formatDate, getLithuanianCounterpart, getLocalizedPages, hasLeadFigure, type LocalizedPage } from "../../lib/publication";
+import { ui } from "../../i18n/ui";
 
 export function getStaticPaths() {
-  return localeShells.flatMap((locale) => getLocalizedArticles(locale).map((page) => ({
+  return localeShells.flatMap((locale) => getLocalizedPages(locale).map((page) => ({
     params: { locale, path: page.path.slice(1).replace(/\.html$/, "") },
     props: { locale, page },
   })));
 }
 
-const { locale, page } = Astro.props as { locale: Locale; page: LocalizedArticle };
-const copy = localeUi[locale];
+const { locale, page } = Astro.props as { locale: Locale; page: LocalizedPage };
+const copy = ui[locale];
 const canonicalPath = `/${locale}${page.path}`;
 const original = getLithuanianCounterpart(canonicalPath);
 const translationState = getTranslationDisplayState({
@@ -24,14 +25,20 @@ const translationState = getTranslationDisplayState({
 const translationDisclosure = translationState === "editor_reviewed"
   ? copy.editorReviewedTranslation
   : copy.automaticTranslation;
-const articleSchema = {
+const bodyOwnsLeadImage = hasLeadFigure(page.html);
+const bodyHtml = cleanHtml(
+  page.html,
+  bodyOwnsLeadImage ? null : page.hero,
+  page.kind === "article"
+);
+const articleSchema = page.kind === "article" ? {
   articleSection: page.section,
   dateModified: page.published ?? undefined,
   datePublished: page.published ?? undefined,
   headline: page.title,
   keywords: page.labels.join(", "),
   mainEntityOfPage: canonicalPath,
-};
+} : undefined;
 ---
 
 <SiteLayout
@@ -42,12 +49,12 @@ const articleSchema = {
   jsonLd={articleSchema}
   lang={locale}
   locale={locale}
-  type="article"
+  type={page.kind === "article" ? "article" : "website"}
 >
   <main class="article-page localized-article">
     <article class="reading-column">
       <header class="article-header">
-        <div class="eyebrow">{getSectionLabel(page.section, locale)}</div>
+        <div class="eyebrow">{page.kind === "page" ? copy.edition : getSectionLabel(page.section, locale)}</div>
         <h1>{page.title}</h1>
         {page.published ? <div class="article-byline"><time datetime={page.published}>{formatDate(page.published, locale)}</time></div> : null}
         {original && translationState !== "original" ? (
@@ -56,9 +63,9 @@ const articleSchema = {
             <a href={original.path}>{copy.viewOriginal}</a>
           </p>
         ) : null}
-        {page.hero ? <EditorialImage class="article-hero" priority src={page.hero} /> : null}
+        {page.hero && !bodyOwnsLeadImage ? <EditorialImage class="article-hero" priority src={page.hero} /> : null}
       </header>
-      <div class="prose" set:html={cleanHtml(page.html, page.hero, true)}></div>
+      <div class="prose" set:html={bodyHtml}></div>
       {page.labels.length > 0 ? <footer class="article-tags">{page.labels.map((label) => <span>{label}</span>)}</footer> : null}
     </article>
   </main>

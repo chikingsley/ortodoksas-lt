@@ -2,29 +2,36 @@ import {
   absoluteUrl,
   articles,
   escapeXml,
-  getLocalizedArticles,
-  localeShells,
+  getLocalizedPages,
   pages,
   sectionSlug,
   sections,
 } from "../lib/publication";
+import { localeShells } from "../i18n/config";
 
 export const prerender = true;
 
 export function GET() {
+  const localizedEntries = localeShells.flatMap((locale) =>
+    getLocalizedPages(locale).map((page) => ({ locale, page }))
+  );
   const paths = [
     "/",
     "/archyvas",
     "/paieska",
     ...localeShells.map((locale) => `/${locale}`),
-    ...localeShells.flatMap((locale) =>
-      getLocalizedArticles(locale).map((page) => `/${locale}${page.path}`)
-    ),
+    ...localizedEntries.map(({ locale, page }) => `/${locale}${page.path}`),
     ...sections.map((section) => `/tema/${sectionSlug(section)}`),
     ...pages.map((page) => page.path),
   ];
   const lastModified = new Map(
-    articles
+    [
+      ...articles.map((entry) => ({ path: entry.path, published: entry.published })),
+      ...localizedEntries.map(({ locale, page }) => ({
+        path: `/${locale}${page.path}`,
+        published: page.published,
+      })),
+    ]
       .filter((entry) => entry.published)
       .map((entry) => [entry.path, entry.published as string])
   );

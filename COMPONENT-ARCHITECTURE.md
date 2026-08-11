@@ -34,3 +34,12 @@ This is the implementation checklist for the public publication UI. A checked it
 1. Reuse an existing primitive or add one under `components/ui` before styling a new control.
 2. Give each surface one owner component and keep route files as composition boundaries.
 3. Record the rendered screenshot and validation result before marking an item complete.
+
+## Tailwind migration
+
+- [x] Archive toolbar: standard shadcn/Base UI InputGroup, Select, and Combobox primitives with component-owned Tailwind layout.
+- [ ] Public shell and navigation: move remaining layout selectors from `index.css` into the owning Astro and React components.
+- [ ] Homepage editorial surfaces: move grids, story cards, service band, archive rail, and library callout into component-owned Tailwind classes.
+- [ ] Search and article surfaces: replace raw control styling and remaining page selectors with shared primitives and component-owned Tailwind classes.
+- [ ] Reduce `index.css` to Tailwind/shadcn imports, brand tokens, font faces, base element defaults, and genuinely global accessibility behavior.
+- [ ] Capture desktop and mobile screenshots after every surface migration and compare them with the approved visual baseline.

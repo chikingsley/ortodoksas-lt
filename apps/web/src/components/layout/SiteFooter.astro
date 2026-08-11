@@ -1,6 +1,8 @@
 ---
-import { localeUi } from "../../lib/locale-ui";
-import type { SiteLocale } from "../../lib/publication";
+import { ui } from "../../i18n/ui";
+import type { SiteLocale } from "../../i18n/config";
+import { getLocalizedCounterpart } from "../../lib/publication";
+import { getContactNavigation, getPrimaryNavigation } from "../../navigation/publication";
 import InstitutionalMarks from "./institutional-marks";
 import "./site-footer.css";
 
@@ -9,8 +11,15 @@ interface Props {
 }
 
 const { locale = "lt" } = Astro.props;
-const copy = localeUi[locale];
-const localized = locale !== "lt";
+const copy = ui[locale];
+const navigationItems = getPrimaryNavigation(
+  locale,
+  (path) => locale === "lt" ? undefined : getLocalizedCounterpart(locale, path)?.path
+);
+const contactItems = getContactNavigation(
+  locale,
+  (path) => locale === "lt" ? undefined : getLocalizedCounterpart(locale, path)?.path
+);
 ---
 
 <footer class="site-footer">
@@ -20,12 +29,16 @@ const localized = locale !== "lt";
       <div><div class="footer-brand">ortodoksas.lt</div><p>{copy.footerDescription}</p></div>
     </div>
     <div>
-      <h2>{copy.articles}</h2>
-      {localized ? <a href={`/${locale}#articles`}>{copy.archive}</a> : <><a href="/p/katekizmas_12.html">Katekizmas</a><a href="/p/dvasininkai.html">Dvasininkai</a><a href="/p/biblioteka.html">Biblioteka</a></>}
+      <h2>{copy.navigation}</h2>
+      {navigationItems.map((item) => (
+        <a href={item.href} hreflang={item.targetLocale}>{item.label}</a>
+      ))}
     </div>
     <div>
-      <h2>{localized ? copy.edition : "Susisiekti"}</h2>
-      {localized ? <a href="/">{copy.backToLithuanian}</a> : <><a href="/p/kontaktai_30.html">Kontaktai</a><a href="/p/paremti.html">Paremti veiklą</a><a href="/admin/">Redakcija</a></>}
+      <h2>{copy.contact}</h2>
+      {contactItems.map((item) => (
+        <a href={item.href} hreflang={item.targetLocale}>{item.label}</a>
+      ))}
     </div>
   </div>
   <div class="site-width footer-base"><span>© 2026 ortodoksas.lt</span><span>{copy.institution}</span></div>

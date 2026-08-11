@@ -12,48 +12,31 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { localeUi } from "@/lib/locale-ui";
-import type { SiteLocale } from "@/lib/publication";
+import { localeMetadata, type SiteLocale, siteLocales } from "@/i18n/config";
+import { ui } from "@/i18n/ui";
+import type { LocaleDestination } from "@/lib/publication";
+import {
+  isNavigationItemActive,
+  type NavigationItem,
+} from "@/navigation/publication";
 import InstitutionalMarks from "./institutional-marks";
 import "./publication-header.css";
 
 interface Props {
   currentPath: string;
   locale?: SiteLocale;
-  localeLinks: Record<SiteLocale, string>;
-}
-
-const locales = [
-  ["lt", "LT"],
-  ["en", "EN"],
-  ["ru", "RU"],
-  ["uk", "UA"],
-  ["be", "BY"],
-] as const;
-
-function isActive(currentPath: string, href: string) {
-  return (
-    currentPath === href || (href !== "/" && currentPath.startsWith(`${href}/`))
-  );
+  localeLinks: Record<SiteLocale, LocaleDestination>;
+  navigationItems: NavigationItem[];
 }
 
 export default function PublicationHeader({
   currentPath,
   localeLinks,
   locale = "lt",
+  navigationItems,
 }: Props) {
-  const copy = localeUi[locale];
+  const copy = ui[locale];
   const localized = locale !== "lt";
-  const items: [string, string][] = localized
-    ? [[copy.articles, `/${locale}`]]
-    : [
-        ["Pradžia", "/"],
-        ["Pamaldos", "/p/bendruomenes_21.html"],
-        ["Dvasininkai", "/p/dvasininkai.html"],
-        ["Biblioteka", "/p/biblioteka.html"],
-        ["Kalendorius", "/p/kalendorius.html"],
-        ["Archyvas", "/archyvas"],
-      ];
 
   return (
     <header className="publication-header">
@@ -63,6 +46,7 @@ export default function PublicationHeader({
             aria-label={`${copy.home} · ortodoksas.lt`}
             className="publication-institution-brand"
             href={localized ? `/${locale}` : "/"}
+            translate="no"
           >
             <InstitutionalMarks />
           </a>
@@ -70,6 +54,7 @@ export default function PublicationHeader({
           <a
             className="publication-wordmark"
             href={localized ? `/${locale}` : "/"}
+            translate="no"
           >
             <strong>ortodoksas.lt</strong>
             <span>Bažnyčios leidinys</span>
@@ -79,7 +64,7 @@ export default function PublicationHeader({
               <SheetTrigger
                 render={
                   <button
-                    aria-label="Atverti meniu"
+                    aria-label={copy.navigation}
                     className="publication-menu-button"
                     type="button"
                   />
@@ -95,21 +80,25 @@ export default function PublicationHeader({
                   aria-label={copy.edition}
                   className="publication-mobile-links"
                 >
-                  {items.map(([label, href]) => (
+                  {navigationItems.map((item) => (
                     <a
                       aria-current={
-                        isActive(currentPath, href) ? "page" : undefined
+                        isNavigationItemActive(currentPath, item)
+                          ? "page"
+                          : undefined
                       }
                       className={
-                        isActive(currentPath, href) ? "active" : undefined
+                        isNavigationItemActive(currentPath, item)
+                          ? "active"
+                          : undefined
                       }
-                      href={href}
-                      key={href}
+                      href={item.href}
+                      key={item.id}
                     >
-                      {label}
+                      {item.label}
                     </a>
                   ))}
-                  <a href="/paieska">Paieška</a>
+                  {localized ? null : <a href="/paieska">{copy.search}</a>}
                 </nav>
               </SheetContent>
             </Sheet>
@@ -117,15 +106,29 @@ export default function PublicationHeader({
         </div>
         <div aria-hidden="true" className="publication-masthead-divider" />
         <nav aria-label={copy.languages} className="publication-languages">
-          {locales.map(([code, label]) => (
+          {siteLocales.map((code) => (
             <a
               aria-current={code === locale ? "page" : undefined}
+              aria-label={`${localeMetadata[code].languageName}${
+                localeLinks[code].hasCounterpart
+                  ? ""
+                  : `. ${copy.pageUnavailable}`
+              }`}
               className={code === locale ? "active" : undefined}
-              href={localeLinks[code]}
+              data-counterpart={
+                localeLinks[code].hasCounterpart ? "available" : "unavailable"
+              }
+              href={localeLinks[code].href}
               key={code}
               lang={code}
+              title={
+                localeLinks[code].hasCounterpart
+                  ? localeMetadata[code].languageName
+                  : `${localeMetadata[code].languageName} — ${copy.pageUnavailable}`
+              }
+              translate="no"
             >
-              {label}
+              {localeMetadata[code].displayCode}
             </a>
           ))}
         </nav>
@@ -134,14 +137,14 @@ export default function PublicationHeader({
         <div className="site-width publication-nav-inner">
           <NavigationMenu>
             <NavigationMenuList>
-              {items.map(([label, href]) => (
-                <NavigationMenuItem key={href}>
+              {navigationItems.map((item) => (
+                <NavigationMenuItem key={item.id}>
                   <NavigationMenuLink
-                    active={isActive(currentPath, href)}
+                    active={isNavigationItemActive(currentPath, item)}
                     className="publication-nav-link"
-                    href={href}
+                    href={item.href}
                   >
-                    {label}
+                    {item.label}
                   </NavigationMenuLink>
                 </NavigationMenuItem>
               ))}
