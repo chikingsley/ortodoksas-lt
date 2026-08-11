@@ -9,7 +9,7 @@ const translatableAttributeNames = new Set([
   "title",
 ]);
 
-const legacyTranslationCuePattern =
+const sourceEditionCuePattern =
   /^(?:english translation|lietuviškas vertimas|russian translation|русский перевод|ukrainian translation|український переклад|belarusian translation|беларускі пераклад)$/iu;
 const trailingCuePunctuationPattern = /[:.]+$/u;
 const leadingCueSeparatorPattern = /^\s*[:—–-]?\s*/u;
@@ -29,7 +29,7 @@ export interface ArticleTranslationResult extends ArticleTranslationSource {
 const isRecord = (value: unknown): value is JsonRecord =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
-const getLinkedLegacyTranslationCue = (value: unknown): string | undefined => {
+const getLinkedSourceEditionCue = (value: unknown): string | undefined => {
   if (!isRecord(value) || value.type !== "paragraph") {
     return;
   }
@@ -58,7 +58,7 @@ const getLinkedLegacyTranslationCue = (value: unknown): string | undefined => {
   }
 
   const cue = text.trim().replace(trailingCuePunctuationPattern, "").trim();
-  return hasLink && legacyTranslationCuePattern.test(cue) ? cue : undefined;
+  return hasLink && sourceEditionCuePattern.test(cue) ? cue : undefined;
 };
 
 const stripLeadingCue = (value: string, cue: string): string => {
@@ -75,7 +75,7 @@ export const normalizeArticleTranslationSource = (
   const content = source.body.content ?? [];
   const removedCues: string[] = [];
   const normalizedContent = content.filter((node) => {
-    const cue = getLinkedLegacyTranslationCue(node);
+    const cue = getLinkedSourceEditionCue(node);
     if (cue) {
       removedCues.push(cue);
       return false;

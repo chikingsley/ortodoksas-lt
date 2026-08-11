@@ -72,12 +72,10 @@
 ### Machine Translation
 
 - Translation sources pass through deterministic normalization before segment
-  extraction and hashing. Cue-only legacy language links are removed; ordinary
+  extraction and hashing. Cue-only source-edition links are removed; ordinary
   links and multilingual article content remain intact.
 - The approved batch candidate is Luna-direct translation followed by an
-  independent Luna review. TranslateGemma remains outside the default path
-  after its clean benchmark added GPU time and substantially increased review
-  burden across RU, UK, and BE.
+  independent Luna review.
 - Deterministic checks enforce complete segment coverage, exact Tiptap
   structure, stable attributes and destinations, names, dates, quotations, and
   locale-specific Orthodox terminology.

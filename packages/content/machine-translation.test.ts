@@ -70,8 +70,8 @@ describe("article machine translation", () => {
     );
   });
 
-  it("removes linked legacy translation navigation before translation", () => {
-    const legacySource = {
+  it("removes linked source-edition navigation before translation", () => {
+    const sourceWithEditionLink = {
       body: {
         content: [
           {
@@ -104,7 +104,7 @@ describe("article machine translation", () => {
       title: "Article title",
     };
 
-    expect(normalizeArticleTranslationSource(legacySource)).toEqual({
+    expect(normalizeArticleTranslationSource(sourceWithEditionLink)).toEqual({
       body: {
         content: [
           {
@@ -117,7 +117,7 @@ describe("article machine translation", () => {
       summary: "Article summary",
       title: "Article title",
     });
-    expect(getArticleTranslationSegments(legacySource)).toEqual([
+    expect(getArticleTranslationSegments(sourceWithEditionLink)).toEqual([
       "Article title",
       "Article summary",
       "Article body",
