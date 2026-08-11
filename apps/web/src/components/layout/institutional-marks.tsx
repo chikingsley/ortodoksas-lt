@@ -1,5 +1,4 @@
 import { cn } from "@/lib/utils";
-import "./institutional-marks.css";
 
 interface Props {
   className?: string;
@@ -12,34 +11,33 @@ export default function InstitutionalMarks({
 }: Props) {
   return (
     <span
-      className={cn(
-        "institutional-marks",
-        `institutional-marks--${tone}`,
-        className
-      )}
+      className={cn("inline-flex items-center gap-3.5 max-sm:gap-2", className)}
     >
       <img
         alt="Visuotinis Patriarchatas"
-        className="institutional-marks__patriarchate"
+        className="size-[52px] shrink-0 object-contain max-sm:size-10"
         height="64"
         src="/assets/brand/source/ecumenical-patriarchate-emblem.svg"
         width="64"
       />
       <span
         aria-label="Visuotinio patriarchato egzarchatas Lietuvoje"
-        className="institutional-marks__exarchate"
+        className={cn(
+          "grid w-[133px] grid-cols-[36.86%_59.62%] items-center gap-[3.52%] text-primary max-sm:w-[103px]",
+          tone === "reverse" && "text-white"
+        )}
         role="img"
       >
         <img
           alt=""
-          className="institutional-marks__exarchate-crest"
+          className="h-auto w-full"
           height="408"
           src="/assets/brand/production/exarchate-crest-client.png"
           width="387"
         />
         <span
           aria-hidden="true"
-          className="institutional-marks__exarchate-wordmark"
+          className="grid whitespace-nowrap font-bold font-sans text-[10.32px] leading-[1.19] tracking-normal [-webkit-text-stroke:0.012em_currentcolor] max-sm:text-[8px]"
         >
           <span>VISUOTINIO</span>
           <span>PATRIARCHATO</span>

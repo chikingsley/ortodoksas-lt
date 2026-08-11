@@ -1,5 +1,6 @@
 ---
 import EditorialImage from "../../components/media/EditorialImage.astro";
+import ArticleBody from "../../components/publication/ArticleBody.astro";
 import { getSectionLabel } from "@ortodoksas-lt/content/sections";
 import SiteLayout from "../../layouts/SiteLayout.astro";
 import { getTranslationDisplayState } from "@ortodoksas-lt/content/translation";
@@ -51,22 +52,22 @@ const articleSchema = page.kind === "article" ? {
   locale={locale}
   type={page.kind === "article" ? "article" : "website"}
 >
-  <main class="article-page localized-article">
-    <article class="reading-column">
-      <header class="article-header">
-        <div class="eyebrow">{page.kind === "page" ? copy.edition : getSectionLabel(page.section, locale)}</div>
-        <h1>{page.title}</h1>
-        {page.published ? <div class="article-byline"><time datetime={page.published}>{formatDate(page.published, locale)}</time></div> : null}
+  <main>
+    <article class="mx-auto mb-[70px] mt-7 w-[min(790px,calc(100%-48px))] max-sm:mt-5 max-sm:w-[min(790px,calc(100%-28px))]">
+      <header class="text-center">
+        <div class="text-[10px] font-bold uppercase tracking-[0.08em] text-primary">{page.kind === "page" ? copy.edition : getSectionLabel(page.section, locale)}</div>
+        <h1 class="mx-auto mb-5 mt-3 text-balance font-serif text-[clamp(40px,6vw,68px)] font-bold leading-[0.99] tracking-[-0.03em] [overflow-wrap:anywhere] max-sm:text-[clamp(35px,11vw,50px)]">{page.title}</h1>
+        {page.published ? <div class="flex justify-center gap-[18px] text-[10px] uppercase tracking-[0.06em] text-muted-foreground max-sm:flex-col max-sm:gap-[7px]"><time datetime={page.published}>{formatDate(page.published, locale)}</time></div> : null}
         {original && translationState !== "original" ? (
-          <p class="translation-disclosure">
+          <p class="mb-7 mt-3 flex justify-center gap-1.5 text-xs leading-[1.4] text-muted-foreground">
             {translationDisclosure}
-            <a href={original.path}>{copy.viewOriginal}</a>
+            <a class="font-bold text-primary" href={original.path}>{copy.viewOriginal}</a>
           </p>
         ) : null}
-        {page.hero && !bodyOwnsLeadImage ? <EditorialImage class="article-hero" priority src={page.hero} /> : null}
+        {page.hero && !bodyOwnsLeadImage ? <EditorialImage class="mx-[50%] mb-[46px] mt-[38px] block aspect-[1.72] w-[min(1080px,calc(100vw-48px))] -translate-x-1/2 overflow-hidden bg-muted max-sm:-mx-3.5 max-sm:mb-[34px] max-sm:mt-7 max-sm:w-[calc(100%+28px)] max-sm:translate-x-0 [&_img]:h-full [&_img]:w-full [&_img]:object-cover" priority src={page.hero} /> : null}
       </header>
-      <div class="prose" set:html={bodyHtml}></div>
-      {page.labels.length > 0 ? <footer class="article-tags">{page.labels.map((label) => <span>{label}</span>)}</footer> : null}
+      <ArticleBody html={bodyHtml} />
+      {page.labels.length > 0 ? <footer class="mt-11 flex flex-wrap gap-2 border-t border-border pt-6">{page.labels.map((label) => <span class="rounded-full border border-border px-[11px] py-[7px] text-[10px] text-muted-foreground">{label}</span>)}</footer> : null}
     </article>
   </main>
 </SiteLayout>

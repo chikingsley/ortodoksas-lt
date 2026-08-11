@@ -13,7 +13,7 @@ const entries = articles.filter((entry) => entry.section === section);
 ---
 
 <SiteLayout title={`${section} · ortodoksas.lt`} description={`Atkurtos ortodoksas.lt publikacijos skiltyje „${section}“.`} canonicalPath={`/tema/${sectionSlug(section)}`}>
-  <main class="site-width category-page">
+  <main class="mx-auto w-[min(1200px,calc(100%-64px))] pb-[70px] max-sm:w-[min(1200px,calc(100%-32px))]">
     <PageIntro description={`${entries.length.toLocaleString("lt-LT")} atkurtos publikacijos iš viešojo ortodoksas.lt archyvo.`} eyebrow="Publikacijų skiltis" title={section} />
     <ArchiveList entries={entries} fallbackSection={section} />
   </main>

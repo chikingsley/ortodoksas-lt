@@ -9,8 +9,8 @@ interface Props {
 const { compact = false, description, eyebrow, title } = Astro.props;
 ---
 
-<header class:list={["page-intro", { compact }]}>
-  <div class="eyebrow">{eyebrow}</div>
-  <h1>{title}</h1>
-  <p>{description}</p>
+<header class:list={["max-w-[800px] pt-7 max-sm:pt-5", compact ? "pb-[22px] max-sm:pb-6" : "pb-8 max-sm:pb-6"]}>
+  <div class="text-[10px] font-bold uppercase tracking-[0.08em] text-primary">{eyebrow}</div>
+  <h1 class="my-[10px] mb-3.5 font-serif text-[clamp(42px,6vw,66px)] font-bold leading-[0.98] tracking-[-0.025em]">{title}</h1>
+  <p class="m-0 font-serif text-xl leading-[1.45] text-muted-foreground">{description}</p>
 </header>

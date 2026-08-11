@@ -4,7 +4,6 @@ import type { SiteLocale } from "../../i18n/config";
 import { getLocalizedCounterpart } from "../../lib/publication";
 import { getContactNavigation, getPrimaryNavigation } from "../../navigation/publication";
 import InstitutionalMarks from "./institutional-marks";
-import "./site-footer.css";
 
 interface Props {
   locale?: SiteLocale;
@@ -22,24 +21,24 @@ const contactItems = getContactNavigation(
 );
 ---
 
-<footer class="site-footer">
-  <div class="site-width footer-grid">
-    <div class="footer-identity">
-      <InstitutionalMarks className="footer-institutional-marks" tone="reverse" />
-      <div><div class="footer-brand">ortodoksas.lt</div><p>{copy.footerDescription}</p></div>
+<footer class="bg-[#004438] pt-12 text-[#d8e5e1]">
+  <div class="mx-auto grid w-[min(1200px,calc(100%-64px))] grid-cols-[2fr_1fr_1fr] gap-16 pb-12 max-lg:grid-cols-2 max-lg:gap-x-6 max-lg:gap-y-8 max-sm:w-[min(1200px,calc(100%-32px))]">
+    <div class="max-lg:col-span-full">
+      <InstitutionalMarks className="mb-4" tone="reverse" />
+      <div><div class="font-serif text-[30px] font-bold text-white">ortodoksas.lt</div><p class="max-w-[34ch] font-serif text-[17px] leading-normal text-[#bad0ca]">{copy.footerDescription}</p></div>
     </div>
     <div>
-      <h2>{copy.navigation}</h2>
+      <h2 class="mb-4 text-[10px] uppercase tracking-[0.14em] text-[#face6b]">{copy.navigation}</h2>
       {navigationItems.map((item) => (
-        <a href={item.href} hreflang={item.targetLocale}>{item.label}</a>
+        <a class="mb-2 block font-serif text-base hover:text-[#face6b]" href={item.href} hreflang={item.targetLocale}>{item.label}</a>
       ))}
     </div>
     <div>
-      <h2>{copy.contact}</h2>
+      <h2 class="mb-4 text-[10px] uppercase tracking-[0.14em] text-[#face6b]">{copy.contact}</h2>
       {contactItems.map((item) => (
-        <a href={item.href} hreflang={item.targetLocale}>{item.label}</a>
+        <a class="mb-2 block font-serif text-base hover:text-[#face6b]" href={item.href} hreflang={item.targetLocale}>{item.label}</a>
       ))}
     </div>
   </div>
-  <div class="site-width footer-base"><span>© 2026 ortodoksas.lt</span><span>{copy.institution}</span></div>
+  <div class="mx-auto flex w-[min(1200px,calc(100%-64px))] justify-between gap-5 border-t border-white/20 py-4 text-[9px] uppercase tracking-[0.1em] text-[#8fb0a8] max-sm:w-[min(1200px,calc(100%-32px))]"><span>© 2026 ortodoksas.lt</span><span>{copy.institution}</span></div>
 </footer>

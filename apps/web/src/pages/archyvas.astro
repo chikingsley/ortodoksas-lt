@@ -10,11 +10,11 @@ const labels = [...new Set(articles.flatMap((entry) => entry.labels).filter(Bool
 ---
 
 <SiteLayout title="Archyvas · ortodoksas.lt" description="Visas atkurtas ortodoksas.lt straipsnių, pamokslų ir Bažnyčios gyvenimo archyvas." canonicalPath="/archyvas">
-  <main class="site-width archive-page">
+  <main class="mx-auto w-[min(1200px,calc(100%-64px))] max-sm:w-[min(1200px,calc(100%-32px))]">
     <PageIntro description={`${articles.length.toLocaleString("lt-LT")} atkurti straipsniai, pamokslai, paskaitos ir Bažnyčios gyvenimo naujienos.`} eyebrow="2012–2026" title="Publikacijų archyvas" />
     <ArchiveControls client:load labels={labels} sections={sections} years={years} />
-    <p class="results-line"><strong id="archive-count">{articles.length.toLocaleString("lt-LT")}</strong> rezultatai</p>
+    <p class="mb-[11px] mt-6 text-xs uppercase tracking-[0.06em] text-muted-foreground"><strong class="whitespace-nowrap tabular-nums text-primary" id="archive-count">{articles.length.toLocaleString("lt-LT")}</strong> rezultatai</p>
     <ArchiveList entries={articles} id="archive-list" searchable />
-    <noscript><p class="archive-empty">Įjungus JavaScript filtrai neveikia, tačiau visas archyvas pateiktas šiame puslapyje.</p></noscript>
+    <noscript><p class="py-[38px] font-serif text-[21px] text-muted-foreground">Įjungus JavaScript filtrai neveikia, tačiau visas archyvas pateiktas šiame puslapyje.</p></noscript>
   </main>
 </SiteLayout>

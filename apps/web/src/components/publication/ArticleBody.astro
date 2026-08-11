@@ -1,0 +1,12 @@
+---
+interface Props {
+  html: string;
+}
+
+const { html } = Astro.props;
+---
+
+<div
+  class="font-serif text-xl leading-[1.72] text-[#2d312e] max-sm:text-lg max-sm:leading-[1.66] [&_:first-child]:mt-0 [&_a]:text-primary [&_a]:underline [&_a]:decoration-primary/35 [&_a]:underline-offset-[3px] hover:[&_a]:decoration-primary [&_blockquote]:my-8 [&_blockquote]:border-l [&_blockquote]:border-primary [&_blockquote]:py-[3px] [&_blockquote]:pl-6 [&_blockquote]:text-2xl [&_blockquote]:italic [&_blockquote]:text-[#3e544e] [&_div:empty]:hidden [&_figure]:my-8 [&_h2]:mb-[0.55em] [&_h2]:mt-[1.65em] [&_h2]:font-serif [&_h2]:text-[34px] [&_h2]:leading-[1.1] [&_h2]:text-foreground [&_h3]:mb-[0.5em] [&_h3]:mt-[1.5em] [&_h3]:font-serif [&_h3]:text-[27px] [&_h3]:leading-[1.1] [&_h3]:text-foreground [&_h4]:mb-[0.45em] [&_h4]:mt-[1.4em] [&_h4]:font-serif [&_h4]:text-[22px] [&_h4]:leading-[1.1] [&_h4]:text-foreground [&_hr]:my-10 [&_hr]:h-px [&_hr]:border-0 [&_hr]:bg-border [&_img]:mx-auto [&_img]:my-8 [&_img]:h-auto [&_img]:max-w-full [&_li]:mb-[0.45em] [&_ol]:my-5 [&_ol]:pl-[1.3em] [&_p]:mb-[1.25em] [&_p]:max-w-full [&_p:empty]:hidden [&_table]:my-8 [&_table]:block [&_table]:w-full [&_table]:overflow-x-auto [&_table]:border-collapse [&_table]:font-sans [&_table]:text-sm [&_td]:border [&_td]:border-border [&_td]:px-3 [&_td]:py-2.5 [&_td]:text-left [&_th]:border [&_th]:border-border [&_th]:px-3 [&_th]:py-2.5 [&_th]:text-left [&_ul]:my-5 [&_ul]:pl-[1.3em] [&_[data-youtube-video]]:my-8 [&_[data-youtube-video]]:aspect-video [&_[data-youtube-video]]:w-full [&_[data-youtube-video]_iframe]:h-full [&_[data-youtube-video]_iframe]:w-full [&_[data-youtube-video]_iframe]:border-0 [&_.archive-link-unavailable-label]:ml-[0.35em] [&_.archive-link-unavailable-label]:text-[0.85em] [&_.archive-link-unavailable-label]:italic [&_.archive-link-unavailable-label]:text-muted-foreground"
+  set:html={html}
+/>

@@ -20,18 +20,18 @@ const {
 const localized = locale !== "lt";
 ---
 
-<div class:list={["archive-list", { "localized-list": localized }]} id={id}>
+<div class="border-t-2 border-primary" id={id}>
   {entries.map((entry) => {
     const href = localized ? `/${locale}${entry.path}` : entry.path;
     const label = entry.section || entry.labels[0] || fallbackSection;
-    return <article
+    return <article class="grid grid-cols-[minmax(0,1fr)_36px] items-start gap-6 border-b border-border px-[5px] py-6 max-sm:grid-cols-[minmax(0,1fr)_32px] max-sm:gap-3.5"
       data-section={searchable ? entry.section : undefined}
       data-labels={searchable ? entry.labels.map(normalizeText).join("||") : undefined}
       data-search={searchable ? normalizeText(`${entry.title} ${entry.description} ${entry.labels.join(" ")}`) : undefined}
       data-year={searchable ? entry.published?.slice(0, 4) ?? "" : undefined}
     >
-      <div><span>{label}</span><h2><a href={href}>{entry.title}</a></h2><time datetime={entry.published ?? undefined}>{formatDate(entry.published, locale)}</time><p>{entry.description}</p></div>
-      <a aria-label={`Skaityti: ${entry.title}`} href={href}>→</a>
+      <div class="min-w-0"><span class="text-[9px] font-bold uppercase tracking-[0.1em] text-primary">{label}</span><h2 class="mb-[7px] mt-[5px] font-serif text-[25px] font-bold leading-[1.08]"><a class="[overflow-wrap:anywhere] hover:text-primary" href={href}>{entry.title}</a></h2><time class="mt-[9px] block text-[10px] uppercase leading-[1.4] text-muted-foreground" datetime={entry.published ?? undefined}>{formatDate(entry.published, locale)}</time><p class="m-0 line-clamp-2 font-serif text-[15px] leading-[1.4] text-muted-foreground max-sm:hidden">{entry.description}</p></div>
+      <a class="grid size-[34px] place-items-center rounded-full border border-border text-primary hover:bg-primary hover:text-white [&_svg]:w-[15px]" aria-label={`Skaityti: ${entry.title}`} href={href}>→</a>
     </article>;
   })}
 </div>

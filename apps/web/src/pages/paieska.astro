@@ -7,26 +7,26 @@ const entries = catalog.filter((entry) => entry.kind === "article");
 ---
 
 <SiteLayout title="Paieška · ortodoksas.lt" description="Ieškokite atkurtame ortodoksas.lt publikacijų archyve." canonicalPath="/paieska">
-  <main class="site-width search-page">
+  <main class="mx-auto min-h-[65vh] w-[min(1200px,calc(100%-64px))] pb-[70px] max-sm:w-[min(1200px,calc(100%-32px))]">
     <PageIntro compact description="Paieška veikia šiame statiniame archyvo puslapyje ir nereikalauja serverio." eyebrow="Archyvo paieška" title="Ko ieškote?" />
-    <form class="search-form" id="site-search" action="/paieska" method="get">
+    <form class="grid max-w-[760px] grid-cols-[24px_minmax(0,1fr)_auto] items-center gap-2.5 border border-border bg-white py-2.5 pl-[18px] pr-2.5 text-foreground" id="site-search" action="/paieska" method="get">
       <span aria-hidden="true">⌕</span>
       <label class="sr-only" for="search-query">Ieškoti</label>
-      <input id="search-query" name="q" placeholder="Įveskite žodį ar frazę" type="search" />
-      <button type="submit">Ieškoti</button>
+      <input class="min-h-[46px] w-full border-0 bg-transparent text-foreground outline-none" id="search-query" name="q" placeholder="Įveskite žodį ar frazę" type="search" />
+      <button class="h-9 bg-primary px-4 text-sm font-medium text-white" type="submit">Ieškoti</button>
     </form>
-    <p class="results-line"><strong id="search-count">{entries.length.toLocaleString("lt-LT")}</strong> rezultatai</p>
-    <div class="search-results" id="search-results">
+    <p class="mb-[11px] mt-6 text-xs uppercase tracking-[0.06em] text-muted-foreground"><strong class="whitespace-nowrap tabular-nums text-primary" id="search-count">{entries.length.toLocaleString("lt-LT")}</strong> rezultatai</p>
+    <div class="grid grid-cols-2 gap-x-11 border-t-2 border-primary max-sm:grid-cols-1" id="search-results">
       {entries.map((entry) => (
-        <article data-search={normalizeText(`${entry.title} ${entry.description} ${entry.labels.join(" ")}`)}>
-          <div class="eyebrow">{entry.section}</div>
-          <h2><a href={entry.path}>{entry.title}</a></h2>
-          <p>{entry.description}</p>
-          <time datetime={entry.published ?? undefined}>{formatDate(entry.published)}</time>
+        <article class="border-b border-border py-6" data-search={normalizeText(`${entry.title} ${entry.description} ${entry.labels.join(" ")}`)}>
+          <div class="text-[10px] font-bold uppercase tracking-[0.08em] text-primary">{entry.section}</div>
+          <h2 class="mb-[9px] mt-1.5 font-serif text-[25px] font-bold leading-[1.08]"><a class="hover:text-primary" href={entry.path}>{entry.title}</a></h2>
+          <p class="mb-2.5 font-serif text-[15px] leading-[1.4] text-muted-foreground">{entry.description}</p>
+          <time class="text-[10px] text-muted-foreground" datetime={entry.published ?? undefined}>{formatDate(entry.published)}</time>
         </article>
       ))}
     </div>
-    <noscript><p class="archive-empty">Įjungus JavaScript visi atkurtų publikacijų įrašai pateikiami šiame puslapyje.</p></noscript>
+    <noscript><p class="py-[38px] font-serif text-[21px] text-muted-foreground">Įjungus JavaScript visi atkurtų publikacijų įrašai pateikiami šiame puslapyje.</p></noscript>
   </main>
 </SiteLayout>
 

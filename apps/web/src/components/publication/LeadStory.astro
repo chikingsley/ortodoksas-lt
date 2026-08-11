@@ -9,11 +9,11 @@ interface Props {
 const { entry } = Astro.props;
 ---
 
-<article class="lead-story">
-  {entry.hero ? <EditorialImage class="lead-image" href={entry.path} label={`Atverti: ${entry.title}`} priority src={entry.hero} /> : null}
-  <div class="eyebrow">{entry.section}</div>
-  <h1><a href={entry.path}>{entry.title}</a></h1>
-  <p>{entry.description}</p>
-  {entry.published ? <div class="story-meta"><time datetime={entry.published}>{formatDate(entry.published)}</time></div> : null}
-  <a class="story-link" href={entry.path}>Skaityti daugiau <span aria-hidden="true">→</span></a>
+<article class="group">
+  {entry.hero ? <EditorialImage class="mb-[17px] block aspect-[1.65] overflow-hidden bg-muted max-lg:aspect-[1.8] max-sm:mb-4 max-sm:aspect-[1.35] [&_img]:h-full [&_img]:w-full [&_img]:object-cover [&_img]:transition-transform [&_img]:duration-500 group-hover:[&_img]:scale-[1.02]" href={entry.path} label={`Atverti: ${entry.title}`} priority src={entry.hero} /> : null}
+  <div class="text-[10px] font-bold uppercase tracking-[0.08em] text-primary max-sm:mx-3.5">{entry.section}</div>
+  <h1 class="mb-[11px] mt-1.5 max-w-[22ch] text-balance font-serif text-[clamp(32px,3vw,40px)] font-bold leading-[1.02] tracking-[-0.028em] max-sm:mx-3.5 max-sm:max-w-none max-sm:text-[clamp(29px,8vw,39px)]"><a class="hover:text-primary" href={entry.path}>{entry.title}</a></h1>
+  <p class="mb-3.5 max-w-[70ch] font-serif text-base leading-normal text-muted-foreground max-sm:mx-3.5 max-sm:text-[15px]">{entry.description}</p>
+  {entry.published ? <div class="mt-2 text-[9px] font-bold uppercase tracking-[0.05em] text-muted-foreground max-sm:mx-3.5"><time datetime={entry.published}>{formatDate(entry.published)}</time></div> : null}
+  <a class="inline-flex items-center gap-[7px] text-[11px] font-bold text-primary max-sm:mx-3.5" href={entry.path}>Skaityti daugiau <span aria-hidden="true">→</span></a>
 </article>
