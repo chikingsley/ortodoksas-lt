@@ -2,9 +2,14 @@
 import Homepage from "../components/home/Homepage.astro";
 import SiteLayout from "../layouts/SiteLayout.astro";
 import { buildHomepageModel } from "../lib/homepage";
-import { articles, catalog, sections } from "../lib/publication";
+import { getArticles, getCatalog, getSections } from "../lib/publication-repository";
 
 const pageDescription = "Viskas apie Ortodoksų Bažnyčią Lietuvoje ir pasaulyje, taip pat apie ortodoksų tikėjimą ir gyvenimą.";
+const [articles, catalog, sections] = await Promise.all([
+  getArticles(),
+  getCatalog(),
+  getSections(),
+]);
 const model = buildHomepageModel({ articles, catalog, sections });
 ---
 

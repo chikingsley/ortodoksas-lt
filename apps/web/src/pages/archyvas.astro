@@ -3,8 +3,9 @@ import ArchiveList from "../components/archive/ArchiveList.astro";
 import { ArchiveControls } from "../components/archive/archive-controls";
 import PageIntro from "../components/publication/PageIntro.astro";
 import SiteLayout from "../layouts/SiteLayout.astro";
-import { articles, sections } from "../lib/publication";
+import { getArticles, getSections } from "../lib/publication-repository";
 
+const [articles, sections] = await Promise.all([getArticles(), getSections()]);
 const years = [...new Set(articles.map((entry) => entry.published?.slice(0, 4)).filter((year): year is string => Boolean(year)))].sort((a, b) => b.localeCompare(a));
 const labels = [...new Set(articles.flatMap((entry) => entry.labels).filter(Boolean))].sort((a, b) => a.localeCompare(b, "lt"));
 ---

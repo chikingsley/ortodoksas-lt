@@ -14,9 +14,6 @@
     "fix": "ultracite fix",
     "lint": "ultracite check",
     "preview": "pnpm run build && vite preview",
-    "studio:down": "./scripts/studio-preview.sh down",
-    "studio:status": "./scripts/studio-preview.sh status",
-    "studio:up": "./scripts/studio-preview.sh up",
     "test": "vitest run",
     "test:watch": "vitest"
   },

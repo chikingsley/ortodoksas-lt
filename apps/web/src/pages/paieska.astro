@@ -1,8 +1,10 @@
 ---
 import PageIntro from "../components/publication/PageIntro.astro";
 import SiteLayout from "../layouts/SiteLayout.astro";
-import { catalog, formatDate, normalizeText } from "../lib/publication";
+import { formatDate, normalizeText } from "../lib/publication";
+import { getCatalog } from "../lib/publication-repository";
 
+const catalog = await getCatalog();
 const entries = catalog.filter((entry) => entry.kind === "article");
 ---
 

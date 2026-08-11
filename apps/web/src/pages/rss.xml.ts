@@ -1,8 +1,8 @@
-import { absoluteUrl, articles, escapeXml } from "../lib/publication";
+import { absoluteUrl, escapeXml } from "../lib/publication";
+import { getArticles } from "../lib/publication-repository";
 
-export const prerender = true;
-
-export function GET() {
+export async function GET() {
+  const articles = await getArticles();
   const items = articles
     .filter((entry) => entry.published)
     .slice(0, 50)

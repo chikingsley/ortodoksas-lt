@@ -1,7 +1,7 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "ortodoksas-lt-web",
-  "main": "./worker/index.ts",
+  "main": "@astrojs/cloudflare/entrypoints/server",
   "compatibility_date": "2026-08-05",
   "compatibility_flags": ["nodejs_compat"],
   "routes": [
@@ -15,28 +15,7 @@
   },
   "assets": {
     "binding": "ASSETS",
-    "directory": "./dist",
-    "html_handling": "none",
-    "not_found_handling": "404-page",
-    "run_worker_first": [
-      "/api/*",
-      "/media/files/*",
-      "/",
-      "/en",
-      "/en/*",
-      "/ru",
-      "/ru/*",
-      "/uk",
-      "/uk/*",
-      "/be",
-      "/be/*",
-      "/archyvas",
-      "/archyvas/",
-      "/paieska",
-      "/paieska/",
-      "/tema/*",
-      "/404"
-    ]
+    "directory": "./dist"
   },
   "r2_buckets": [
     {

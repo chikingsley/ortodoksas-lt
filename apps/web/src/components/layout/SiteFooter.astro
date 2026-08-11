@@ -1,7 +1,7 @@
 ---
 import { ui } from "../../i18n/ui";
 import type { SiteLocale } from "../../i18n/config";
-import { getLocalizedCounterpart } from "../../lib/publication";
+import { getLocalizedCounterpart } from "../../lib/publication-repository";
 import { getContactNavigation, getPrimaryNavigation } from "../../navigation/publication";
 import InstitutionalMarks from "./institutional-marks";
 
@@ -11,13 +11,31 @@ interface Props {
 
 const { locale = "lt" } = Astro.props;
 const copy = ui[locale];
+const paths = [
+  "/p/bendruomenes_21.html",
+  "/p/dvasininkai.html",
+  "/p/biblioteka.html",
+  "/p/kalendorius.html",
+  "/p/kontaktai_30.html",
+  "/p/paremti.html",
+];
+const localizedPaths = new Map(
+  locale === "lt"
+    ? []
+    : await Promise.all(
+        paths.map(async (path) => [
+          path,
+          (await getLocalizedCounterpart(locale, path))?.path,
+        ] as const)
+      )
+);
 const navigationItems = getPrimaryNavigation(
   locale,
-  (path) => locale === "lt" ? undefined : getLocalizedCounterpart(locale, path)?.path
+  (path) => localizedPaths.get(path)
 );
 const contactItems = getContactNavigation(
   locale,
-  (path) => locale === "lt" ? undefined : getLocalizedCounterpart(locale, path)?.path
+  (path) => localizedPaths.get(path)
 );
 ---
 

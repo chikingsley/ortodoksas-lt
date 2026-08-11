@@ -25,7 +25,7 @@ const tiptapMarkSchema = z.looseObject({
   type: z.string().min(1),
 });
 
-const tiptapNodeSchema: z.ZodType<JSONContent> = z.lazy(() =>
+const tiptapNodeSchema = z.lazy(() =>
   z.looseObject({
     attrs: z.record(z.string(), z.unknown()).optional(),
     content: z.array(tiptapNodeSchema).optional(),
@@ -33,7 +33,7 @@ const tiptapNodeSchema: z.ZodType<JSONContent> = z.lazy(() =>
     text: z.string().optional(),
     type: z.string().min(1),
   })
-);
+) as z.ZodType<JSONContent>;
 
 export const tiptapDocumentSchema = tiptapNodeSchema.refine(
   (document): document is JSONContent & { type: "doc" } =>

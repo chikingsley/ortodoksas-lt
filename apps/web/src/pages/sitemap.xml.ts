@@ -1,19 +1,20 @@
 import {
   absoluteUrl,
-  articles,
   escapeXml,
-  getLocalizedPages,
-  pages,
   sectionSlug,
-  sections,
 } from "../lib/publication";
 import { localeShells } from "../i18n/config";
+import { getArticles, getCatalog, getSections } from "../lib/publication-repository";
 
-export const prerender = true;
-
-export function GET() {
-  const localizedEntries = localeShells.flatMap((locale) =>
-    getLocalizedPages(locale).map((page) => ({ locale, page }))
+export async function GET() {
+  const [pages, articles, sections, ...localizedCatalogs] = await Promise.all([
+    getCatalog(),
+    getArticles(),
+    getSections(),
+    ...localeShells.map((locale) => getCatalog(locale)),
+  ]);
+  const localizedEntries = localeShells.flatMap((locale, index) =>
+    (localizedCatalogs[index] ?? []).map((page) => ({ locale, page }))
   );
   const paths = [
     "/",

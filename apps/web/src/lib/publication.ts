@@ -1,25 +1,13 @@
-import { readdirSync, readFileSync } from "node:fs";
-import { join, resolve } from "node:path";
-import { getSectionOptions } from "@ortodoksas-lt/content/sections";
 import type {
   TranslationKind,
   TranslationReviewStatus,
 } from "@ortodoksas-lt/content/translation";
 import { siteOrigin } from "../config/site";
-import {
-  type Locale,
-  localeMetadata,
-  localeShells,
-  type SiteLocale,
-} from "../i18n/config";
+import { localeMetadata, type SiteLocale } from "../i18n/config";
 import { ui } from "../i18n/ui";
 
-import { localizeMediaHtml, localizeMediaUrl } from "./media";
-
 export interface CatalogEntry {
-  capture?: string;
   description: string;
-  file?: string;
   hero: string | null;
   heroAlt: string;
   heroMediaId: string | null;
@@ -30,7 +18,6 @@ export interface CatalogEntry {
   path: string;
   published: string | null;
   section: string;
-  source?: string;
   title: string;
   translationGroupId?: string;
   translationKind?: TranslationKind;
@@ -41,17 +28,14 @@ export interface ContentPage extends CatalogEntry {
   html: string;
 }
 
-export interface LocalizedPage extends CatalogEntry {
-  html: string;
-  locale: Locale;
-}
-
+export type LocalizedPage = ContentPage & { locale: Exclude<SiteLocale, "lt"> };
 export type LocalizedArticle = LocalizedPage & { kind: "article" };
 
-const contentRoot = resolve(process.cwd(), ".canonical-content");
-const pagesDirectory = resolve(contentRoot, "pages");
-const localesDirectory = resolve(contentRoot, "locales");
-const safeLocaleFilePattern = /^pages\/[A-Za-z0-9._-]+\.json$/;
+export interface LocaleDestination {
+  hasCounterpart: boolean;
+  href: string;
+}
+
 const imageSourcePattern = /\bsrc\s*=\s*["']([^"']+)["']/i;
 const firstMediaTablePattern = /<table\b[\s\S]*?<img\b[^>]*>[\s\S]*?<\/table>/i;
 const standaloneStrongHeadingPattern =
@@ -62,257 +46,6 @@ const youtubeEmbedSourcePattern =
 const leadFigurePattern = /<figure\b[^>]*\bdata-figure-role=["']lead["']/i;
 const figurePattern = /<figure\b[^>]*>[\s\S]*?<\/figure>/gi;
 const figureMediaIdPattern = /\bdata-media-id=(?:"([^"]+)"|'([^']+)')/i;
-const contentFiles = readdirSync(pagesDirectory, { encoding: "utf8" }).filter(
-  (file) => file.endsWith(".json")
-);
-
-function readJson<T>(base: string, file: string): T {
-  const path = join(base, file);
-  try {
-    return JSON.parse(readFileSync(path, "utf8")) as T;
-  } catch (error) {
-    throw new Error(`Unable to read publication JSON: ${path}`, {
-      cause: error,
-    });
-  }
-}
-
-const canonicalPages = contentFiles
-  .map((file) => readJson<ContentPage>(pagesDirectory, file))
-  .filter((page) => page.path !== "/")
-  .map((page) => ({
-    ...page,
-    hero: localizeMediaUrl(page.hero, page.path),
-    html: localizeMediaHtml(page.html),
-  }));
-
-const catalogValue = readJson<CatalogEntry[]>(contentRoot, "catalog.json");
-const canonicalCatalog = catalogValue.map((entry) => ({
-  ...entry,
-  hero: localizeMediaUrl(entry.hero, entry.path),
-}));
-
-function assertUniquePaths(entries: CatalogEntry[], label: string) {
-  const paths = new Set<string>();
-  for (const entry of entries) {
-    if (paths.has(entry.path)) {
-      throw new Error(`Duplicate ${label} path: ${entry.path}`);
-    }
-    paths.add(entry.path);
-  }
-  return entries;
-}
-
-export const pages = assertUniquePaths(
-  canonicalPages,
-  "Lithuanian publication"
-) as ContentPage[];
-
-export const catalog = assertUniquePaths(
-  canonicalCatalog,
-  "Lithuanian catalog"
-);
-
-export const articles = catalog
-  .filter((entry) => entry.kind === "article")
-  .sort((a, b) => {
-    const left = a.published ? Date.parse(a.published) : 0;
-    const right = b.published ? Date.parse(b.published) : 0;
-    return right - left;
-  });
-
-export const sections = getSectionOptions(
-  articles.map((entry) => entry.section)
-);
-
-function isCanonicalLocaleCatalogEntry(
-  value: unknown
-): value is CatalogEntry & { file: string; translationGroupId: string } {
-  if (!value || typeof value !== "object") {
-    return false;
-  }
-  const entry = value as Partial<CatalogEntry>;
-  return (
-    (entry.kind === "article" || entry.kind === "page") &&
-    typeof entry.path === "string" &&
-    entry.path.startsWith("/") &&
-    typeof entry.file === "string" &&
-    typeof entry.title === "string" &&
-    typeof entry.description === "string" &&
-    typeof entry.translationGroupId === "string" &&
-    Array.isArray(entry.labels)
-  );
-}
-
-function isSafeLocaleFile(file: string) {
-  return safeLocaleFilePattern.test(file);
-}
-
-function loadLocalizedPages(locale: Locale): LocalizedPage[] {
-  const localeCatalogValue = readJson<unknown>(
-    localesDirectory,
-    `${locale}/catalog.json`
-  );
-  if (!Array.isArray(localeCatalogValue)) {
-    throw new Error(`Invalid ${locale} publication catalog: expected an array`);
-  }
-  return localeCatalogValue
-    .map((rawEntry, index) => {
-      if (!isCanonicalLocaleCatalogEntry(rawEntry)) {
-        throw new Error(`Invalid ${locale} catalog entry at index ${index}`);
-      }
-      if (!isSafeLocaleFile(rawEntry.file)) {
-        throw new Error(
-          `Unsafe ${locale} catalog file at index ${index}: ${rawEntry.file}`
-        );
-      }
-      const page = readJson<ContentPage>(
-        join(localesDirectory, locale),
-        rawEntry.file
-      );
-      if (page.path !== rawEntry.path || typeof page.html !== "string") {
-        throw new Error(
-          `Localized ${locale} page does not match catalog entry: ${rawEntry.path}`
-        );
-      }
-      return {
-        ...page,
-        hero: localizeMediaUrl(page.hero, page.path),
-        html: localizeMediaHtml(page.html),
-        locale,
-      };
-    })
-    .sort(
-      (a, b) => Date.parse(b.published ?? "") - Date.parse(a.published ?? "")
-    );
-}
-
-export const localizedPages = Object.fromEntries(
-  localeShells.map((locale) => [
-    locale,
-    assertUniquePaths(loadLocalizedPages(locale), `${locale} publication`).sort(
-      (a, b) => Date.parse(b.published ?? "") - Date.parse(a.published ?? "")
-    ),
-  ])
-) as Record<Locale, LocalizedPage[]>;
-
-export function getLocalizedArticles(locale: Locale) {
-  return localizedPages[locale].filter(
-    (page): page is LocalizedArticle => page.kind === "article"
-  );
-}
-
-export function getLocalizedPages(locale: Locale) {
-  return localizedPages[locale];
-}
-
-export function getLocalizedPage(locale: Locale, path: string) {
-  return localizedPages[locale].find((page) => page.path === path);
-}
-
-const localePrefixes = localeShells.map((locale) => `/${locale}`);
-
-function unprefixLocalePath(path: string) {
-  const normalized = path === "" ? "/" : path;
-  for (const prefix of localePrefixes) {
-    if (normalized === prefix) {
-      return "/";
-    }
-    if (normalized.startsWith(`${prefix}/`)) {
-      return normalized.slice(prefix.length) || "/";
-    }
-  }
-  return normalized;
-}
-
-function getCurrentArticle(currentPath: string) {
-  const path = unprefixLocalePath(currentPath);
-  const locale = localeShells.find(
-    (candidate) =>
-      currentPath === `/${candidate}` ||
-      currentPath.startsWith(`/${candidate}/`)
-  );
-  return locale ? getLocalizedPage(locale, path) : getPage(path);
-}
-
-function getCounterpart(locale: SiteLocale, currentPath: string) {
-  const path = unprefixLocalePath(currentPath);
-  const current = getCurrentArticle(currentPath);
-  const candidates = locale === "lt" ? pages : localizedPages[locale];
-  if (current?.translationGroupId) {
-    const grouped = candidates.find(
-      (entry) => entry.translationGroupId === current.translationGroupId
-    );
-    if (grouped) {
-      return grouped;
-    }
-  }
-  return candidates.find((entry) => entry.path === path);
-}
-
-export function getLithuanianCounterpart(currentPath: string) {
-  return getCounterpart("lt", currentPath);
-}
-
-export function getLocalizedCounterpart(locale: Locale, sourcePath: string) {
-  return getCounterpart(locale, sourcePath);
-}
-
-export interface LocaleDestination {
-  hasCounterpart: boolean;
-  href: string;
-}
-
-/** Return edition destinations and expose when a page-level counterpart is unavailable. */
-export function getLocaleLinks(currentPath: string) {
-  if (unprefixLocalePath(currentPath) === "/") {
-    return {
-      be: { hasCounterpart: true, href: "/be" },
-      en: { hasCounterpart: true, href: "/en" },
-      lt: { hasCounterpart: true, href: "/" },
-      ru: { hasCounterpart: true, href: "/ru" },
-      uk: { hasCounterpart: true, href: "/uk" },
-    };
-  }
-  const be = getCounterpart("be", currentPath);
-  const en = getCounterpart("en", currentPath);
-  const lt = getCounterpart("lt", currentPath);
-  const ru = getCounterpart("ru", currentPath);
-  const uk = getCounterpart("uk", currentPath);
-  return {
-    be: { hasCounterpart: Boolean(be), href: be ? `/be${be.path}` : "/be" },
-    en: { hasCounterpart: Boolean(en), href: en ? `/en${en.path}` : "/en" },
-    lt: { hasCounterpart: Boolean(lt), href: lt?.path ?? "/" },
-    ru: { hasCounterpart: Boolean(ru), href: ru ? `/ru${ru.path}` : "/ru" },
-    uk: { hasCounterpart: Boolean(uk), href: uk ? `/uk${uk.path}` : "/uk" },
-  } as const;
-}
-
-/** Return only equivalent pages suitable for reciprocal hreflang annotations. */
-export function getLocaleAlternates(currentPath: string) {
-  const path = unprefixLocalePath(currentPath);
-  const alternates: Array<{ href: string; locale: SiteLocale }> = [];
-  const lithuanian =
-    path === "/" ? undefined : getCounterpart("lt", currentPath);
-  if (path === "/" || lithuanian) {
-    alternates.push({ href: lithuanian?.path ?? "/", locale: "lt" });
-  }
-  for (const locale of localeShells) {
-    const counterpart =
-      path === "/" ? undefined : getCounterpart(locale, currentPath);
-    if (path === "/" || counterpart) {
-      alternates.push({
-        href: `/${locale}${counterpart?.path ?? ""}`,
-        locale,
-      });
-    }
-  }
-  return alternates;
-}
-
-export function getPage(path: string) {
-  return pages.find((page) => page.path === path);
-}
 
 export function formatDate(
   value: string | null | undefined,

@@ -7,11 +7,9 @@
     "build": "pnpm --filter @ortodoksas-lt/web build && pnpm --filter @ortodoksas-lt/studio build",
     "build:canonical": "pnpm --filter @ortodoksas-lt/web build",
     "check": "ultracite check && pnpm --filter @ortodoksas-lt/db check && pnpm --filter @ortodoksas-lt/web check && pnpm --filter @ortodoksas-lt/studio check",
-    "content:export": "pnpm --filter @ortodoksas-lt/web content:export",
     "dev:studio": "pnpm --filter @ortodoksas-lt/studio dev",
     "dev:web": "pnpm --filter @ortodoksas-lt/web dev",
-    "fix": "pnpm --recursive --if-present fix",
-    "media:check": "pnpm --filter @ortodoksas-lt/web media:check:source"
+    "fix": "pnpm --recursive --if-present fix"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.7",

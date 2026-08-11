@@ -2,13 +2,14 @@
 import ArchiveList from "../../components/archive/ArchiveList.astro";
 import PageIntro from "../../components/publication/PageIntro.astro";
 import SiteLayout from "../../layouts/SiteLayout.astro";
-import { articles, sectionSlug, sections } from "../../lib/publication";
+import { sectionSlug } from "../../lib/publication";
+import { getArticles, getSections } from "../../lib/publication-repository";
 
-export function getStaticPaths() {
-  return sections.map((section) => ({ params: { slug: sectionSlug(section) }, props: { section } }));
+const [articles, sections] = await Promise.all([getArticles(), getSections()]);
+const section = sections.find((candidate) => sectionSlug(candidate) === Astro.params.slug);
+if (!section) {
+  return Astro.rewrite("/404");
 }
-
-const { section } = Astro.props as { section: string };
 const entries = articles.filter((entry) => entry.section === section);
 ---
 

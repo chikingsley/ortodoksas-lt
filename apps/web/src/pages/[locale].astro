@@ -3,15 +3,14 @@ import ArchiveList from "../components/archive/ArchiveList.astro";
 import PageIntro from "../components/publication/PageIntro.astro";
 import { type Locale, localeMetadata, localeShells } from "../i18n/config";
 import SiteLayout from "../layouts/SiteLayout.astro";
-import { getLocalizedArticles } from "../lib/publication";
+import { getArticles } from "../lib/publication-repository";
 import { ui } from "../i18n/ui";
 
-export function getStaticPaths() {
-  return localeShells.map((locale) => ({ params: { locale }, props: { locale } }));
+const locale = Astro.params.locale as Locale;
+if (!localeShells.includes(locale)) {
+  return Astro.rewrite("/404");
 }
-
-const { locale } = Astro.props as { locale: Locale };
-const entries = getLocalizedArticles(locale);
+const entries = await getArticles(locale);
 const localizedCopy = ui[locale];
 const languageName = localeMetadata[locale].languageName;
 ---

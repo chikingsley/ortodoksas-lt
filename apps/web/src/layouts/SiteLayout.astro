@@ -4,7 +4,7 @@ import SiteFooter from "../components/layout/SiteFooter.astro";
 import SiteHeader from "../components/layout/SiteHeader.astro";
 import { siteOrigin } from "../config/site";
 import type { SiteLocale } from "../i18n/config";
-import { getLocaleAlternates } from "../lib/publication";
+import { getLocaleAlternates } from "../lib/publication-repository";
 
 interface AlternateLink {
   href: string;
@@ -39,7 +39,7 @@ const canonical = new URL(canonicalPath, siteUrl).toString();
 const socialImage = image?.startsWith("/") ? new URL(image, siteUrl).toString() : image;
 const resolvedAlternates = alternates.length
   ? alternates
-  : getLocaleAlternates(canonicalPath).map(({ href, locale }) => ({
+  : (await getLocaleAlternates(canonicalPath)).map(({ href, locale }) => ({
       href: new URL(href, siteUrl).toString(),
       hreflang: locale,
     }));
