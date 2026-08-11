@@ -77,6 +77,8 @@ import { useWindowSize } from "@/hooks/use-window-size";
 import { handleImageUpload, MAX_FILE_SIZE } from "@/lib/tiptap-utils";
 
 // --- Styles ---
+import "@/styles/_variables.scss";
+import "@/styles/_keyframe-animations.scss";
 import "@/components/tiptap-templates/simple/simple-editor.scss";
 
 const SEARCH_AND_REPLACE_SCROLL_OPTIONS: ScrollIntoViewOptions = {
@@ -226,10 +228,12 @@ export function SimpleEditor({
     editorProps: {
       attributes: {
         "aria-label": "Main content area, start typing to enter text.",
+        "aria-multiline": "true",
         autocapitalize: "off",
         autocomplete: "off",
         autocorrect: "off",
         class: "simple-editor",
+        role: "textbox",
       },
     },
     extensions: [

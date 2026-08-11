@@ -86,7 +86,7 @@ export const SectionSelect = ({
   }, []);
 
   return (
-    <div className="section-select">
+    <div>
       <Select
         onValueChange={selectSection}
         value={selectedSection?.value ?? value}
@@ -105,7 +105,7 @@ export const SectionSelect = ({
         </SelectContent>
       </Select>
       {adding ? (
-        <div className="section-select-add">
+        <div className="mt-[7px] grid grid-cols-[minmax(0,1fr)_auto_auto] gap-1.5">
           <Input
             aria-label="New section name"
             autoFocus
@@ -129,7 +129,7 @@ export const SectionSelect = ({
         </div>
       ) : (
         <Button
-          className="section-select-create"
+          className="mt-[5px]"
           onClick={startAdding}
           size="sm"
           type="button"
@@ -138,7 +138,9 @@ export const SectionSelect = ({
           Add new section
         </Button>
       )}
-      <small>Select a canonical section or add a deliberate new one.</small>
+      <small className="mt-1.5 block text-[11px] text-muted-foreground leading-snug">
+        Select a canonical section or add a deliberate new one.
+      </small>
     </div>
   );
 };

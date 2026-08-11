@@ -1,19 +1,5 @@
-import {
-  getSectionLabel,
-  getSectionOptions,
-  type SectionLocale,
-} from "@ortodoksas-lt/content/sections";
-import {
-  ArrowDown,
-  ChevronLeft,
-  ChevronRight,
-  CircleCheck,
-  FilePlus2,
-  Filter,
-  House,
-  Save,
-  Search,
-} from "lucide-react";
+import { getSectionOptions } from "@ortodoksas-lt/content/sections";
+import { FilePlus2, House } from "lucide-react";
 import {
   type ChangeEvent,
   useCallback,
@@ -23,11 +9,17 @@ import {
 } from "react";
 
 import { Button } from "@/components/ui/button";
-
-import { formatPublicationStatus } from "./format-publication-status";
-import { formatTranslationLabel } from "./translation-label";
+import {
+  fetchHomepagePlacements,
+  persistHomepagePlacements,
+} from "./inventory/homepage-api";
+import {
+  AUTOMATIC_PLACEMENT,
+  HomepageLayoutPanel,
+} from "./inventory/homepage-layout-panel";
+import { InventoryPanel } from "./inventory/inventory-panel";
 import type { CatalogArticle } from "./types";
-import { ValueCombobox, type ValueOption } from "./value-combobox";
+import type { ValueOption } from "./value-combobox";
 
 interface Props {
   articles: CatalogArticle[];
@@ -35,118 +27,11 @@ interface Props {
   onOpen: (article: CatalogArticle) => void;
 }
 
-interface ArticleRowProps {
-  article: CatalogArticle;
-  onOpen: (article: CatalogArticle) => void;
-}
-
 const PAGE_SIZE = 30;
-const SUPPORTING_SLOTS = ["first", "second", "third", "fourth"] as const;
-const AUTOMATIC_PLACEMENT = "automatic";
-const dateFormatter = new Intl.DateTimeFormat("en-US", {
-  day: "2-digit",
-  month: "short",
-  year: "numeric",
-});
-
-const ArticleRow = ({ article, onOpen }: ArticleRowProps) => {
-  const openArticle = useCallback(() => onOpen(article), [article, onOpen]);
-
-  return (
-    <tr>
-      <td className="checkbox-cell">
-        <input aria-label={`Select ${article.title}`} type="checkbox" />
-      </td>
-      <td>
-        <button className="article-link" onClick={openArticle} type="button">
-          <span className="article-thumb">
-            {article.hero ? (
-              <img alt="" height="43" src={article.hero} width="43" />
-            ) : (
-              <FilePlus2 />
-            )}
-          </span>
-          <span>
-            <strong>{article.title}</strong>
-            <small>{article.description || article.path}</small>
-          </span>
-        </button>
-      </td>
-      <td>
-        <div className="translation-identity">
-          <span className="language-code">
-            {article.language.toUpperCase()}
-          </span>
-          <span className="translation-badge">
-            {formatTranslationLabel(
-              article.translationKind,
-              article.translationReviewStatus
-            )}
-          </span>
-        </div>
-      </td>
-      <td>
-        <span className="section-label">
-          {article.section
-            ? getSectionLabel(
-                article.section,
-                article.language as SectionLocale
-              )
-            : "Other"}
-        </span>
-      </td>
-      <td>
-        <span className="status-label">
-          <CircleCheck /> {formatPublicationStatus(article.status)}
-        </span>
-      </td>
-      <td className="date-cell">
-        {article.published
-          ? dateFormatter.format(new Date(article.published))
-          : "—"}
-      </td>
-    </tr>
-  );
-};
-
-interface HomepagePlacementFieldProps {
-  label: string;
-  onChange: (position: number, value: string) => void;
-  options: ValueOption[];
-  position: number;
-  value: string;
-}
-
-const HomepagePlacementField = ({
-  label,
-  onChange,
-  options,
-  position,
-  value,
-}: HomepagePlacementFieldProps) => {
-  const inputId = `homepage-supporting-${position}`;
-  const updatePlacement = useCallback(
-    (nextValue: string) => onChange(position, nextValue),
-    [onChange, position]
-  );
-
-  return (
-    <label htmlFor={inputId}>
-      {label}
-      <ValueCombobox
-        ariaLabel={label}
-        id={inputId}
-        onChange={updatePlacement}
-        options={options}
-        value={value || AUTOMATIC_PLACEMENT}
-      />
-    </label>
-  );
-};
-
 export const ArticleInventory = ({ articles, catalogState, onOpen }: Props) => {
   const [query, setQuery] = useState("");
   const [section, setSection] = useState("All sections");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [page, setPage] = useState(1);
   const [homepageOpen, setHomepageOpen] = useState(false);
   const [leadId, setLeadId] = useState("");
@@ -156,28 +41,17 @@ export const ArticleInventory = ({ articles, catalogState, onOpen }: Props) => {
   >("idle");
 
   useEffect(() => {
-    fetch("/api/homepage")
-      .then((response) => response.json())
-      .then(
-        (data: {
-          placements: Array<{
-            articleId: string;
-            position: number;
-            slot: string;
-          }>;
-        }) => {
-          const lead = data.placements.find(
-            (placement) => placement.slot === "lead"
-          );
-          const secondary = data.placements
-            .filter((placement) => placement.slot === "secondary")
-            .sort((left, right) => left.position - right.position);
-          setLeadId(lead?.articleId ?? "");
-          setSecondaryIds(
-            [0, 1, 2, 3].map((index) => secondary[index]?.articleId ?? "")
-          );
-        }
-      )
+    fetchHomepagePlacements()
+      .then((placements) => {
+        const lead = placements.find((placement) => placement.slot === "lead");
+        const secondary = placements
+          .filter((placement) => placement.slot === "secondary")
+          .sort((left, right) => left.position - right.position);
+        setLeadId(lead?.articleId ?? "");
+        setSecondaryIds(
+          [0, 1, 2, 3].map((index) => secondary[index]?.articleId ?? "")
+        );
+      })
       .catch(() => setHomepageState("error"));
   }, []);
 
@@ -224,14 +98,16 @@ export const ArticleInventory = ({ articles, catalogState, onOpen }: Props) => {
     return inventoryArticles.filter((article) => {
       const matchesSection =
         section === "All sections" || article.section === section;
+      const matchesStatus =
+        statusFilter === "all" || article.status === statusFilter;
       const matchesQuery =
         normalized.length === 0 ||
         `${article.title} ${article.description} ${article.labels.join(" ")}`
           .toLocaleLowerCase("lt")
           .includes(normalized);
-      return matchesSection && matchesQuery;
+      return matchesSection && matchesStatus && matchesQuery;
     });
-  }, [inventoryArticles, query, section]);
+  }, [inventoryArticles, query, section, statusFilter]);
 
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const safePage = Math.min(page, pageCount);
@@ -246,6 +122,10 @@ export const ArticleInventory = ({ articles, catalogState, onOpen }: Props) => {
   }, []);
   const updateSection = useCallback((value: string) => {
     setSection(value);
+    setPage(1);
+  }, []);
+  const updateStatusFilter = useCallback((value: string | number) => {
+    setStatusFilter(String(value));
     setPage(1);
   }, []);
   const previousPage = useCallback(
@@ -283,202 +163,78 @@ export const ArticleInventory = ({ articles, catalogState, onOpen }: Props) => {
       setHomepageState("error");
       return;
     }
-    const response = await fetch("/api/homepage", {
-      body: JSON.stringify({
-        leadId: leadId || null,
-        secondaryIds: secondaryIds.filter(Boolean),
-      }),
-      headers: { "content-type": "application/json" },
-      method: "PUT",
+    const saved = await persistHomepagePlacements({
+      leadId: leadId || null,
+      secondaryIds: secondaryIds.filter(Boolean),
     });
-    setHomepageState(response.ok ? "saved" : "error");
+    setHomepageState(saved ? "saved" : "error");
   }, [inventoryArticles, leadId, secondaryIds]);
 
   return (
-    <div className="inventory-page">
-      <header className="page-header">
+    <div className="mx-auto w-[min(100%,1500px)] px-[42px] pt-[42px] pb-[72px] max-inventory-compact:px-6 max-inventory-mobile:px-4 max-inventory-compact:pt-8 max-inventory-mobile:pt-[26px] max-inventory-compact:pb-[60px] max-inventory-mobile:pb-12">
+      <header className="mb-[30px] flex min-h-24 items-end justify-between gap-8 max-inventory-mobile:mb-[22px] max-inventory-phone:block max-inventory-mobile:min-h-0 max-inventory-mobile:items-start">
         <div>
-          <p className="eyebrow">Content</p>
-          <div className="title-row">
-            <h1>Articles</h1>
-            <span className="count-pill">
+          <p className="mt-0 mb-[7px] font-bold text-[11px] text-primary uppercase tracking-[0.08em]">
+            Content
+          </p>
+          <div className="flex items-center gap-2.5">
+            <h1 className="m-0 font-[650] text-[30px] leading-[1.1] tracking-[-0.035em] max-inventory-mobile:text-[27px]">
+              Articles
+            </h1>
+            <span className="inline-flex h-[23px] min-w-[38px] items-center justify-center rounded-full bg-muted px-2 font-semibold text-[11px] text-muted-foreground">
               {inventoryArticles.length.toLocaleString("en-US")}
             </span>
           </div>
-          <p>
+          <p className="mt-2 mb-0 text-[13px] text-muted-foreground max-inventory-mobile:max-w-[480px]">
             The complete publication archive and current editorial work in one
             place.
           </p>
         </div>
-        <div className="page-header-actions">
+        <div className="flex flex-wrap gap-2.5 max-inventory-mobile:mt-[18px]">
           <Button onClick={toggleHomepage} size="lg" variant="outline">
             <House data-icon="inline-start" /> Homepage layout
           </Button>
-          <Button className="primary-action" size="lg">
+          <Button
+            className="shadow-[0_1px_1px_rgb(0_0_0/0.08)] max-inventory-phone:w-full"
+            size="lg"
+          >
             <FilePlus2 data-icon="inline-start" /> New article
           </Button>
         </div>
       </header>
 
       {homepageOpen ? (
-        <section aria-label="Homepage layout" className="homepage-editor">
-          <div>
-            <strong>Homepage placements</strong>
-            <span>
-              Choose one lead story and up to four supporting stories.
-            </span>
-          </div>
-          <label htmlFor="homepage-lead-story">
-            Lead story
-            <ValueCombobox
-              ariaLabel="Lead story"
-              id="homepage-lead-story"
-              onChange={updateLead}
-              options={leadOptions}
-              value={leadId || AUTOMATIC_PLACEMENT}
-            />
-          </label>
-          {SUPPORTING_SLOTS.map((slot, position) => (
-            <HomepagePlacementField
-              key={slot}
-              label={`Supporting story ${position + 1}`}
-              onChange={updateSecondary}
-              options={articleOptions}
-              position={position}
-              value={secondaryIds[position] ?? ""}
-            />
-          ))}
-          <Button disabled={homepageState === "saving"} onClick={saveHomepage}>
-            <Save /> {homepageState === "saving" ? "Saving…" : "Save layout"}
-          </Button>
-          {homepageState === "saved" ? (
-            <span>Homepage layout saved.</span>
-          ) : null}
-          {homepageState === "error" ? (
-            <span>
-              Homepage placements require a valid image and a successful save.
-            </span>
-          ) : null}
-        </section>
+        <HomepageLayoutPanel
+          articleOptions={articleOptions}
+          leadId={leadId}
+          leadOptions={leadOptions}
+          onLeadChange={updateLead}
+          onSave={saveHomepage}
+          onSecondaryChange={updateSecondary}
+          secondaryIds={secondaryIds}
+          state={homepageState}
+        />
       ) : null}
 
-      <section aria-label="Article inventory" className="inventory-panel">
-        <div className="status-tabs" role="tablist">
-          <button aria-selected="true" role="tab" type="button">
-            All <span>{inventoryArticles.length.toLocaleString("en-US")}</span>
-          </button>
-          <button role="tab" type="button">
-            Published{" "}
-            <span>
-              {inventoryArticles
-                .filter((article) => article.status === "published")
-                .length.toLocaleString("en-US")}
-            </span>
-          </button>
-          <button role="tab" type="button">
-            Drafts{" "}
-            <span>
-              {
-                inventoryArticles.filter(
-                  (article) => article.status === "draft"
-                ).length
-              }
-            </span>
-          </button>
-        </div>
-
-        <div className="inventory-tools">
-          <label className="search-field">
-            <Search />
-            <input
-              aria-label="Search articles"
-              onChange={updateQuery}
-              placeholder="Search by title, text, or tag…"
-              type="search"
-              value={query}
-            />
-            <kbd>⌘ K</kbd>
-          </label>
-          <ValueCombobox
-            ariaLabel="Filter by section"
-            className="inventory-section-combobox"
-            onChange={updateSection}
-            options={sectionOptions}
-            value={section}
-          />
-          <button className="tool-button" type="button">
-            <Filter /> More filters
-          </button>
-        </div>
-
-        <div className="article-table-wrap">
-          <table className="article-table">
-            <thead>
-              <tr>
-                <th className="checkbox-cell">
-                  <input aria-label="Select all" type="checkbox" />
-                </th>
-                <th>
-                  <button type="button">
-                    Article <ArrowDown />
-                  </button>
-                </th>
-                <th>Language</th>
-                <th>Section</th>
-                <th>Status</th>
-                <th>Published</th>
-              </tr>
-            </thead>
-            <tbody>
-              {visible.map((article) => (
-                <ArticleRow
-                  article={article}
-                  key={article.path}
-                  onOpen={onOpen}
-                />
-              ))}
-            </tbody>
-          </table>
-          {catalogState === "loading" ? (
-            <div className="table-state">Loading the complete archive…</div>
-          ) : null}
-          {catalogState === "error" ? (
-            <div className="table-state error">
-              The archive could not be loaded. Refresh the page.
-            </div>
-          ) : null}
-          {catalogState === "ready" && visible.length === 0 ? (
-            <div className="table-state">No articles match these filters.</div>
-          ) : null}
-        </div>
-
-        <footer className="table-footer">
-          <p>
-            Showing {filtered.length === 0 ? 0 : (safePage - 1) * PAGE_SIZE + 1}
-            –{Math.min(safePage * PAGE_SIZE, filtered.length)} iš{" "}
-            {filtered.length.toLocaleString("en-US")}
-          </p>
-          <div>
-            <button
-              disabled={safePage === 1}
-              onClick={previousPage}
-              type="button"
-            >
-              <ChevronLeft />
-            </button>
-            <span>
-              {safePage} / {pageCount}
-            </span>
-            <button
-              disabled={safePage === pageCount}
-              onClick={nextPage}
-              type="button"
-            >
-              <ChevronRight />
-            </button>
-          </div>
-        </footer>
-      </section>
+      <InventoryPanel
+        catalogState={catalogState}
+        filteredCount={filtered.length}
+        inventoryArticles={inventoryArticles}
+        onNextPage={nextPage}
+        onOpen={onOpen}
+        onPreviousPage={previousPage}
+        onQueryChange={updateQuery}
+        onSectionChange={updateSection}
+        onStatusChange={updateStatusFilter}
+        pageCount={pageCount}
+        pageSize={PAGE_SIZE}
+        query={query}
+        safePage={safePage}
+        section={section}
+        sectionOptions={sectionOptions}
+        statusFilter={statusFilter}
+        visible={visible}
+      />
     </div>
   );
 };

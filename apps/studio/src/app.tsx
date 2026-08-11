@@ -60,15 +60,19 @@ const App = () => {
   return (
     <div
       className={
-        selectedArticle ? "studio-shell editor-active" : "studio-shell"
+        selectedArticle
+          ? "grid min-h-screen grid-cols-[minmax(0,1fr)]"
+          : "grid min-h-screen grid-cols-[232px_minmax(0,1fr)] max-[801px]:block max-[1101px]:grid-cols-[196px_minmax(0,1fr)]"
       }
     >
-      <StudioSidebar />
-      <div className="studio-main">
+      {selectedArticle ? null : <StudioSidebar />}
+      <div className="min-w-0">
         {selectedArticle ? (
           <Suspense
             fallback={
-              <div className="editor-route-loading">Įkeliamas redaktorius…</div>
+              <div className="grid min-h-screen place-items-center text-[13px] text-muted-foreground">
+                Įkeliamas redaktorius…
+              </div>
             }
           >
             <ArticleEditor

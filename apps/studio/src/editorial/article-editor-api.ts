@@ -1,0 +1,87 @@
+import type {
+  ArticleResponse,
+  BaselineResponse,
+  PersistArticleInput,
+  Revision,
+  StoredArticle,
+} from "./article-editor-types";
+
+export interface ArticleWorkspaceResponse {
+  baseline: BaselineResponse["baseline"];
+  canonical: StoredArticle;
+  changes: BaselineResponse["changes"];
+  revisions: Revision[];
+}
+
+export async function fetchArticleWorkspace(
+  articleId: string,
+  signal: AbortSignal
+): Promise<ArticleWorkspaceResponse> {
+  const [storedResponse, baselineResponse, revisionResponse] =
+    await Promise.all([
+      fetch(`/api/articles/${articleId}`, { signal }),
+      fetch(`/api/articles/${articleId}/baseline`, { signal }),
+      fetch(`/api/articles/${articleId}/revisions`, { signal }),
+    ]);
+  if (!(storedResponse.ok && baselineResponse.ok)) {
+    throw new Error("Article request failed");
+  }
+
+  const { article: canonical } =
+    (await storedResponse.json()) as ArticleResponse;
+  const { baseline, changes } =
+    (await baselineResponse.json()) as BaselineResponse;
+  const revisions = revisionResponse.ok
+    ? ((await revisionResponse.json()) as { revisions: Revision[] }).revisions
+    : [];
+
+  return { baseline, canonical, changes, revisions };
+}
+
+export async function fetchArticleBaseline(
+  articleId: string
+): Promise<BaselineResponse | null> {
+  const response = await fetch(`/api/articles/${articleId}/baseline`);
+  return response.ok ? ((await response.json()) as BaselineResponse) : null;
+}
+
+export async function fetchArticleRevisions(
+  articleId: string
+): Promise<Revision[]> {
+  const response = await fetch(`/api/articles/${articleId}/revisions`);
+  if (!response.ok) {
+    return [];
+  }
+  const data = (await response.json()) as { revisions: Revision[] };
+  return data.revisions;
+}
+
+export function persistArticle({
+  articleId,
+  baseline,
+  payload,
+  sourceArticleId,
+}: PersistArticleInput): Promise<Response> {
+  return fetch(articleId ? `/api/articles/${articleId}` : "/api/articles", {
+    body: JSON.stringify(
+      articleId ? payload : { ...payload, baseline, sourceArticleId }
+    ),
+    headers: { "content-type": "application/json" },
+    method: articleId ? "PUT" : "POST",
+  });
+}
+
+export async function restoreArticleRevision(
+  articleId: string,
+  version: number
+): Promise<StoredArticle | null> {
+  const response = await fetch(
+    `/api/articles/${articleId}/revisions/${version}/restore`,
+    { method: "POST" }
+  );
+  if (!response.ok) {
+    return null;
+  }
+  const data = (await response.json()) as { article: StoredArticle };
+  return data.article;
+}

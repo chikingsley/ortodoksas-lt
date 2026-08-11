@@ -35,11 +35,21 @@ This is the implementation checklist for the public publication UI. A checked it
 2. Give each surface one owner component and keep route files as composition boundaries.
 3. Record the rendered screenshot and validation result before marking an item complete.
 
-## Tailwind migration
+## Styling boundaries
 
-- [x] Archive toolbar: standard shadcn/Base UI InputGroup, Select, and Combobox primitives with component-owned Tailwind layout.
-- [ ] Public shell and navigation: move remaining layout selectors from `index.css` into the owning Astro and React components.
-- [ ] Homepage editorial surfaces: move grids, story cards, service band, archive rail, and library callout into component-owned Tailwind classes.
-- [ ] Search and article surfaces: replace raw control styling and remaining page selectors with shared primitives and component-owned Tailwind classes.
-- [ ] Reduce `index.css` to Tailwind/shadcn imports, brand tokens, font faces, base element defaults, and genuinely global accessibility behavior.
-- [ ] Capture desktop and mobile screenshots after every surface migration and compare them with the approved visual baseline.
+- [x] Public presentation uses `apps/web/src/styles/globals.css` for Tailwind/shadcn imports, publication tokens, fonts, and base behavior.
+- [x] Studio uses `apps/studio/src/styles/globals.css` for Tailwind/shadcn imports, newsroom tokens, Geist, and base form behavior.
+- [x] Public and Studio globals stay separate because their typography, radius, and surface contracts differ.
+- [x] Feature layout lives beside its owning Astro or React component as Tailwind utilities.
+- [x] Tiptap keeps its upstream component-scoped SCSS inside the editor component tree.
+- [x] The superseded Studio `index.css` and CSS-migration evidence bundle are removed after validation.
+- [ ] Capture desktop and mobile screenshots for each public surface after the next visual change.
+
+## Studio composition
+
+- [x] `ArticleInventory` owns catalog filtering, pagination, and homepage-placement state.
+- [x] Inventory presentation is divided into `InventoryPanel`, `ArticleRow`, and `HomepageLayoutPanel` feature components.
+- [x] `ArticleEditor` owns loading, persistence, preview state, revision restore, and translation transitions.
+- [x] Editor presentation is divided into header, document, inspector, and dialog components.
+- [x] Reusable controls come from generated shadcn/Base UI primitives under `apps/studio/src/components/ui`.
+- [x] Domain components remain under `apps/studio/src/editorial`; they compose primitives rather than duplicating primitive behavior.
