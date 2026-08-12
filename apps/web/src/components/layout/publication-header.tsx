@@ -38,6 +38,8 @@ export default function PublicationHeader({
   const copy = ui[locale];
   const localized = locale !== "lt";
   const homeHref = localized ? `/${locale}` : "/";
+  const searchHref = localized ? `/${locale}/paieska` : "/paieska";
+  const searchActive = currentPath === searchHref;
 
   const languageLink = (code: SiteLocale, mobile = false) => (
     <a
@@ -79,9 +81,12 @@ export default function PublicationHeader({
     <header className="relative z-20 bg-white text-foreground">
       <div className="mx-auto w-[min(1200px,calc(100%-64px))] max-sm:w-full">
         <div className="grid min-h-20 grid-cols-[1fr_auto_1fr] items-center max-sm:min-h-16 max-sm:grid-cols-[48px_minmax(0,1fr)_48px] max-sm:px-3">
-          <SocialLinks className="justify-self-start max-sm:hidden" />
+          <SocialLinks
+            className="justify-self-start max-sm:hidden"
+            locale={locale}
+          />
 
-          <div className="hidden justify-self-start max-sm:block">
+          <div className="justify-self-start sm:hidden">
             <Sheet>
               <SheetTrigger
                 render={
@@ -102,10 +107,7 @@ export default function PublicationHeader({
                   <SheetTitle className="sr-only">{copy.navigation}</SheetTitle>
                   <PublicationLogo className="w-[178px]" />
                 </SheetHeader>
-                <nav
-                  aria-label={copy.edition}
-                  className="grid gap-0 px-6 pt-3 pb-6"
-                >
+                <nav aria-label={copy.edition} className="grid gap-0 px-6 pt-3">
                   {navigationItems.map((item) => (
                     <a
                       aria-current={
@@ -124,15 +126,10 @@ export default function PublicationHeader({
                       {item.label}
                     </a>
                   ))}
-                  {localized ? null : (
-                    <a
-                      className="flex min-h-12 items-center border-border border-b py-3 font-semibold font-serif text-[17px] text-foreground leading-none transition-colors hover:text-primary"
-                      href="/paieska"
-                    >
-                      {copy.search}
-                    </a>
-                  )}
                 </nav>
+                <div className="mt-auto border-border border-t px-6 py-5">
+                  <SocialLinks locale={locale} />
+                </div>
               </SheetContent>
             </Sheet>
           </div>
@@ -154,18 +151,28 @@ export default function PublicationHeader({
               {siteLocales.map((code) => languageLink(code))}
             </nav>
             <a
+              aria-current={searchActive ? "page" : undefined}
               aria-label={copy.search}
-              className="ml-2 grid size-9 place-items-center transition-colors hover:text-primary [&_svg]:size-4"
-              href="/paieska"
+              className={
+                searchActive
+                  ? "ml-2 grid size-9 place-items-center text-primary [&_svg]:size-4"
+                  : "ml-2 grid size-9 place-items-center transition-colors hover:text-primary [&_svg]:size-4"
+              }
+              href={searchHref}
             >
               <SearchIcon aria-hidden="true" />
             </a>
           </div>
 
           <a
+            aria-current={searchActive ? "page" : undefined}
             aria-label={copy.search}
-            className="hidden size-11 place-items-center justify-self-end text-foreground transition-colors hover:text-primary max-sm:grid [&_svg]:size-5"
-            href="/paieska"
+            className={
+              searchActive
+                ? "grid size-11 place-items-center justify-self-end text-primary sm:hidden [&_svg]:size-5"
+                : "grid size-11 place-items-center justify-self-end text-foreground transition-colors hover:text-primary sm:hidden [&_svg]:size-5"
+            }
+            href={searchHref}
           >
             <SearchIcon aria-hidden="true" />
           </a>
@@ -190,24 +197,13 @@ export default function PublicationHeader({
                 <NavigationMenuItem key={item.id}>
                   <NavigationMenuLink
                     active={isNavigationItemActive(currentPath, item)}
-                    className="relative inline-flex min-h-12 items-center rounded-none bg-transparent px-[27px] pt-4 pb-3.5 font-semibold font-serif text-foreground text-sm leading-none transition-colors hover:bg-transparent hover:text-primary focus:bg-transparent focus:text-primary data-[active]:bg-transparent data-[active]:text-primary data-[active]:after:absolute data-[active]:after:inset-x-[27px] data-[active]:after:-bottom-px data-[active]:after:h-0.5 data-[active]:after:bg-gold"
+                    className="relative inline-flex min-h-12 items-center rounded-none bg-transparent px-[27px] pt-4 pb-3.5 font-semibold font-serif text-foreground text-sm leading-none transition-colors hover:bg-transparent hover:text-primary focus:bg-transparent focus:text-primary data-[active]:bg-transparent data-[active]:font-bold data-[active]:text-primary"
                     href={item.href}
                   >
                     {item.label}
                   </NavigationMenuLink>
                 </NavigationMenuItem>
               ))}
-              {localized ? null : (
-                <NavigationMenuItem>
-                  <NavigationMenuLink
-                    aria-label={copy.search}
-                    className="inline-flex min-h-12 items-center bg-transparent px-[18px] text-foreground transition-colors hover:bg-transparent hover:text-primary"
-                    href="/paieska"
-                  >
-                    <SearchIcon aria-hidden="true" className="size-4" />
-                  </NavigationMenuLink>
-                </NavigationMenuItem>
-              )}
             </NavigationMenuList>
           </NavigationMenu>
         </div>

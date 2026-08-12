@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 
 interface Props {
   className?: string;
+  locale?: "be" | "en" | "lt" | "ru" | "uk";
 }
 
 const socialLinks = [
@@ -24,7 +25,8 @@ const socialLinks = [
   },
 ] as const;
 
-export default function SocialLinks({ className }: Props) {
+export default function SocialLinks({ className, locale = "lt" }: Props) {
+  const localPrefix = locale === "lt" ? "" : `/${locale}`;
   return (
     <nav
       aria-label="Socialiniai kanalai"
@@ -33,7 +35,7 @@ export default function SocialLinks({ className }: Props) {
       {socialLinks.map(({ href, icon, label }) => (
         <a
           aria-label={label}
-          className="grid size-9 place-items-center text-foreground transition-colors hover:text-primary focus-visible:text-primary [&_svg]:size-3.5"
+          className="grid size-11 place-items-center text-foreground transition-colors hover:text-primary focus-visible:text-primary [&_svg]:size-3.5"
           href={href}
           key={label}
           rel="noreferrer"
@@ -47,15 +49,15 @@ export default function SocialLinks({ className }: Props) {
       ))}
       <a
         aria-label="Kontaktai"
-        className="grid size-9 place-items-center text-foreground transition-colors hover:text-primary focus-visible:text-primary [&_svg]:size-4"
-        href="/p/kontaktai_30.html"
+        className="grid size-11 place-items-center text-foreground transition-colors hover:text-primary focus-visible:text-primary [&_svg]:size-4"
+        href={`${localPrefix}/p/kontaktai_30.html`}
       >
         <MailIcon aria-hidden="true" />
         <span className="sr-only">Kontaktai</span>
       </a>
       <a
         aria-label="RSS"
-        className="grid size-9 place-items-center text-foreground transition-colors hover:text-primary focus-visible:text-primary [&_svg]:size-4"
+        className="grid size-11 place-items-center text-foreground transition-colors hover:text-primary focus-visible:text-primary [&_svg]:size-4"
         href="/rss.xml"
       >
         <RssIcon aria-hidden="true" />

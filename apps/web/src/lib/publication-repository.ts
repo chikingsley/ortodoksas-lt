@@ -6,7 +6,7 @@ import type {
 } from "@ortodoksas-lt/content/translation";
 import { articles, homepagePlacements, mediaAssets } from "@ortodoksas-lt/db";
 import { renderArticleBody } from "@ortodoksas-lt/editor/render";
-import { and, desc, eq, inArray } from "drizzle-orm";
+import { and, count, desc, eq, inArray, like, or } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
 import { defaultLocale, localeShells, type SiteLocale } from "../i18n/config";
 import type {
@@ -150,6 +150,40 @@ export async function getArticles(language: SiteLocale = defaultLocale) {
   );
 }
 
+export async function searchArticles(
+  language: SiteLocale,
+  query: string,
+  options: { limit: number; offset: number }
+) {
+  const pattern = `%${query.replace(/[%_]/gu, (character) => `\\${character}`)}%`;
+  const searchCondition = or(
+    like(articles.title, pattern),
+    like(articles.summary, pattern),
+    like(articles.section, pattern),
+    like(articles.labelsJson, pattern)
+  );
+  const where = and(
+    eq(articles.status, "published"),
+    eq(articles.language, language),
+    searchCondition
+  );
+  const [rows, totals] = await Promise.all([
+    database()
+      .select(catalogSelection)
+      .from(articles)
+      .where(where)
+      .orderBy(desc(articles.publishedAt))
+      .limit(options.limit)
+      .offset(options.offset),
+    database().select({ value: count() }).from(articles).where(where),
+  ]);
+  const heroes = await heroMap(rows);
+  return {
+    entries: rows.map((row) => catalogEntry(row, heroes)),
+    total: totals[0]?.value ?? 0,
+  };
+}
+
 export async function getSections(language: SiteLocale = defaultLocale) {
   return getSectionOptions(
     (await getArticles(language)).map((entry) => entry.section)
@@ -225,13 +259,23 @@ export function getLocalizedCounterpart(
 }
 
 export async function getLocaleLinks(currentPath: string) {
-  if (stripLocale(currentPath) === "/") {
+  const publicationPath = stripLocale(currentPath);
+  if (publicationPath === "/") {
     return {
       be: { hasCounterpart: true, href: "/be" },
       en: { hasCounterpart: true, href: "/en" },
       lt: { hasCounterpart: true, href: "/" },
       ru: { hasCounterpart: true, href: "/ru" },
       uk: { hasCounterpart: true, href: "/uk" },
+    } satisfies Record<SiteLocale, LocaleDestination>;
+  }
+  if (publicationPath === "/paieska") {
+    return {
+      be: { hasCounterpart: true, href: "/be/paieska" },
+      en: { hasCounterpart: true, href: "/en/paieska" },
+      lt: { hasCounterpart: true, href: "/paieska" },
+      ru: { hasCounterpart: true, href: "/ru/paieska" },
+      uk: { hasCounterpart: true, href: "/uk/paieska" },
     } satisfies Record<SiteLocale, LocaleDestination>;
   }
   const pairs = await Promise.all(

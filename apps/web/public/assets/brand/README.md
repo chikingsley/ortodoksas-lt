@@ -15,7 +15,6 @@ This folder contains the client-supplied Exarchate identity, the Canva reference
 - `production/exarchate-crest-client.png`: accepted client crest with its exterior background removed and internal white lettering preserved
 - `production/exarchate-lockup-client.png`: client-supplied full lockup retained as the visual source reference
 - `production/canva-patterns/`: six transparent, pixel-faithful extractions from the Canva brand board
-- `production/canva-patterns/motif-burgundy-chain-column.svg`: exact single-column interface trace used at the desktop story-rail edge in the approved burgundy
 - `production/ortodoksas-logo-official.svg`: tightly framed horizontal publication logo taken directly from the supplied vector artwork
 - `source/ecumenical-patriarchate-emblem.svg`: complete vector artwork matching the emblem in the Canva brand board
 - `source/ecumenical-patriarchate-emblem-2048.png`: transparent 2,048 px render of that vector

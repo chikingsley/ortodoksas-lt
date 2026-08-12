@@ -1,42 +1,43 @@
-# Public CSS migration visual QA
+# Burgundy publication correction visual QA
 
 ## Evidence
 
-- Source: `/tmp/codex-remote-attachments/019fd18e-5856-7f33-b2b8-c54848887dc8/A51BE7C1-7E8C-4F4C-B5CC-187F4D3AF2E6/1-Photo-1.jpg`
-- Final homepage, mobile: `/tmp/ortodoksas-css-migration-mobile-final.png`
-- Final archive, mobile: `/tmp/ortodoksas-css-migration-archive-mobile-final.png`
-- Final article, mobile: `/tmp/ortodoksas-css-migration-article-mobile-final.png`
-- Final navigation sheet, mobile: `/tmp/ortodoksas-css-migration-menu-mobile-final.png`
-- Final footer, mobile: `/tmp/ortodoksas-css-migration-footer-mobile-final.png`
-- Final homepage, desktop: `/tmp/ortodoksas-css-migration-desktop-final.png`
-- Final archive, desktop: `/tmp/ortodoksas-css-migration-archive-desktop-top-final.png`
-- Final article, desktop: `/tmp/ortodoksas-css-migration-article-desktop-final.png`
-- Source/final comparison: `/tmp/ortodoksas-css-migration-comparison.png`
+- Client visual truth: `/tmp/codex-remote-attachments/019fd18e-5856-7f33-b2b8-c54848887dc8/2E7A7133-524B-4CF1-BA4C-3C59DF2DDF1A/1-Pasted-Image-1.jpg`
+- User audit markup: `/tmp/codex-remote-attachments/019fd18e-5856-7f33-b2b8-c54848887dc8/5E4AF41D-EF3B-4E95-B87C-F30A411DEFE7/1-Photo-1.jpg`
+- Corrected homepage, desktop: `/tmp/ort-home-final-desktop.png`
+- Corrected homepage, mobile: `/tmp/ort-home-final-mobile-v2.png`
+- Corrected search, mobile: `/tmp/ort-search-final-mobile.png`
+- Corrected search results, mobile: `/tmp/ort-search-results-mobile.png`
+- Public page-type captures: `/tmp/ort-audit-final/`
+- Article regression matrix: `/tmp/ort-article-audit.tsv`
 
 ## Conditions
 
 - Mobile viewport: 390 x 844 CSS pixels, device scale factor 1.
-- Desktop viewport: 1280 x 960 CSS pixels, device scale factor 1.
-- Source focus: the reserved scrollbar gutter and clipped right edge.
-- Verified states: homepage top and footer, archive top, article top, and open mobile navigation sheet.
+- Desktop viewport: 1440 x 1000 CSS pixels, device scale factor 1.
+- Source focus: centered legacy mark, sparse burgundy, exact gold ornaments, editorial density, and one search control.
+- Verified states: homepage, archive, search, institutional page, topic page, five locale shells, and 20 current articles in each locale.
 
 ## Iteration history
 
-1. Initial mobile measurement: `innerWidth=390`, `clientWidth=375`, `scrollWidth=375`. The root scrolling element reserved a 15-pixel gutter.
-2. Applied the scrollbar utility to the root `html` scrolling element and kept horizontal clipping on the shared public shell.
-3. Final homepage, archive, and article measurements: `innerWidth=390`, `clientWidth=390`, `scrollWidth=390`, `body.scrollWidth=390`.
+1. The reviewed build paired a gold active underline with two burgundy framing rules, exposed two search controls on desktop, used an authored burgundy rail, and repeated separators between adjacent sections.
+2. The correction removed the underline, duplicate search entry, invented rail, and redundant section rules; it restored source-faithful gold assets and measured service-band geometry.
+3. The search surface was rebuilt from the project shadcn primitives and D1-backed pagination. Locale switches now retain the search route and query surface.
+4. Post-fix measurements: desktop root `1440/1440`, mobile root `390/390`; active navigation pseudo-element `none`; service icon `36 x 36`, gap `8`, inset `16`, stroke `rgb(200, 163, 74)`.
 
 ## Visual checks
 
-- Typography: passed; the same brand families and weights render at both breakpoints.
-- Spacing: passed; mobile content reaches the full viewport and retains the 16-pixel content inset.
-- Color: passed; green, gold, blue, neutral surfaces, and active states match the approved brand treatment.
-- Images and motifs: passed; source assets retain their aspect ratio and crops.
-- Copy: passed for the captured Lithuanian states.
-- Interaction: passed; mobile navigation opens as a sheet with usable links and a visible close control.
-- Console: passed; captured routes produced an empty browser console.
-- Horizontal overflow: passed at 390 and 1280 CSS pixels.
+- Typography: passed; Arimo remains the control/body face and Playfair Display remains the editorial face across all five scripts.
+- Spacing: passed; the 1200px desktop shell, 16px mobile inset, service geometry, and single-owner separator contract are consistent.
+- Color: passed; burgundy is the text/action state and exact opaque `#C8A34A` is reserved for ornaments.
+- Images and motifs: passed; supplied raster ornaments remain unstretched and the unsupported burgundy rail is gone.
+- Copy: passed for the captured UI states; article copy remains canonical D1 content.
+- Interaction: passed; search input, submission, pagination, locale persistence, mobile sheet, and navigation links work.
+- Accessibility: passed for visible labels, 44px mobile header/social targets, image alt presence, current-page state, and heading presence.
+- Route audit: passed for the public page types plus 100 article pages. Every checked article reported the expected locale, viewport width, body and heading content, zero broken images, zero missing alt attributes, and zero replacement-character artifacts.
+- Console: the browser capture run produced no application console errors.
+- Horizontal overflow: passed at 390 and 1440 CSS pixels.
 
 ## Final result
 
-Passed.
+passed

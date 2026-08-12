@@ -1,0 +1,102 @@
+---
+import type { SiteLocale } from "../../i18n/config";
+import { ui } from "../../i18n/ui";
+import { searchArticles } from "../../lib/publication-repository";
+import SiteLayout from "../../layouts/SiteLayout.astro";
+import ArchiveList from "../archive/ArchiveList.astro";
+import PageIntro from "../publication/PageIntro.astro";
+import { SearchForm } from "./search-form";
+
+interface Props {
+  locale?: SiteLocale;
+}
+
+const { locale = "lt" } = Astro.props;
+const localized = locale !== "lt";
+const searchPath = localized ? `/${locale}/paieska` : "/paieska";
+const query = Astro.url.searchParams.get("q")?.trim() ?? "";
+const page = Math.max(1, Number.parseInt(Astro.url.searchParams.get("page") ?? "1", 10) || 1);
+const pageSize = 20;
+const copy = {
+  be: {
+    description: "Шукайце публікацыі паводле назвы, тэмы або пазнакі.",
+    eyebrow: "Пошук у архіве",
+    placeholder: "Увядзіце слова або фразу",
+    results: "вынікаў",
+    title: "Што вы шукаеце?",
+  },
+  en: {
+    description: "Search publications by title, topic, or label.",
+    eyebrow: "Archive search",
+    placeholder: "Enter a word or phrase",
+    results: "results",
+    title: "What are you looking for?",
+  },
+  lt: {
+    description: "Ieškokite publikacijų pagal pavadinimą, temą ar žymą.",
+    eyebrow: "Archyvo paieška",
+    placeholder: "Įveskite žodį ar frazę",
+    results: "rezultatai",
+    title: "Ko ieškote?",
+  },
+  ru: {
+    description: "Ищите публикации по названию, теме или метке.",
+    eyebrow: "Поиск по архиву",
+    placeholder: "Введите слово или фразу",
+    results: "результатов",
+    title: "Что вы ищете?",
+  },
+  uk: {
+    description: "Шукайте публікації за назвою, темою або міткою.",
+    eyebrow: "Пошук в архіві",
+    placeholder: "Введіть слово або фразу",
+    results: "результатів",
+    title: "Що ви шукаєте?",
+  },
+}[locale];
+const result = query
+  ? await searchArticles(locale, query, {
+      limit: pageSize,
+      offset: (page - 1) * pageSize,
+    })
+  : { entries: [], total: 0 };
+const pageCount = Math.max(1, Math.ceil(result.total / pageSize));
+const currentPage = Math.min(page, pageCount);
+const visibleMatches = currentPage === page
+  ? result.entries
+  : (await searchArticles(locale, query, {
+      limit: pageSize,
+      offset: (currentPage - 1) * pageSize,
+    })).entries;
+const pageHref = (target: number) => `${searchPath}?q=${encodeURIComponent(query)}&page=${target}`;
+---
+
+<SiteLayout
+  canonicalPath={searchPath}
+  description={copy.description}
+  lang={locale}
+  locale={locale}
+  title={`${ui[locale].search} · ortodoksas.lt`}
+>
+  <main class="mx-auto min-h-[65vh] w-[min(1200px,calc(100%-64px))] pb-[70px] max-sm:w-[min(1200px,calc(100%-32px))]">
+    <PageIntro compact description={copy.description} eyebrow={copy.eyebrow} title={copy.title} />
+    <SearchForm action={searchPath} buttonLabel={ui[locale].search} placeholder={copy.placeholder} query={query} />
+    {query ? (
+      <section class="pt-9" aria-live="polite">
+        <p class="mb-4 text-xs uppercase tracking-[0.06em] text-muted-foreground">
+          <strong class="tabular-nums text-primary">{result.total.toLocaleString(locale)}</strong> {copy.results}
+        </p>
+        {visibleMatches.length ? <ArchiveList entries={visibleMatches} locale={locale} /> : (
+          <p class="border-primary border-t-2 py-8 font-serif text-xl text-muted-foreground">{copy.description}</p>
+        )}
+        {pageCount > 1 ? (
+          <nav class="flex items-center justify-between py-7" aria-label={ui[locale].search}>
+            {currentPage > 1 ? <a class="font-bold text-primary" href={pageHref(currentPage - 1)}>←</a> : <span />}
+            <span class="text-xs text-muted-foreground">{currentPage} / {pageCount}</span>
+            {currentPage < pageCount ? <a class="font-bold text-primary" href={pageHref(currentPage + 1)}>→</a> : <span />}
+          </nav>
+        ) : null}
+      </section>
+    ) : null}
+  </main>
+</SiteLayout>
