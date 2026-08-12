@@ -1,16 +1,14 @@
 ---
-name: ortodoksas.lt C Institutional Edition
-description: A living Lithuanian church publication joining institutional authority to a compact newsroom.
+name: ortodoksas.lt Burgundy Editorial Edition
+description: A compact multilingual church newsroom built around the original centered Ortodoksas identity.
 colors:
-  patriarchal-green: "#015c4b"
-  patriarchal-green-deep: "#004438"
-  ceremonial-gold: "#face6b"
-  library-blue: "#2a4782"
-  cool-bone: "#f0eee4"
-  cool-bone-deep: "#e4e1d4"
-  living-ink: "#171916"
-  quiet-ink: "#555b57"
-  hairline: "#c9c7bd"
+  publication-burgundy: "#af272f"
+  publication-burgundy-deep: "#861d24"
+  ceremonial-gold: "#c8a34a"
+  warm-paper: "#f4f1e8"
+  living-ink: "#111111"
+  quiet-ink: "#5c5650"
+  hairline: "#d3cdc0"
   white: "#ffffff"
 typography:
   display:
@@ -69,12 +67,12 @@ components:
     padding: "16px 27px 14px"
   story-link:
     backgroundColor: "transparent"
-    textColor: "{colors.patriarchal-green}"
+    textColor: "{colors.publication-burgundy}"
     typography: "{typography.label}"
     rounded: "{rounded.square}"
     padding: "0"
   service-link:
-    backgroundColor: "{colors.patriarchal-green}"
+    backgroundColor: "{colors.publication-burgundy}"
     textColor: "{colors.white}"
     typography: "{typography.title}"
     rounded: "{rounded.square}"
@@ -96,25 +94,25 @@ components:
 
 <!-- markdownlint-disable MD024 MD025 MD026 MD036 -->
 
-# Design System: ortodoksas.lt C Institutional Edition
+# Design System: ortodoksas.lt Burgundy Editorial Edition
 
 ## Standards Foundation
 
-The system adopts the U.S. Web Design System 3 foundations for spacing, responsive widths, grid behavior, site margins, and structural borders. This is a foundation rather than a visual theme: the client palette, Playfair Display, Arimo, institutional marks, editorial hierarchy, and C composition remain the product's own identity.
+The system adopts the U.S. Web Design System 3 foundations for spacing, responsive widths, grid behavior, site margins, and structural borders. The client palette, original Ortodoksas mark, Playfair Display, Arimo, editorial hierarchy, and compact newsroom composition remain the product's own identity.
 
 - **Spacing:** Use USWDS spacing-unit values only: 4, 8, 12, 16, 20, 24, 32, 40, 48, and 64px for this publication surface.
 - **Responsive widths:** Use 640px as the mobile-to-tablet composition change, 1024px as the tablet-to-desktop composition change, and 1200px as the publication max-width. These match the practical BBC GEL/Guardian reflow model while preserving this publication's fixed outer contract.
 - **Grid and margins:** Use a 1200px maximum publication container, 32px gutters from tablet upward, 16px gutters below tablet, a 24px standard column gap, and a 32px large column gap.
 - **Borders:** Use a 1px structural border. A 2px line belongs to focus or an explicit selection state.
-- **Current location:** Mark the current destination with `aria-current="page"`. The visual state uses green text plus one 2px gold indicator contained inside the navigation item.
-- **Keyboard focus:** Use a 2px library-blue outline with a 4px offset and at least 3:1 contrast against adjacent colors.
+- **Current location:** Mark the current destination with `aria-current="page"`. The visual state uses burgundy text plus one 2px gold indicator contained inside the navigation item.
+- **Keyboard focus:** Use a 2px burgundy outline with a 4px offset and at least 3:1 contrast against adjacent colors.
 
 ### Boundary Ownership
 
 - `SectionHeader` owns one bottom structural border.
 - `StoryList` items own one bottom structural border; the final item removes it.
 - `PageHeader` uses spacing alone when the following component already owns a top border.
-- `InstitutionalMasthead` owns the single green divider immediately above desktop navigation or mobile language choices; those rows draw no second outer divider.
+- `PublicationMasthead` owns the burgundy boundaries around desktop navigation or mobile language choices. Each boundary appears once.
 - Adjacent components never both draw the same boundary.
 - Background changes count as a boundary and do not receive an additional separator.
 - Every margin, padding, gap, gutter, and responsive width must resolve to the adopted tokens above.
@@ -135,40 +133,36 @@ The system adopts the U.S. Web Design System 3 foundations for spacing, responsi
 
 **Creative North Star: "The Living Ecclesial Press"**
 
-The C Institutional Edition presents a living Lithuanian church publication through the visual discipline of an ecclesial institution and the pace of a compact newsroom. White and cool-bone fields keep the publication immediate and readable; patriarchal green, ceremonial gold, exact institutional marks, and authentic chain motifs give it provenance and ceremony.
+The Burgundy Editorial Edition presents a living Lithuanian church publication through the original Ortodoksas identity and the pace of a compact newsroom. White and warm-paper fields keep the publication immediate and readable; official burgundy, restrained gold, and authentic chain motifs give it provenance and ceremony.
 
 The system feels authoritative, editorial, restrained, and current. Playfair Display carries headlines and long-form reading with literary gravity, while Arimo handles navigation, metadata, controls, and multilingual utility text. Dense story groupings remain legible through strong type hierarchy, image crops, hairline rules, and generous section intervals rather than generic lifestyle-blog staging.
 
 **Key Characteristics:**
 
-- Exact dual institutional marks paired with the visible `ortodoksas.lt` publication identity.
-- Flat white and cool-bone fields structured by green and neutral hairlines.
+- The exact original `ortodoksas.lt` horizontal identity, mathematically centered.
+- Social channels on the left and language/search utilities on the right.
+- Flat white and warm-paper fields structured by burgundy and neutral hairlines.
 - Playfair-led editorial hierarchy with compact Arimo utility labels.
-- Ceremonial green and gold accents used with discipline; library blue marks a distinct content destination.
+- Burgundy functional accents and solid gold ornaments used with discipline.
 - Authentic chain and grid motifs acting as cropped edge signatures rather than wallpaper.
 - Image-led reporting with quiet scale motion and highly legible responsive density.
 
 ## Colors
 
-The palette combines ecclesial authority, ceremonial warmth, and paper-like neutrals, with blue reserved for a distinct institutional-library moment.
+The palette combines ecclesial authority, ceremonial warmth, and paper-like neutrals.
 
 ### Primary
 
-- **Patriarchal Green:** The institutional voice for rules, links, labels, active states, service bands, and the footer.
-- **Deep Patriarchal Green:** The grounded state for hover fills and the footer field.
+- **Publication Burgundy:** The functional voice for rules, links, labels, active states, and the service band.
+- **Deep Burgundy:** The grounded state for hover fills and high-contrast interface states.
 
 ### Secondary
 
 - **Ceremonial Gold:** A precise accent for active underlines, icons, motifs, and highlighted editorial status.
 
-### Tertiary
-
-- **Library Blue:** A contained destination color for the library callout and the universal focus outline.
-
 ### Neutral
 
-- **Cool Bone:** The warm-cool paper field behind archive panels, shell cards, and image placeholders.
-- **Deep Cool Bone:** The deeper paper tone available for adjacent neutral layering.
+- **Warm Paper:** The `#F4F1E8` field behind archive panels, the library callout, footer, shell cards, and image placeholders.
 - **Living Ink:** The near-black reading and navigation color.
 - **Quiet Ink:** The softer text color for descriptions, dates, and supporting information.
 - **Hairline:** The structural divider color between stories, columns, controls, and masthead identities.
@@ -178,7 +172,7 @@ The palette combines ecclesial authority, ceremonial warmth, and paper-like neut
 
 **The Ceremonial Accent Rule.** Gold identifies ceremony, selection, or an institutional motif; it remains an accent rather than a broad reading surface.
 
-**The Blue Room Rule.** Blue belongs to the library destination and focus visibility, giving that content one distinct chamber inside the green-led world.
+**The Functional Burgundy Rule.** Burgundy identifies destinations, state, and navigation; gold remains a small decorative accent.
 
 ## Typography
 
@@ -226,11 +220,11 @@ The recovered publication supplies five historical sections: `Tikėjimas ir kult
 
 ## Elevation & Depth
 
-The system is flat and paper-like by default. White, cool-bone, green, and blue planes establish depth through tonal contrast, hairline rules, cropped image fields, and section spacing. The mobile menu alone receives a low diffuse shadow because it floats over publication content; imagery gains a quiet 2% scale on hover, and reduced-motion preferences collapse transitions to an immediate state change.
+The system is flat and paper-like by default. White, warm-paper, and burgundy planes establish depth through tonal contrast, hairline rules, cropped image fields, and section spacing. The mobile menu alone receives a low diffuse shadow because it floats over publication content; imagery gains a quiet 2% scale on hover, and reduced-motion preferences collapse transitions to an immediate state change.
 
 ### Shadow Vocabulary
 
-- **Mobile Menu Float** (`0 12px 28px rgba(0, 39, 31, 0.15)`): A single structural shadow for the expanded small-screen menu.
+- **Mobile Menu Float** (`0 12px 28px rgba(46, 16, 18, 0.18)`): A single structural shadow for the expanded small-screen menu.
 
 ### Named Rules
 
@@ -246,14 +240,13 @@ Chain motifs create the signature organic geometry: exact ceremonial-gold vertic
 
 ## Components
 
-### Institutional Masthead
+### Publication Masthead
 
-- **Identity:** Place the Ecumenical Patriarchate emblem at the far left, followed by the client Exarchate crest with its Arimo wordmark, a hairline divider, and the visible `ortodoksas.lt` wordmark.
-- **Typography:** Set the publication name in bold Playfair with a compact uppercase Arimo descriptor.
-- **Sizing:** Render the Ecumenical Patriarchate emblem and the crest portion of the Exarchate lockup at the same optical height: 52px on desktop and 40px on mobile.
-- **Responsive behavior:** Preserve both institutional marks, the hairline, and the publication identity in one compact identity row. Place the language choices below the masthead's single green divider.
-- **Desktop rhythm:** Use an 80px identity row, place languages 16px from its top edge, follow it with the single 1px green divider and a 48px primary-navigation row, then use 24px before homepage content.
-- **Mobile rhythm:** Use a 60px identity row: the 44px menu target plus 8px vertical padding determines the row while the 40px marks center inside it. Follow it with the single 1px green divider and one 44px language row, then use 8px before homepage content.
+- **Identity:** Place social channels at the left, the exact supplied horizontal `ortodoksas.lt` vector at the mathematical center, and languages plus search at the right.
+- **Sizing:** Render the horizontal mark at 210px wide on desktop and 174px wide on mobile, preserving its intrinsic ratio.
+- **Responsive behavior:** Replace desktop social channels with the 44px menu trigger on mobile. Keep the centered mark and 44px search target in the same row; place languages in the row below.
+- **Desktop rhythm:** Use an 80px masthead row followed by one 48px primary-navigation row. Solid 1px burgundy boundaries separate those structural rows.
+- **Mobile rhythm:** Use a 64px masthead row followed by one 44px language row. Solid 1px burgundy boundaries separate those structural rows, followed by 8px before homepage content.
 - **Scrolling:** The document owns vertical scrolling. Publication components create no nested vertical scroller and reserve no scrollbar gutter.
 
 - **Page intro spacing:** Use 48px above and 32px below the desktop archive/page intro; use 32px above and 24px below on mobile.
@@ -261,41 +254,41 @@ Chain motifs create the signature organic geometry: exact ceremonial-gold vertic
 ### Navigation
 
 - **Style:** Center Playfair navigation inside a 48px row under a neutral hairline.
-- **States:** Hover and active labels turn green; the active item receives a thin gold underline. The mobile menu uses a three-line trigger and a white, hairline-divided overlay.
-- **Languages:** Keep multilingual switches compact in Arimo, with the same green-and-gold active treatment.
+- **States:** Hover and active labels turn burgundy; the active item receives a thin gold underline. The mobile menu uses a three-line trigger and a white, hairline-divided overlay.
+- **Languages:** Keep multilingual switches compact in Arimo, with the same burgundy-and-gold active treatment.
 
 ### Motifs
 
-- **Story rail:** Use the single-column green chain SVG at its intrinsic ratio, positioned 4px beyond the right edge of the desktop story rail. Remove it when the desktop story rail collapses.
+- **Story rail:** Use the single-column burgundy chain SVG at its intrinsic ratio, positioned 4px beyond the right edge of the desktop story rail. Hide it when the desktop story rail collapses.
 - **Service band:** Use the pixel-faithful ceremonial-gold chain continuously at grid-column boundaries. Desktop shows the four quarter boundaries; mobile shows the center and outer-right boundaries. The motif itself owns each boundary.
 - **Assets:** Preserve the client PNG extractions as the production masters. The vectorization comparison remains an audit artifact until an identity-owner SVG export supersedes it.
 
 ### Story Links
 
 - **Shape:** Inline and square with a compact arrow aligned to the text.
-- **Color:** Patriarchal green on light fields and ceremonial gold on the library-blue field.
-- **States:** Preserve direct text behavior and the universal blue focus outline.
+- **Color:** Publication burgundy on light fields and ceremonial gold inside the burgundy function band.
+- **States:** Preserve direct text behavior and the universal burgundy focus outline.
 
 ### Editorial Cards
 
 - **Corner Style:** Crisp rectangular image and copy regions.
 - **Background:** White by default; cool bone for archive and placeholder contexts.
 - **Shadow Strategy:** Flat at rest, with a quiet image-scale response on hover.
-- **Structure:** Pair an image crop with green uppercase eyebrow, bold Playfair title, and compact Arimo metadata. Desktop grids become thumbnail-led rows on phones.
+- **Structure:** Pair an image crop with a burgundy uppercase eyebrow, bold Playfair title, and compact Arimo metadata. Desktop grids become thumbnail-led rows on phones.
 
 ### Service Links
 
-- **Shape:** Full-width rectilinear cells inside the patriarchal-green band.
+- **Shape:** Full-width rectilinear cells inside the publication-burgundy band.
 - **Color:** White text, ceremonial-gold line icon, and the exact client ceremonial-gold chain between adjacent cells. One gold hairline separates the two mobile rows.
 - **Icon size:** Use a 34px ceremonial-gold line icon, matching the height of the title-and-description block.
-- **Hover / Focus:** Deepen the green fill on hover and retain the universal blue focus outline.
+- **Hover / Focus:** Deepen the burgundy fill on hover and retain the universal burgundy focus outline.
 
 ### Inputs / Fields
 
 - **Style:** Use the generated shadcn/Base UI `InputGroup`, `Select`, and `Combobox` primitives at their standard 32px control height. Archive controls sit directly on the white page in a lightweight toolbar: one flexible search field followed by compact filters. The toolbar stacks with an 8px gap on phones, forms two columns at tablet width, and resolves to one row on desktop.
 - **Ownership:** Control shape, border, type, focus, and disabled states come from the shared primitives. Feature components may set width and responsive layout; they do not restyle control internals.
-- **Focus:** Use the universal two-pixel library-blue outline with a four-pixel offset.
-- **Icons:** Use restrained green line icons at approximately 18px.
+- **Focus:** Use the universal two-pixel burgundy outline with a four-pixel offset.
+- **Icons:** Use restrained burgundy line icons at approximately 18px.
 
 ### Chips
 
@@ -304,20 +297,20 @@ Chain motifs create the signature organic geometry: exact ceremonial-gold vertic
 
 ### Editorial Preview
 
-- **Identity:** Reuse Arimo, Playfair Display, living ink, patriarchal green, ceremonial gold, exact brand imagery, and hairline masthead structure inside the CMS preview.
+- **Identity:** Reuse Arimo, Playfair Display, living ink, publication burgundy, ceremonial gold, exact brand imagery, and hairline masthead structure inside the CMS preview.
 - **Reading:** Constrain the article to approximately 760px, give hero media a 460px maximum height, and preserve the large Playfair title, serif description, and spacious body leading.
-- **Status:** Render homepage-placement status as a compact gold label with green text, keeping editorial workflow metadata visually distinct from article content.
+- **Status:** Render homepage-placement status as a compact gold label with burgundy text, keeping editorial workflow metadata visually distinct from article content.
 
 ## Design Commitments
 
 ### Do:
 
 - **Do** preserve the exact dual-mark order and keep `ortodoksas.lt` visible as the publication identity.
-- **Do** use green hairlines, paper fields, editorial image crops, and spacing to structure dense information.
+- **Do** use burgundy hairlines, paper fields, editorial image crops, and spacing to structure dense information.
 - **Do** pair Playfair publication content with Arimo utility text across both public pages and editorial preview.
 - **Do** treat chain and grid motifs as authentic, cropped institutional signatures.
 - **Do** maintain the homepage's lead-to-archive journey as a homepage behavior.
-- **Do** preserve the blue focus outline and reduced-motion behavior across interactive elements.
+- **Do** preserve the burgundy focus outline and reduced-motion behavior across interactive elements.
 
 ### Boundaries:
 

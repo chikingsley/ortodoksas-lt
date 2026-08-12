@@ -7,15 +7,15 @@ interface Props {
 const { description, title } = Astro.props;
 ---
 
-<section class="relative mx-auto mb-[72px] mt-[30px] grid w-[min(1200px,calc(100%-64px))] grid-cols-[1fr_260px] items-center gap-10 overflow-hidden bg-[#2a4782] px-[54px] py-[45px] text-white max-sm:mb-12 max-sm:w-[min(1200px,calc(100%-32px))] max-sm:grid-cols-1 max-sm:px-7 max-sm:py-9">
+<section class="relative mx-auto mb-[72px] mt-[30px] grid w-[min(1200px,calc(100%-64px))] grid-cols-[1fr_260px] items-center gap-10 overflow-hidden bg-paper px-[54px] py-[45px] text-foreground max-sm:mb-12 max-sm:w-[min(1200px,calc(100%-32px))] max-sm:grid-cols-1 max-sm:px-7 max-sm:py-9">
   <div class="relative z-10 max-sm:max-w-[calc(100%-64px)]">
     <h2 class="mb-2.5 font-serif text-[38px] font-bold leading-none">{title}</h2>
-    <p class="mb-5 max-w-[65ch] font-serif text-[17px] leading-normal text-[#e2e8f5]">{description}</p>
-    <a class="inline-flex items-center gap-[7px] text-[11px] font-bold text-[#face6b]" href="/p/biblioteka.html">
+    <p class="mb-5 max-w-[65ch] font-serif text-[17px] leading-normal text-muted-foreground">{description}</p>
+    <a class="inline-flex items-center gap-[7px] text-[11px] font-bold text-primary" href="/p/biblioteka.html">
       Atverti biblioteką <span aria-hidden="true">→</span>
     </a>
   </div>
-  <img class="absolute -right-5 -top-[35px] w-[300px] opacity-55 max-sm:w-[180px] max-sm:opacity-100"
+  <img class="absolute -right-5 -top-[35px] w-[300px] max-sm:w-[180px]"
     src="/assets/brand/production/canva-patterns/pattern-gold-grid.png"
     alt=""
   />

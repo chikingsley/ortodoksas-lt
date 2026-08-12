@@ -50,7 +50,7 @@ const baseSchema = {
   description,
   url: canonical,
   inLanguage: lang,
-  ...(type === "article" ? { publisher: { "@type": "Organization", name: "ortodoksas.lt", logo: { "@type": "ImageObject", url: new URL("/assets/ortodoksas-logo.png", siteUrl).toString() } } } : {}),
+  ...(type === "article" ? { publisher: { "@type": "Organization", name: "ortodoksas.lt", logo: { "@type": "ImageObject", url: new URL("/assets/brand/production/ortodoksas-logo-official.svg", siteUrl).toString() } } } : {}),
   ...jsonLd,
 };
 ---
@@ -60,7 +60,7 @@ const baseSchema = {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
-    <meta name="theme-color" content="#015c4b" />
+    <meta name="theme-color" content="#af272f" />
     <meta name="description" content={description} />
     <title>{title}</title>
     <link rel="canonical" href={canonical} />
@@ -78,9 +78,9 @@ const baseSchema = {
   <body class="m-0 min-w-80 bg-white font-sans text-foreground antialiased [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
     <!--
     THESIS: A living Lithuanian church publication joins institutional authority to a compact newsroom, leaving the generic lifestyle-blog hero behind.
-    OWN-WORLD: White and cool-bone fields, patriarchal green, ceremonial gold, exact institutional marks, Playfair headlines, Arimo utility type, hairline rules, and authentic chain motifs.
+    OWN-WORLD: White and warm-paper fields, official Ortodoksas burgundy, restrained gold ornaments, the centered legacy publication mark, Playfair headlines, Arimo utility type, hairline rules, and authentic chain motifs.
     STORY: Readers identify the institution, reach the current lead story, scan three supporting stories, then move into services, recent articles, and the archive.
-    FIRST VIEWPORT: A dual-mark masthead and centered navigation sit above a 56/44 editorial grid; the lead photograph and headline dominate left while three image-led briefs stack right.
+    FIRST VIEWPORT: Social channels, the centered publication mark, language controls, and navigation sit above a 56/44 editorial grid; the lead photograph and headline dominate left while three image-led briefs stack right.
     FORM: User-approved C Institutional Edition, first choice and production target; seed key user-approved-c-institutional.
     FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
     -->
