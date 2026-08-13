@@ -15,11 +15,13 @@ const { entry, loading = "lazy", locale = "lt", variant = "supporting" } = Astro
 const href = locale === "lt" ? entry.path : `/${locale}${entry.path}`;
 const copy = ui[locale];
 const section = getSectionLabel(entry.section, locale);
+const imageFit = entry.heroFit === "contain" ? "[&_img]:object-contain [&_img]:p-1.5" : "[&_img]:object-cover";
+const objectPosition = `${entry.heroFocalX}% ${entry.heroFocalY}%`;
 ---
 
 {variant === "supporting" ? (
   <article class="group grid h-full grid-cols-[46%_1fr] gap-4 border-border border-t py-4 first:border-t-0 first:pt-0 max-lg:flex max-lg:flex-col max-lg:border-0 max-lg:pt-0 max-sm:grid max-sm:grid-cols-[116px_1fr] max-sm:gap-4 max-sm:border-t max-sm:border-border max-sm:py-4 max-sm:first:border-t-0">
-    {entry.hero ? <EditorialImage alt={entry.heroAlt} class="block aspect-[1.55] overflow-hidden bg-muted max-lg:mb-3 max-sm:m-0 max-sm:aspect-[1.35] [&_img]:h-full [&_img]:w-full [&_img]:object-cover [&_img]:transition-transform [&_img]:duration-500 group-hover:[&_img]:scale-[1.02]" href={href} label={`${copy.read}: ${entry.title}`} loading={loading} src={entry.hero} /> : null}
+    {entry.hero ? <EditorialImage alt={entry.heroAlt} class:list={["block aspect-[1.55] overflow-hidden bg-muted max-lg:mb-3 max-sm:m-0 max-sm:aspect-[1.35] [&_img]:h-full [&_img]:w-full [&_img]:transition-transform [&_img]:duration-500 group-hover:[&_img]:scale-[1.02]", imageFit]} href={href} label={`${copy.read}: ${entry.title}`} loading={loading} objectPosition={objectPosition} src={entry.hero} /> : null}
     <div class="flex flex-1 flex-col">
       <div class="text-[10px] font-bold uppercase tracking-[0.08em] text-primary">{section}</div>
       <h2 class="mb-2 mt-[5px] font-serif text-[clamp(17px,1.55vw,22px)] font-bold leading-[1.08] tracking-[-0.015em] max-lg:text-lg max-sm:mb-0 max-sm:text-base"><a class="line-clamp-2 hover:text-primary max-sm:line-clamp-4" href={href}>{entry.title}</a></h2>
@@ -30,12 +32,12 @@ const section = getSectionLabel(entry.section, locale);
   </article>
 ) : variant === "compact" ? (
   <article class="grid grid-cols-[102px_1fr] gap-3 border-border border-t py-3 first:border-t-0 first:pt-0">
-    {entry.hero ? <EditorialImage alt={entry.heroAlt} class="block aspect-[1.35] overflow-hidden bg-muted [&_img]:h-full [&_img]:w-full [&_img]:object-cover" href={href} label={`${copy.read}: ${entry.title}`} loading={loading} src={entry.hero} /> : null}
+    {entry.hero ? <EditorialImage alt={entry.heroAlt} class:list={["block aspect-[1.35] overflow-hidden bg-muted [&_img]:h-full [&_img]:w-full", imageFit]} href={href} label={`${copy.read}: ${entry.title}`} loading={loading} objectPosition={objectPosition} src={entry.hero} /> : null}
     <div><div class="text-[10px] font-bold uppercase tracking-[0.08em] text-primary">{section}</div><h2 class="mb-0 mt-[5px] font-serif text-[15px] font-bold leading-[1.1]"><a class="hover:text-primary" href={href}>{entry.title}</a></h2>{entry.published ? <div class="mt-2 text-[9px] font-bold uppercase tracking-[0.05em] text-muted-foreground"><time datetime={entry.published}>{formatDate(entry.published, locale)}</time></div> : null}</div>
   </article>
 ) : (
   <article class="grid h-full grid-cols-[132px_1fr] items-start gap-4 py-4 first:pt-0 max-sm:grid-cols-[108px_1fr]">
-    {entry.hero ? <EditorialImage alt={entry.heroAlt} class="block aspect-[1.25] overflow-hidden bg-muted [&_img]:h-full [&_img]:w-full [&_img]:object-cover" href={href} label={`${copy.read}: ${entry.title}`} loading={loading} src={entry.hero} /> : null}
+    {entry.hero ? <EditorialImage alt={entry.heroAlt} class:list={["block aspect-[1.25] overflow-hidden bg-muted [&_img]:h-full [&_img]:w-full", imageFit]} href={href} label={`${copy.read}: ${entry.title}`} loading={loading} objectPosition={objectPosition} src={entry.hero} /> : null}
     <div>
       <div class="text-[10px] font-bold uppercase tracking-[0.08em] text-primary">{section}</div>
       <h3 class="mb-[7px] mt-[5px] font-serif text-xl font-bold leading-[1.1]"><a class="hover:text-primary" href={href}>{entry.title}</a></h3>

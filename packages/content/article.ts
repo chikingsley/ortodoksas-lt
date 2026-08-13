@@ -51,6 +51,9 @@ export const createArticleSchema = z.object({
     })
     .optional(),
   body: tiptapDocumentSchema,
+  heroFit: z.enum(["cover", "contain"]).default("cover"),
+  heroFocalX: z.number().int().min(0).max(100).default(50),
+  heroFocalY: z.number().int().min(0).max(100).default(50),
   heroSourceUrl: z.string().trim().min(1).max(4096).optional(),
   kind: z.enum(["article", "page"]).default("article"),
   labels: z.array(z.string().trim().min(1).max(120)).default([]),
@@ -84,6 +87,9 @@ export type TiptapDocument = z.infer<typeof tiptapDocumentSchema>;
 export const updateArticleSchema = createArticleSchema
   .pick({
     body: true,
+    heroFit: true,
+    heroFocalX: true,
+    heroFocalY: true,
     heroSourceUrl: true,
     kind: true,
     labels: true,

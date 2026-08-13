@@ -79,6 +79,9 @@ export function ArticleEditor({
   const [changes, setChanges] = useState<ContentChange[]>([]);
   const [changesOpen, setChangesOpen] = useState(false);
   const [heroMediaId, setHeroMediaId] = useState<string | null>(null);
+  const [heroFit, setHeroFit] = useState<"contain" | "cover">("cover");
+  const [heroFocalX, setHeroFocalX] = useState(50);
+  const [heroFocalY, setHeroFocalY] = useState(50);
   const [language, setLanguage] = useState("lt");
   const [loadState, setLoadState] = useState<"loading" | "ready" | "error">(
     "loading"
@@ -160,6 +163,9 @@ export function ArticleEditor({
         setArticleId(canonical.id);
         setLanguage(canonical.language);
         setHeroMediaId(canonical.heroMediaId);
+        setHeroFit(canonical.heroFit);
+        setHeroFocalX(canonical.heroFocalX);
+        setHeroFocalY(canonical.heroFocalY);
         setSection(canonical.section);
         setStatus(canonical.status);
         setSummary(canonical.summary);
@@ -217,6 +223,18 @@ export function ArticleEditor({
     setLanguage(value);
     setSaveState("dirty");
   }, []);
+  const updateHeroFit = useCallback((value: "contain" | "cover") => {
+    setHeroFit(value);
+    setSaveState("dirty");
+  }, []);
+  const updateHeroFocalX = useCallback((value: number) => {
+    setHeroFocalX(value);
+    setSaveState("dirty");
+  }, []);
+  const updateHeroFocalY = useCallback((value: number) => {
+    setHeroFocalY(value);
+    setSaveState("dirty");
+  }, []);
   const updateSection = useCallback((value: string) => {
     setSection(value);
     setSaveState("dirty");
@@ -247,6 +265,9 @@ export function ArticleEditor({
       };
       const payload = {
         body,
+        heroFit,
+        heroFocalX,
+        heroFocalY,
         heroSourceUrl: article.hero ?? undefined,
         kind: article.kind,
         labels: article.labels,
@@ -306,6 +327,9 @@ export function ArticleEditor({
       articleId,
       baselineBody,
       body,
+      heroFit,
+      heroFocalX,
+      heroFocalY,
       language,
       loadRevisions,
       section,
@@ -365,6 +389,9 @@ export function ArticleEditor({
             tiptapDocumentSchema.parse(JSON.parse(restoredArticle.bodyJson))
           )
         );
+        setHeroFit(restoredArticle.heroFit);
+        setHeroFocalX(restoredArticle.heroFocalX);
+        setHeroFocalY(restoredArticle.heroFocalY);
         setLanguage(restoredArticle.language);
         setStatus(restoredArticle.status);
         setSummary(restoredArticle.summary);
@@ -458,6 +485,9 @@ export function ArticleEditor({
           <ArticleEditorDocument
             body={body}
             bodyHasLeadFigure={bodyHasLeadFigure}
+            heroFit={heroFit}
+            heroFocalX={heroFocalX}
+            heroFocalY={heroFocalY}
             heroMediaId={heroMediaId}
             heroUrl={article.hero}
             onBodyChange={updateBody}
@@ -470,8 +500,14 @@ export function ArticleEditor({
 
           <ArticleEditorInspector
             changesCount={changes.length}
+            heroFit={heroFit}
+            heroFocalX={heroFocalX}
+            heroFocalY={heroFocalY}
             historyOpen={historyOpen}
             language={language}
+            onHeroFitChange={updateHeroFit}
+            onHeroFocalXChange={updateHeroFocalX}
+            onHeroFocalYChange={updateHeroFocalY}
             onLanguageChange={updateLanguage}
             onMarkReviewed={markEditorReviewed}
             onOpenChanges={openChanges}

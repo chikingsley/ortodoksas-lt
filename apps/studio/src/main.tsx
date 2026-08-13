@@ -1,3 +1,5 @@
+import { ClerkProvider } from "@clerk/react";
+import { shadcn } from "@clerk/ui/themes";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -12,6 +14,8 @@ if (root === null) {
 
 createRoot(root).render(
   <StrictMode>
-    <App />
+    <ClerkProvider afterSignOutUrl="/" appearance={{ theme: shadcn }}>
+      <App />
+    </ClerkProvider>
   </StrictMode>
 );

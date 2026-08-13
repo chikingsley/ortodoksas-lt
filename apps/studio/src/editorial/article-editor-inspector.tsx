@@ -1,5 +1,5 @@
 import { Check, ChevronDown, History, X } from "lucide-react";
-import type { MouseEvent } from "react";
+import { type ChangeEvent, type MouseEvent, useCallback } from "react";
 
 import { Button } from "@/components/ui/button";
 
@@ -11,8 +11,14 @@ import { TranslationBadge } from "./translation-badge";
 
 interface Props {
   changesCount: number;
+  heroFit: "contain" | "cover";
+  heroFocalX: number;
+  heroFocalY: number;
   historyOpen: boolean;
   language: string;
+  onHeroFitChange: (value: "contain" | "cover") => void;
+  onHeroFocalXChange: (value: number) => void;
+  onHeroFocalYChange: (value: number) => void;
   onLanguageChange: (value: string) => void;
   onMarkReviewed: () => void;
   onOpenChanges: () => void;
@@ -38,8 +44,14 @@ const sectionClass =
 export function ArticleEditorInspector({
   changesCount,
   historyOpen,
+  heroFit,
+  heroFocalX,
+  heroFocalY,
   language,
   onLanguageChange,
+  onHeroFitChange,
+  onHeroFocalXChange,
+  onHeroFocalYChange,
   onMarkReviewed,
   onOpenChanges,
   onOpenSource,
@@ -57,6 +69,22 @@ export function ArticleEditorInspector({
   translationKind,
   translationReviewStatus,
 }: Props) {
+  const changeHeroFit = useCallback(
+    (event: ChangeEvent<HTMLSelectElement>) =>
+      onHeroFitChange(event.target.value as "contain" | "cover"),
+    [onHeroFitChange]
+  );
+  const changeHeroFocalX = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) =>
+      onHeroFocalXChange(Number(event.target.value)),
+    [onHeroFocalXChange]
+  );
+  const changeHeroFocalY = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) =>
+      onHeroFocalYChange(Number(event.target.value)),
+    [onHeroFocalYChange]
+  );
+
   return (
     <aside className="min-w-0 border-l bg-muted/30 max-md:border-t max-md:border-l-0">
       <section className={sectionClass}>
@@ -215,6 +243,61 @@ export function ArticleEditorInspector({
         <code className="block w-full overflow-hidden text-ellipsis whitespace-nowrap rounded-md border bg-card px-2.5 py-2 text-xs">
           /{publicPath}
         </code>
+      </section>
+
+      <section className={sectionClass}>
+        <h2>Hero presentation</h2>
+        <label
+          className="mb-1.5 block font-semibold text-xs"
+          htmlFor="hero-fit"
+        >
+          Image treatment
+        </label>
+        <select
+          className="h-9 w-full rounded-md border bg-card px-2.5 text-xs"
+          id="hero-fit"
+          onChange={changeHeroFit}
+          value={heroFit}
+        >
+          <option value="cover">Editorial crop</option>
+          <option value="contain">Preserve complete artwork</option>
+        </select>
+        <p className="mt-2 mb-4 text-[11px] text-muted-foreground leading-relaxed">
+          Editorial crop fills homepage frames. Preserve complete artwork keeps
+          icons, seals, diagrams, and sacred art fully visible.
+        </p>
+        {heroFit === "cover" ? (
+          <div className="grid gap-4">
+            <label className="grid gap-1.5 text-xs" htmlFor="hero-focal-x">
+              <span className="flex justify-between">
+                <span>Horizontal focus</span>
+                <strong>{heroFocalX}%</strong>
+              </span>
+              <input
+                id="hero-focal-x"
+                max="100"
+                min="0"
+                onChange={changeHeroFocalX}
+                type="range"
+                value={heroFocalX}
+              />
+            </label>
+            <label className="grid gap-1.5 text-xs" htmlFor="hero-focal-y">
+              <span className="flex justify-between">
+                <span>Vertical focus</span>
+                <strong>{heroFocalY}%</strong>
+              </span>
+              <input
+                id="hero-focal-y"
+                max="100"
+                min="0"
+                onChange={changeHeroFocalY}
+                type="range"
+                value={heroFocalY}
+              />
+            </label>
+          </div>
+        ) : null}
       </section>
     </aside>
   );

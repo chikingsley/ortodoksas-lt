@@ -49,7 +49,7 @@ const archiveHref = locale === "lt" ? "/archyvas" : `/${locale}#articles`;
           linkLabel={copy.allArticles}
           title={copy.recentPublications}
         />
-        <div class="grid auto-rows-fr grid-cols-3 gap-6 max-sm:grid-cols-1">
+        <div class="grid auto-rows-fr grid-cols-3 gap-6 max-sm:auto-rows-auto max-sm:grid-cols-1 max-sm:gap-0">
           {model.recent.map((entry) => <ArticleCard entry={entry} loading="eager" locale={locale} />)}
         </div>
       </div>

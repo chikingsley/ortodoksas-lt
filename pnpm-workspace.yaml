@@ -4,8 +4,11 @@ packages:
 
 allowBuilds:
   '@parcel/watcher': true
+  bufferutil: false
+  core-js: false
   esbuild: true
   sharp: true
+  utf-8-validate: false
   workerd: true
 minimumReleaseAgeExclude:
   - '@cloudflare/vite-plugin@1.51.0'
@@ -14,6 +17,15 @@ minimumReleaseAgeExclude:
   - ultracite@7.10.1
   - wrangler@4.119.0
   - tsx@4.23.8
+  - '@clerk/cli-darwin-arm64@3.1.0'
+  - '@clerk/cli-darwin-x64@3.1.0'
+  - '@clerk/cli-linux-arm64-musl@3.1.0'
+  - '@clerk/cli-linux-arm64@3.1.0'
+  - '@clerk/cli-linux-x64-musl@3.1.0'
+  - '@clerk/cli-linux-x64@3.1.0'
+  - '@clerk/cli-win32-arm64@3.1.0'
+  - '@clerk/cli-win32-x64@3.1.0'
+  - clerk@3.1.0
 peerDependencyRules:
   allowAny:
     - vite

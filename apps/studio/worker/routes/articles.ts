@@ -158,6 +158,9 @@ articleRoutes.get("/", async (context) => {
       capture: articles.sourceCapture,
       description: articles.summary,
       file: articles.sourceArticleId,
+      heroFit: articles.heroFit,
+      heroFocalX: articles.heroFocalX,
+      heroFocalY: articles.heroFocalY,
       heroMediaId: articles.heroMediaId,
       id: articles.id,
       kind: articles.kind,
@@ -351,6 +354,9 @@ articleRoutes.post("/:id/revisions/:version/restore", async (context) => {
     .limit(1);
   const nextVersion = (latest?.version ?? 0) + 1;
   const metadata = JSON.parse(revision.metadata_json) as {
+    heroFit?: "contain" | "cover";
+    heroFocalX?: number;
+    heroFocalY?: number;
     language: string;
     slug: string;
     status: string;
@@ -406,6 +412,9 @@ articleRoutes.post("/:id/revisions/:version/restore", async (context) => {
       .update(articles)
       .set({
         bodyJson: restoredBodyJson,
+        heroFit: metadata.heroFit ?? "cover",
+        heroFocalX: metadata.heroFocalX ?? 50,
+        heroFocalY: metadata.heroFocalY ?? 50,
         language: metadata.language,
         slug: metadata.slug,
         status: metadata.status,
@@ -497,6 +506,9 @@ articleRoutes.post("/", async (context) => {
     database.insert(articles).values({
       bodyJson,
       createdAt: timestamp,
+      heroFit: parsed.data.heroFit,
+      heroFocalX: parsed.data.heroFocalX,
+      heroFocalY: parsed.data.heroFocalY,
       heroMediaId,
       id,
       kind: parsed.data.kind,
@@ -529,6 +541,9 @@ articleRoutes.post("/", async (context) => {
       editorId: context.var.editor.id,
       id: crypto.randomUUID(),
       metadataJson: JSON.stringify({
+        heroFit: parsed.data.heroFit,
+        heroFocalX: parsed.data.heroFocalX,
+        heroFocalY: parsed.data.heroFocalY,
         language: parsed.data.language,
         slug: parsed.data.slug,
         status: parsed.data.status,
@@ -674,6 +689,9 @@ articleRoutes.put("/:id", async (context) => {
     });
   }
   const metadataJson = JSON.stringify({
+    heroFit: parsed.data.heroFit,
+    heroFocalX: parsed.data.heroFocalX,
+    heroFocalY: parsed.data.heroFocalY,
     language: parsed.data.language,
     slug: parsed.data.slug,
     status: parsed.data.status,
@@ -686,6 +704,9 @@ articleRoutes.put("/:id", async (context) => {
       .update(articles)
       .set({
         bodyJson,
+        heroFit: parsed.data.heroFit,
+        heroFocalX: parsed.data.heroFocalX,
+        heroFocalY: parsed.data.heroFocalY,
         heroMediaId,
         kind: parsed.data.kind,
         labelsJson: JSON.stringify(parsed.data.labels),

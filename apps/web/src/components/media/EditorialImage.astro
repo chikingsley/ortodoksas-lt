@@ -7,6 +7,7 @@ interface Props {
   href?: string;
   label?: string;
   loading?: "eager" | "lazy";
+  objectPosition?: string;
   priority?: boolean;
   src: string;
   width?: number;
@@ -20,6 +21,7 @@ const {
   href,
   label,
   loading = "lazy",
+  objectPosition,
   priority = false,
   src,
   width,
@@ -28,12 +30,12 @@ const {
 
 {href ? (
   <a class={className} href={href} aria-label={label || alt || undefined}>
-    <img src={src} alt={alt} decoding={decoding} fetchpriority={priority ? "high" : undefined} height={height} loading={priority ? "eager" : loading} onerror="this.hidden=true;this.nextElementSibling?.removeAttribute('hidden')" width={width} />
+    <img src={src} alt={alt} decoding={decoding} fetchpriority={priority ? "high" : undefined} height={height} loading={priority ? "eager" : loading} onerror="this.hidden=true;this.nextElementSibling?.removeAttribute('hidden')" style={objectPosition ? `object-position:${objectPosition}` : undefined} width={width} />
     <span class="my-8 min-h-[150px] w-full place-content-center gap-2 border border-border bg-muted p-7 text-center font-sans text-sm leading-[1.45] text-muted-foreground" role="img" aria-label="Vaizdas nepasiekiamas" hidden><strong class="text-[13px] font-bold uppercase tracking-[0.06em] text-primary">Vaizdas nepasiekiamas</strong>{alt ? <span>{alt}</span> : null}</span>
   </a>
 ) : (
   <div class={className}>
-    <img src={src} alt={alt} decoding={decoding} fetchpriority={priority ? "high" : undefined} height={height} loading={priority ? "eager" : loading} onerror="this.hidden=true;this.nextElementSibling?.removeAttribute('hidden')" width={width} />
+    <img src={src} alt={alt} decoding={decoding} fetchpriority={priority ? "high" : undefined} height={height} loading={priority ? "eager" : loading} onerror="this.hidden=true;this.nextElementSibling?.removeAttribute('hidden')" style={objectPosition ? `object-position:${objectPosition}` : undefined} width={width} />
     <span class="my-8 min-h-[150px] w-full place-content-center gap-2 border border-border bg-muted p-7 text-center font-sans text-sm leading-[1.45] text-muted-foreground" role="img" aria-label="Vaizdas nepasiekiamas" hidden><strong class="text-[13px] font-bold uppercase tracking-[0.06em] text-primary">Vaizdas nepasiekiamas</strong>{alt ? <span>{alt}</span> : null}</span>
   </div>
 )}

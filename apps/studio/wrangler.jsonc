@@ -7,6 +7,12 @@
   "name": "ortodoksas-studio",
   "main": "worker/index.ts",
   "compatibility_date": "2026-08-05",
+  "routes": [
+    {
+      "pattern": "ortodoksas-studio.grassinside.com",
+      "custom_domain": true
+    }
+  ],
   "assets": {
     "binding": "ASSETS",
     "not_found_handling": "single-page-application",
@@ -31,6 +37,9 @@
   },
   "cache": {
     "enabled": true
+  },
+  "vars": {
+    "CLERK_AUTHORIZED_PARTIES": "http://localhost:5173,http://127.0.0.1:5173,https://ortodoksas-studio.grassinside.com"
   },
   "env": {
     "studio": {

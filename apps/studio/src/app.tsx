@@ -1,4 +1,11 @@
 import {
+  ClerkLoaded,
+  ClerkLoading,
+  Show,
+  SignInButton,
+  SignUpButton,
+} from "@clerk/react";
+import {
   lazy,
   Suspense,
   useCallback,
@@ -6,7 +13,7 @@ import {
   useMemo,
   useState,
 } from "react";
-
+import { Button } from "@/components/ui/button";
 import { ArticleInventory } from "@/editorial/article-inventory";
 import { StudioSidebar } from "@/editorial/studio-sidebar";
 import type { CatalogArticle } from "@/editorial/types";
@@ -18,7 +25,7 @@ const ArticleEditor = lazy(() =>
   }))
 );
 
-const App = () => {
+const Studio = () => {
   const catalog = useArticleCatalog();
   const [selectedArticle, setSelectedArticle] = useState<CatalogArticle | null>(
     null
@@ -94,5 +101,55 @@ const App = () => {
     </div>
   );
 };
+
+const SignInScreen = () => (
+  <main className="grid min-h-screen place-items-center bg-[radial-gradient(circle_at_top,#e6f0ec_0,transparent_42%)] px-5 py-12">
+    <section className="w-full max-w-md rounded-xl border bg-card p-8 shadow-sm max-inventory-phone:p-6">
+      <div className="mb-8">
+        <span className="mb-4 grid size-11 place-items-center rounded-lg bg-primary font-bold text-primary-foreground text-sm">
+          O
+        </span>
+        <p className="mb-2 font-semibold text-muted-foreground text-xs uppercase tracking-[0.14em]">
+          Ortodoksas.lt
+        </p>
+        <h1 className="m-0 text-2xl tracking-[-0.025em]">Editorial Studio</h1>
+        <p className="mt-3 mb-0 text-muted-foreground text-sm leading-6">
+          Sign in to review translations, edit articles, and manage the
+          publication homepage.
+        </p>
+      </div>
+      <div className="grid gap-3">
+        <SignInButton mode="modal">
+          <Button className="w-full" size="lg">
+            Sign in
+          </Button>
+        </SignInButton>
+        <SignUpButton mode="modal">
+          <Button className="w-full" size="lg" variant="outline">
+            Create account
+          </Button>
+        </SignUpButton>
+      </div>
+    </section>
+  </main>
+);
+
+const App = () => (
+  <>
+    <ClerkLoading>
+      <div className="grid min-h-screen place-items-center text-muted-foreground text-sm">
+        Loading Studio…
+      </div>
+    </ClerkLoading>
+    <ClerkLoaded>
+      <Show when="signed-out">
+        <SignInScreen />
+      </Show>
+      <Show when="signed-in">
+        <Studio />
+      </Show>
+    </ClerkLoaded>
+  </>
+);
 
 export default App;

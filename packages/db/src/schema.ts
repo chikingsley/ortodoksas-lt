@@ -51,6 +51,9 @@ export const articles = sqliteTable(
   {
     bodyJson: text("body_json").notNull(),
     createdAt: integer("created_at").notNull(),
+    heroFit: text("hero_fit").notNull().default("cover"),
+    heroFocalX: integer("hero_focal_x").notNull().default(50),
+    heroFocalY: integer("hero_focal_y").notNull().default(50),
     heroMediaId: text("hero_media_id").references(() => mediaAssets.id),
     id: text("id").primaryKey(),
     kind: text("kind").notNull().default("article"),

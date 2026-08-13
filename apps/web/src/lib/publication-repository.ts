@@ -35,6 +35,9 @@ type ArticleRow = typeof articles.$inferSelect;
 type PublicationRow = Pick<
   ArticleRow,
   | "heroMediaId"
+  | "heroFit"
+  | "heroFocalX"
+  | "heroFocalY"
   | "id"
   | "kind"
   | "labelsJson"
@@ -49,6 +52,9 @@ type PublicationRow = Pick<
 >;
 
 const catalogSelection = {
+  heroFit: articles.heroFit,
+  heroFocalX: articles.heroFocalX,
+  heroFocalY: articles.heroFocalY,
   heroMediaId: articles.heroMediaId,
   id: articles.id,
   kind: articles.kind,
@@ -116,6 +122,9 @@ function catalogEntry(
     description: row.summary,
     hero: row.heroMediaId ? `/api/media/${row.heroMediaId}` : null,
     heroAlt: row.heroMediaId ? heroes.get(row.heroMediaId) || row.title : "",
+    heroFit: row.heroFit === "contain" ? "contain" : "cover",
+    heroFocalX: row.heroFocalX,
+    heroFocalY: row.heroFocalY,
     heroMediaId: row.heroMediaId,
     ...(homepage ? { homepage } : {}),
     ...(placement ? { homepageOrder: placement.position } : {}),

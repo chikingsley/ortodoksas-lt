@@ -1,3 +1,4 @@
+import { UserButton } from "@clerk/react";
 import { ArrowLeft, Eye, LoaderCircle, Save } from "lucide-react";
 import type { MouseEvent } from "react";
 
@@ -75,6 +76,9 @@ export function ArticleEditorHeader({
             )}
             <span>Save draft</span>
           </Button>
+          <span className="ml-1 max-md:absolute max-md:top-3 max-md:right-3">
+            <UserButton />
+          </span>
         </div>
       </header>
 

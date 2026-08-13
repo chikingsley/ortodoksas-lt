@@ -1,8 +1,40 @@
 import { env } from "cloudflare:test";
-import { exports } from "cloudflare:workers";
+import { createMiddleware } from "hono/factory";
 import { describe, expect, it } from "vitest";
 
+import { createStudioApp } from "../worker";
+import type { StudioEnvironment } from "../worker/types";
+
+const testAuth = createMiddleware<StudioEnvironment>(async (context, next) => {
+  context.set("editor", {
+    id: "clerk-test-editor",
+    name: "Clerk test editor",
+    role: "editor",
+  });
+  await next();
+});
+const testApp = createStudioApp(testAuth);
+const exports = {
+  default: {
+    fetch: (input: string | Request, init?: RequestInit) =>
+      testApp.request(input, init, env),
+  },
+};
+
 describe("studio Worker", () => {
+  it("requires a Clerk session for the API", async () => {
+    const response = await createStudioApp().request(
+      "https://studio.test/api/session",
+      undefined,
+      env
+    );
+
+    expect(response.status).toBe(401);
+    await expect(response.json()).resolves.toEqual({
+      error: "Authentication required",
+    });
+  });
+
   it("reports its health", async () => {
     const response = await exports.default.fetch(
       "https://studio.test/api/health"
@@ -15,16 +47,16 @@ describe("studio Worker", () => {
     });
   });
 
-  it("provides the development editor identity", async () => {
+  it("provides the Clerk editor identity", async () => {
     const response = await exports.default.fetch(
       "https://studio.test/api/session"
     );
 
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toMatchObject({
-      authentication: "development",
+      authentication: "clerk",
       editor: {
-        id: "local-editor",
+        id: "clerk-test-editor",
         role: "editor",
       },
     });
@@ -165,7 +197,7 @@ describe("studio Worker", () => {
     );
     expect(revisionsResponse.status).toBe(200);
     await expect(revisionsResponse.json()).resolves.toMatchObject({
-      revisions: [{ editor_id: "local-editor", version: 1 }],
+      revisions: [{ editor_id: "clerk-test-editor", version: 1 }],
     });
 
     const baselineResponse = await exports.default.fetch(

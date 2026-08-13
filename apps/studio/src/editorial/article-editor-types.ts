@@ -2,6 +2,9 @@ import type { JSONContent } from "@tiptap/core";
 
 export interface StoredArticle {
   bodyJson: string;
+  heroFit: "contain" | "cover";
+  heroFocalX: number;
+  heroFocalY: number;
   heroMediaId: string | null;
   id: string;
   kind: "article" | "page";

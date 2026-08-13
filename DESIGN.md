@@ -210,6 +210,7 @@ Below `desktop` at 1024px, major asymmetric grids stack, supporting briefs form 
 - Supporting source target: at least 800 × 550px, landscape, displayed at a 1.45:1 crop. The desktop brief rail renders four 175px-wide crops at the 1200px container.
 - Recent-card source target: at least 840 × 590px, displayed at a 1.42:1 crop.
 - Every promoted story requires a valid image. The publishing workflow blocks a homepage placement whose image fails media validation.
+- Editors choose an editorial crop with a percentage focal point for photographs or preserve-complete-artwork treatment for icons, seals, diagrams, and sacred art. The public renderer applies that choice across article and homepage frames.
 - Lead titles target 45–90 characters and summaries target 110–220 characters. Supporting titles target 30–75 characters and summaries target 55–110 characters. Responsive wrapping remains the final constraint; editorial guidance avoids destructive truncation.
 
 ### Editorial Taxonomy

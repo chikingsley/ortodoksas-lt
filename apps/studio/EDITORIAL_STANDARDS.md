@@ -38,6 +38,8 @@ Every imported or newly created article enters Studio as one canonical Tiptap do
 - Preserve unresolved source media as figure evidence until article-level review recovers, replaces, or deliberately removes it.
 - Treat removal as an editorial decision tied to the article and its revision history. The Sakartvelas calibration deliberately removes one duplicated body copy of the approved lead image.
 - Verify image order, crop, orientation, and loading in the public preview.
+- Choose **Editorial crop** for photographs, then set the focal point so the subject survives every homepage frame.
+- Choose **Preserve complete artwork** for icons, seals, diagrams, and sacred artwork whose complete composition must remain visible.
 
 ## Automatic quality gate
 

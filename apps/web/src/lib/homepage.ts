@@ -59,6 +59,9 @@ export function localizeHomepageCatalog(
         ...localized,
         hero: canonical.hero,
         heroAlt: canonical.heroAlt,
+        heroFit: canonical.heroFit,
+        heroFocalX: canonical.heroFocalX,
+        heroFocalY: canonical.heroFocalY,
         heroMediaId: canonical.heroMediaId,
         ...(canonical.homepage ? { homepage: canonical.homepage } : {}),
         ...(canonical.homepageOrder === undefined

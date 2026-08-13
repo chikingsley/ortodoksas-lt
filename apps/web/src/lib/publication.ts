@@ -10,6 +10,9 @@ export interface CatalogEntry {
   description: string;
   hero: string | null;
   heroAlt: string;
+  heroFit: "contain" | "cover";
+  heroFocalX: number;
+  heroFocalY: number;
   heroMediaId: string | null;
   homepage?: "feed" | "lead" | "secondary";
   homepageOrder?: number;

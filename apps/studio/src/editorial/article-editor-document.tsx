@@ -9,6 +9,9 @@ import { AutoResizeTextarea } from "./auto-resize-textarea";
 interface Props {
   body: JSONContent;
   bodyHasLeadFigure: boolean;
+  heroFit: "contain" | "cover";
+  heroFocalX: number;
+  heroFocalY: number;
   heroMediaId: string | null;
   heroUrl: string | null;
   onBodyChange: (body: JSONContent) => void;
@@ -23,6 +26,9 @@ export function ArticleEditorDocument({
   body,
   bodyHasLeadFigure,
   heroMediaId,
+  heroFit,
+  heroFocalX,
+  heroFocalY,
   heroUrl,
   onBodyChange,
   onSummaryChange,
@@ -63,13 +69,14 @@ export function ArticleEditorDocument({
           {heroUrl ? (
             <img
               alt={`Lead for ${title}`}
-              className="block max-h-[280px] w-full rounded-lg bg-secondary object-contain"
+              className={`block h-[280px] w-full rounded-lg bg-secondary ${heroFit === "contain" ? "object-contain" : "object-cover"}`}
               height="900"
               src={
                 heroMediaId
                   ? `/api/media/${heroMediaId}`
                   : resolveHeroUrl(heroUrl)
               }
+              style={{ objectPosition: `${heroFocalX}% ${heroFocalY}%` }}
               width="1600"
             />
           ) : (
