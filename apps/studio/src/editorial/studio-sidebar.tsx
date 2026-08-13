@@ -36,6 +36,11 @@ export const StudioSidebar = () => {
     user?.primaryEmailAddress?.emailAddress ??
     "Studio editor";
   const emailAddress = user?.primaryEmailAddress?.emailAddress;
+  const accessLabel =
+    user?.publicMetadata.role === "admin" ? "Administrator" : "Editor access";
+  const accountLabel = emailAddress
+    ? `${accessLabel} · ${emailAddress}`
+    : accessLabel;
 
   return (
     <aside className="sticky top-0 z-20 flex h-screen flex-col border-border border-r bg-card max-inventory-mobile:static max-inventory-mobile:block max-inventory-mobile:h-16 max-inventory-mobile:w-full max-inventory-mobile:border-r-0 max-inventory-mobile:border-b">
@@ -91,7 +96,7 @@ export const StudioSidebar = () => {
             {displayName}
           </strong>
           <small className="mt-0.5 block overflow-hidden text-ellipsis whitespace-nowrap text-[10px] text-muted-foreground">
-            {emailAddress ?? "Editor access"}
+            {accountLabel}
           </small>
         </span>
       </div>

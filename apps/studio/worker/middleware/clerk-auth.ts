@@ -15,6 +15,13 @@ const getAuthorizedParties = (
   return parties?.length ? parties : [new URL(request.url).origin];
 };
 
+const isAdmin = (userId: string, configuredUserIds: string | undefined) =>
+  configuredUserIds
+    ?.split(",")
+    .map((configuredUserId) => configuredUserId.trim())
+    .filter(Boolean)
+    .includes(userId) ?? false;
+
 export const clerkAuth = createMiddleware<StudioEnvironment>(
   async (context, next) => {
     const { CLERK_SECRET_KEY, VITE_CLERK_PUBLISHABLE_KEY } = context.env;
@@ -51,7 +58,9 @@ export const clerkAuth = createMiddleware<StudioEnvironment>(
     context.set("editor", {
       id: auth.userId,
       name: "Clerk editor",
-      role: "editor",
+      role: isAdmin(auth.userId, context.env.CLERK_ADMIN_USER_IDS)
+        ? "admin"
+        : "editor",
     });
     await next();
   }
