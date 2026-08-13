@@ -38,11 +38,11 @@ const objectPosition = `${entry.heroFocalX}% ${entry.heroFocalY}%`;
 ) : (
   <article class="grid h-full grid-cols-[132px_1fr] items-start gap-4 py-4 first:pt-0 max-sm:grid-cols-[108px_1fr]">
     {entry.hero ? <EditorialImage alt={entry.heroAlt} class:list={["block aspect-[1.25] overflow-hidden bg-muted [&_img]:h-full [&_img]:w-full", imageFit]} href={href} label={`${copy.read}: ${entry.title}`} loading={loading} objectPosition={objectPosition} src={entry.hero} /> : null}
-    <div>
+    <div class="flex min-h-full flex-col">
       <div class="text-[10px] font-bold uppercase tracking-[0.08em] text-primary">{section}</div>
       <h3 class="mb-[7px] mt-[5px] font-serif text-xl font-bold leading-[1.1]"><a class="hover:text-primary" href={href}>{entry.title}</a></h3>
-      <time class="text-[9px] uppercase text-muted-foreground" datetime={entry.published ?? undefined}>{formatDate(entry.published, locale)}</time>
       <p class="m-0 line-clamp-2 font-serif text-sm leading-[1.45] text-muted-foreground max-sm:hidden">{entry.description}</p>
+      {entry.published ? <time class="mt-auto block pt-2 text-[9px] uppercase text-muted-foreground" datetime={entry.published}>{formatDate(entry.published, locale)}</time> : null}
     </div>
   </article>
 )}
