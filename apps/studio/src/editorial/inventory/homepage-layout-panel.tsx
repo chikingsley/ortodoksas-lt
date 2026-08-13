@@ -101,7 +101,7 @@ export function HomepageLayoutPanel({
           value={secondaryIds[position] ?? ""}
         />
       ))}
-      <Button disabled={state === "saving"} onClick={onSave}>
+      <Button className="h-10" disabled={state === "saving"} onClick={onSave}>
         <Save /> {state === "saving" ? "Saving…" : "Save layout"}
       </Button>
       {state === "saved" ? (

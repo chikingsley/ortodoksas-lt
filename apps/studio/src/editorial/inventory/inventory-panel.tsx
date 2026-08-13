@@ -144,7 +144,7 @@ export function InventoryPanel({
                       Article <ArrowDown />
                     </button>
                   </th>
-                  <th className={`${headerCellClass} w-[72px]`}>Language</th>
+                  <th className={`${headerCellClass} w-[128px]`}>Language</th>
                   <th className={`${headerCellClass} w-[145px] max-md:hidden`}>
                     Section
                   </th>
