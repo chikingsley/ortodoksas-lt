@@ -64,28 +64,21 @@ export function InventoryPanel({
   statusFilter,
   visible,
 }: Props) {
-  const publishedCount = inventoryArticles.filter(
-    (article) => article.status === "published"
-  ).length;
-  const draftCount = inventoryArticles.filter(
-    (article) => article.status === "draft"
-  ).length;
-
   return (
     <section
       aria-label="Article inventory"
-      className="overflow-hidden rounded-lg border bg-card shadow-xs"
+      className="overflow-hidden border-y bg-card"
     >
       <Tabs.Root onValueChange={onStatusChange} value={statusFilter}>
-        <Tabs.List className="flex h-[51px] items-end gap-6 border-b px-5 max-sm:grid max-sm:h-auto max-sm:grid-cols-2 max-sm:gap-x-5 max-sm:gap-y-0 max-sm:pt-1">
+        <Tabs.List className="flex h-[51px] items-end gap-6 border-b px-5 max-sm:grid max-sm:h-auto max-sm:grid-cols-3 max-sm:gap-x-5 max-sm:gap-y-0 max-sm:pt-1">
           <Tabs.Tab className={tabClass} value="all">
             All <span>{inventoryArticles.length.toLocaleString("en-US")}</span>
           </Tabs.Tab>
           <Tabs.Tab className={tabClass} value="published">
-            Published <span>{publishedCount.toLocaleString("en-US")}</span>
+            Published
           </Tabs.Tab>
           <Tabs.Tab className={tabClass} value="draft">
-            Drafts <span>{draftCount}</span>
+            Drafts
           </Tabs.Tab>
         </Tabs.List>
 

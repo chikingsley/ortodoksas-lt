@@ -1,13 +1,16 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import type { CatalogArticle } from "./types";
 
-type CatalogState =
+type CatalogState = (
   | { articles: CatalogArticle[]; state: "ready" }
-  | { articles: []; state: "loading" | "error" };
+  | { articles: []; state: "loading" | "error" }
+) & { refresh: () => void };
 
 export const useArticleCatalog = (): CatalogState => {
-  const [catalog, setCatalog] = useState<CatalogState>({
+  const [version, setVersion] = useState(0);
+  const refresh = useCallback(() => setVersion((current) => current + 1), []);
+  const [catalog, setCatalog] = useState<Omit<CatalogState, "refresh">>({
     articles: [],
     state: "loading",
   });
@@ -15,7 +18,7 @@ export const useArticleCatalog = (): CatalogState => {
   useEffect(() => {
     const controller = new AbortController();
 
-    fetch("/api/articles", { signal: controller.signal })
+    fetch(`/api/articles?refresh=${version}`, { signal: controller.signal })
       .then((response) => {
         if (!response.ok) {
           throw new Error("Catalog request failed");
@@ -78,7 +81,7 @@ export const useArticleCatalog = (): CatalogState => {
       });
 
     return () => controller.abort();
-  }, []);
+  }, [version]);
 
-  return catalog;
+  return { ...catalog, refresh } as CatalogState;
 };

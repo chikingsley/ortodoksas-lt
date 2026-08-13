@@ -15,7 +15,8 @@ import {
 } from "react";
 import { Button } from "@/components/ui/button";
 import { ArticleInventory } from "@/editorial/article-inventory";
-import { StudioSidebar } from "@/editorial/studio-sidebar";
+import { HomepageWorkspace } from "@/editorial/homepage-workspace";
+import { StudioSidebar, type StudioView } from "@/editorial/studio-sidebar";
 import type { CatalogArticle } from "@/editorial/types";
 import { useArticleCatalog } from "@/editorial/use-article-catalog";
 
@@ -27,6 +28,13 @@ const ArticleEditor = lazy(() =>
 
 const Studio = () => {
   const catalog = useArticleCatalog();
+  const [activeView, setActiveView] = useState<StudioView>(() =>
+    new URLSearchParams(window.location.search).get("view") === "homepage"
+      ? "homepage"
+      : "articles"
+  );
+  const [createError, setCreateError] = useState(false);
+  const [creating, setCreating] = useState(false);
   const [selectedArticle, setSelectedArticle] = useState<CatalogArticle | null>(
     null
   );
@@ -52,7 +60,66 @@ const Studio = () => {
   const closeArticle = useCallback(() => {
     window.history.replaceState(null, "", window.location.pathname);
     setSelectedArticle(null);
+    catalog.refresh();
+  }, [catalog]);
+  const navigate = useCallback((view: StudioView) => {
+    const nextUrl =
+      view === "homepage"
+        ? `${window.location.pathname}?view=homepage`
+        : window.location.pathname;
+    window.history.replaceState(null, "", nextUrl);
+    setActiveView(view);
   }, []);
+  const createArticle = useCallback(async () => {
+    setCreateError(false);
+    setCreating(true);
+    const slug = `draft-${crypto.randomUUID()}`;
+    try {
+      const response = await fetch("/api/articles", {
+        body: JSON.stringify({
+          body: { content: [{ type: "paragraph" }], type: "doc" },
+          kind: "article",
+          language: "lt",
+          section: "Naujienos",
+          slug,
+          status: "draft",
+          summary: "",
+          title: "Untitled article",
+          translationKind: "original",
+          translationReviewStatus: "not_required",
+        }),
+        headers: { "Content-Type": "application/json" },
+        method: "POST",
+      });
+      if (!response.ok) {
+        throw new Error("Draft creation failed");
+      }
+      const result = (await response.json()) as { id: string };
+      openArticle({
+        capture: "",
+        description: "",
+        file: result.id,
+        hero: null,
+        id: result.id,
+        kind: "article",
+        labels: [],
+        language: "lt",
+        path: `/${slug}`,
+        published: null,
+        section: "Naujienos",
+        source: "",
+        status: "draft",
+        title: "Untitled article",
+        translationGroupId: result.id,
+        translationKind: "original",
+        translationReviewStatus: "not_required",
+      });
+    } catch {
+      setCreateError(true);
+    } finally {
+      setCreating(false);
+    }
+  }, [openArticle]);
   const translations = useMemo(
     () =>
       selectedArticle
@@ -64,6 +131,39 @@ const Studio = () => {
     [catalog.articles, selectedArticle]
   );
 
+  let workspace = (
+    <ArticleInventory
+      articles={catalog.articles}
+      catalogState={catalog.state}
+      createError={createError}
+      creating={creating}
+      onCreate={createArticle}
+      onOpen={openArticle}
+    />
+  );
+  if (activeView === "homepage") {
+    workspace = <HomepageWorkspace articles={catalog.articles} />;
+  }
+  if (selectedArticle) {
+    workspace = (
+      <Suspense
+        fallback={
+          <div className="grid min-h-screen place-items-center text-[13px] text-muted-foreground">
+            Įkeliamas redaktorius…
+          </div>
+        }
+      >
+        <ArticleEditor
+          article={selectedArticle}
+          key={selectedArticle.file}
+          onBack={closeArticle}
+          onOpenTranslation={openArticle}
+          translations={translations}
+        />
+      </Suspense>
+    );
+  }
+
   return (
     <div
       className={
@@ -72,32 +172,10 @@ const Studio = () => {
           : "grid min-h-screen grid-cols-[232px_minmax(0,1fr)] max-[801px]:block max-[1101px]:grid-cols-[196px_minmax(0,1fr)]"
       }
     >
-      {selectedArticle ? null : <StudioSidebar />}
-      <div className="min-w-0">
-        {selectedArticle ? (
-          <Suspense
-            fallback={
-              <div className="grid min-h-screen place-items-center text-[13px] text-muted-foreground">
-                Įkeliamas redaktorius…
-              </div>
-            }
-          >
-            <ArticleEditor
-              article={selectedArticle}
-              key={selectedArticle.file}
-              onBack={closeArticle}
-              onOpenTranslation={openArticle}
-              translations={translations}
-            />
-          </Suspense>
-        ) : (
-          <ArticleInventory
-            articles={catalog.articles}
-            catalogState={catalog.state}
-            onOpen={openArticle}
-          />
-        )}
-      </div>
+      {selectedArticle ? null : (
+        <StudioSidebar activeView={activeView} onNavigate={navigate} />
+      )}
+      <div className="min-w-0">{workspace}</div>
     </div>
   );
 };

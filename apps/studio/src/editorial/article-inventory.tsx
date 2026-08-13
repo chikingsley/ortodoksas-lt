@@ -1,22 +1,8 @@
 import { getSectionOptions } from "@ortodoksas-lt/content/sections";
-import { FilePlus2, House } from "lucide-react";
-import {
-  type ChangeEvent,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { FilePlus2 } from "lucide-react";
+import { type ChangeEvent, useCallback, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import {
-  fetchHomepagePlacements,
-  persistHomepagePlacements,
-} from "./inventory/homepage-api";
-import {
-  AUTOMATIC_PLACEMENT,
-  HomepageLayoutPanel,
-} from "./inventory/homepage-layout-panel";
 import { InventoryPanel } from "./inventory/inventory-panel";
 import type { CatalogArticle } from "./types";
 import type { ValueOption } from "./value-combobox";
@@ -24,37 +10,25 @@ import type { ValueOption } from "./value-combobox";
 interface Props {
   articles: CatalogArticle[];
   catalogState: "loading" | "ready" | "error";
+  createError: boolean;
+  creating: boolean;
+  onCreate: () => void;
   onOpen: (article: CatalogArticle) => void;
 }
 
 const PAGE_SIZE = 30;
-export const ArticleInventory = ({ articles, catalogState, onOpen }: Props) => {
+export const ArticleInventory = ({
+  articles,
+  catalogState,
+  createError,
+  creating,
+  onCreate,
+  onOpen,
+}: Props) => {
   const [query, setQuery] = useState("");
   const [section, setSection] = useState("All sections");
   const [statusFilter, setStatusFilter] = useState("all");
   const [page, setPage] = useState(1);
-  const [homepageOpen, setHomepageOpen] = useState(false);
-  const [leadId, setLeadId] = useState("");
-  const [secondaryIds, setSecondaryIds] = useState(["", "", "", ""]);
-  const [homepageState, setHomepageState] = useState<
-    "idle" | "saving" | "saved" | "error"
-  >("idle");
-
-  useEffect(() => {
-    fetchHomepagePlacements()
-      .then((placements) => {
-        const lead = placements.find((placement) => placement.slot === "lead");
-        const secondary = placements
-          .filter((placement) => placement.slot === "secondary")
-          .sort((left, right) => left.position - right.position);
-        setLeadId(lead?.articleId ?? "");
-        setSecondaryIds(
-          [0, 1, 2, 3].map((index) => secondary[index]?.articleId ?? "")
-        );
-      })
-      .catch(() => setHomepageState("error"));
-  }, []);
-
   const inventoryArticles = useMemo(
     () =>
       articles
@@ -68,23 +42,6 @@ export const ArticleInventory = ({ articles, catalogState, onOpen }: Props) => {
     () =>
       getSectionOptions(inventoryArticles.map((article) => article.section)),
     [inventoryArticles]
-  );
-  const articleOptions = useMemo<ValueOption[]>(
-    () => [
-      { label: "Automatic", value: AUTOMATIC_PLACEMENT },
-      ...inventoryArticles.map((article) => ({
-        label: article.title,
-        value: article.id,
-      })),
-    ],
-    [inventoryArticles]
-  );
-  const leadOptions = useMemo<ValueOption[]>(
-    () => [
-      { label: "Automatic latest story", value: AUTOMATIC_PLACEMENT },
-      ...articleOptions.slice(1),
-    ],
-    [articleOptions]
   );
   const sectionOptions = useMemo<ValueOption[]>(
     () => [
@@ -136,105 +93,45 @@ export const ArticleInventory = ({ articles, catalogState, onOpen }: Props) => {
     () => setPage((value) => Math.min(pageCount, value + 1)),
     [pageCount]
   );
-  const toggleHomepage = useCallback(
-    () => setHomepageOpen((open) => !open),
-    []
-  );
-  const updateLead = useCallback((value: string) => {
-    setLeadId(value === AUTOMATIC_PLACEMENT ? "" : value);
-    setHomepageState("idle");
-  }, []);
-  const updateSecondary = useCallback((position: number, value: string) => {
-    const nextValue = value === AUTOMATIC_PLACEMENT ? "" : value;
-    setSecondaryIds((current) =>
-      current.map((currentValue, index) =>
-        index === position ? nextValue : currentValue
-      )
-    );
-    setHomepageState("idle");
-  }, []);
-  const saveHomepage = useCallback(async () => {
-    setHomepageState("saving");
-    const selectedIds = [leadId, ...secondaryIds].filter(Boolean);
-    const hasMissingImage = selectedIds.some(
-      (id) => !inventoryArticles.find((article) => article.id === id)?.hero
-    );
-    if (hasMissingImage) {
-      setHomepageState("error");
-      return;
-    }
-    const saved = await persistHomepagePlacements({
-      leadId: leadId || null,
-      secondaryIds: secondaryIds.filter(Boolean),
-    });
-    setHomepageState(saved ? "saved" : "error");
-  }, [inventoryArticles, leadId, secondaryIds]);
-
   return (
-    <div className="mx-auto w-[min(100%,1500px)] px-[42px] pt-[42px] pb-[72px] max-inventory-compact:px-6 max-inventory-mobile:px-4 max-inventory-compact:pt-8 max-inventory-mobile:pt-[26px] max-inventory-compact:pb-[60px] max-inventory-mobile:pb-12">
-      <header className="mb-[30px] flex min-h-24 items-end justify-between gap-8 max-inventory-mobile:mb-[22px] max-inventory-phone:block max-inventory-mobile:min-h-0 max-inventory-mobile:items-start">
+    <div className="mx-auto w-full max-w-[1500px] pb-[72px] max-inventory-mobile:pb-12">
+      <header className="flex h-[76px] items-center justify-between gap-6 border-b px-[42px] max-inventory-mobile:h-auto max-inventory-mobile:min-h-[72px] max-inventory-compact:px-6 max-inventory-mobile:px-4">
         <div>
-          <p className="mt-0 mb-[7px] font-bold text-[11px] text-primary uppercase tracking-[0.08em]">
-            Content
-          </p>
-          <div className="flex items-center gap-2.5">
-            <h1 className="m-0 font-[650] text-[30px] leading-[1.1] tracking-[-0.035em] max-inventory-mobile:text-[27px]">
-              Articles
-            </h1>
-            <span className="inline-flex h-[23px] min-w-[38px] items-center justify-center rounded-full bg-muted px-2 font-semibold text-[11px] text-muted-foreground">
-              {inventoryArticles.length.toLocaleString("en-US")}
-            </span>
-          </div>
-          <p className="mt-2 mb-0 text-[13px] text-muted-foreground max-inventory-mobile:max-w-[480px]">
-            The complete publication archive and current editorial work in one
-            place.
-          </p>
+          <h1 className="m-0 font-[650] text-2xl tracking-[-0.03em]">
+            Articles
+          </h1>
+          {createError ? (
+            <p className="mt-1 mb-0 text-destructive text-xs" role="alert">
+              The draft needs another creation attempt.
+            </p>
+          ) : null}
         </div>
-        <div className="flex flex-wrap gap-2.5 max-inventory-mobile:mt-[18px]">
-          <Button onClick={toggleHomepage} size="lg" variant="outline">
-            <House data-icon="inline-start" /> Homepage layout
-          </Button>
-          <Button
-            className="shadow-[0_1px_1px_rgb(0_0_0/0.08)] max-inventory-phone:w-full"
-            size="lg"
-          >
-            <FilePlus2 data-icon="inline-start" /> New article
-          </Button>
-        </div>
+        <Button disabled={creating} onClick={onCreate} size="lg">
+          <FilePlus2 data-icon="inline-start" />
+          {creating ? "Creating…" : "New article"}
+        </Button>
       </header>
-
-      {homepageOpen ? (
-        <HomepageLayoutPanel
-          articleOptions={articleOptions}
-          leadId={leadId}
-          leadOptions={leadOptions}
-          onLeadChange={updateLead}
-          onSave={saveHomepage}
-          onSecondaryChange={updateSecondary}
-          secondaryIds={secondaryIds}
-          state={homepageState}
+      <div className="pt-6">
+        <InventoryPanel
+          catalogState={catalogState}
+          filteredCount={filtered.length}
+          inventoryArticles={inventoryArticles}
+          onNextPage={nextPage}
+          onOpen={onOpen}
+          onPreviousPage={previousPage}
+          onQueryChange={updateQuery}
+          onSectionChange={updateSection}
+          onStatusChange={updateStatusFilter}
+          pageCount={pageCount}
+          pageSize={PAGE_SIZE}
+          query={query}
+          safePage={safePage}
+          section={section}
+          sectionOptions={sectionOptions}
+          statusFilter={statusFilter}
+          visible={visible}
         />
-      ) : null}
-
-      <InventoryPanel
-        catalogState={catalogState}
-        filteredCount={filtered.length}
-        inventoryArticles={inventoryArticles}
-        onNextPage={nextPage}
-        onOpen={onOpen}
-        onPreviousPage={previousPage}
-        onQueryChange={updateQuery}
-        onSectionChange={updateSection}
-        onStatusChange={updateStatusFilter}
-        pageCount={pageCount}
-        pageSize={PAGE_SIZE}
-        query={query}
-        safePage={safePage}
-        section={section}
-        sectionOptions={sectionOptions}
-        statusFilter={statusFilter}
-        visible={visible}
-      />
+      </div>
     </div>
   );
 };

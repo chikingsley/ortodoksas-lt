@@ -47,8 +47,10 @@ This is the implementation checklist for the public publication UI. A checked it
 
 ## Studio composition
 
-- [x] `ArticleInventory` owns catalog filtering, pagination, and homepage-placement state.
-- [x] Inventory presentation is divided into `InventoryPanel`, `ArticleRow`, and `HomepageLayoutPanel` feature components.
+- [x] `ArticleInventory` owns article filtering and pagination; its workspace header owns the new-article action.
+- [x] `HomepageWorkspace` owns homepage placement loading, selection, and saving in a dedicated navigation state.
+- [x] Inventory presentation is divided into `InventoryPanel` and `ArticleRow`; homepage composition uses `HomepageLayoutPanel`.
+- [x] Studio navigation exposes only complete Articles and Homepage destinations.
 - [x] `ArticleEditor` owns loading, persistence, preview state, revision restore, and translation transitions.
 - [x] Editor presentation is divided into header, document, inspector, and dialog components.
 - [x] Reusable controls come from generated shadcn/Base UI primitives under `apps/studio/src/components/ui`.
