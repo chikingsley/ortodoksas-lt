@@ -1,12 +1,8 @@
+import { getSectionLabel } from "@ortodoksas-lt/content/sections";
 import { SearchIcon } from "lucide-react";
-import {
-  type ChangeEvent,
-  type SyntheticEvent,
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
+import { type ChangeEvent, useCallback, useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import {
   Combobox,
   ComboboxContent,
@@ -28,8 +24,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { SiteLocale } from "@/i18n/config";
+import { ui } from "@/i18n/ui";
 
 interface ArchiveControlsProps {
+  initialLabel?: string;
+  initialQuery?: string;
+  initialSection?: string;
+  initialYear?: string;
   labels: string[];
   locale?: SiteLocale;
   sections: string[];
@@ -39,112 +40,21 @@ interface ArchiveControlsProps {
 const allValue = "__all__";
 const filterControlText =
   "font-sans text-base font-normal text-foreground md:text-sm";
-const copy: Record<
-  SiteLocale,
-  {
-    allSections: string;
-    allYears: string;
-    emptyLabels: string;
-    label: string;
-    labelPlaceholder: string;
-    search: string;
-    searchPlaceholder: string;
-    section: string;
-    year: string;
-  }
-> = {
-  be: {
-    allSections: "Усе тэмы",
-    allYears: "Усе гады",
-    emptyLabels: "Меткі не знойдзены",
-    label: "Метка",
-    labelPlaceholder: "Усе меткі",
-    search: "Пошук у архіве",
-    searchPlaceholder: "Шукаць па назве або тэме",
-    section: "Тэма",
-    year: "Год",
-  },
-  en: {
-    allSections: "All topics",
-    allYears: "All years",
-    emptyLabels: "No tags found",
-    label: "Tag",
-    labelPlaceholder: "All tags",
-    search: "Search the archive",
-    searchPlaceholder: "Search by title or topic",
-    section: "Section",
-    year: "Year",
-  },
-  lt: {
-    allSections: "Visos temos",
-    allYears: "Visi metai",
-    emptyLabels: "Žymų nerasta",
-    label: "Žyma",
-    labelPlaceholder: "Visos žymos",
-    search: "Ieškoti archyve",
-    searchPlaceholder: "Ieškoti pagal pavadinimą ar temą",
-    section: "Tema",
-    year: "Metai",
-  },
-  ru: {
-    allSections: "Все темы",
-    allYears: "Все годы",
-    emptyLabels: "Метки не найдены",
-    label: "Метка",
-    labelPlaceholder: "Все метки",
-    search: "Поиск по архиву",
-    searchPlaceholder: "Искать по названию или теме",
-    section: "Тема",
-    year: "Год",
-  },
-  uk: {
-    allSections: "Усі теми",
-    allYears: "Усі роки",
-    emptyLabels: "Міток не знайдено",
-    label: "Мітка",
-    labelPlaceholder: "Усі мітки",
-    search: "Пошук в архіві",
-    searchPlaceholder: "Шукати за назвою або темою",
-    section: "Тема",
-    year: "Рік",
-  },
-};
-
-const normalize = (value: string) =>
-  value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/gu, "")
-    .toLocaleLowerCase();
-
-interface ArchiveFilterState {
-  label: string;
-  query: string;
-  section: string;
-  year: string;
-}
-
-const rowMatchesFilters = (
-  row: HTMLElement,
-  { label, query, section, year }: ArchiveFilterState
-) =>
-  (!query || row.dataset.search?.includes(query) === true) &&
-  (!section || row.dataset.section === section) &&
-  (!label || row.dataset.labels?.split("||").includes(label) === true) &&
-  (!year || row.dataset.year === year);
-
 export function ArchiveControls({
+  initialLabel = "",
+  initialQuery = "",
+  initialSection = "",
+  initialYear = "",
   labels,
   locale = "lt",
   sections,
   years,
 }: ArchiveControlsProps) {
-  const displayLocale = locale;
-  const labelsForLocale = copy[locale];
-  const [hydrated, setHydrated] = useState(false);
-  const [label, setLabel] = useState("");
-  const [query, setQuery] = useState("");
-  const [section, setSection] = useState("");
-  const [year, setYear] = useState("");
+  const labelsForLocale = ui[locale];
+  const [label, setLabel] = useState(initialLabel);
+  const [query, setQuery] = useState(initialQuery);
+  const [section, setSection] = useState(initialSection);
+  const [year, setYear] = useState(initialYear);
 
   const handleLabelChange = useCallback((value: string | null) => {
     setLabel(value ?? "");
@@ -158,82 +68,19 @@ export function ArchiveControls({
   const handleSectionChange = useCallback((value: string | null) => {
     setSection(value === allValue || value === null ? "" : value);
   }, []);
-  const handleSubmit = useCallback(
-    (event: SyntheticEvent<HTMLFormElement, SubmitEvent>) => {
-      event.preventDefault();
-    },
-    []
-  );
   const handleYearChange = useCallback((value: string | null) => {
     setYear(value === allValue || value === null ? "" : value);
   }, []);
 
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    setQuery(params.get("q") ?? "");
-    setSection(params.get("tema") ?? "");
-    setLabel(params.get("zyma") ?? "");
-    setYear(params.get("metai") ?? "");
-    setHydrated(true);
-  }, []);
-
-  useEffect(() => {
-    if (!hydrated) {
-      return;
-    }
-
-    const filters = {
-      label: normalize(label),
-      query: normalize(query),
-      section,
-      year,
-    };
-    const rows = Array.from(
-      document.querySelectorAll<HTMLElement>("#archive-list article")
-    );
-    let visible = 0;
-
-    for (const row of rows) {
-      const matches = rowMatchesFilters(row, filters);
-      row.hidden = !matches;
-      visible += Number(matches);
-    }
-
-    const count = document.querySelector("#archive-count");
-    if (count) {
-      count.textContent = visible.toLocaleString(displayLocale);
-    }
-
-    const params = new URLSearchParams(window.location.search);
-    params.delete("q");
-    params.delete("tema");
-    params.delete("zyma");
-    params.delete("metai");
-    if (query) {
-      params.set("q", query);
-    }
-    if (section) {
-      params.set("tema", section);
-    }
-    if (label) {
-      params.set("zyma", label);
-    }
-    if (year) {
-      params.set("metai", year);
-    }
-    window.history.replaceState(
-      null,
-      "",
-      `${window.location.pathname}${params.size > 0 ? `?${params}` : ""}`
-    );
-  }, [displayLocale, hydrated, label, query, section, year]);
-
   const sectionItems = [
-    { label: labelsForLocale.allSections, value: allValue },
-    ...sections.map((value) => ({ label: value, value })),
+    { label: labelsForLocale.archiveAllSections, value: allValue },
+    ...sections.map((value) => ({
+      label: getSectionLabel(value, locale),
+      value,
+    })),
   ];
   const yearItems = [
-    { label: labelsForLocale.allYears, value: allValue },
+    { label: labelsForLocale.archiveAllYears, value: allValue },
     ...years.map((value) => ({ label: value, value })),
   ];
 
@@ -243,7 +90,6 @@ export function ArchiveControls({
       className="flex flex-col gap-2 sm:grid sm:grid-cols-2 lg:flex lg:flex-row lg:items-center"
       id="archive-controls"
       method="get"
-      onSubmit={handleSubmit}
       translate="no"
     >
       <label
@@ -256,7 +102,7 @@ export function ArchiveControls({
             id="archive-query"
             name="q"
             onChange={handleQueryChange}
-            placeholder={labelsForLocale.searchPlaceholder}
+            placeholder={labelsForLocale.archiveSearchPlaceholder}
             type="search"
             value={query}
           />
@@ -268,11 +114,12 @@ export function ArchiveControls({
 
       <Select
         items={sectionItems}
+        name="tema"
         onValueChange={handleSectionChange}
         value={section || allValue}
       >
         <SelectTrigger
-          aria-label={labelsForLocale.section}
+          aria-label={labelsForLocale.archiveSection}
           className={`w-full lg:w-44 ${filterControlText}`}
         >
           <SelectValue />
@@ -288,18 +135,19 @@ export function ArchiveControls({
 
       <Combobox
         items={labels}
+        name="zyma"
         onValueChange={handleLabelChange}
         value={label || null}
       >
         <ComboboxInput
-          aria-label={labelsForLocale.label}
+          aria-label={labelsForLocale.archiveLabel}
           className="w-full lg:w-44"
           inputClassName={`${filterControlText} placeholder:text-foreground`}
-          placeholder={labelsForLocale.labelPlaceholder}
+          placeholder={labelsForLocale.archiveLabelPlaceholder}
           showClear
         />
         <ComboboxContent>
-          <ComboboxEmpty>{labelsForLocale.emptyLabels}</ComboboxEmpty>
+          <ComboboxEmpty>{labelsForLocale.archiveEmptyLabels}</ComboboxEmpty>
           <ComboboxList>
             {labels.map((item) => (
               <ComboboxItem key={item} value={item}>
@@ -312,11 +160,12 @@ export function ArchiveControls({
 
       <Select
         items={yearItems}
+        name="metai"
         onValueChange={handleYearChange}
         value={year || allValue}
       >
         <SelectTrigger
-          aria-label={labelsForLocale.year}
+          aria-label={labelsForLocale.archiveYear}
           className={`w-full lg:w-44 ${filterControlText}`}
         >
           <SelectValue />
@@ -329,6 +178,13 @@ export function ArchiveControls({
           ))}
         </SelectContent>
       </Select>
+
+      <Button
+        className="h-8 rounded-none bg-primary px-5 text-primary-foreground text-sm hover:bg-primary/90"
+        type="submit"
+      >
+        {labelsForLocale.search}
+      </Button>
     </form>
   );
 }

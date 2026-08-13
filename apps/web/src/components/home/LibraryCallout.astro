@@ -1,18 +1,22 @@
 ---
 interface Props {
   description: string;
+  locale?: import("../../i18n/config").SiteLocale;
   title: string;
 }
 
-const { description, title } = Astro.props;
+import { ui } from "../../i18n/ui";
+const { description, locale = "lt", title } = Astro.props;
+const copy = ui[locale];
+const href = "/p/biblioteka.html";
 ---
 
-<section class="relative mx-auto mb-[72px] mt-[30px] grid w-[min(1200px,calc(100%-64px))] grid-cols-[1fr_260px] items-center gap-10 overflow-hidden bg-paper px-[54px] py-[45px] text-foreground max-sm:mb-12 max-sm:w-[min(1200px,calc(100%-32px))] max-sm:grid-cols-1 max-sm:px-7 max-sm:py-9">
+<section class="relative mx-auto grid w-[min(1200px,calc(100%-64px))] grid-cols-[1fr_260px] items-center gap-10 overflow-hidden bg-paper px-12 py-10 text-foreground max-sm:w-[min(1200px,calc(100%-32px))] max-sm:grid-cols-1 max-sm:px-6 max-sm:py-8">
   <div class="relative z-10 max-sm:max-w-[calc(100%-64px)]">
     <h2 class="mb-2.5 font-serif text-[38px] font-bold leading-none">{title}</h2>
     <p class="mb-5 max-w-[65ch] font-serif text-[17px] leading-normal text-muted-foreground">{description}</p>
-    <a class="inline-flex items-center gap-[7px] text-[11px] font-bold text-primary" href="/p/biblioteka.html">
-      Atverti biblioteką <span aria-hidden="true">→</span>
+    <a class="inline-flex items-center gap-[7px] text-[11px] font-bold text-primary" href={href}>
+      {copy.openLibrary} <span aria-hidden="true">→</span>
     </a>
   </div>
   <img class="absolute right-0 -top-[35px] w-[280px] max-sm:w-[172px]"

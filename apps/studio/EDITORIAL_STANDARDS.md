@@ -19,6 +19,15 @@ Every imported or newly created article enters Studio as one canonical Tiptap do
 - Represent section headings with heading nodes. Automatic checks flag empty and level-one body headings.
 - Preserve intentional single line breaks inside verse, addresses, and similar material.
 
+## Translation fidelity
+
+- Translate meaning and grammar while preserving the source's rhetorical structure.
+- Preserve source punctuation unless target-language grammar requires a documented change.
+- Compare sentence dashes within aligned source fields, treating en and em dashes as equivalent source punctuation.
+- Treat sentence dashes introduced beyond an aligned source field as publication-blocking review items.
+- Use spaced en dashes for Ukrainian sentence punctuation under the 2026 official orthography.
+- Use the source-comparison view to resolve every punctuation-fidelity item before publication.
+
 ## Media
 
 - Render the lead image once between the summary and article body.

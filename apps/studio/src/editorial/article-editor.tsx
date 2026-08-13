@@ -117,6 +117,12 @@ export function ArticleEditor({
   const [translationSourceHash, setTranslationSourceHash] = useState<
     string | null
   >(null);
+  const [translationSourceQuality, setTranslationSourceQuality] = useState<{
+    body: JSONContent;
+    language: string;
+    summary: string;
+    title: string;
+  } | null>(null);
   const [warnings, setWarnings] = useState<string[]>([]);
 
   useEffect(() => {
@@ -129,6 +135,7 @@ export function ArticleEditor({
           canonical,
           changes: baselineChanges,
           revisions: loadedRevisions,
+          translationSource,
         } = await fetchArticleWorkspace(article.id, controller.signal);
         const sourceRecord: SourceArticle = {
           ...article,
@@ -164,6 +171,18 @@ export function ArticleEditor({
         setTranslationReviewStatus(canonical.translationReviewStatus);
         setTranslationSourceArticleId(canonical.translationSourceArticleId);
         setTranslationSourceHash(canonical.translationSourceHash);
+        setTranslationSourceQuality(
+          translationSource
+            ? {
+                body: tiptapDocumentSchema.parse(
+                  JSON.parse(translationSource.bodyJson)
+                ),
+                language: translationSource.language,
+                summary: translationSource.summary,
+                title: translationSource.title,
+              }
+            : null
+        );
         setRevisions(loadedRevisions);
         setLoadState("ready");
         setSaveState("saved");
@@ -391,8 +410,15 @@ export function ArticleEditor({
       : "";
   }, [article.hero, body, language, summary, title]);
   const qualityIssues = useMemo(
-    () => getArticleQualityIssues({ body, summary, title }),
-    [body, summary, title]
+    () =>
+      getArticleQualityIssues({
+        body,
+        language,
+        summary,
+        title,
+        translationSource: translationSourceQuality ?? undefined,
+      }),
+    [body, language, summary, title, translationSourceQuality]
   );
   const bodyHasLeadFigure = useMemo(
     () =>

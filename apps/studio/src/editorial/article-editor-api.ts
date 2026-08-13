@@ -11,6 +11,7 @@ export interface ArticleWorkspaceResponse {
   canonical: StoredArticle;
   changes: BaselineResponse["changes"];
   revisions: Revision[];
+  translationSource: StoredArticle | null;
 }
 
 export async function fetchArticleWorkspace(
@@ -34,8 +35,17 @@ export async function fetchArticleWorkspace(
   const revisions = revisionResponse.ok
     ? ((await revisionResponse.json()) as { revisions: Revision[] }).revisions
     : [];
+  const translationSourceResponse = canonical.translationSourceArticleId
+    ? await fetch(`/api/articles/${canonical.translationSourceArticleId}`, {
+        signal,
+      })
+    : null;
+  const translationSource =
+    translationSourceResponse?.ok === true
+      ? ((await translationSourceResponse.json()) as ArticleResponse).article
+      : null;
 
-  return { baseline, canonical, changes, revisions };
+  return { baseline, canonical, changes, revisions, translationSource };
 }
 
 export async function fetchArticleBaseline(

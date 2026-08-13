@@ -1,3 +1,6 @@
+import { getSectionLabel } from "@ortodoksas-lt/content/sections";
+import type { SiteLocale } from "../i18n/config";
+import { ui } from "../i18n/ui";
 import { type CatalogEntry, sectionSlug } from "./publication";
 
 interface HomepageEntry {
@@ -22,6 +25,50 @@ export interface HomepageModel {
     href: string;
     title: string;
   }>;
+}
+
+export function getHomepageArticleGroups(model: HomepageModel) {
+  return new Set(
+    [
+      model.lead,
+      ...model.secondary,
+      ...model.recent,
+      ...model.sectionGroups.flatMap((section) => section.articles),
+    ].flatMap((entry) => entry?.translationGroupId ?? [])
+  );
+}
+
+export function localizeHomepageCatalog(
+  canonicalCatalog: CatalogEntry[],
+  localizedCatalog: CatalogEntry[]
+) {
+  const localizedByGroup = new Map(
+    localizedCatalog.map((entry) => [entry.translationGroupId, entry])
+  );
+
+  return canonicalCatalog.flatMap((canonical) => {
+    const localized = canonical.translationGroupId
+      ? localizedByGroup.get(canonical.translationGroupId)
+      : undefined;
+    if (!localized) {
+      return [];
+    }
+
+    return [
+      {
+        ...localized,
+        hero: canonical.hero,
+        heroAlt: canonical.heroAlt,
+        heroMediaId: canonical.heroMediaId,
+        ...(canonical.homepage ? { homepage: canonical.homepage } : {}),
+        ...(canonical.homepageOrder === undefined
+          ? {}
+          : { homepageOrder: canonical.homepageOrder }),
+        published: canonical.published,
+        section: canonical.section,
+      },
+    ];
+  });
 }
 
 export function selectHomepageArticles<T extends HomepageEntry>(entries: T[]) {
@@ -61,12 +108,14 @@ export function selectHomepageArticles<T extends HomepageEntry>(entries: T[]) {
 interface HomepageModelInput {
   articles: CatalogEntry[];
   catalog: CatalogEntry[];
+  locale?: SiteLocale;
   sections: string[];
 }
 
 export function buildHomepageModel({
   articles,
   catalog,
+  locale = "lt",
   sections,
 }: HomepageModelInput): HomepageModel {
   const { lead, remaining, secondary } = selectHomepageArticles(articles);
@@ -76,7 +125,7 @@ export function buildHomepageModel({
       continue;
     }
     const date = new Date(`${article.published.slice(0, 10)}T00:00:00Z`);
-    const key = new Intl.DateTimeFormat("lt-LT", {
+    const key = new Intl.DateTimeFormat(locale, {
       month: "long",
       timeZone: "UTC",
       year: "numeric",
@@ -95,8 +144,11 @@ export function buildHomepageModel({
       ? [
           {
             articles: sectionArticles,
-            href: `/tema/${sectionSlug(title)}`,
-            title,
+            href:
+              locale === "lt"
+                ? `/tema/${sectionSlug(title)}`
+                : `/${locale}#articles`,
+            title: getSectionLabel(title, locale),
           },
         ]
       : [];
@@ -106,10 +158,8 @@ export function buildHomepageModel({
     archiveMonths: [...archiveMonths.entries()],
     lead,
     library: {
-      description:
-        library?.description ??
-        "Atkurtų tekstų, paskaitų ir liturginės medžiagos rinkinys.",
-      title: library?.title ?? "Biblioteka",
+      description: library?.description ?? ui[locale].footerDescription,
+      title: library?.title ?? ui[locale].library,
     },
     recent: remaining.slice(0, 3),
     secondary,

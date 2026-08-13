@@ -255,7 +255,7 @@ Chain motifs create the signature organic geometry: exact ceremonial-gold vertic
 
 - **Style:** Center Playfair navigation inside a 48px row under a neutral hairline.
 - **States:** Hover and active labels turn burgundy; the active item uses burgundy text and weight only. The mobile menu uses a three-line trigger and a white, hairline-divided overlay.
-- **Languages:** Keep multilingual switches compact in Arimo, with the same burgundy-and-gold active treatment.
+- **Languages:** Keep multilingual switches compact in Arimo; the active language uses burgundy text and weight only on every breakpoint.
 
 ### Motifs
 

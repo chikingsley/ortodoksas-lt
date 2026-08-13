@@ -131,9 +131,9 @@ export function isNavigationItemActive(
     return currentPath === item.href;
   }
   if (item.id === "archive") {
-    return (
-      currentPath === item.href.split("#")[0] || currentPath === "/archyvas"
-    );
+    return item.href.includes("#")
+      ? currentPath === item.href
+      : currentPath === item.href || currentPath === "/archyvas";
   }
   return currentPath === item.href;
 }

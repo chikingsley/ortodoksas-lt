@@ -8,7 +8,7 @@ interface Props {
 const { href, linkLabel, title } = Astro.props;
 ---
 
-<div class="mb-5 flex items-end justify-between gap-5 border-b-2 border-primary pb-[11px] max-sm:items-center">
+<div class="mb-5 flex items-end justify-between gap-5 border-b-2 border-primary pb-3 max-sm:items-center">
   <h2 class="m-0 font-serif text-[clamp(24px,2.3vw,32px)] font-bold leading-none tracking-[-0.02em] max-sm:text-[26px]">{title}</h2>
   {href && linkLabel ? <a class="text-[10px] font-bold text-primary" href={href}>{linkLabel} <span aria-hidden="true">→</span></a> : null}
 </div>

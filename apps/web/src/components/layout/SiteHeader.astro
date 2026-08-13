@@ -3,7 +3,7 @@ import PublicationHeader from "./publication-header";
 import type { SiteLocale } from "../../i18n/config";
 import {
   getLocaleLinks,
-  getLocalizedCounterpart,
+  getLocalizedCounterparts,
 } from "../../lib/publication-repository";
 import { getPrimaryNavigation } from "../../navigation/publication";
 
@@ -14,20 +14,16 @@ interface Props {
 
 const { currentPath, locale = "lt" } = Astro.props;
 const localeLinks = await getLocaleLinks(currentPath);
+const headerPaths = [
+  "/p/bendruomenes_21.html",
+  "/p/dvasininkai.html",
+  "/p/biblioteka.html",
+  "/p/kalendorius.html",
+];
+const localizedEntries =
+  locale === "lt" ? new Map() : await getLocalizedCounterparts(locale, headerPaths);
 const localizedPaths = new Map(
-  locale === "lt"
-    ? []
-    : await Promise.all(
-        [
-          "/p/bendruomenes_21.html",
-          "/p/dvasininkai.html",
-          "/p/biblioteka.html",
-          "/p/kalendorius.html",
-        ].map(async (path) => [
-          path,
-          (await getLocalizedCounterpart(locale, path))?.path,
-        ] as const)
-      )
+  [...localizedEntries].map(([path, entry]) => [path, entry.path])
 );
 const navigationItems = getPrimaryNavigation(
   locale,

@@ -1,7 +1,10 @@
 ---
 import type { SiteLocale } from "../../i18n/config";
 import { ui } from "../../i18n/ui";
-import { searchArticles } from "../../lib/publication-repository";
+import {
+  getRecentArticles,
+  searchArticles,
+} from "../../lib/publication-repository";
 import SiteLayout from "../../layouts/SiteLayout.astro";
 import ArchiveList from "../archive/ArchiveList.astro";
 import PageIntro from "../publication/PageIntro.astro";
@@ -17,43 +20,7 @@ const searchPath = localized ? `/${locale}/paieska` : "/paieska";
 const query = Astro.url.searchParams.get("q")?.trim() ?? "";
 const page = Math.max(1, Number.parseInt(Astro.url.searchParams.get("page") ?? "1", 10) || 1);
 const pageSize = 20;
-const copy = {
-  be: {
-    description: "Шукайце публікацыі паводле назвы, тэмы або пазнакі.",
-    eyebrow: "Пошук у архіве",
-    placeholder: "Увядзіце слова або фразу",
-    results: "вынікаў",
-    title: "Што вы шукаеце?",
-  },
-  en: {
-    description: "Search publications by title, topic, or label.",
-    eyebrow: "Archive search",
-    placeholder: "Enter a word or phrase",
-    results: "results",
-    title: "What are you looking for?",
-  },
-  lt: {
-    description: "Ieškokite publikacijų pagal pavadinimą, temą ar žymą.",
-    eyebrow: "Archyvo paieška",
-    placeholder: "Įveskite žodį ar frazę",
-    results: "rezultatai",
-    title: "Ko ieškote?",
-  },
-  ru: {
-    description: "Ищите публикации по названию, теме или метке.",
-    eyebrow: "Поиск по архиву",
-    placeholder: "Введите слово или фразу",
-    results: "результатов",
-    title: "Что вы ищете?",
-  },
-  uk: {
-    description: "Шукайте публікації за назвою, темою або міткою.",
-    eyebrow: "Пошук в архіві",
-    placeholder: "Введіть слово або фразу",
-    results: "результатів",
-    title: "Що ви шукаєте?",
-  },
-}[locale];
+const copy = ui[locale];
 const result = query
   ? await searchArticles(locale, query, {
       limit: pageSize,
@@ -68,26 +35,27 @@ const visibleMatches = currentPage === page
       limit: pageSize,
       offset: (currentPage - 1) * pageSize,
     })).entries;
+const recentArticles = query ? [] : await getRecentArticles(locale, 6);
 const pageHref = (target: number) => `${searchPath}?q=${encodeURIComponent(query)}&page=${target}`;
 ---
 
 <SiteLayout
   canonicalPath={searchPath}
-  description={copy.description}
+  description={copy.searchDescription}
   lang={locale}
   locale={locale}
   title={`${ui[locale].search} · ortodoksas.lt`}
 >
-  <main class="mx-auto min-h-[65vh] w-[min(1200px,calc(100%-64px))] pb-[70px] max-sm:w-[min(1200px,calc(100%-32px))]">
-    <PageIntro compact description={copy.description} eyebrow={copy.eyebrow} title={copy.title} />
-    <SearchForm action={searchPath} buttonLabel={ui[locale].search} placeholder={copy.placeholder} query={query} />
+  <main class="mx-auto w-[min(1200px,calc(100%-64px))] pb-[70px] max-sm:w-[min(1200px,calc(100%-32px))]">
+    <PageIntro compact description={copy.searchDescription} eyebrow={copy.searchEyebrow} title={copy.searchTitle} />
+    <SearchForm action={searchPath} buttonLabel={copy.search} placeholder={copy.searchPlaceholder} query={query} />
     {query ? (
       <section class="pt-9" aria-live="polite">
         <p class="mb-4 text-xs uppercase tracking-[0.06em] text-muted-foreground">
-          <strong class="tabular-nums text-primary">{result.total.toLocaleString(locale)}</strong> {copy.results}
+          <strong class="tabular-nums text-primary">{result.total.toLocaleString(locale)}</strong> {copy.searchResults}
         </p>
         {visibleMatches.length ? <ArchiveList entries={visibleMatches} locale={locale} /> : (
-          <p class="border-primary border-t-2 py-8 font-serif text-xl text-muted-foreground">{copy.description}</p>
+          <p class="border-primary border-t-2 py-8 font-serif text-xl text-muted-foreground">{copy.searchDescription}</p>
         )}
         {pageCount > 1 ? (
           <nav class="flex items-center justify-between py-7" aria-label={ui[locale].search}>
@@ -97,6 +65,11 @@ const pageHref = (target: number) => `${searchPath}?q=${encodeURIComponent(query
           </nav>
         ) : null}
       </section>
-    ) : null}
+    ) : (
+      <section class="pt-10">
+        <h2 class="mb-5 border-primary border-b-2 pb-3 font-serif text-[clamp(24px,2.3vw,32px)] font-bold leading-none tracking-[-0.02em]">{copy.recentPublications}</h2>
+        <ArchiveList entries={recentArticles} locale={locale} rule={false} />
+      </section>
+    )}
   </main>
 </SiteLayout>

@@ -576,10 +576,25 @@ articleRoutes.put("/:id", async (context) => {
 
   const id = context.req.param("id");
   if (parsed.data.status === "published") {
+    const database = getDatabase(context.env.DB);
+    const translationSource = parsed.data.translationSourceArticleId
+      ? await database.query.articles.findFirst({
+          where: eq(articles.id, parsed.data.translationSourceArticleId),
+        })
+      : undefined;
     const qualityIssues = getArticleQualityIssues({
       body: parsed.data.body,
+      language: parsed.data.language,
       summary: parsed.data.summary,
       title: parsed.data.title,
+      translationSource: translationSource
+        ? {
+            body: JSON.parse(translationSource.bodyJson) as TiptapDocument,
+            language: translationSource.language,
+            summary: translationSource.summary,
+            title: translationSource.title,
+          }
+        : undefined,
     });
     if (qualityIssues.length > 0) {
       return context.json(

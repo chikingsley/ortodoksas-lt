@@ -13,12 +13,16 @@ describe("publication navigation contract", () => {
   });
 
   it("marks home active only on the edition root", () => {
-    const [home] = getPrimaryNavigation("en");
+    const items = getPrimaryNavigation("en");
+    const home = items.find((item) => item.id === "home");
+    const archive = items.find((item) => item.id === "archive");
     expect(home).toBeDefined();
-    if (!home) {
+    expect(archive).toBeDefined();
+    if (!(home && archive)) {
       return;
     }
     expect(isNavigationItemActive("/en", home)).toBe(true);
+    expect(isNavigationItemActive("/en", archive)).toBe(false);
     expect(isNavigationItemActive("/en/2022/article.html", home)).toBe(false);
   });
 

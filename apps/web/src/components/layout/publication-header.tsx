@@ -49,11 +49,11 @@ export default function PublicationHeader({
       }`}
       className={
         code === locale
-          ? `relative inline-flex items-center justify-center font-bold text-primary ${
+          ? `inline-flex items-center justify-center font-bold text-primary ${
               mobile
                 ? "min-h-11 min-w-11 text-[10px]"
                 : "min-h-9 min-w-8 text-[10px]"
-            } after:absolute after:inset-x-2 after:bottom-0 after:h-0.5 after:bg-gold`
+            }`
           : `inline-flex items-center justify-center font-bold text-muted-foreground transition-colors hover:text-primary data-[counterpart=unavailable]:opacity-55 ${
               mobile
                 ? "min-h-11 min-w-11 text-[10px]"

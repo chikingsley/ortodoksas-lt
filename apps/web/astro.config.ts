@@ -10,6 +10,9 @@ export default defineConfig({
   build: {
     format: "file",
   },
+  devToolbar: {
+    enabled: false,
+  },
   i18n: {
     defaultLocale,
     locales: [...siteLocales],

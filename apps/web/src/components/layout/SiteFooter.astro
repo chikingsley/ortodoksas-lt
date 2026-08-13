@@ -1,7 +1,7 @@
 ---
 import { ui } from "../../i18n/ui";
 import type { SiteLocale } from "../../i18n/config";
-import { getLocalizedCounterpart } from "../../lib/publication-repository";
+import { getLocalizedCounterparts } from "../../lib/publication-repository";
 import { getContactNavigation, getPrimaryNavigation } from "../../navigation/publication";
 import PublicationLogo from "./publication-logo";
 
@@ -19,23 +19,18 @@ const paths = [
   "/p/kontaktai_30.html",
   "/p/paremti.html",
 ];
+const localizedEntries =
+  locale === "lt" ? new Map() : await getLocalizedCounterparts(locale, paths);
 const localizedPaths = new Map(
-  locale === "lt"
-    ? []
-    : await Promise.all(
-        paths.map(async (path) => [
-          path,
-          (await getLocalizedCounterpart(locale, path))?.path,
-        ] as const)
-      )
+  [...localizedEntries].map(([path, entry]) => [path, entry.path])
 );
 const navigationItems = getPrimaryNavigation(locale, (path) => localizedPaths.get(path));
 const contactItems = getContactNavigation(locale, (path) => localizedPaths.get(path));
 ---
 
 <footer class="border-primary border-t bg-paper pt-12 text-foreground">
-  <div class="mx-auto grid w-[min(1200px,calc(100%-64px))] grid-cols-[2fr_1fr_1fr] gap-16 pb-12 max-lg:grid-cols-2 max-lg:gap-x-6 max-lg:gap-y-8 max-sm:w-[min(1200px,calc(100%-32px))]">
-    <div class="max-lg:col-span-full">
+  <div class="mx-auto grid w-[min(1200px,calc(100%-64px))] grid-cols-[2fr_1fr_1fr] gap-16 pb-12 max-md:grid-cols-2 max-md:gap-x-6 max-md:gap-y-8 max-sm:w-[min(1200px,calc(100%-32px))]">
+    <div class="max-md:col-span-full">
       <PublicationLogo className="mb-5 w-[230px]" />
       <p class="max-w-[34ch] font-serif text-[17px] leading-normal text-muted-foreground">{copy.footerDescription}</p>
     </div>

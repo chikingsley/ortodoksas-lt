@@ -1,5 +1,7 @@
 ---
 import type { HomepageModel } from "../../lib/homepage";
+import type { SiteLocale } from "../../i18n/config";
+import { ui } from "../../i18n/ui";
 import ArchivePanel from "../archive/ArchivePanel.astro";
 import ArticleCard from "../publication/ArticleCard.astro";
 import LeadStory from "../publication/LeadStory.astro";
@@ -9,65 +11,70 @@ import LibraryCallout from "./LibraryCallout.astro";
 import ServiceBand from "./ServiceBand.astro";
 
 interface Props {
+  locale?: SiteLocale;
   model: HomepageModel;
 }
 
-const { model } = Astro.props;
+const { locale = "lt", model } = Astro.props;
+const copy = ui[locale];
+const archiveHref = locale === "lt" ? "/archyvas" : `/${locale}#articles`;
 ---
 
 <main>
   {model.lead ? (
-    <section class="relative mx-auto grid w-[min(1200px,calc(100%-64px))] grid-cols-[minmax(0,1.34fr)_minmax(390px,1fr)] gap-8 py-6 max-lg:grid-cols-1 max-sm:w-full max-sm:gap-[22px] max-sm:py-2">
-      <LeadStory entry={model.lead} />
-      <div class="grid content-start max-lg:grid-cols-3 max-lg:gap-5 max-sm:hidden">
-        {model.secondary.map((entry) => <StoryRow entry={entry} />)}
+    <section class="relative mx-auto grid w-[min(1200px,calc(100%-64px))] grid-cols-[minmax(0,1.34fr)_minmax(390px,1fr)] gap-8 py-6 max-lg:grid-cols-1 max-sm:w-full max-sm:gap-6 max-sm:py-2">
+      <LeadStory entry={model.lead} locale={locale} />
+      <div class="grid grid-rows-4 max-lg:grid-cols-2 max-lg:grid-rows-2 max-lg:gap-x-5 max-lg:gap-y-1 max-sm:hidden">
+        {model.secondary.map((entry) => <StoryRow entry={entry} loading="eager" locale={locale} />)}
       </div>
     </section>
   ) : null}
 
-  <ServiceBand />
-
   <section
-    class="mx-auto hidden w-[min(1200px,calc(100%-32px))] py-[30px] pb-1 max-sm:block"
-    aria-label="Naujausi straipsniai"
+    class="mx-auto hidden w-[min(1200px,calc(100%-32px))] pb-1 pt-5 max-sm:block"
+    aria-label={copy.recentPublications}
   >
-    <SectionHeader title="Naujausi straipsniai" />
     {model.secondary.map((entry) => (
-      <StoryRow entry={entry} variant="compact" />
+      <StoryRow entry={entry} loading="eager" locale={locale} variant="compact" />
     ))}
   </section>
 
-  <section class="mx-auto grid w-[min(1200px,calc(100%-64px))] grid-cols-[minmax(0,3fr)_minmax(210px,1fr)] gap-[38px] pb-[30px] pt-11 max-lg:grid-cols-1 max-sm:w-[min(1200px,calc(100%-32px))] max-sm:pb-5 max-sm:pt-1" id="articles">
-    <div>
-      <SectionHeader
-        href="/archyvas"
-        linkLabel="Visi straipsniai"
-        title="Naujausi straipsniai"
-      />
-      <div class="grid grid-cols-3 gap-[22px] max-sm:grid-cols-1">
-        {model.recent.map((entry) => <ArticleCard entry={entry} />)}
-      </div>
-    </div>
-    <ArchivePanel months={model.archiveMonths} />
-  </section>
+  <ServiceBand locale={locale} />
 
-  {model.sectionGroups.map((section) => (
-    <section class="mx-auto w-[min(1200px,calc(100%-64px))] py-12 max-sm:w-[min(1200px,calc(100%-32px))]">
-      <SectionHeader
-        href={section.href}
-        linkLabel="Daugiau"
-        title={section.title}
-      />
-      <div class="grid grid-cols-2 gap-x-[38px] gap-y-2 max-sm:grid-cols-1">
-        {section.articles.map((entry) => (
-          <StoryRow entry={entry} variant="section" />
-        ))}
+  <div class="space-y-8 py-8 max-sm:space-y-6 max-sm:py-6">
+    <section class="mx-auto grid w-[min(1200px,calc(100%-64px))] grid-cols-[minmax(0,3fr)_minmax(210px,1fr)] gap-8 max-lg:grid-cols-1 max-sm:w-[min(1200px,calc(100%-32px))]" id="articles">
+      <div>
+        <SectionHeader
+          href={archiveHref}
+          linkLabel={copy.allArticles}
+          title={copy.recentPublications}
+        />
+        <div class="grid auto-rows-fr grid-cols-3 gap-6 max-sm:grid-cols-1">
+          {model.recent.map((entry) => <ArticleCard entry={entry} loading="eager" locale={locale} />)}
+        </div>
       </div>
+      <ArchivePanel locale={locale} months={model.archiveMonths} />
     </section>
-  ))}
 
-  <LibraryCallout
-    description={model.library.description}
-    title={model.library.title}
-  />
+    {model.sectionGroups.map((section) => (
+      <section class="mx-auto w-[min(1200px,calc(100%-64px))] max-sm:w-[min(1200px,calc(100%-32px))]">
+        <SectionHeader
+          href={section.href}
+          linkLabel={copy.more}
+          title={section.title}
+        />
+        <div class="grid grid-cols-2 gap-x-8 max-sm:grid-cols-1">
+          {section.articles.map((entry) => (
+            <StoryRow entry={entry} loading="eager" locale={locale} variant="section" />
+          ))}
+        </div>
+      </section>
+    ))}
+
+    <LibraryCallout
+      description={model.library.description}
+      locale={locale}
+      title={model.library.title}
+    />
+  </div>
 </main>

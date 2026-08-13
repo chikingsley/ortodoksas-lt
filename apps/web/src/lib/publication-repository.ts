@@ -6,9 +6,25 @@ import type {
 } from "@ortodoksas-lt/content/translation";
 import { articles, homepagePlacements, mediaAssets } from "@ortodoksas-lt/db";
 import { renderArticleBody } from "@ortodoksas-lt/editor/render";
-import { and, count, desc, eq, inArray, like, or } from "drizzle-orm";
+import {
+  and,
+  count,
+  desc,
+  eq,
+  gte,
+  inArray,
+  like,
+  lt,
+  or,
+  type SQL,
+} from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
 import { defaultLocale, localeShells, type SiteLocale } from "../i18n/config";
+import {
+  buildHomepageModel,
+  getHomepageArticleGroups,
+  localizeHomepageCatalog,
+} from "./homepage";
 import type {
   CatalogEntry,
   ContentPage,
@@ -50,6 +66,7 @@ const catalogSelection = {
 const database = () => drizzle(env.DB);
 const leadingSlash = /^\//u;
 const htmlSuffix = /\.html$/u;
+const fourDigitYear = /^\d{4}$/u;
 
 function articlePath(slug: string) {
   return `/${slug}.html`;
@@ -98,7 +115,7 @@ function catalogEntry(
   return {
     description: row.summary,
     hero: row.heroMediaId ? `/api/media/${row.heroMediaId}` : null,
-    heroAlt: row.heroMediaId ? (heroes.get(row.heroMediaId) ?? "") : "",
+    heroAlt: row.heroMediaId ? heroes.get(row.heroMediaId) || row.title : "",
     heroMediaId: row.heroMediaId,
     ...(homepage ? { homepage } : {}),
     ...(placement ? { homepageOrder: placement.position } : {}),
@@ -144,10 +161,150 @@ export async function getCatalog(language: SiteLocale = defaultLocale) {
   );
 }
 
+export async function getHomepageCatalog(language: SiteLocale = defaultLocale) {
+  if (language === defaultLocale) {
+    return getCatalog(defaultLocale);
+  }
+  const [canonicalCatalog, localizedCatalog] = await Promise.all([
+    getCatalog(defaultLocale),
+    getCatalog(language),
+  ]);
+  const canonicalArticles = canonicalCatalog.filter(
+    (entry) => entry.kind === "article"
+  );
+  const sections = getSectionOptions(
+    canonicalArticles.map((entry) => entry.section)
+  );
+  const canonicalModel = buildHomepageModel({
+    articles: canonicalArticles,
+    catalog: canonicalCatalog,
+    sections,
+  });
+  const homepageGroups = getHomepageArticleGroups(canonicalModel);
+  const homepageCatalog = canonicalCatalog.filter(
+    (entry) =>
+      entry.kind === "page" ||
+      (entry.translationGroupId
+        ? homepageGroups.has(entry.translationGroupId)
+        : false)
+  );
+  return localizeHomepageCatalog(homepageCatalog, localizedCatalog);
+}
+
 export async function getArticles(language: SiteLocale = defaultLocale) {
   return (await getCatalog(language)).filter(
     (entry) => entry.kind === "article"
   );
+}
+
+export async function getRecentArticles(language: SiteLocale, limit: number) {
+  const rows = await database()
+    .select(catalogSelection)
+    .from(articles)
+    .where(
+      and(
+        eq(articles.status, "published"),
+        eq(articles.language, language),
+        eq(articles.kind, "article")
+      )
+    )
+    .orderBy(desc(articles.publishedAt))
+    .limit(limit);
+  const heroes = await heroMap(rows);
+  return rows.map((row) => catalogEntry(row, heroes));
+}
+
+interface ArchiveQuery {
+  label?: string;
+  limit: number;
+  offset: number;
+  query?: string;
+  section?: string;
+  year?: string;
+}
+
+export async function getArchiveArticles(
+  language: SiteLocale,
+  options: ArchiveQuery
+) {
+  const conditions: SQL[] = [
+    eq(articles.status, "published"),
+    eq(articles.language, language),
+    eq(articles.kind, "article"),
+  ];
+  if (options.query) {
+    const pattern = `%${options.query.replace(/[%_]/gu, (character) => `\\${character}`)}%`;
+    conditions.push(
+      or(
+        like(articles.title, pattern),
+        like(articles.summary, pattern),
+        like(articles.section, pattern),
+        like(articles.labelsJson, pattern)
+      ) as SQL
+    );
+  }
+  if (options.section) {
+    conditions.push(eq(articles.section, options.section));
+  }
+  if (options.label) {
+    conditions.push(like(articles.labelsJson, `%${options.label}%`));
+  }
+  if (options.year && fourDigitYear.test(options.year)) {
+    const start = Date.UTC(Number(options.year), 0, 1);
+    const end = Date.UTC(Number(options.year) + 1, 0, 1);
+    conditions.push(gte(articles.publishedAt, start));
+    conditions.push(lt(articles.publishedAt, end));
+  }
+
+  const where = and(...conditions);
+  const [rows, totals] = await Promise.all([
+    database()
+      .select(catalogSelection)
+      .from(articles)
+      .where(where)
+      .orderBy(desc(articles.publishedAt))
+      .limit(options.limit)
+      .offset(options.offset),
+    database().select({ value: count() }).from(articles).where(where),
+  ]);
+  const heroes = await heroMap(rows);
+  return {
+    entries: rows.map((row) => catalogEntry(row, heroes)),
+    total: totals[0]?.value ?? 0,
+  };
+}
+
+export async function getArchiveFacets(language: SiteLocale = defaultLocale) {
+  const rows = await database()
+    .select({
+      labelsJson: articles.labelsJson,
+      publishedAt: articles.publishedAt,
+      section: articles.section,
+    })
+    .from(articles)
+    .where(
+      and(
+        eq(articles.status, "published"),
+        eq(articles.language, language),
+        eq(articles.kind, "article")
+      )
+    );
+  return {
+    labels: [
+      ...new Set(rows.flatMap((row) => parseLabels(row.labelsJson))),
+    ].sort((left, right) => left.localeCompare(right, language)),
+    sections: getSectionOptions(rows.map((row) => row.section)),
+    total: rows.length,
+    years: [
+      ...new Set(
+        rows.flatMap((row) =>
+          row.publishedAt
+            ? [new Date(row.publishedAt).getUTCFullYear().toString()]
+            : []
+        )
+      ),
+    ].sort((left, right) => right.localeCompare(left)),
+  };
 }
 
 export async function searchArticles(
@@ -256,6 +413,60 @@ export function getLocalizedCounterpart(
   sourcePath: string
 ) {
   return getCounterpart(locale, sourcePath);
+}
+
+export async function getLocalizedCounterparts(
+  locale: Exclude<SiteLocale, "lt">,
+  sourcePaths: string[]
+) {
+  const sourceSlugs = sourcePaths.map((path) =>
+    path.replace(leadingSlash, "").replace(htmlSuffix, "")
+  );
+  if (sourceSlugs.length === 0) {
+    return new Map<string, CatalogEntry>();
+  }
+
+  const sourceRows = await database()
+    .select({
+      slug: articles.slug,
+      translationGroupId: articles.translationGroupId,
+    })
+    .from(articles)
+    .where(
+      and(
+        eq(articles.language, defaultLocale),
+        inArray(articles.slug, sourceSlugs)
+      )
+    );
+  const groups = sourceRows.map((row) => row.translationGroupId);
+  if (groups.length === 0) {
+    return new Map<string, CatalogEntry>();
+  }
+
+  const localizedRows = await database()
+    .select(catalogSelection)
+    .from(articles)
+    .where(
+      and(
+        eq(articles.status, "published"),
+        eq(articles.language, locale),
+        inArray(articles.translationGroupId, groups)
+      )
+    );
+  const heroes = await heroMap(localizedRows);
+  const localizedByGroup = new Map(
+    localizedRows.map((row) => [
+      row.translationGroupId,
+      catalogEntry(row, heroes),
+    ])
+  );
+
+  return new Map(
+    sourceRows.flatMap((source) => {
+      const localized = localizedByGroup.get(source.translationGroupId);
+      return localized ? [[articlePath(source.slug), localized] as const] : [];
+    })
+  );
 }
 
 export async function getLocaleLinks(currentPath: string) {

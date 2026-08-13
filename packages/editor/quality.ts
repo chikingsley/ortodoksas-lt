@@ -2,8 +2,15 @@ import type { JSONContent } from "@tiptap/core";
 
 interface ArticleQualityInput {
   body: JSONContent;
+  language?: string;
   summary: string;
   title: string;
+  translationSource?: {
+    body: JSONContent;
+    language: string;
+    summary: string;
+    title: string;
+  };
 }
 
 const ATTACHED_BYLINE_PATTERN = /^—\S/u;
@@ -11,8 +18,59 @@ const COMPLETE_SENTENCE_PATTERN = /[.!?…][”’"']?$/u;
 const PLACEHOLDER_PATTERN =
   /\b(?:lorem ipsum|placeholder|tbd|todo)\b|\[(?:insert|image|caption)[^\]]*\]/iu;
 const TRUNCATED_TEXT_PATTERN = /(?:\.\.\.|…)$/u;
+const SENTENCE_DASH_PATTERN = /—|\s[–-]\s/gu;
+const EM_DASH_PATTERN = /—/gu;
 const getNodeText = (node: JSONContent): string =>
   node.text ?? (node.content ?? []).map(getNodeText).join("");
+
+const countMatches = (value: string, pattern: RegExp): number =>
+  [...value.matchAll(pattern)].length;
+
+const getTranslationFidelityIssues = (
+  translated: Pick<
+    ArticleQualityInput,
+    "body" | "language" | "summary" | "title"
+  >,
+  source: NonNullable<ArticleQualityInput["translationSource"]>
+): string[] => {
+  const translatedFields = [
+    translated.title,
+    translated.summary,
+    ...(translated.body.content ?? []).map(getNodeText),
+  ];
+  const sourceFields = [
+    source.title,
+    source.summary,
+    ...(source.body.content ?? []).map(getNodeText),
+  ];
+  const introducedDashCount = translatedFields.reduce(
+    (total, field, index) =>
+      total +
+      Math.max(
+        0,
+        countMatches(field, SENTENCE_DASH_PATTERN) -
+          countMatches(sourceFields[index] ?? "", SENTENCE_DASH_PATTERN)
+      ),
+    0
+  );
+  const issues: string[] = [];
+
+  if (introducedDashCount > 0) {
+    issues.push(
+      `Review ${introducedDashCount} sentence dash${introducedDashCount === 1 ? "" : "es"} introduced beyond the aligned ${source.language.toUpperCase()} source fields.`
+    );
+  }
+  if (translated.language === "uk") {
+    const translatedText = translatedFields.join("\n");
+    const emDashCount = countMatches(translatedText, EM_DASH_PATTERN);
+    if (emDashCount > 0) {
+      issues.push(
+        `Replace ${emDashCount} Ukrainian em dash${emDashCount === 1 ? " with an en dash" : "es with en dashes"}.`
+      );
+    }
+  }
+  return issues;
+};
 
 const hasRepeatedHardBreaks = (node: JSONContent): boolean => {
   let previousWasBreak = false;
@@ -137,8 +195,10 @@ const getNodeIssues = (
 
 export const getArticleQualityIssues = ({
   body,
+  language,
   summary,
   title,
+  translationSource,
 }: ArticleQualityInput): string[] => {
   const issues = getSummaryIssues(summary);
   const nodes = body.content ?? [];
@@ -173,6 +233,15 @@ export const getArticleQualityIssues = ({
   const seenFigureSources = new Set<string>();
   for (const [index, node] of nodes.entries()) {
     issues.push(...getNodeIssues(node, index, nodes, seenFigureSources));
+  }
+
+  if (translationSource) {
+    issues.push(
+      ...getTranslationFidelityIssues(
+        { body, language, summary, title },
+        translationSource
+      )
+    );
   }
 
   return [...new Set(issues)];

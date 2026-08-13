@@ -68,6 +68,150 @@ describe("canonical article content", () => {
     expect(issues).toContain("Replace placeholder text in block 3.");
   });
 
+  it("flags em dashes introduced beyond the translation source", () => {
+    const issues = getArticleQualityIssues({
+      body: {
+        content: [
+          {
+            content: [
+              {
+                text: "The translation adds — a stylistic aside.",
+                type: "text",
+              },
+            ],
+            type: "paragraph",
+          },
+        ],
+        type: "doc",
+      },
+      summary: "A complete translated summary.",
+      title: "Translated article",
+      translationSource: {
+        body: {
+          content: [
+            {
+              content: [
+                { text: "Vertimas prideda stilistinį intarpą.", type: "text" },
+              ],
+              type: "paragraph",
+            },
+          ],
+          type: "doc",
+        },
+        language: "lt",
+        summary: "Išsami originalo santrauka.",
+        title: "Originalus straipsnis",
+      },
+    });
+
+    expect(issues).toContain(
+      "Review 1 sentence dash introduced beyond the aligned LT source fields."
+    );
+  });
+
+  it("accepts an English em dash aligned with a source en dash", () => {
+    const issues = getArticleQualityIssues({
+      body: {
+        content: [
+          {
+            content: [
+              { text: "A phrase — followed by its explanation.", type: "text" },
+            ],
+            type: "paragraph",
+          },
+        ],
+        type: "doc",
+      },
+      summary: "A complete translated summary.",
+      title: "Translated article",
+      translationSource: {
+        body: {
+          content: [
+            {
+              content: [
+                { text: "Frazė – po jos einantis paaiškinimas.", type: "text" },
+              ],
+              type: "paragraph",
+            },
+          ],
+          type: "doc",
+        },
+        language: "lt",
+        summary: "Išsami originalo santrauka.",
+        title: "Originalus straipsnis",
+      },
+    });
+
+    expect(issues).not.toContain(
+      "Review 1 sentence dash introduced beyond the aligned LT source fields."
+    );
+  });
+
+  it("accepts an en dash aligned with an ASCII numeric range", () => {
+    const issues = getArticleQualityIssues({
+      body: {
+        content: [
+          {
+            content: [{ text: "Complete article body.", type: "text" }],
+            type: "paragraph",
+          },
+        ],
+        type: "doc",
+      },
+      summary: "Matthew 9:1–8.",
+      title: "Sermon on Matthew 9:1–8",
+      translationSource: {
+        body: {
+          content: [
+            {
+              content: [{ text: "Visas straipsnio tekstas.", type: "text" }],
+              type: "paragraph",
+            },
+          ],
+          type: "doc",
+        },
+        language: "lt",
+        summary: "Mato 9,1-8.",
+        title: "Pamokslas pagal Matą 9,1-8",
+      },
+    });
+
+    expect(issues).toEqual([]);
+  });
+
+  it("flags Ukrainian em dashes for en-dash typography", () => {
+    const issues = getArticleQualityIssues({
+      body: {
+        content: [
+          {
+            content: [{ text: "Київ — столиця України.", type: "text" }],
+            type: "paragraph",
+          },
+        ],
+        type: "doc",
+      },
+      language: "uk",
+      summary: "Повне резюме.",
+      title: "Перекладена стаття",
+      translationSource: {
+        body: {
+          content: [
+            {
+              content: [{ text: "Kyjivas – Ukrainos sostinė.", type: "text" }],
+              type: "paragraph",
+            },
+          ],
+          type: "doc",
+        },
+        language: "lt",
+        summary: "Išsami originalo santrauka.",
+        title: "Originalus straipsnis",
+      },
+    });
+
+    expect(issues).toContain("Replace 1 Ukrainian em dash with an en dash.");
+  });
+
   it("keeps distinct figures that share an editorial caption", () => {
     const issues = getArticleQualityIssues({
       body: {

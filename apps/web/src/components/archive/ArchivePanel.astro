@@ -1,15 +1,20 @@
 ---
 import SectionHeader from "../publication/SectionHeader.astro";
+import type { SiteLocale } from "../../i18n/config";
+import { ui } from "../../i18n/ui";
 
 interface Props {
+  locale?: SiteLocale;
   months: Array<[string, number]>;
 }
 
-const { months } = Astro.props;
+const { locale = "lt", months } = Astro.props;
+const copy = ui[locale];
+const archiveHref = locale === "lt" ? "/archyvas" : `/${locale}#articles`;
 ---
 
-<aside class="bg-muted p-[18px] max-lg:grid max-lg:grid-cols-2 max-lg:gap-x-5 max-sm:grid-cols-1">
-  <SectionHeader title="Archyvas" />
-  {months.slice(0, 5).map(([month, count]) => <a class="flex justify-between border-b border-border py-3 text-[11px] capitalize text-[#444944] hover:text-primary" href="/archyvas"><span>{month}</span><strong>{count}</strong></a>)}
-  <a class="mt-2 flex justify-between py-3 text-[11px] font-bold text-primary max-lg:col-span-full max-sm:col-auto" href="/archyvas">Visas archyvas <span aria-hidden="true">→</span></a>
+<aside class="self-start bg-muted p-6 max-sm:p-4">
+  <SectionHeader title={copy.archive} />
+  {months.slice(0, 5).map(([month, count]) => <a class="flex justify-between border-b border-border py-3 text-[11px] capitalize text-[#444944] hover:text-primary" href={archiveHref}><span>{month}</span><strong>{count}</strong></a>)}
+  <a class="mt-2 flex justify-between py-3 text-[11px] font-bold text-primary" href={archiveHref}>{copy.archive} <span aria-hidden="true">→</span></a>
 </aside>

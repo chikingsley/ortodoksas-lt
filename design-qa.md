@@ -1,43 +1,42 @@
-# Burgundy publication correction visual QA
+# Public publication QA
 
-## Evidence
+## Visual truth
 
-- Client visual truth: `/tmp/codex-remote-attachments/019fd18e-5856-7f33-b2b8-c54848887dc8/2E7A7133-524B-4CF1-BA4C-3C59DF2DDF1A/1-Pasted-Image-1.jpg`
-- User audit markup: `/tmp/codex-remote-attachments/019fd18e-5856-7f33-b2b8-c54848887dc8/5E4AF41D-EF3B-4E95-B87C-F30A411DEFE7/1-Photo-1.jpg`
-- Corrected homepage, desktop: `/tmp/ort-home-final-desktop.png`
-- Corrected homepage, mobile: `/tmp/ort-home-final-mobile-v2.png`
-- Corrected search, mobile: `/tmp/ort-search-final-mobile.png`
-- Corrected search results, mobile: `/tmp/ort-search-results-mobile.png`
-- Public page-type captures: `/tmp/ort-audit-final/`
-- Article regression matrix: `/tmp/ort-article-audit.tsv`
+- Client-approved burgundy reference: `/tmp/codex-remote-attachments/019fd18e-5856-7f33-b2b8-c54848887dc8/2E7A7133-524B-4CF1-BA4C-3C59DF2DDF1A/1-Pasted-Image-1.jpg`
+- Reference comparison: `/tmp/ort-reference-comparison.png`
+- Page matrix: `/tmp/ort-page-matrix.png`
+- Locale matrix, desktop: `/tmp/ort-locale-matrix-1280.png`
+- Locale matrix, mobile: `/tmp/ort-locale-matrix-390.png`
+- Lithuanian homepage: `/tmp/ort-lt-home-desktop.png`, `/tmp/ort-lt-home-mobile.png`
+- Archive: `/tmp/ort-archive-desktop-fixed.png`, `/tmp/ort-archive-mobile-fixed.png`
+- Search: `/tmp/ort-search-desktop.png`, `/tmp/ort-search-mobile.png`
+- English article: `/tmp/ort-en-article-desktop.png`, `/tmp/ort-en-article-mobile.png`
 
-## Conditions
+## Capture conditions
 
-- Mobile viewport: 390 x 844 CSS pixels, device scale factor 1.
-- Desktop viewport: 1440 x 1000 CSS pixels, device scale factor 1.
-- Source focus: centered legacy mark, sparse burgundy, exact gold ornaments, editorial density, and one search control.
-- Verified states: homepage, archive, search, institutional page, topic page, five locale shells, and 20 current articles in each locale.
+- Desktop: 1280 x 900 CSS pixels.
+- Tablet: 780 x 900 CSS pixels.
+- Mobile: 390 x 844 CSS pixels.
+- Browser: canonical Kasm Browserless Chromium.
+- Data: remote canonical D1 and R2 bindings through the local Astro server.
 
-## Iteration history
+## Verified behavior
 
-1. The reviewed build paired a gold active underline with two burgundy framing rules, exposed two search controls on desktop, used an authored burgundy rail, and repeated separators between adjacent sections.
-2. The correction removed the underline, duplicate search entry, invented rail, and redundant section rules; it restored source-faithful gold assets and measured service-band geometry.
-3. The search surface was rebuilt from the project shadcn primitives and D1-backed pagination. Locale switches now retain the search route and query surface.
-4. Post-fix measurements: desktop root `1440/1440`, mobile root `390/390`; active navigation pseudo-element `none`; service icon `36 x 36`, gap `8`, inset `16`, stroke `rgb(200, 163, 74)`.
+- Shared header, locale bar, primary navigation, footer, and active states render from one component path.
+- Homepage composition remains stable at 1280, 780, and 390 pixels.
+- The mobile supporting stories precede the service band and use one section heading for the subsequent publication grid.
+- Homepage media resolves from R2; every checked image reported a positive natural width.
+- Archive output is bounded to 20 articles per page, with 118 pages for the current 2,345-article corpus.
+- Archive search and filters execute in D1 and retain paging parameters.
+- Search renders six recent publications before a query and bounded result pages after a query.
+- Translated articles use one lead image and one locale-specific canonical route.
+- Every checked route reported zero horizontal overflow at 1280 and 390 pixels.
+- Web validation passes formatting, Cloudflare binding types, Astro diagnostics, TypeScript, 19 tests, build, and Wrangler deploy dry-run.
 
-## Visual checks
+## Open finding
 
-- Typography: passed; Arimo remains the control/body face and Playfair Display remains the editorial face across all five scripts.
-- Spacing: passed; the 1200px desktop shell, 16px mobile inset, service geometry, and single-owner separator contract are consistent.
-- Color: passed; burgundy is the text/action state and exact opaque `#C8A34A` is reserved for ornaments.
-- Images and motifs: passed; supplied raster ornaments remain unstretched and the unsupported burgundy rail is gone.
-- Copy: passed for the captured UI states; article copy remains canonical D1 content.
-- Interaction: passed; search input, submission, pagination, locale persistence, mobile sheet, and navigation links work.
-- Accessibility: passed for visible labels, 44px mobile header/social targets, image alt presence, current-page state, and heading presence.
-- Route audit: passed for the public page types plus 100 article pages. Every checked article reported the expected locale, viewport width, body and heading content, zero broken images, zero missing alt attributes, and zero replacement-character artifacts.
-- Console: the browser capture run produced no application console errors.
-- Horizontal overflow: passed at 390 and 1440 CSS pixels.
+- P1 data completeness: five homepage translation groups currently contain Lithuanian only. Their absence causes EN, RU, UK, and BE roots to choose a different lead and omit cards. The shared i18n route and component code preserves translation-group geometry once those 20 D1 counterparts exist.
 
 ## Final result
 
-passed
+blocked by the five incomplete homepage translation groups

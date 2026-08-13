@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { buildHomepageModel, selectHomepageArticles } from "./homepage";
+import {
+  buildHomepageModel,
+  getHomepageArticleGroups,
+  localizeHomepageCatalog,
+  selectHomepageArticles,
+} from "./homepage";
 import { type CatalogEntry, cleanHtml, hasLeadFigure } from "./publication";
 
 interface Article {
@@ -129,6 +134,69 @@ describe("selectHomepageArticles", () => {
   });
 });
 
+describe("localizeHomepageCatalog", () => {
+  it("keeps canonical placement and presentation while replacing editorial text and paths", () => {
+    const canonical = catalogEntry("/lt-lead", "2026-08-06", {
+      homepage: "lead",
+      homepageOrder: 1,
+      section: "Naujienos",
+      title: "Lietuviškas pavadinimas",
+      translationGroupId: "group-1",
+    });
+    const localized = catalogEntry("/english-lead", "2026-08-05", {
+      hero: "/media/different.jpg",
+      section: "News",
+      title: "English title",
+      translationGroupId: "group-1",
+    });
+
+    expect(localizeHomepageCatalog([canonical], [localized])).toEqual([
+      {
+        ...localized,
+        hero: canonical.hero,
+        heroAlt: canonical.heroAlt,
+        heroMediaId: canonical.heroMediaId,
+        homepage: "lead",
+        homepageOrder: 1,
+        published: canonical.published,
+        section: canonical.section,
+      },
+    ]);
+  });
+
+  it("omits canonical entries until their localized counterpart exists", () => {
+    const canonical = catalogEntry("/lt-only", "2026-08-06", {
+      translationGroupId: "group-1",
+    });
+
+    expect(localizeHomepageCatalog([canonical], [])).toEqual([]);
+  });
+});
+
+describe("getHomepageArticleGroups", () => {
+  it("returns exactly the groups rendered by the homepage model", () => {
+    const lead = catalogEntry("/lead", "2026-08-06", {
+      translationGroupId: "lead-group",
+    });
+    const recent = catalogEntry("/recent", "2026-08-05", {
+      translationGroupId: "recent-group",
+    });
+
+    expect(
+      getHomepageArticleGroups({
+        archiveMonths: [],
+        lead,
+        library: { description: "Library", title: "Library" },
+        recent: [recent],
+        secondary: [lead],
+        sectionGroups: [
+          { articles: [recent], href: "/section", title: "Section" },
+        ],
+      })
+    ).toEqual(new Set(["lead-group", "recent-group"]));
+  });
+});
+
 describe("cleanHtml", () => {
   it("promotes a standalone bold subheading to a semantic heading", () => {
     expect(
@@ -171,6 +239,11 @@ describe("hasLeadFigure", () => {
     expect(
       hasLeadFigure(
         '<figure class="article-figure" data-figure-role="content"><img src="/photo.png"></figure>'
+      )
+    ).toBe(true);
+    expect(
+      hasLeadFigure(
+        '<p>Introduction</p><figure class="article-figure" data-figure-role="content"><img src="/photo.png"></figure>'
       )
     ).toBe(false);
   });

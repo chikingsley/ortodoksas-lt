@@ -44,6 +44,7 @@ const youtubeIframePattern = /<iframe\b[^>]*><\/iframe\s*>/gi;
 const youtubeEmbedSourcePattern =
   /\bsrc\s*=\s*["'](https:\/\/www\.youtube-nocookie\.com\/embed\/[A-Za-z0-9_-]+(?:\?[^"']*)?)["']/i;
 const leadFigurePattern = /<figure\b[^>]*\bdata-figure-role=["']lead["']/i;
+const openingFigurePattern = /^\s*<figure\b/i;
 const figurePattern = /<figure\b[^>]*>[\s\S]*?<\/figure>/gi;
 const figureMediaIdPattern = /\bdata-media-id=(?:"([^"]+)"|'([^']+)')/i;
 
@@ -144,7 +145,7 @@ export function cleanHtml(value: string, options: CleanHtmlOptions = {}) {
 }
 
 export function hasLeadFigure(value: string) {
-  return leadFigurePattern.test(value);
+  return leadFigurePattern.test(value) || openingFigurePattern.test(value);
 }
 
 export function escapeXml(value: string) {

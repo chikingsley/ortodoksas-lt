@@ -3,19 +3,57 @@ import ArchiveList from "../components/archive/ArchiveList.astro";
 import { ArchiveControls } from "../components/archive/archive-controls";
 import PageIntro from "../components/publication/PageIntro.astro";
 import SiteLayout from "../layouts/SiteLayout.astro";
-import { getArticles, getSections } from "../lib/publication-repository";
+import {
+  getArchiveArticles,
+  getArchiveFacets,
+} from "../lib/publication-repository";
 
-const [articles, sections] = await Promise.all([getArticles(), getSections()]);
-const years = [...new Set(articles.map((entry) => entry.published?.slice(0, 4)).filter((year): year is string => Boolean(year)))].sort((a, b) => b.localeCompare(a));
-const labels = [...new Set(articles.flatMap((entry) => entry.labels).filter(Boolean))].sort((a, b) => a.localeCompare(b, "lt"));
+const query = Astro.url.searchParams.get("q")?.trim() ?? "";
+const sectionValue = Astro.url.searchParams.get("tema")?.trim() ?? "";
+const section = sectionValue === "__all__" ? "" : sectionValue;
+const label = Astro.url.searchParams.get("zyma")?.trim() ?? "";
+const yearValue = Astro.url.searchParams.get("metai")?.trim() ?? "";
+const year = yearValue === "__all__" ? "" : yearValue;
+const requestedPage = Number.parseInt(Astro.url.searchParams.get("page") ?? "1", 10) || 1;
+const pageSize = 20;
+const facets = await getArchiveFacets();
+const initialResult = await getArchiveArticles("lt", {
+  label,
+  limit: pageSize,
+  offset: (Math.max(1, requestedPage) - 1) * pageSize,
+  query,
+  section,
+  year,
+});
+const pageCount = Math.max(1, Math.ceil(initialResult.total / pageSize));
+const page = Math.min(Math.max(1, requestedPage), pageCount);
+const result = page === requestedPage
+  ? initialResult
+  : await getArchiveArticles("lt", {
+      label,
+      limit: pageSize,
+      offset: (page - 1) * pageSize,
+      query,
+      section,
+      year,
+    });
+const pageHref = (target: number) => {
+  const params = new URLSearchParams(Astro.url.searchParams);
+  params.set("page", target.toString());
+  return `/archyvas?${params}`;
+};
 ---
 
 <SiteLayout title="Archyvas · ortodoksas.lt" description="Visas atkurtas ortodoksas.lt straipsnių, pamokslų ir Bažnyčios gyvenimo archyvas." canonicalPath="/archyvas">
   <main class="mx-auto w-[min(1200px,calc(100%-64px))] max-sm:w-[min(1200px,calc(100%-32px))]">
-    <PageIntro description={`${articles.length.toLocaleString("lt-LT")} atkurti straipsniai, pamokslai, paskaitos ir Bažnyčios gyvenimo naujienos.`} eyebrow="2012–2026" title="Publikacijų archyvas" />
-    <ArchiveControls client:load labels={labels} sections={sections} years={years} />
-    <p class="mb-[11px] mt-6 text-xs uppercase tracking-[0.06em] text-muted-foreground"><strong class="whitespace-nowrap tabular-nums text-primary" id="archive-count">{articles.length.toLocaleString("lt-LT")}</strong> rezultatai</p>
-    <ArchiveList entries={articles} id="archive-list" searchable />
-    <noscript><p class="py-[38px] font-serif text-[21px] text-muted-foreground">Įjungus JavaScript filtrai neveikia, tačiau visas archyvas pateiktas šiame puslapyje.</p></noscript>
+    <PageIntro description={`${facets.total.toLocaleString("lt-LT")} straipsniai, pamokslai, paskaitos ir Bažnyčios gyvenimo naujienos.`} eyebrow="2012–2026" title="Publikacijų archyvas" />
+    <ArchiveControls client:load initialLabel={label} initialQuery={query} initialSection={section} initialYear={year} labels={facets.labels} sections={facets.sections} years={facets.years} />
+    <p class="mb-[11px] mt-6 text-xs uppercase tracking-[0.06em] text-muted-foreground"><strong class="whitespace-nowrap tabular-nums text-primary" id="archive-count">{result.total.toLocaleString("lt-LT")}</strong> rezultatai</p>
+    <ArchiveList entries={result.entries} id="archive-list" />
+    {pageCount > 1 ? <nav class="flex items-center justify-between py-8" aria-label="Archyvo puslapiai">
+      {page > 1 ? <a class="font-bold text-primary" href={pageHref(page - 1)}>← Ankstesnis</a> : <span />}
+      <span class="text-xs text-muted-foreground">{page} / {pageCount}</span>
+      {page < pageCount ? <a class="font-bold text-primary" href={pageHref(page + 1)}>Kitas →</a> : <span />}
+    </nav> : null}
   </main>
 </SiteLayout>

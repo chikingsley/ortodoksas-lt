@@ -1,30 +1,53 @@
 ---
-const serviceLinks = [
+import type { SiteLocale } from "../../i18n/config";
+import { ui } from "../../i18n/ui";
+import { getLocalizedCounterparts } from "../../lib/publication-repository";
+
+interface Props { locale?: SiteLocale; }
+const { locale = "lt" } = Astro.props;
+const copy = ui[locale];
+const serviceDefinitions = [
   {
-    detail: "Tvarkaraščiai ir bendruomenės",
+    detail: copy.serviceWorshipDescription,
     href: "/p/bendruomenes_21.html",
     icon: "church",
-    title: "Pamaldos",
+    title: copy.worship,
   },
   {
-    detail: "Šventės ir pasninkai",
+    detail: copy.serviceCalendarDescription,
     href: "/p/kalendorius.html",
     icon: "calendar",
-    title: "Kalendorius",
+    title: copy.calendar,
   },
   {
-    detail: "Straipsniai ir knygos",
+    detail: copy.serviceLibraryDescription,
     href: "/p/biblioteka.html",
     icon: "book",
-    title: "Biblioteka",
+    title: copy.library,
   },
   {
-    detail: "Prisidėkite prie misijos",
+    detail: copy.serviceSupportDescription,
     href: "/p/paremti.html",
     icon: "heart",
-    title: "Paremti",
+    title: copy.support,
   },
 ] as const;
+const localizedEntries =
+  locale === "lt"
+    ? new Map()
+    : await getLocalizedCounterparts(
+        locale,
+        serviceDefinitions.map((service) => service.href)
+      );
+const serviceLinks = serviceDefinitions.map((service) => ({
+  ...service,
+  href:
+    locale === "lt"
+      ? service.href
+      : localizedEntries.get(service.href)
+        ? `/${locale}${localizedEntries.get(service.href)?.path}`
+        : service.href,
+}));
 const motifPositions = [
   "left-1/4 -translate-x-1/2 max-sm:hidden",
   "left-1/2 -translate-x-1/2",
@@ -33,8 +56,8 @@ const motifPositions = [
 ] as const;
 ---
 
-<section class="bg-primary text-white" aria-label="Praktinė informacija">
-  <div class="relative mx-auto grid w-[min(1200px,calc(100%-64px))] grid-cols-4 max-lg:grid-cols-2 max-sm:w-full">
+<section class="bg-primary text-white" aria-label={copy.navigation}>
+  <div class="relative mx-auto grid w-[min(1200px,calc(100%-64px))] grid-cols-4 max-md:grid-cols-2 max-sm:w-full">
     {serviceLinks.map((service) => (
       <a class="relative grid min-h-[66px] grid-cols-[36px_1fr] items-center gap-2 overflow-hidden px-4 py-[11px] transition-colors hover:bg-brand-dark max-sm:px-4 max-sm:py-2 max-sm:pr-6" href={service.href}>
         <svg class="size-9 fill-none stroke-gold stroke-[1.5] [stroke-linecap:round] [stroke-linejoin:round]" aria-hidden="true" viewBox="0 0 32 32">
