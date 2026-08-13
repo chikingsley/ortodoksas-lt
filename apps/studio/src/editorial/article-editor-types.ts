@@ -68,3 +68,9 @@ export interface PersistArticleInput {
   payload: Record<string, unknown>;
   sourceArticleId: string;
 }
+
+export interface PublicationVerification {
+  reachable: boolean;
+  status: number | null;
+  url: string;
+}

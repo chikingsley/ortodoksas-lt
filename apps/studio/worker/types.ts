@@ -9,6 +9,7 @@ export interface StudioEnvironment {
     CLERK_ADMIN_USER_IDS?: string;
     CLERK_AUTHORIZED_PARTIES?: string;
     CLERK_SECRET_KEY?: string;
+    PUBLICATION_ORIGIN?: string;
     VITE_CLERK_PUBLISHABLE_KEY?: string;
   };
   Variables: {

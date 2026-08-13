@@ -2,6 +2,7 @@ import type {
   ArticleResponse,
   BaselineResponse,
   PersistArticleInput,
+  PublicationVerification,
   Revision,
   StoredArticle,
 } from "./article-editor-types";
@@ -24,14 +25,18 @@ export async function fetchArticleWorkspace(
       fetch(`/api/articles/${articleId}/baseline`, { signal }),
       fetch(`/api/articles/${articleId}/revisions`, { signal }),
     ]);
-  if (!(storedResponse.ok && baselineResponse.ok)) {
+  if (!storedResponse.ok) {
     throw new Error("Article request failed");
   }
 
   const { article: canonical } =
     (await storedResponse.json()) as ArticleResponse;
-  const { baseline, changes } =
-    (await baselineResponse.json()) as BaselineResponse;
+  const { baseline, changes } = baselineResponse.ok
+    ? ((await baselineResponse.json()) as BaselineResponse)
+    : {
+        baseline: { body_json: canonical.bodyJson },
+        changes: [],
+      };
   const revisions = revisionResponse.ok
     ? ((await revisionResponse.json()) as { revisions: Revision[] }).revisions
     : [];
@@ -79,6 +84,15 @@ export function persistArticle({
     headers: { "content-type": "application/json" },
     method: articleId ? "PUT" : "POST",
   });
+}
+
+export async function verifyArticlePublication(
+  articleId: string
+): Promise<PublicationVerification | null> {
+  const response = await fetch(`/api/articles/${articleId}/publication`);
+  return response.ok
+    ? ((await response.json()) as PublicationVerification)
+    : null;
 }
 
 export async function restoreArticleRevision(

@@ -1,5 +1,5 @@
 import { UserButton } from "@clerk/react";
-import { ArrowLeft, Eye, LoaderCircle, Save } from "lucide-react";
+import { ArrowLeft, Eye, LoaderCircle, Save, Send } from "lucide-react";
 import type { MouseEvent } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -12,8 +12,10 @@ interface Props {
   onBack: () => void;
   onOpenTranslation: (event: MouseEvent<HTMLButtonElement>) => void;
   onPreview: () => void;
+  onPublish: () => void;
   onSave: () => void;
   saveState: "saved" | "dirty" | "saving" | "error";
+  status: "archived" | "draft" | "published" | "scheduled";
   title: string;
   translations: CatalogArticle[];
 }
@@ -25,8 +27,10 @@ export function ArticleEditorHeader({
   onBack,
   onOpenTranslation,
   onPreview,
+  onPublish,
   onSave,
   saveState,
+  status,
   title,
   translations,
 }: Props) {
@@ -36,6 +40,7 @@ export function ArticleEditorHeader({
     saved: articleId ? "Saved to Studio" : "Source loaded",
     saving: "Saving…",
   }[saveState];
+  const saveLabel = status === "draft" ? "Save draft" : "Save changes";
 
   return (
     <>
@@ -60,7 +65,7 @@ export function ArticleEditorHeader({
             </span>
           </div>
         </div>
-        <div className="flex items-center gap-2 max-md:grid max-md:w-full max-md:grid-cols-2 [&_svg]:size-4">
+        <div className="flex items-center gap-2 max-md:grid max-md:w-full max-md:grid-cols-3 [&_svg]:size-4">
           <Button onClick={onPreview} variant="outline">
             <Eye /> <span>Preview</span>
           </Button>
@@ -74,7 +79,11 @@ export function ArticleEditorHeader({
             ) : (
               <Save />
             )}
-            <span>Save draft</span>
+            <span>{saveLabel}</span>
+          </Button>
+          <Button disabled={saveState === "saving"} onClick={onPublish}>
+            <Send />
+            <span>{status === "published" ? "Verify live" : "Publish"}</span>
           </Button>
           <span className="ml-1 max-md:absolute max-md:top-3 max-md:right-3">
             <UserButton />

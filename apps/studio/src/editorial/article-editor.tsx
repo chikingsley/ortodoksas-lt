@@ -22,6 +22,7 @@ import {
   fetchArticleWorkspace,
   persistArticle,
   restoreArticleRevision,
+  verifyArticlePublication,
 } from "./article-editor-api";
 import { ArticleEditorDialogs } from "./article-editor-dialogs";
 import { ArticleEditorDocument } from "./article-editor-document";
@@ -29,9 +30,11 @@ import { ArticleEditorHeader } from "./article-editor-header";
 import { ArticleEditorInspector } from "./article-editor-inspector";
 import type {
   ContentChange,
+  PublicationVerification,
   Revision,
   StoredArticle,
 } from "./article-editor-types";
+import { ArticlePublicationDialog } from "./article-publication-dialog";
 import type { CatalogArticle, SourceArticle } from "./types";
 
 interface Props {
@@ -87,6 +90,14 @@ export function ArticleEditor({
     "loading"
   );
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [publicationError, setPublicationError] = useState<string | null>(null);
+  const [publicationOpen, setPublicationOpen] = useState(false);
+  const [publicationState, setPublicationState] = useState<
+    "error" | "idle" | "published_unverified" | "verified" | "working"
+  >("idle");
+  const [publicationVerification, setPublicationVerification] =
+    useState<PublicationVerification | null>(null);
+  const [publishedAt, setPublishedAt] = useState<number | null>(null);
   const [revisions, setRevisions] = useState<Revision[]>([]);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [restoringVersion, setRestoringVersion] = useState<number | null>(null);
@@ -162,6 +173,7 @@ export function ArticleEditor({
         );
         setArticleId(canonical.id);
         setLanguage(canonical.language);
+        setPublishedAt(canonical.publishedAt);
         setHeroMediaId(canonical.heroMediaId);
         setHeroFit(canonical.heroFit);
         setHeroFocalX(canonical.heroFocalX);
@@ -272,7 +284,7 @@ export function ArticleEditor({
         kind: article.kind,
         labels: article.labels,
         language,
-        publishedAt: article.published ? Date.parse(article.published) : null,
+        publishedAt,
         section: section.trim(),
         slug: getSlug(article.path),
         status: nextStatus,
@@ -304,10 +316,12 @@ export function ArticleEditor({
       const result = (await response.json()) as {
         heroMediaId: string | null;
         id: string;
+        publishedAt: number | null;
         version: number;
       };
       setArticleId(result.id);
       setHeroMediaId(result.heroMediaId);
+      setPublishedAt(result.publishedAt);
       setStatus(nextStatus);
       if (reviewOverride) {
         setTranslationReviewedAt(reviewOverride.reviewedAt);
@@ -332,6 +346,7 @@ export function ArticleEditor({
       heroFocalY,
       language,
       loadRevisions,
+      publishedAt,
       section,
       summary,
       source,
@@ -345,9 +360,9 @@ export function ArticleEditor({
       translationSourceHash,
     ]
   );
-  const saveDraft = useCallback(() => {
-    save("draft").catch(() => setSaveState("error"));
-  }, [save]);
+  const saveCurrentStatus = useCallback(() => {
+    save(status).catch(() => setSaveState("error"));
+  }, [save, status]);
   const markEditorReviewed = useCallback(() => {
     save(status, {
       reviewedAt: Date.now(),
@@ -367,10 +382,50 @@ export function ArticleEditor({
     [onOpenTranslation, translations]
   );
   const openPreview = useCallback(() => setPreviewOpen(true), []);
+  const openPublication = useCallback(() => {
+    setPublicationError(null);
+    setPublicationState("idle");
+    setPublicationVerification(null);
+    setPublicationOpen(true);
+  }, []);
   const openSourceReview = useCallback(() => {
     setSourceReviewOpen(true);
   }, []);
   const openChanges = useCallback(() => setChangesOpen(true), []);
+
+  const publishOrVerify = useCallback(async (): Promise<void> => {
+    setPublicationError(null);
+    setPublicationState("working");
+    const publishingChanges = status !== "published" || saveState === "dirty";
+    const publishedId = publishingChanges ? await save("published") : articleId;
+    if (!publishedId) {
+      setPublicationError(
+        "Publication stopped at the server quality gate. Resolve the listed findings and try again."
+      );
+      setPublicationState("error");
+      return;
+    }
+    const verification = await verifyArticlePublication(publishedId);
+    if (!verification) {
+      setPublicationError(
+        "The article is published. Live verification is ready for another check."
+      );
+      setPublicationState("error");
+      return;
+    }
+    setPublicationVerification(verification);
+    setPublicationState(
+      verification.reachable ? "verified" : "published_unverified"
+    );
+  }, [articleId, save, saveState, status]);
+  const runPublication = useCallback(() => {
+    publishOrVerify().catch(() => {
+      setPublicationError(
+        "Publication encountered a service error. The saved article remains available in Studio."
+      );
+      setPublicationState("error");
+    });
+  }, [publishOrVerify]);
 
   const toggleHistory = useCallback(() => {
     setHistoryOpen((open) => !open);
@@ -462,8 +517,10 @@ export function ArticleEditor({
         onBack={onBack}
         onOpenTranslation={openTranslation}
         onPreview={openPreview}
-        onSave={saveDraft}
+        onPublish={openPublication}
+        onSave={saveCurrentStatus}
         saveState={saveState}
+        status={status}
         title={title}
         translations={translations}
       />
@@ -540,6 +597,17 @@ export function ArticleEditor({
         sourceHtml={source?.html ?? ""}
         sourceOpen={sourceReviewOpen}
         warnings={warnings}
+      />
+      <ArticlePublicationDialog
+        errorMessage={publicationError}
+        onAction={runPublication}
+        onOpenChange={setPublicationOpen}
+        open={publicationOpen}
+        publicationState={publicationState}
+        publishingChanges={status !== "published" || saveState === "dirty"}
+        qualityIssues={qualityIssues}
+        title={title}
+        verification={publicationVerification}
       />
     </div>
   );

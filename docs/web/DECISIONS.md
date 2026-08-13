@@ -68,6 +68,8 @@
 - The deployed Worker serves the static publication, D1-backed publication API,
   and R2 media.
 - Production authentication uses Clerk in the production-authentication phase.
+- Homepage category rails rotate automatically to the two sections with the
+  most recently published activity; each rail shows its newest eligible items.
 
 ### Machine Translation
 

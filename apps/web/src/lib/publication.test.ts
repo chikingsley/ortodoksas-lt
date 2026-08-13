@@ -135,6 +135,36 @@ describe("selectHomepageArticles", () => {
     expect(model.sectionGroups[0]?.articles).toHaveLength(4);
     expect(model.library.description).toBe("Library description");
   });
+
+  it("rotates section groups to the two most recently active categories", () => {
+    const articles = [
+      catalogEntry("/culture", "2026-08-01", {
+        section: "Tikėjimas ir kultūra",
+      }),
+      catalogEntry("/sermon", "2026-08-07", { section: "Pamokslai" }),
+      catalogEntry("/news", "2026-08-08", { section: "Naujienos" }),
+      catalogEntry("/older-news", "2026-08-06", { section: "Naujienos" }),
+      catalogEntry("/church", "2026-07-30", {
+        section: "Bažnyčios gyvenimas",
+      }),
+    ];
+
+    const model = buildHomepageModel({
+      articles,
+      catalog: articles,
+      sections: [
+        "Bažnyčios gyvenimas",
+        "Naujienos",
+        "Pamokslai",
+        "Tikėjimas ir kultūra",
+      ],
+    });
+
+    expect(model.sectionGroups.map((group) => group.title)).toEqual([
+      "Naujienos",
+      "Pamokslai",
+    ]);
+  });
 });
 
 describe("localizeHomepageCatalog", () => {

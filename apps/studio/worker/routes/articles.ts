@@ -28,6 +28,8 @@ export const articleRoutes = new Hono<StudioEnvironment>();
 const WAYBACK_URL_PATTERN =
   /^https:\/\/web\.archive\.org\/web\/\d+[a-z_]*\/(https?:\/\/)/u;
 const CONTENT_CHANGE_INSERT_SIZE = 10;
+const HTML_SUFFIX_PATTERN = /\.html$/u;
+const LEADING_SLASHES_PATTERN = /^\/+/u;
 
 const toHex = (value: ArrayBuffer): string =>
   [...new Uint8Array(value)]
@@ -67,6 +69,27 @@ const translationMetadataUpdate = (data: UpdateArticleInput) => {
     update.translationSourceHash = data.translationSourceHash;
   }
   return update;
+};
+
+const publicationTimestamp = (
+  status: UpdateArticleInput["status"],
+  publishedAt: number | null | undefined,
+  timestamp: number
+): number | null =>
+  status === "published" ? (publishedAt ?? timestamp) : (publishedAt ?? null);
+
+const publicArticleUrl = (
+  origin: string,
+  language: string,
+  slug: string
+): string => {
+  const normalizedOrigin = origin.endsWith("/") ? origin : `${origin}/`;
+  const normalizedSlug = slug
+    .replace(LEADING_SLASHES_PATTERN, "")
+    .replace(HTML_SUFFIX_PATTERN, "");
+  const localePrefix = language === "lt" ? "" : `${language}/`;
+  return new URL(`${localePrefix}${normalizedSlug}.html`, normalizedOrigin)
+    .href;
 };
 
 const insertContentChanges = async (
@@ -270,6 +293,40 @@ articleRoutes.get("/:id", async (context) => {
   }
 
   return context.json({ article });
+});
+
+articleRoutes.get("/:id/publication", async (context) => {
+  const database = getDatabase(context.env.DB);
+  const [article] = await database
+    .select({
+      language: articles.language,
+      slug: articles.slug,
+      status: articles.status,
+    })
+    .from(articles)
+    .where(eq(articles.id, context.req.param("id")))
+    .limit(1);
+  if (!article) {
+    return context.json({ error: "Article unavailable" }, 404);
+  }
+  if (article.status !== "published") {
+    return context.json({ error: "Article is awaiting publication" }, 409);
+  }
+  const origin = context.env.PUBLICATION_ORIGIN;
+  if (!origin) {
+    return context.json({ error: "Publication origin is unavailable" }, 503);
+  }
+  const url = publicArticleUrl(origin, article.language, article.slug);
+  try {
+    const response = await fetch(url, { method: "HEAD", redirect: "follow" });
+    return context.json({
+      reachable: response.ok,
+      status: response.status,
+      url,
+    });
+  } catch {
+    return context.json({ reachable: false, status: null, url });
+  }
 });
 
 articleRoutes.get("/:id/revisions", async (context) => {
@@ -514,7 +571,11 @@ articleRoutes.post("/", async (context) => {
       kind: parsed.data.kind,
       labelsJson: JSON.stringify(parsed.data.labels),
       language: parsed.data.language,
-      publishedAt: parsed.data.publishedAt ?? null,
+      publishedAt: publicationTimestamp(
+        parsed.data.status,
+        parsed.data.publishedAt,
+        timestamp
+      ),
       section: parsed.data.section,
       slug: parsed.data.slug,
       sourceArticleId: parsed.data.sourceArticleId ?? null,
@@ -573,7 +634,17 @@ articleRoutes.post("/", async (context) => {
   }
 
   return context.json(
-    { heroMediaId, id, status: parsed.data.status, version: 1 },
+    {
+      heroMediaId,
+      id,
+      publishedAt: publicationTimestamp(
+        parsed.data.status,
+        parsed.data.publishedAt,
+        timestamp
+      ),
+      status: parsed.data.status,
+      version: 1,
+    },
     201
   );
 });
@@ -711,7 +782,11 @@ articleRoutes.put("/:id", async (context) => {
         kind: parsed.data.kind,
         labelsJson: JSON.stringify(parsed.data.labels),
         language: parsed.data.language,
-        publishedAt: parsed.data.publishedAt ?? null,
+        publishedAt: publicationTimestamp(
+          parsed.data.status,
+          parsed.data.publishedAt,
+          timestamp
+        ),
         section: parsed.data.section,
         slug: parsed.data.slug,
         status: parsed.data.status,
@@ -740,5 +815,15 @@ articleRoutes.put("/:id", async (context) => {
     await insertContentChanges(database, id, timestamp, changes);
   }
 
-  return context.json({ heroMediaId, id, status: parsed.data.status, version });
+  return context.json({
+    heroMediaId,
+    id,
+    publishedAt: publicationTimestamp(
+      parsed.data.status,
+      parsed.data.publishedAt,
+      timestamp
+    ),
+    status: parsed.data.status,
+    version,
+  });
 });

@@ -192,12 +192,48 @@ describe("studio Worker", () => {
       error: "Article quality checks failed",
     });
 
+    const publishResponse = await exports.default.fetch(
+      `https://studio.test/api/articles/${created.id}`,
+      {
+        body: JSON.stringify({
+          body: {
+            content: [
+              {
+                content: [{ text: "Turinys", type: "text" }],
+                type: "paragraph",
+              },
+            ],
+            type: "doc",
+          },
+          language: "lt",
+          slug: "patikros-straipsnis",
+          status: "published",
+          summary: "Complete worker runtime test.",
+          title: "Patikros straipsnis",
+          translationKind: "original",
+        }),
+        headers: { "content-type": "application/json" },
+        method: "PUT",
+      }
+    );
+    expect(publishResponse.status).toBe(200);
+    const published = (await publishResponse.json()) as {
+      publishedAt: number | null;
+      status: string;
+    };
+    expect(published.status).toBe("published");
+    expect(published.publishedAt).toEqual(expect.any(Number));
+
     const revisionsResponse = await exports.default.fetch(
       `https://studio.test/api/articles/${created.id}/revisions`
     );
     expect(revisionsResponse.status).toBe(200);
-    await expect(revisionsResponse.json()).resolves.toMatchObject({
-      revisions: [{ editor_id: "clerk-test-editor", version: 1 }],
+    const revisionData = (await revisionsResponse.json()) as {
+      revisions: Array<{ editor_id: string; version: number }>;
+    };
+    expect(revisionData.revisions[0]).toMatchObject({
+      editor_id: "clerk-test-editor",
+      version: 2,
     });
 
     const baselineResponse = await exports.default.fetch(
@@ -247,7 +283,7 @@ describe("studio Worker", () => {
     expect(restoreResponse.status).toBe(200);
     await expect(restoreResponse.json()).resolves.toMatchObject({
       restoredFrom: 1,
-      version: 2,
+      version: 3,
     });
   });
 

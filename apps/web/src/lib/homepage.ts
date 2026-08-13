@@ -27,6 +27,9 @@ export interface HomepageModel {
   }>;
 }
 
+const publishedTime = (entry: HomepageEntry): number =>
+  entry.published ? Date.parse(entry.published) : 0;
+
 export function getHomepageArticleGroups(model: HomepageModel) {
   return new Set(
     [
@@ -75,11 +78,9 @@ export function localizeHomepageCatalog(
 }
 
 export function selectHomepageArticles<T extends HomepageEntry>(entries: T[]) {
-  const sorted = [...entries].sort((a, b) => {
-    const left = a.published ? Date.parse(a.published) : 0;
-    const right = b.published ? Date.parse(b.published) : 0;
-    return right - left;
-  });
+  const sorted = [...entries].sort(
+    (a, b) => publishedTime(b) - publishedTime(a)
+  );
   const lead =
     sorted.find((entry) => entry.homepage === "lead" && entry.hero) ??
     sorted.find((entry) => entry.hero) ??
@@ -139,9 +140,26 @@ export function buildHomepageModel({
   const library = catalog.find(
     (entry) => entry.kind === "page" && entry.path === "/p/biblioteka.html"
   );
-  const sectionGroups = sections.slice(0, 2).flatMap((title) => {
+  const rotatingSections = sections
+    .map((title) => ({
+      latest: Math.max(
+        ...articles
+          .filter((entry) => entry.section === title)
+          .map(publishedTime)
+      ),
+      title,
+    }))
+    .filter(({ latest }) => Number.isFinite(latest))
+    .sort(
+      (left, right) =>
+        right.latest - left.latest ||
+        left.title.localeCompare(right.title, "lt")
+    )
+    .slice(0, 2);
+  const sectionGroups = rotatingSections.flatMap(({ title }) => {
     const sectionArticles = articles
       .filter((entry) => entry.section === title && entry.path !== lead?.path)
+      .sort((left, right) => publishedTime(right) - publishedTime(left))
       .slice(0, 4);
     return sectionArticles.length
       ? [
