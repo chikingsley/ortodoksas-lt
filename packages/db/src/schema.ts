@@ -86,6 +86,10 @@ export const articles = sqliteTable(
   },
   (table) => [
     uniqueIndex("articles_language_slug_unique").on(table.language, table.slug),
+    uniqueIndex("articles_translation_group_language_unique").on(
+      table.translationGroupId,
+      table.language
+    ),
     index("articles_status_updated_idx").on(table.status, table.updatedAt),
     index("articles_translation_group_idx").on(table.translationGroupId),
   ]
@@ -177,6 +181,12 @@ export const articleContentChanges = sqliteTable(
   ]
 );
 
+export const homepageLayoutState = sqliteTable("homepage_layout_state", {
+  id: text("id").primaryKey(),
+  revision: text("revision").notNull(),
+  updatedAt: integer("updated_at").notNull(),
+});
+
 export const homepagePlacements = sqliteTable(
   "homepage_placements",
   {
@@ -186,6 +196,7 @@ export const homepagePlacements = sqliteTable(
     createdAt: integer("created_at").notNull(),
     endsAt: integer("ends_at"),
     id: text("id").primaryKey(),
+    layoutRevision: text("layout_revision").notNull().default("initial"),
     position: integer("position").notNull().default(0),
     slot: text("slot").notNull(),
     startsAt: integer("starts_at"),
@@ -196,5 +207,6 @@ export const homepagePlacements = sqliteTable(
       table.slot,
       table.position
     ),
+    index("homepage_placements_layout_revision_idx").on(table.layoutRevision),
   ]
 );

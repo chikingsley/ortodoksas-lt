@@ -1,9 +1,10 @@
 ---
 import ArchiveList from "../../components/archive/ArchiveList.astro";
 import PageIntro from "../../components/publication/PageIntro.astro";
-import SiteLayout from "../../layouts/SiteLayout.astro";
-import { sectionSlug } from "../../lib/publication";
-import { getArticles, getSections } from "../../lib/publication-repository";
+import SiteLayout from "../../components/layout/SiteLayout.astro";
+import { sectionSlug } from "../../components/publication/publication";
+import { getSections } from "../../server/publication-archive";
+import { getArticles } from "../../server/publication-catalog";
 
 const [articles, sections] = await Promise.all([getArticles(), getSections()]);
 const section = sections.find((candidate) => sectionSlug(candidate) === Astro.params.slug);

@@ -1,24 +1,27 @@
 ---
 import PublicationHeader from "./publication-header";
 import type { SiteLocale } from "../../i18n/config";
+import type { LocaleDestination } from "../publication/publication";
 import {
   getLocaleLinks,
   getLocalizedCounterparts,
-} from "../../lib/publication-repository";
-import { getPrimaryNavigation } from "../../navigation/publication";
+} from "../../server/publication-localization";
+import { getPrimaryNavigation } from "./publication-navigation";
 
 interface Props {
   currentPath: string;
   locale?: SiteLocale;
+  localeLinks?: Record<SiteLocale, LocaleDestination>;
 }
 
-const { currentPath, locale = "lt" } = Astro.props;
-const localeLinks = await getLocaleLinks(currentPath);
+const { currentPath, locale = "lt", localeLinks: suppliedLocaleLinks } = Astro.props;
+const localeLinks = suppliedLocaleLinks ?? await getLocaleLinks(currentPath);
 const headerPaths = [
   "/p/bendruomenes_21.html",
   "/p/dvasininkai.html",
   "/p/biblioteka.html",
   "/p/kalendorius.html",
+  "/p/kontaktai_30.html",
 ];
 const localizedEntries =
   locale === "lt" ? new Map() : await getLocalizedCounterparts(locale, headerPaths);
@@ -29,6 +32,9 @@ const navigationItems = getPrimaryNavigation(
   locale,
   locale === "lt" ? undefined : (path) => localizedPaths.get(path)
 );
+const contactHref = locale === "lt"
+  ? "/p/kontaktai_30.html"
+  : `/${locale}${localizedPaths.get("/p/kontaktai_30.html") ?? "/p/kontaktai_30.html"}`;
 ---
 
-<PublicationHeader client:load currentPath={currentPath} locale={locale} localeLinks={localeLinks} navigationItems={navigationItems} />
+<PublicationHeader client:load contactHref={contactHref} currentPath={currentPath} locale={locale} localeLinks={localeLinks} navigationItems={navigationItems} />

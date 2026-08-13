@@ -1,0 +1,41 @@
+---
+import { libraryGroups } from "../../content/information";
+import EditorialImage from "../publication/EditorialImage.astro";
+
+interface Props {
+  hero: string | null;
+  heroAlt?: string;
+}
+
+const { hero, heroAlt = "" } = Astro.props;
+---
+
+<div class="mt-9">
+  {hero ? (
+    <EditorialImage
+      alt={heroAlt}
+      class="mx-auto mb-12 block aspect-[2.45] w-full overflow-hidden bg-muted max-sm:mb-9 max-sm:aspect-[1.65] [&_img]:h-full [&_img]:w-full [&_img]:object-cover"
+      priority
+      src={hero}
+    />
+  ) : null}
+  <div class="grid grid-cols-2 gap-x-12 gap-y-11 max-md:grid-cols-1 max-md:gap-y-9">
+    {libraryGroups.map((group) => (
+      <section aria-labelledby={`library-${group.title}`} class="border-border border-t pt-4">
+        <h2 id={`library-${group.title}`} class="mb-3 text-[11px] font-bold uppercase tracking-[0.11em] text-primary">
+          {group.title}
+        </h2>
+        <ul>
+          {group.links.map((link) => (
+            <li class="border-border/70 border-b last:border-b-0">
+              <a class="group flex min-h-12 items-center justify-between gap-5 py-2.5 font-serif text-[19px] leading-tight transition-colors hover:text-primary" href={link.href}>
+                <span>{link.label}</span>
+                <span aria-hidden="true" class="shrink-0 font-sans text-sm text-primary transition-transform group-hover:translate-x-0.5">→</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))}
+  </div>
+</div>

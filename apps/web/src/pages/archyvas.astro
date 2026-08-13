@@ -2,11 +2,11 @@
 import ArchiveList from "../components/archive/ArchiveList.astro";
 import { ArchiveControls } from "../components/archive/archive-controls";
 import PageIntro from "../components/publication/PageIntro.astro";
-import SiteLayout from "../layouts/SiteLayout.astro";
+import SiteLayout from "../components/layout/SiteLayout.astro";
 import {
   getArchiveArticles,
   getArchiveFacets,
-} from "../lib/publication-repository";
+} from "../server/publication-archive";
 
 const query = Astro.url.searchParams.get("q")?.trim() ?? "";
 const sectionValue = Astro.url.searchParams.get("tema")?.trim() ?? "";

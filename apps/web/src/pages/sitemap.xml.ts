@@ -2,9 +2,10 @@ import {
   absoluteUrl,
   escapeXml,
   sectionSlug,
-} from "../lib/publication";
+} from "../components/publication/publication";
 import { localeShells } from "../i18n/config";
-import { getArticles, getCatalog, getSections } from "../lib/publication-repository";
+import { getSections } from "../server/publication-archive";
+import { getArticles, getCatalog } from "../server/publication-catalog";
 
 export async function GET() {
   const [pages, articles, sections, ...localizedCatalogs] = await Promise.all([

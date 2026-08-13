@@ -7,25 +7,31 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: #f7f8f6;
-  --foreground: #17201d;
+  --background: #ffffff;
+  --foreground: #111111;
   --card: #ffffff;
-  --card-foreground: #17201d;
+  --card-foreground: #111111;
   --popover: #ffffff;
-  --popover-foreground: #17201d;
-  --primary: #015c4b;
+  --popover-foreground: #111111;
+  --primary: #af272f;
   --primary-foreground: #ffffff;
-  --secondary: #eef1ee;
-  --secondary-foreground: #26332f;
-  --muted: #f1f3f1;
-  --muted-foreground: #66716d;
-  --accent: #edf3f1;
-  --accent-foreground: #015c4b;
+  --secondary: #f4f1e8;
+  --secondary-foreground: #111111;
+  --muted: #f4f1e8;
+  --muted-foreground: #5c5650;
+  --accent: #f4f1e8;
+  --accent-foreground: #861d24;
   --destructive: #b42318;
-  --border: #dde2df;
-  --input: #ccd4d0;
-  --ring: #4d8a7e;
-  --radius: 0.5rem;
+  --border: #d3cdc0;
+  --input: #d3cdc0;
+  --ring: #af272f;
+  --radius: 0.375rem;
+  --brand-dark: #861d24;
+  --gold: #c8a34a;
+  --paper: #f4f1e8;
+  --studio-action-height: 2.25rem;
+  --studio-mobile-header-height: 4rem;
+  --studio-shell-header-height: 4.75rem;
   color-scheme: light;
 }
 
@@ -49,6 +55,9 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-brand-dark: var(--brand-dark);
+  --color-gold: var(--gold);
+  --color-paper: var(--paper);
   --radius-sm: calc(var(--radius) - 3px);
   --radius-md: var(--radius);
   --radius-lg: calc(var(--radius) + 2px);
@@ -87,5 +96,17 @@
 
   button:disabled {
     cursor: default;
+  }
+}
+
+@layer components {
+  .studio-auth-shell {
+    background:
+      radial-gradient(
+        circle at 50% 0%,
+        rgb(244 241 232 / 100%) 0%,
+        transparent 48%
+      ),
+      var(--background);
   }
 }

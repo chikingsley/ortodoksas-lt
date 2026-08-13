@@ -10,8 +10,14 @@
     "./sections": "./sections.ts",
     "./translation": "./translation.ts"
   },
+  "scripts": {
+    "test": "vitest run"
+  },
   "dependencies": {
     "@tiptap/core": "^3.29.2",
     "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "vitest": "^4.1.10"
   }
 }

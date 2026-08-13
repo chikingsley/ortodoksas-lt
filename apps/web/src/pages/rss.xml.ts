@@ -1,5 +1,5 @@
-import { absoluteUrl, escapeXml } from "../lib/publication";
-import { getArticles } from "../lib/publication-repository";
+import { absoluteUrl, escapeXml } from "../components/publication/publication";
+import { getArticles } from "../server/publication-catalog";
 
 export async function GET() {
   const articles = await getArticles();

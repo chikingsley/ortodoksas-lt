@@ -21,7 +21,7 @@ export const getTranslationDisplayState = ({
   if (kind === "original") {
     return "original";
   }
-  if (kind === "human" || reviewStatus === "approved") {
+  if (reviewStatus === "approved") {
     return "editor_reviewed";
   }
   return "automatic";

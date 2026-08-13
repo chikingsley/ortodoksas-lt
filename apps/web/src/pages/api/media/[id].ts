@@ -3,7 +3,7 @@ import { mediaAssets } from "@ortodoksas-lt/db";
 import type { APIRoute } from "astro";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
-import { mediaResponse } from "../../../lib/media-response";
+import { mediaResponse } from "../../../server/media-response";
 
 export const ALL: APIRoute = async ({ params, request }) => {
   const { id } = params;

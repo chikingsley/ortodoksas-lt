@@ -1,4 +1,5 @@
 import { MenuIcon, SearchIcon } from "lucide-react";
+import type { LocaleDestination } from "@/components/publication/publication";
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -14,15 +15,15 @@ import {
 } from "@/components/ui/sheet";
 import { localeMetadata, type SiteLocale, siteLocales } from "@/i18n/config";
 import { ui } from "@/i18n/ui";
-import type { LocaleDestination } from "@/lib/publication";
+import PublicationLogo from "./publication-logo";
 import {
   isNavigationItemActive,
   type NavigationItem,
-} from "@/navigation/publication";
-import PublicationLogo from "./publication-logo";
+} from "./publication-navigation";
 import SocialLinks from "./social-links";
 
 interface Props {
+  contactHref: string;
   currentPath: string;
   locale?: SiteLocale;
   localeLinks: Record<SiteLocale, LocaleDestination>;
@@ -30,6 +31,7 @@ interface Props {
 }
 
 export default function PublicationHeader({
+  contactHref,
   currentPath,
   localeLinks,
   locale = "lt",
@@ -83,6 +85,7 @@ export default function PublicationHeader({
         <div className="grid min-h-20 grid-cols-[1fr_auto_1fr] items-center max-sm:min-h-16 max-sm:grid-cols-[48px_minmax(0,1fr)_48px] max-sm:px-3">
           <SocialLinks
             className="justify-self-start max-sm:hidden"
+            contactHref={contactHref}
             locale={locale}
           />
 
@@ -128,7 +131,7 @@ export default function PublicationHeader({
                   ))}
                 </nav>
                 <div className="mt-auto border-border border-t px-6 py-5">
-                  <SocialLinks locale={locale} />
+                  <SocialLinks contactHref={contactHref} locale={locale} />
                 </div>
               </SheetContent>
             </Sheet>

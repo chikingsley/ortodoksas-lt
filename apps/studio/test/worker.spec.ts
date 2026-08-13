@@ -1,371 +1,781 @@
 import { env } from "cloudflare:test";
-import { createMiddleware } from "hono/factory";
+import { articleRevisions } from "@ortodoksas-lt/db";
+import { and, eq } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
 
-import { createStudioApp } from "../worker";
-import type { StudioEnvironment } from "../worker/types";
+import { getDatabase } from "../worker/db";
+import {
+  createArticle,
+  getArticleWorkspace,
+  restoreArticleRevision,
+  updateArticle,
+} from "../worker/services/article-operations";
+import {
+  createTranslationDraft,
+  getTranslationSourceHash,
+} from "../worker/services/article-translation";
+import {
+  getHomepagePlacements,
+  updateHomepagePlacements,
+} from "../worker/services/homepage-operations";
+import { serveMedia, uploadMedia } from "../worker/services/media-operations";
 
-const testAuth = createMiddleware<StudioEnvironment>(async (context, next) => {
-  context.set("editor", {
-    id: "clerk-test-editor",
-    name: "Clerk test editor",
-    role: "editor",
+const IMAGE_BYTES = Uint8Array.from(
+  atob(
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII="
+  ),
+  (character) => character.charCodeAt(0)
+);
+const EDITOR_ID = "clerk-test-editor";
+
+const uploadHero = async (fileName: string) => {
+  const response = await uploadMedia({
+    database: getDatabase(env.DB),
+    images: env.IMAGES,
+    media: env.MEDIA,
+    request: new Request("https://studio.test/api/media", {
+      body: IMAGE_BYTES,
+      headers: {
+        "content-type": "image/png",
+        "x-file-name": encodeURIComponent(fileName),
+      },
+      method: "POST",
+    }),
   });
-  await next();
-});
-const testApp = createStudioApp(testAuth);
-const exports = {
-  default: {
-    fetch: (input: string | Request, init?: RequestInit) =>
-      testApp.request(input, init, env),
-  },
+  expect([200, 201]).toContain(response.status);
+  return (await response.json()) as {
+    media: { id: string; url: string };
+    reused: boolean;
+  };
 };
 
-describe("studio Worker", () => {
-  it("requires a Clerk session for the API", async () => {
-    const response = await createStudioApp().request(
-      "https://studio.test/api/session",
-      undefined,
-      env
-    );
-
-    expect(response.status).toBe(401);
-    await expect(response.json()).resolves.toEqual({
-      error: "Authentication required",
-    });
-  });
-
-  it("reports its health", async () => {
-    const response = await exports.default.fetch(
-      "https://studio.test/api/health"
-    );
-
-    expect(response.status).toBe(200);
-    await expect(response.json()).resolves.toMatchObject({
-      service: "ortodoksas-studio",
-      status: "ready",
-    });
-  });
-
-  it("provides the Clerk editor identity", async () => {
-    const response = await exports.default.fetch(
-      "https://studio.test/api/session"
-    );
-
-    expect(response.status).toBe(200);
-    await expect(response.json()).resolves.toMatchObject({
-      authentication: "clerk",
-      editor: {
-        id: "clerk-test-editor",
-        role: "editor",
+describe("Studio Worker services", () => {
+  it("routes translation creation through the guarded draft workflow", async () => {
+    const database = getDatabase(env.DB);
+    const result = await createArticle({
+      database,
+      editorId: EDITOR_ID,
+      payload: {
+        body: { content: [{ type: "paragraph" }], type: "doc" },
+        language: "lt",
+        slug: `review-bypass-${crypto.randomUUID()}`,
+        summary: "Attempted bypass",
+        title: "Attempted bypass",
+        translationKind: "human",
+        translationReviewStatus: "approved",
+        translationSourceArticleId: crypto.randomUUID(),
+        translationSourceHash: "a".repeat(64),
       },
     });
+    expect(result).toMatchObject({ ok: false, status: 422 });
+
+    const original = await createArticle({
+      database,
+      editorId: EDITOR_ID,
+      payload: {
+        body: { content: [{ type: "paragraph" }], type: "doc" },
+        language: "lt",
+        slug: `original-conversion-${crypto.randomUUID()}`,
+        summary: "Original article",
+        title: "Original article",
+      },
+    });
+    expect(original.ok).toBe(true);
+    if (!original.ok) {
+      return;
+    }
+    const conversion = await updateArticle({
+      articleId: original.data.id,
+      database,
+      editorId: EDITOR_ID,
+      payload: {
+        body: { content: [{ type: "paragraph" }], type: "doc" },
+        expectedVersion: 1,
+        language: "en",
+        slug: "converted-translation",
+        summary: "Converted translation",
+        title: "Converted translation",
+        translationKind: "human",
+      },
+    });
+    expect(conversion).toMatchObject({ ok: false, status: 422 });
+  });
+
+  it("applies publication quality gates during article creation", async () => {
+    const result = await createArticle({
+      database: getDatabase(env.DB),
+      editorId: EDITOR_ID,
+      payload: {
+        body: { content: [{ type: "paragraph" }], type: "doc" },
+        language: "lt",
+        slug: `quality-gate-${crypto.randomUUID()}`,
+        status: "published",
+        summary: "",
+        title: "Quality gate",
+      },
+    });
+    expect(result).toMatchObject({ ok: false, status: 422 });
   });
 
   it("stores, deduplicates, and serves an uploaded image through R2", async () => {
-    const image = Uint8Array.from(
-      atob(
-        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII="
-      ),
-      (character) => character.charCodeAt(0)
-    );
-    const upload = () =>
-      exports.default.fetch("https://studio.test/api/media", {
-        body: image,
-        headers: {
-          "content-type": "image/png",
-          "x-file-name": encodeURIComponent("example.png"),
-        },
-        method: "POST",
-      });
+    const first = await uploadHero("service-image.png");
+    const second = await uploadHero("service-image-copy.png");
+    expect(second.media.id).toBe(first.media.id);
+    expect(second.reused).toBe(true);
 
-    const firstResponse = await upload();
-    expect(firstResponse.status).toBe(201);
-    const first = (await firstResponse.json()) as {
-      media: { height: number; id: string; url: string; width: number };
-      reused: boolean;
-    };
-    expect(first.reused).toBe(false);
-    expect(first.media).toMatchObject({ height: 1, width: 1 });
-    expect(first.media.url).toBe(`/api/media/${first.media.id}`);
-
-    const reusedResponse = await upload();
-    expect(reusedResponse.status).toBe(200);
-    await expect(reusedResponse.json()).resolves.toMatchObject({
-      media: { id: first.media.id },
-      reused: true,
+    const response = await serveMedia({
+      database: getDatabase(env.DB),
+      id: first.media.id,
+      images: env.IMAGES,
+      media: env.MEDIA,
+      request: new Request(`https://studio.test${first.media.url}`),
     });
-
-    const mediaResponse = await exports.default.fetch(
-      `https://studio.test${first.media.url}`
-    );
-    expect(mediaResponse.status).toBe(200);
-    expect(mediaResponse.headers.get("content-type")).toBe("image/png");
-    expect(new Uint8Array(await mediaResponse.arrayBuffer())).toEqual(image);
-
-    const responsiveResponse = await exports.default.fetch(
-      `https://studio.test${first.media.url}?width=320`,
-      { headers: { accept: "image/avif,image/webp" } }
-    );
-    expect(responsiveResponse.status).toBe(200);
-    expect(responsiveResponse.headers.get("content-type")).toBe("image/avif");
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toBe("image/png");
+    expect(new Uint8Array(await response.arrayBuffer())).toEqual(IMAGE_BYTES);
   });
 
-  it("creates and lists a canonical draft article", async () => {
-    const createResponse = await exports.default.fetch(
-      "https://studio.test/api/articles",
-      {
-        body: JSON.stringify({
-          baseline: {
-            body: {
-              content: [
-                {
-                  content: [{ text: "Turinys", type: "text" }],
-                  type: "paragraph",
-                },
-              ],
-              type: "doc",
+  it("runs the atomic editorial lifecycle with revision concurrency", async () => {
+    const database = getDatabase(env.DB);
+    const hero = await uploadHero("article-hero.png");
+    const slug = `worker-${crypto.randomUUID()}`;
+    const created = await createArticle({
+      database,
+      editorId: EDITOR_ID,
+      payload: {
+        baseline: {
+          body: {
+            content: [
+              {
+                content: [{ text: "Turinys", type: "text" }],
+                type: "paragraph",
+              },
+            ],
+            type: "doc",
+          },
+          converterVersion: "legacy-html-v1",
+          summary: "",
+          title: "Source title",
+        },
+        body: {
+          content: [
+            {
+              content: [{ text: "Turinys", type: "text" }],
+              type: "paragraph",
             },
-            converterVersion: "legacy-html-v1",
-            summary: "",
-            title: "Source title",
-          },
-          body: {
-            content: [
-              {
-                content: [{ text: "Turinys", type: "text" }],
-                type: "paragraph",
-              },
-            ],
-            type: "doc",
-          },
-          language: "lt",
-          slug: "patikros-straipsnis",
-          summary: "Worker runtime test",
-          title: "Patikros straipsnis",
-        }),
-        headers: { "content-type": "application/json" },
-        method: "POST",
-      }
-    );
-
-    expect(createResponse.status).toBe(201);
-    const created = (await createResponse.json()) as { id: string };
-
-    const listResponse = await exports.default.fetch(
-      "https://studio.test/api/articles"
-    );
-
-    expect(listResponse.status).toBe(200);
-    await expect(listResponse.json()).resolves.toMatchObject({
-      articles: [
-        {
-          language: "lt",
-          slug: "patikros-straipsnis",
-          status: "draft",
-          title: "Patikros straipsnis",
+          ],
+          type: "doc",
         },
-      ],
+        heroSourceUrl: hero.media.url,
+        labels: ["Original label"],
+        language: "lt",
+        section: "Original section",
+        slug,
+        summary: "Worker runtime test",
+        title: "Patikros straipsnis",
+      },
+    });
+    expect(created.ok).toBe(true);
+    if (!created.ok) {
+      return;
+    }
+
+    const workspace = await getArticleWorkspace(database, created.data.id);
+    expect(workspace).toMatchObject({
+      canonical: {
+        heroMediaId: hero.media.id,
+        status: "draft",
+        title: "Patikros straipsnis",
+      },
+      revisions: [{ editor_id: EDITOR_ID, version: 1 }],
     });
 
-    const blockedPublishResponse = await exports.default.fetch(
-      `https://studio.test/api/articles/${created.id}`,
-      {
-        body: JSON.stringify({
-          body: {
-            content: [{ type: "paragraph" }],
-            type: "doc",
-          },
-          language: "lt",
-          slug: "patikros-straipsnis",
-          status: "published",
-          summary: "Truncated...",
-          title: "Patikros straipsnis",
-          translationKind: "original",
-        }),
-        headers: { "content-type": "application/json" },
-        method: "PUT",
-      }
-    );
-    expect(blockedPublishResponse.status).toBe(422);
-    await expect(blockedPublishResponse.json()).resolves.toMatchObject({
-      error: "Article quality checks failed",
+    const published = await updateArticle({
+      articleId: created.data.id,
+      database,
+      editorId: EDITOR_ID,
+      payload: {
+        body: {
+          content: [
+            {
+              content: [{ text: "Turinys", type: "text" }],
+              type: "paragraph",
+            },
+          ],
+          type: "doc",
+        },
+        expectedVersion: 1,
+        heroSourceUrl: hero.media.url,
+        labels: ["Changed label"],
+        language: "lt",
+        section: "Changed section",
+        slug,
+        status: "published",
+        summary: "Complete worker runtime test.",
+        title: "Patikros straipsnis",
+        translationKind: "original",
+      },
+    });
+    expect(published).toMatchObject({
+      data: { status: "published", version: 2 },
+      ok: true,
     });
 
-    const publishResponse = await exports.default.fetch(
-      `https://studio.test/api/articles/${created.id}`,
-      {
-        body: JSON.stringify({
-          body: {
-            content: [
-              {
-                content: [{ text: "Turinys", type: "text" }],
-                type: "paragraph",
-              },
-            ],
-            type: "doc",
-          },
-          language: "lt",
-          slug: "patikros-straipsnis",
-          status: "published",
-          summary: "Complete worker runtime test.",
-          title: "Patikros straipsnis",
-          translationKind: "original",
-        }),
-        headers: { "content-type": "application/json" },
-        method: "PUT",
-      }
-    );
-    expect(publishResponse.status).toBe(200);
-    const published = (await publishResponse.json()) as {
-      publishedAt: number | null;
-      status: string;
-    };
-    expect(published.status).toBe("published");
-    expect(published.publishedAt).toEqual(expect.any(Number));
-
-    const revisionsResponse = await exports.default.fetch(
-      `https://studio.test/api/articles/${created.id}/revisions`
-    );
-    expect(revisionsResponse.status).toBe(200);
-    const revisionData = (await revisionsResponse.json()) as {
-      revisions: Array<{ editor_id: string; version: number }>;
-    };
-    expect(revisionData.revisions[0]).toMatchObject({
-      editor_id: "clerk-test-editor",
-      version: 2,
+    const staleSave = await updateArticle({
+      articleId: created.data.id,
+      database,
+      editorId: EDITOR_ID,
+      payload: {
+        body: { content: [{ type: "paragraph" }], type: "doc" },
+        expectedVersion: 1,
+        language: "lt",
+        slug,
+        summary: "Stale save.",
+        title: "Stale title",
+      },
+    });
+    expect(staleSave).toMatchObject({
+      currentVersion: 2,
+      ok: false,
+      status: 409,
     });
 
-    const baselineResponse = await exports.default.fetch(
-      `https://studio.test/api/articles/${created.id}/baseline`
-    );
-    expect(baselineResponse.status).toBe(200);
-    await expect(baselineResponse.json()).resolves.toMatchObject({
-      baseline: { converter_version: "legacy-html-v1" },
-      changes: [
-        { change_kind: "added", field_path: "summary" },
-        { change_kind: "changed", field_path: "title" },
-      ],
+    const initialHomepage = await getHomepagePlacements(database);
+    const homepage = await updateHomepagePlacements({
+      database,
+      payload: {
+        expectedRevision: initialHomepage.revision,
+        leadId: created.data.id,
+        secondaryIds: [],
+      },
     });
-
-    const homepageResponse = await exports.default.fetch(
-      "https://studio.test/api/homepage",
-      {
-        body: JSON.stringify({
-          leadId: created.id,
-          secondaryIds: [created.id],
-        }),
-        headers: { "content-type": "application/json" },
-        method: "PUT",
-      }
-    );
-    expect(homepageResponse.status).toBe(200);
-    await expect(homepageResponse.json()).resolves.toEqual({
-      leadId: created.id,
-      secondaryIds: [created.id],
+    expect(homepage.ok).toBe(true);
+    const staleHomepage = await updateHomepagePlacements({
+      database,
+      payload: {
+        expectedRevision: initialHomepage.revision,
+        leadId: created.data.id,
+        secondaryIds: [],
+      },
     });
-
-    const homepageReadResponse = await exports.default.fetch(
-      "https://studio.test/api/homepage"
-    );
-    expect(homepageReadResponse.status).toBe(200);
-    await expect(homepageReadResponse.json()).resolves.toMatchObject({
+    expect(staleHomepage).toMatchObject({ ok: false, status: 409 });
+    await expect(getHomepagePlacements(database)).resolves.toMatchObject({
       placements: [
-        { articleId: created.id, position: 0, slot: "lead" },
-        { articleId: created.id, position: 0, slot: "secondary" },
+        expect.objectContaining({
+          articleId: created.data.id,
+          slot: "lead",
+        }),
       ],
     });
+    const placementRows = await database.query.homepagePlacements.findMany();
+    expect(placementRows).toHaveLength(1);
 
-    const restoreResponse = await exports.default.fetch(
-      `https://studio.test/api/articles/${created.id}/revisions/1/restore`,
-      { method: "POST" }
-    );
-    expect(restoreResponse.status).toBe(200);
-    await expect(restoreResponse.json()).resolves.toMatchObject({
-      restoredFrom: 1,
-      version: 3,
+    const blockedUnpublish = await updateArticle({
+      articleId: created.data.id,
+      database,
+      editorId: EDITOR_ID,
+      payload: {
+        body: {
+          content: [
+            {
+              content: [{ text: "Turinys", type: "text" }],
+              type: "paragraph",
+            },
+          ],
+          type: "doc",
+        },
+        expectedVersion: 2,
+        heroSourceUrl: hero.media.url,
+        labels: ["Changed label"],
+        language: "lt",
+        section: "Changed section",
+        slug,
+        status: "draft",
+        summary: "Complete worker runtime test.",
+        title: "Patikros straipsnis",
+        translationKind: "original",
+      },
     });
+    expect(blockedUnpublish).toMatchObject({ ok: false, status: 409 });
+
+    const activeHomepage = await getHomepagePlacements(database);
+    const clearedHomepage = await updateHomepagePlacements({
+      database,
+      payload: {
+        expectedRevision: activeHomepage.revision,
+        leadId: null,
+        secondaryIds: [],
+      },
+    });
+    expect(clearedHomepage.ok).toBe(true);
+
+    const restored = await restoreArticleRevision({
+      articleId: created.data.id,
+      database,
+      editorId: EDITOR_ID,
+      expectedVersion: 2,
+      version: 1,
+    });
+    expect(restored).toMatchObject({
+      data: {
+        article: {
+          labelsJson: '["Original label"]',
+          publishedAt: null,
+          section: "Original section",
+          status: "draft",
+        },
+        restoredFrom: 1,
+        version: 3,
+      },
+      ok: true,
+    });
+
+    const translation = await createTranslationDraft({
+      database,
+      editorId: EDITOR_ID,
+      language: "en",
+      sourceArticleId: created.data.id,
+    });
+    expect(translation).toMatchObject({
+      article: { language: "en" },
+      kind: "created",
+    });
+    await expect(
+      createTranslationDraft({
+        database,
+        editorId: EDITOR_ID,
+        language: "en",
+        sourceArticleId: created.data.id,
+      })
+    ).resolves.toMatchObject({ kind: "edition_exists" });
   });
 
-  it("treats recovered media linking as normalization", async () => {
-    const mediaId = "media_normalized_source_test";
-    const sourceUrl = "https://example.test/recovered-source.jpg";
-    const timestamp = Date.now();
-    await env.DB.prepare(
-      `INSERT INTO media_assets (
-        id, alt_text, alt_text_provenance, byte_size, caption,
-        caption_provenance, created_at, credit, file_name, mime_type,
-        provenance, r2_key, updated_at
-      ) VALUES (?, '', 'missing', 1, '', 'missing', ?, '', 'source.jpg',
-        'image/jpeg', 'recovered', 'test/source.jpg', ?)`
-    )
-      .bind(mediaId, timestamp, timestamp)
-      .run();
-    await env.DB.prepare(
-      "INSERT INTO media_aliases (alias, created_at, media_id) VALUES (?, ?, ?)"
-    )
-      .bind(sourceUrl, timestamp, mediaId)
-      .run();
-
-    const body = {
-      content: [
-        {
-          attrs: {
-            alt: "Source description",
-            altProvenance: "source",
-            src: sourceUrl,
-          },
-          type: "figure",
+  it("preserves explicit translation approval and invalidates stale reviews", async () => {
+    const database = getDatabase(env.DB);
+    const sourceSlug = `translation-source-${crypto.randomUUID()}`;
+    const source = await createArticle({
+      database,
+      editorId: EDITOR_ID,
+      payload: {
+        body: {
+          content: [
+            {
+              content: [{ text: "Source body", type: "text" }],
+              type: "paragraph",
+            },
+          ],
+          type: "doc",
         },
-      ],
-      type: "doc",
-    };
-    const createResponse = await exports.default.fetch(
-      "https://studio.test/api/articles",
-      {
-        body: JSON.stringify({
-          baseline: {
-            body,
-            converterVersion: "legacy-html-v1",
-            summary: "Complete source summary.",
-            title: "Recovered media source",
+        language: "lt",
+        slug: sourceSlug,
+        summary: "Source summary",
+        title: "Source title",
+      },
+    });
+    expect(source.ok).toBe(true);
+    if (!source.ok) {
+      return;
+    }
+    const translationDraft = await createTranslationDraft({
+      database,
+      editorId: EDITOR_ID,
+      language: "en",
+      sourceArticleId: source.data.id,
+    });
+    expect(translationDraft.kind).toBe("created");
+    if (translationDraft.kind !== "created") {
+      return;
+    }
+    const translationId = translationDraft.article.id;
+    const translationPayload = {
+      body: {
+        content: [
+          {
+            content: [{ text: "Translated body", type: "text" }],
+            type: "paragraph",
           },
-          body,
-          language: "lt",
-          slug: "recovered-media-source",
-          summary: "Complete source summary.",
-          title: "Recovered media source",
+        ],
+        type: "doc",
+      },
+      language: "en",
+      slug: translationDraft.article.slug,
+      summary: "Translated summary",
+      title: "Translated title",
+      translationKind: "human" as const,
+    };
+
+    const approved = await updateArticle({
+      articleId: translationId,
+      database,
+      editorId: EDITOR_ID,
+      payload: {
+        ...translationPayload,
+        expectedVersion: 1,
+        translationReviewAction: "approve",
+      },
+    });
+    expect(approved).toMatchObject({
+      data: { translationReviewStatus: "approved", version: 2 },
+      ok: true,
+    });
+    const approvedWorkspace = await getArticleWorkspace(
+      database,
+      translationId
+    );
+    const approvedAt = approvedWorkspace?.canonical.translationReviewedAt;
+    expect(approvedAt).toEqual(expect.any(Number));
+
+    const ordinarySave = await updateArticle({
+      articleId: translationId,
+      database,
+      editorId: EDITOR_ID,
+      payload: { ...translationPayload, expectedVersion: 2 },
+    });
+    expect(ordinarySave).toMatchObject({
+      data: { translationReviewStatus: "approved", version: 3 },
+      ok: true,
+    });
+    await expect(
+      getArticleWorkspace(database, translationId)
+    ).resolves.toMatchObject({
+      canonical: {
+        translationReviewedAt: approvedAt,
+        translationReviewedBy: EDITOR_ID,
+      },
+    });
+
+    const editedTranslation = await updateArticle({
+      articleId: translationId,
+      database,
+      editorId: EDITOR_ID,
+      payload: {
+        ...translationPayload,
+        body: {
+          content: [
+            {
+              content: [{ text: "Edited translation", type: "text" }],
+              type: "paragraph",
+            },
+          ],
+          type: "doc",
+        },
+        expectedVersion: 3,
+      },
+    });
+    expect(editedTranslation).toMatchObject({
+      data: { translationReviewStatus: "pending", version: 4 },
+      ok: true,
+    });
+    await expect(
+      getArticleWorkspace(database, translationId)
+    ).resolves.toMatchObject({
+      canonical: {
+        translationReviewedAt: null,
+        translationReviewedBy: null,
+      },
+    });
+
+    const reapproved = await updateArticle({
+      articleId: translationId,
+      database,
+      editorId: EDITOR_ID,
+      payload: {
+        ...translationPayload,
+        body: {
+          content: [
+            {
+              content: [{ text: "Edited translation", type: "text" }],
+              type: "paragraph",
+            },
+          ],
+          type: "doc",
+        },
+        expectedVersion: 4,
+        translationReviewAction: "approve",
+      },
+    });
+    expect(reapproved).toMatchObject({
+      data: { translationReviewStatus: "approved", version: 5 },
+      ok: true,
+    });
+    await database
+      .update(articleRevisions)
+      .set({
+        metadataJson: JSON.stringify({
+          snapshotCompleteness: "legacy_partial",
+          snapshotVersion: 2,
+          summary: "Translated summary",
+          title: "Translated title",
         }),
-        headers: { "content-type": "application/json" },
-        method: "POST",
-      }
-    );
-    expect(createResponse.status).toBe(201);
-    const created = (await createResponse.json()) as { id: string };
+      })
+      .where(
+        and(
+          eq(articleRevisions.articleId, translationId),
+          eq(articleRevisions.version, 5)
+        )
+      );
 
-    const baselineResponse = await exports.default.fetch(
-      `https://studio.test/api/articles/${created.id}/baseline`
-    );
-    expect(baselineResponse.status).toBe(200);
-    await expect(baselineResponse.json()).resolves.toMatchObject({
-      changes: [],
-    });
-
-    const articleResponse = await exports.default.fetch(
-      `https://studio.test/api/articles/${created.id}`
-    );
-    const article = (await articleResponse.json()) as {
-      article: { bodyJson: string };
-    };
-    expect(JSON.parse(article.article.bodyJson)).toMatchObject({
-      content: [
-        {
-          attrs: {
-            mediaId,
-            src: `/api/media/${mediaId}`,
-          },
+    const editedSource = await updateArticle({
+      articleId: source.data.id,
+      database,
+      editorId: EDITOR_ID,
+      payload: {
+        body: {
+          content: [
+            {
+              content: [{ text: "Edited source body", type: "text" }],
+              type: "paragraph",
+            },
+          ],
+          type: "doc",
         },
-      ],
+        expectedVersion: 1,
+        language: "lt",
+        slug: sourceSlug,
+        summary: "Source summary",
+        title: "Source title",
+        translationKind: "original",
+      },
     });
+    expect(editedSource.ok).toBe(true);
+    const sourceInvalidatedWorkspace = await getArticleWorkspace(
+      database,
+      translationId
+    );
+    expect(sourceInvalidatedWorkspace).toMatchObject({
+      canonical: {
+        translationReviewedAt: null,
+        translationReviewedBy: null,
+        translationReviewStatus: "pending",
+      },
+    });
+    expect(sourceInvalidatedWorkspace?.revisions[0]).toMatchObject({
+      version: 6,
+    });
+    expect(
+      JSON.parse(
+        sourceInvalidatedWorkspace?.revisions[0]?.metadata_json ?? "{}"
+      )
+    ).toMatchObject({
+      snapshotCompleteness: "complete",
+      translationReviewStatus: "pending",
+      translationSourceArticleId: source.data.id,
+    });
+
+    const approvedAfterSourceEdit = await updateArticle({
+      articleId: translationId,
+      database,
+      editorId: EDITOR_ID,
+      payload: {
+        ...translationPayload,
+        body: {
+          content: [
+            {
+              content: [{ text: "Edited translation", type: "text" }],
+              type: "paragraph",
+            },
+          ],
+          type: "doc",
+        },
+        expectedVersion: 6,
+        translationReviewAction: "approve",
+      },
+    });
+    expect(approvedAfterSourceEdit).toMatchObject({
+      data: { translationReviewStatus: "approved", version: 7 },
+      ok: true,
+    });
+
+    const restoredSource = await restoreArticleRevision({
+      articleId: source.data.id,
+      database,
+      editorId: EDITOR_ID,
+      expectedVersion: 2,
+      version: 1,
+    });
+    expect(restoredSource.ok).toBe(true);
+    const restoreInvalidatedWorkspace = await getArticleWorkspace(
+      database,
+      translationId
+    );
+    expect(restoreInvalidatedWorkspace).toMatchObject({
+      canonical: { translationReviewStatus: "pending" },
+    });
+    expect(restoreInvalidatedWorkspace?.revisions[0]?.version).toBe(8);
+
+    await Promise.all([
+      updateArticle({
+        articleId: source.data.id,
+        database,
+        editorId: EDITOR_ID,
+        payload: {
+          body: {
+            content: [
+              {
+                content: [{ text: "Concurrent source body", type: "text" }],
+                type: "paragraph",
+              },
+            ],
+            type: "doc",
+          },
+          expectedVersion: 3,
+          language: "lt",
+          slug: sourceSlug,
+          summary: "Source summary",
+          title: "Source title",
+          translationKind: "original",
+        },
+      }),
+      updateArticle({
+        articleId: translationId,
+        database,
+        editorId: EDITOR_ID,
+        payload: {
+          ...translationPayload,
+          body: {
+            content: [
+              {
+                content: [{ text: "Edited translation", type: "text" }],
+                type: "paragraph",
+              },
+            ],
+            type: "doc",
+          },
+          expectedVersion: 8,
+          translationReviewAction: "approve",
+        },
+      }),
+    ]);
+    const [concurrentSource, concurrentTranslation] = await Promise.all([
+      getArticleWorkspace(database, source.data.id),
+      getArticleWorkspace(database, translationId),
+    ]);
+    expect(concurrentSource).toBeDefined();
+    expect(concurrentTranslation).toBeDefined();
+    if (!(concurrentSource && concurrentTranslation)) {
+      return;
+    }
+    if (
+      concurrentTranslation.canonical.translationReviewStatus === "approved"
+    ) {
+      await expect(
+        getTranslationSourceHash(concurrentSource.canonical)
+      ).resolves.toBe(concurrentTranslation.canonical.translationSourceHash);
+    } else {
+      expect(concurrentTranslation.canonical.translationReviewStatus).toBe(
+        "pending"
+      );
+    }
+
+    const changesRequested = await updateArticle({
+      articleId: translationId,
+      database,
+      editorId: EDITOR_ID,
+      payload: {
+        ...translationPayload,
+        body: {
+          content: [
+            {
+              content: [{ text: "Edited translation", type: "text" }],
+              type: "paragraph",
+            },
+          ],
+          type: "doc",
+        },
+        expectedVersion: concurrentTranslation.revisions[0]?.version,
+        translationReviewAction: "request_changes",
+      },
+    });
+    expect(changesRequested).toMatchObject({
+      data: { translationReviewStatus: "changes_requested" },
+      ok: true,
+    });
+
+    const [preRestoreSource, preRestoreTranslation] = await Promise.all([
+      getArticleWorkspace(database, source.data.id),
+      getArticleWorkspace(database, translationId),
+    ]);
+    expect(preRestoreSource).toBeDefined();
+    expect(preRestoreTranslation).toBeDefined();
+    if (!(preRestoreSource && preRestoreTranslation)) {
+      return;
+    }
+    const restoreRaceApproval = await updateArticle({
+      articleId: translationId,
+      database,
+      editorId: EDITOR_ID,
+      payload: {
+        ...translationPayload,
+        body: {
+          content: [
+            {
+              content: [{ text: "Edited translation", type: "text" }],
+              type: "paragraph",
+            },
+          ],
+          type: "doc",
+        },
+        expectedVersion: preRestoreTranslation.revisions[0]?.version,
+        translationReviewAction: "approve",
+      },
+    });
+    expect(restoreRaceApproval.ok).toBe(true);
+    if (!restoreRaceApproval.ok) {
+      return;
+    }
+    const approvedVersion = restoreRaceApproval.data.version;
+    await Promise.all([
+      restoreArticleRevision({
+        articleId: translationId,
+        database,
+        editorId: EDITOR_ID,
+        expectedVersion: approvedVersion,
+        version: approvedVersion,
+      }),
+      updateArticle({
+        articleId: source.data.id,
+        database,
+        editorId: EDITOR_ID,
+        payload: {
+          body: {
+            content: [
+              {
+                content: [
+                  { text: "Source changed during restore", type: "text" },
+                ],
+                type: "paragraph",
+              },
+            ],
+            type: "doc",
+          },
+          expectedVersion: preRestoreSource.revisions[0]?.version,
+          language: "lt",
+          slug: sourceSlug,
+          summary: "Source summary",
+          title: "Source title",
+          translationKind: "original",
+        },
+      }),
+    ]);
+    const [postRestoreSource, postRestoreTranslation] = await Promise.all([
+      getArticleWorkspace(database, source.data.id),
+      getArticleWorkspace(database, translationId),
+    ]);
+    expect(postRestoreSource).toBeDefined();
+    expect(postRestoreTranslation).toBeDefined();
+    if (!(postRestoreSource && postRestoreTranslation)) {
+      return;
+    }
+    if (
+      postRestoreTranslation.canonical.translationReviewStatus === "approved"
+    ) {
+      await expect(
+        getTranslationSourceHash(postRestoreSource.canonical)
+      ).resolves.toBe(postRestoreTranslation.canonical.translationSourceHash);
+    } else {
+      expect(postRestoreTranslation.canonical.translationReviewStatus).toBe(
+        "pending"
+      );
+    }
   });
 });

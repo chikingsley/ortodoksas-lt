@@ -1,16 +1,20 @@
 # Ortodoksas Studio
 
-Ortodoksas Studio is the independent editorial application for the publication. It contains the editor-facing React application, Cloudflare Worker API, D1 content database, and R2 media boundary. The public website remains a separate consumer of published content.
+Ortodoksas Studio is the independent editorial application for the publication. It contains the editor-facing TanStack Start application, Cloudflare Worker runtime, D1 content database, and R2 media boundary. The public Astro website remains a separate consumer of published content.
 
 ## Current foundation
 
-- React 19 and Vite 8 with the official Cloudflare Vite plugin
-- Cloudflare Worker API routed with Hono
+- TanStack Start and Router on React 19 and Vite 8
+- The official Cloudflare Vite plugin and Workers Static Assets
+- TanStack Query for server-state ownership
+- TanStack Form with Zod validation for editorial metadata
+- TanStack Table for inventory pagination and row identity
+- Clerk authentication with a server-enforced editor allowlist
 - D1 schema managed with Drizzle and SQL migrations
 - R2 media binding
 - Tiptap JSON as the canonical article-body format
 - Shared Tiptap extensions for editing and static rendering
-- Zod API validation
+- Zod validation at every mutation boundary
 - Current shadcn components backed by Base UI
 - Ultracite and Biome for formatting and linting
 - Worker-runtime tests through Cloudflare's Vitest integration
@@ -21,28 +25,44 @@ Ortodoksas Studio is the independent editorial application for the publication. 
 pnpm dev
 pnpm check
 pnpm build
+pnpm deploy:dry-run
+pnpm deploy:dry-run:production
 pnpm db:migrate:local
 pnpm cf-typegen
-pnpm studio:up
-pnpm studio:status
-pnpm studio:down
 ```
 
-`studio:up` starts a supervised local preview and exposes its stable Peacockery Tunnel. The service uses a transient user unit with login autostart disabled. `studio:down` removes the route and stops the preview together.
+`pnpm dev` uses local Cloudflare bindings. `pnpm dev:remote` generates the operator-owned configuration and connects production D1 and R2 bindings for an explicitly selected remote-development session.
+
+Tracked Wrangler configuration contains local binding placeholders. Production builds read `ORTODOKSAS_D1_DATABASE_ID`, `ORTODOKSAS_MEDIA_BUCKET_NAME`, the build-time `VITE_CLERK_PUBLISHABLE_KEY`, and the release-controlled `ORTODOKSAS_STUDIO_WRITE_MODE`, then generate an ignored `wrangler.production.jsonc` with mode `0600`. The write mode accepts `frozen` during recovery capture and migration or `open` for routine editorial work. `pnpm deploy` and `pnpm deploy:dry-run:production` use that operator-owned configuration.
+
+Local Clerk configuration belongs in `.dev.vars`. Production uses Wrangler secrets for `CLERK_SECRET_KEY` and `CLERK_ALLOWED_USER_IDS`; `VITE_CLERK_PUBLISHABLE_KEY` remains the public browser key.
+
+Studio exposes a staff sign-in flow. Production Clerk configuration uses Restricted sign-up mode, and administrators create or invite accounts through Clerk before adding their user IDs to the Worker allowlist. This keeps identity enrollment with Clerk and editorial authorization with Studio.
 
 ## Project boundaries
 
-- `src` contains the editor-facing React application.
-- `worker` contains API routes, data access, publishing, conversion, and media operations.
+- `src/routes` contains the file-based application routes and the explicit raw media routes. TanStack Router's `_studio.tsx` pathless layout owns the shared authentication and authorization guard without adding a URL segment; `__root.tsx` owns the document shell, and `$articleId` marks a dynamic parameter.
+- `src/server` contains authenticated TanStack server functions and request-boundary coordination.
+- `src/editorial/articles/editor` contains the focused article-editing workflow.
+- `src/editorial/articles/inventory` contains article and page catalog tables, grouping, filters, and creation actions.
+- `src/editorial/homepage` contains homepage placement queries and composition.
+- `src/editorial/shell` contains Studio navigation and route-level workspace coordination.
+- `src/editorial/auth` and `src/editorial/shared` contain the sign-in screen and cross-feature editorial controls.
+- `src/components/tiptap-*` contains the copied official Tiptap Simple Editor kit. Its component-scoped SCSS styles define editor nodes, toolbars, menus, theme tokens, and editor animations; Vite compiles them into the lazy editor bundle while `src/styles/globals.css` owns the surrounding Studio application.
+- `worker/services` contains framework-neutral article, homepage, translation, and media operations.
+- `worker/db.ts` owns the Drizzle D1 adapter.
 - `../../packages/content` contains contracts shared by both applications.
 - `../../packages/editor` contains the shared Tiptap schema and renderer.
 - `../../packages/db` contains the Drizzle schema and D1 migration history.
-- `test` runs inside the Workers runtime with the real Wrangler configuration.
+- `test/worker.spec.ts` and `test/start-runtime.spec.ts` run inside workerd with the real Wrangler configuration. The public Astro app carries its corresponding emitted-Worker checks under `../web/worker`.
+- `test/article-services.spec.ts` and `test/inventory-groups.spec.ts` exercise adapter-neutral domain behavior in the Node lane.
 
-The current implementation provides automatic article-quality checks, semantic Tiptap figures, D1 article persistence, revisions, R2 media uploads, translation state, and publishing behavior. Each Tiptap extension corresponds to content present in the publication corpus.
+The current implementation provides automatic article-quality checks, semantic Tiptap figures, D1 article persistence, optimistic revision conflicts, restore-as-new-version history, R2 media uploads, translation state, homepage placement, and publication verification. Each Tiptap extension corresponds to content present in the publication corpus.
+
+All editorial mutations pass through Clerk authentication, the server-side allowlist, and TanStack Start CSRF middleware. Raw media delivery stays under `/api/media/:id`; the remaining application reads and writes use typed server functions. See [CUTOVER.md](CUTOVER.md) for the production sequence.
 
 ## Media and editorial history
 
 R2 stores immutable original image bytes under content-addressed keys. D1 stores the SHA-256 digest, dimensions, MIME type, source URL, aliases, and the stable media ID used by articles. Delivery through `/api/media/:id` supports responsive widths and AVIF/WebP negotiation through Cloudflare Images while preserving the original object.
 
-Each article stores an editorial baseline alongside the editable canonical document. D1 keeps the current field-level difference, revisions keep the complete save history, and figure attributes identify source, generated, manual, or missing alt text and captions.
+Each article stores an editorial baseline alongside the editable canonical document. D1 keeps the current field-level difference, and every revision created by this Studio captures the complete versioned article state. Imported legacy revisions retain their exact body, title, summary, status, slug, language, and hero-presentation history; Studio labels them as partial and uses current values for fields the legacy system never recorded. Figure attributes identify source, generated, manual, or missing alt text and captions.

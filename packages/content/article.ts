@@ -20,6 +20,12 @@ export const translationReviewStatusSchema = z.enum([
   "changes_requested",
 ]);
 
+export const translationReviewActionSchema = z.enum([
+  "approve",
+  "request_changes",
+  "mark_pending",
+]);
+
 const tiptapMarkSchema = z.looseObject({
   attrs: z.record(z.string(), z.unknown()).optional(),
   type: z.string().min(1),
@@ -41,7 +47,7 @@ export const tiptapDocumentSchema = tiptapNodeSchema.refine(
   { error: "Tiptap document root must use the doc node" }
 );
 
-export const createArticleSchema = z.object({
+export const createArticleSchema = z.strictObject({
   baseline: z
     .object({
       body: tiptapDocumentSchema,
@@ -70,8 +76,6 @@ export const createArticleSchema = z.object({
   title: z.string().trim().min(1).max(240),
   translationGroupId: z.string().uuid().optional(),
   translationKind: translationKindSchema.default("original"),
-  translationReviewedAt: z.number().int().nonnegative().nullable().optional(),
-  translationReviewedBy: z.string().trim().min(1).max(200).optional(),
   translationReviewStatus:
     translationReviewStatusSchema.default("not_required"),
   translationSourceArticleId: z.string().uuid().optional(),
@@ -83,6 +87,19 @@ export const createArticleSchema = z.object({
 
 export type CreateArticleInput = z.infer<typeof createArticleSchema>;
 export type TiptapDocument = z.infer<typeof tiptapDocumentSchema>;
+
+export const createInteractiveArticleSchema = createArticleSchema
+  .omit({
+    translationKind: true,
+    translationReviewStatus: true,
+    translationSourceArticleId: true,
+    translationSourceHash: true,
+  })
+  .extend({ language: z.literal("lt") });
+
+export const createTranslationDraftSchema = z.object({
+  language: z.enum(["en", "ru", "uk", "be"]),
+});
 
 export const updateArticleSchema = createArticleSchema
   .pick({
@@ -102,21 +119,10 @@ export const updateArticleSchema = createArticleSchema
     title: true,
     translationGroupId: true,
     translationKind: true,
-    translationReviewedAt: true,
-    translationReviewedBy: true,
-    translationReviewStatus: true,
-    translationSourceArticleId: true,
-    translationSourceHash: true,
   })
   .extend({
-    translationReviewedAt: z.number().int().nonnegative().nullable().optional(),
-    translationReviewedBy: z.string().trim().min(1).max(200).optional(),
-    translationReviewStatus: translationReviewStatusSchema.optional(),
-    translationSourceArticleId: z.string().uuid().optional(),
-    translationSourceHash: z
-      .string()
-      .regex(/^[0-9a-f]{64}$/u)
-      .optional(),
+    expectedVersion: z.number().int().positive(),
+    translationReviewAction: translationReviewActionSchema.optional(),
   });
 
 export type UpdateArticleInput = z.infer<typeof updateArticleSchema>;

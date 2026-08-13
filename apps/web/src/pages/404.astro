@@ -1,13 +1,52 @@
 ---
-import SiteLayout from "../layouts/SiteLayout.astro";
+import SiteLayout from "../components/layout/SiteLayout.astro";
+import { localeShells, type SiteLocale } from "../i18n/config";
+
+const requestedLocale = Astro.url.pathname.split("/")[1];
+const locale: SiteLocale = localeShells.includes(requestedLocale as never)
+  ? (requestedLocale as SiteLocale)
+  : "lt";
+const copy = {
+  be: {
+    archive: "Адкрыць публікацыі",
+    description: "Па гэтым адрасе публікацыя не знойдзена. Усе даступныя матэрыялы знаходзяцца на галоўнай старонцы гэтага выдання.",
+    heading: "Старонка не знойдзена",
+    title: "Старонка не знойдзена",
+  },
+  en: {
+    archive: "Open publications",
+    description: "No publication was found at this address. Every available item is listed on this edition’s home page.",
+    heading: "Page not found",
+    title: "Page not found",
+  },
+  lt: {
+    archive: "Atverti archyvą",
+    description: "Šio adreso viešoje kopijoje rasti nepavyko. Visas išsaugotas publikacijas rasite archyve.",
+    heading: "Puslapio archyve nėra",
+    title: "Puslapis nerastas",
+  },
+  ru: {
+    archive: "Открыть публикации",
+    description: "По этому адресу публикация не найдена. Все доступные материалы размещены на главной странице этого издания.",
+    heading: "Страница не найдена",
+    title: "Страница не найдена",
+  },
+  uk: {
+    archive: "Відкрити публікації",
+    description: "За цією адресою публікацію не знайдено. Усі доступні матеріали розміщено на головній сторінці цього видання.",
+    heading: "Сторінку не знайдено",
+    title: "Сторінку не знайдено",
+  },
+}[locale];
+const homeHref = locale === "lt" ? "/archyvas" : `/${locale}#articles`;
 ---
 
-<SiteLayout title="Puslapis nerastas · ortodoksas.lt" description="Šio adreso atkurtame ortodoksas.lt archyve nėra." canonicalPath="/404">
+<SiteLayout title={`${copy.title} · ortodoksas.lt`} description={copy.description} canonicalPath={Astro.url.pathname} lang={locale} locale={locale}>
   <main class="mx-auto grid min-h-[55vh] w-[min(1200px,calc(100%-64px))] place-items-center content-center text-center max-sm:w-[min(1200px,calc(100%-32px))]">
     <span class="font-serif text-[70px] text-gold" aria-hidden="true">☦</span>
     <div class="text-[10px] font-bold uppercase tracking-[0.08em] text-primary">404</div>
-    <h1 class="mb-2.5 mt-[7px] font-serif text-5xl font-bold">Puslapio archyve nėra</h1>
-    <p class="max-w-[520px] font-serif text-lg leading-normal text-muted-foreground">Šio adreso viešoje kopijoje rasti nepavyko. Visas išsaugotas publikacijas rasite archyve.</p>
-    <a class="text-[11px] font-bold text-primary" href="/archyvas">Atverti archyvą →</a>
+    <h1 class="mb-2.5 mt-[7px] font-serif text-5xl font-bold">{copy.heading}</h1>
+    <p class="max-w-[520px] font-serif text-lg leading-normal text-muted-foreground">{copy.description}</p>
+    <a class="text-[11px] font-bold text-primary" href={homeHref}>{copy.archive} →</a>
   </main>
 </SiteLayout>

@@ -6,7 +6,7 @@ the shared content system.
 ## Workspace
 
 - `apps/web` — Astro public site and Cloudflare Worker delivery layer.
-- `apps/studio` — React/Vite editorial interface and Cloudflare Worker API.
+- `apps/studio` — TanStack Start editorial application on Cloudflare Workers.
 - `packages/content` — canonical article contracts and media URL handling.
 - `packages/editor` — shared Tiptap schema, rendering, provenance, and quality gates.
 - `packages/db` — Drizzle schema and immutable D1 migrations.
@@ -14,6 +14,13 @@ the shared content system.
 Both apps use the same D1 database and R2 media bucket. D1 is the canonical
 source for articles, editorial baselines, field-level changes, revision history,
 and homepage placements. R2 is the canonical source for media objects.
+
+Tracked Wrangler files define local binding placeholders. Release operators
+provide `ORTODOKSAS_D1_DATABASE_ID` and `ORTODOKSAS_MEDIA_BUCKET_NAME`; each
+app generates an ignored, mode-`0600` `wrangler.production.jsonc` for production
+builds and deployments. Studio releases also receive
+`VITE_CLERK_PUBLISHABLE_KEY` as an explicit Vite build input and
+`ORTODOKSAS_STUDIO_WRITE_MODE` as the release maintenance gate.
 
 The historical crawl and migration evidence lives in the public
 [`chikingsley/ortodoksas-lt-source-archive`](https://huggingface.co/datasets/chikingsley/ortodoksas-lt-source-archive)
@@ -33,4 +40,5 @@ pnpm dev:studio
 
 Ultracite/Biome owns formatting and linting. TypeScript owns type checking.
 React tests run under Vitest, and Worker tests run inside Cloudflare's workerd
-runtime with the real Wrangler configuration.
+runtime with the same binding shape and compatibility settings used in release
+configuration.

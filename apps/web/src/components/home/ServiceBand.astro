@@ -1,7 +1,7 @@
 ---
 import type { SiteLocale } from "../../i18n/config";
 import { ui } from "../../i18n/ui";
-import { getLocalizedCounterparts } from "../../lib/publication-repository";
+import { getLocalizedCounterparts } from "../../server/publication-localization";
 
 interface Props { locale?: SiteLocale; }
 const { locale = "lt" } = Astro.props;

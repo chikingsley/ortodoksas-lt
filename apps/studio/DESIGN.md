@@ -2,19 +2,21 @@
 name: Ortodoksas Studio
 description: A focused institutional newsroom for archive conversion, canonical editing, automatic quality checks, and revision.
 colors:
-  institutional-green: "#015c4b"
-  canvas: "#f7f8f6"
-  editor-canvas: "#f4f5f3"
+  brand-burgundy: "#af272f"
+  brand-dark: "#861d24"
+  gold: "#c8a34a"
+  canvas: "#ffffff"
+  editor-canvas: "#f4f1e8"
   surface: "#ffffff"
-  ink: "#17201d"
-  secondary-surface: "#eef1ee"
-  secondary-ink: "#26332f"
-  muted-surface: "#f1f3f1"
-  muted-ink: "#66716d"
-  accent-surface: "#edf3f1"
-  border: "#dde2df"
-  input-border: "#ccd4d0"
-  focus-ring: "#4d8a7e"
+  ink: "#111111"
+  secondary-surface: "#f4f1e8"
+  secondary-ink: "#111111"
+  muted-surface: "#f4f1e8"
+  muted-ink: "#5c5650"
+  accent-surface: "#f4f1e8"
+  border: "#d3cdc0"
+  input-border: "#d3cdc0"
+  focus-ring: "#af272f"
   destructive: "#b42318"
 typography:
   editor-title:
@@ -84,23 +86,23 @@ spacing:
   section: "42px"
 components:
   button-primary:
-    backgroundColor: "{colors.institutional-green}"
+    backgroundColor: "{colors.brand-burgundy}"
     textColor: "{colors.surface}"
     rounded: "{rounded.action}"
     padding: "0 10px"
-    height: "32px"
+    height: "36px"
   button-outline:
     backgroundColor: "{colors.canvas}"
     textColor: "{colors.ink}"
     rounded: "{rounded.action}"
     padding: "0 10px"
-    height: "32px"
+    height: "36px"
   search-field:
     backgroundColor: "{colors.surface}"
     textColor: "{colors.ink}"
     rounded: "{rounded.field}"
     padding: "0 9px"
-    height: "35px"
+    height: "36px"
   inventory-panel:
     backgroundColor: "{colors.surface}"
     textColor: "{colors.ink}"
@@ -121,7 +123,7 @@ components:
 
 Ortodoksas Studio is a calm, high-density newsroom for turning recovered archive material into canonical editorial records. The interface gives the article full-page focus while preserving source evidence, save state, automatic quality results, publication metadata, and revision history within the same working context.
 
-Institutional green marks deliberate editorial action. Cool gray-green canvases, white work surfaces, one-pixel divisions, compact controls, and restrained shadows give the product the character of a durable staff system. The official Tiptap Simple Editor remains a distinct authored-content workspace inside that institutional shell.
+Official Ortodoksas burgundy marks deliberate editorial action. Warm paper accents, white work surfaces, black editorial ink, one-pixel divisions, compact controls, and restrained shadows give the product the character of a durable staff system. The official Tiptap Simple Editor remains a distinct authored-content workspace inside that publication shell.
 
 **Key Characteristics:**
 
@@ -133,11 +135,13 @@ Institutional green marks deliberate editorial action. Cool gray-green canvases,
 
 ## Colors
 
-Institutional green is the single brand accent. White and cool gray-green surfaces create hierarchy, while muted ink carries secondary metadata and destructive red identifies failures or change-request states.
+Official Ortodoksas burgundy is the functional brand accent. White and warm paper surfaces create hierarchy, muted ink carries secondary metadata, gold remains decorative, and destructive red identifies failures or change-request states.
 
 ### Primary
 
-- **Institutional Green** (`colors.institutional-green`): primary actions, selected tabs and navigation, active checks, and high-confidence editorial states.
+- **Brand Burgundy** (`colors.brand-burgundy`): primary actions, selected tabs and navigation, focus, and high-confidence editorial states.
+- **Dark Burgundy** (`colors.brand-dark`): active text and strong brand emphasis.
+- **Gold** (`colors.gold`): restrained decorative emphasis tied to the publication identity.
 
 ### Neutral
 
@@ -153,7 +157,7 @@ Institutional green is the single brand accent. White and cool gray-green surfac
 - **Focus Ring** (`colors.focus-ring`): visible keyboard focus and field emphasis.
 - **Destructive Red** (`colors.destructive`): errors and requested-change states.
 
-**The Green State Rule.** Use green for selected, successful, quality-pass, and publishing actions. Keep routine navigation and utility controls neutral.
+**The Brand Emphasis Rule.** Use burgundy for selected states, primary publishing actions, and focus. Keep routine navigation and utility controls neutral, and reserve gold for decorative identity details.
 
 **The Surface Hierarchy Rule.** Create depth with canvas shifts, white working surfaces, and hairline boundaries before adding shadow.
 
@@ -187,10 +191,10 @@ One-pixel borders provide the primary depth system. Tonal layering separates the
 
 ### Shadow Vocabulary
 
-- **Panel Trace** (`0 1px 2px rgb(26 42 35 / 3%)`): inventory panel separation.
+- **Panel Trace** (`0 1px 2px rgb(17 17 17 / 3%)`): inventory panel separation.
 - **Primary Action Trace** (`0 1px 1px rgb(0 0 0 / 8%)`): compact emphasis on the inventory creation action.
-- **Sticky Action Bar** (`0 5px 18px rgb(17 32 27 / 5%)`): a soft boundary beneath the 96%-opaque white editor bar.
-- **Focus Halo** (`0 0 0 3px rgb(1 92 75 / 8%)`): search-field focus paired with a greener border.
+- **Sticky Action Bar** (`0 5px 18px rgb(17 17 17 / 5%)`): a soft boundary beneath the 96%-opaque white editor bar.
+- **Focus Halo** (`0 0 0 3px rgb(175 39 47 / 12%)`): search-field focus paired with the official burgundy border.
 - **Overlay Lift** (`0 24px 70px rgb(0 0 0 / 30%)`): preview and comparison windows above the 68%-opaque dark scrim.
 
 **The Bordered Workspace Rule.** Use one-pixel structure for persistent surfaces and reserve pronounced elevation for modal reading or comparison.
@@ -205,7 +209,7 @@ The system uses a measured radius ladder tied to scale and role. Count and langu
 
 ### Inventory
 
-The inventory follows established newsroom CMS conventions. Desktop rows are 67px high with a 43px square thumbnail, single-line title and summary, language badge, section, green published state, and tabular date. The title column receives 48% of table width, and the complete table holds a 920px minimum width. Row hover uses a pale green surface. Search and section filters are 35px high; status tabs occupy 51px; pagination sits in a 52px footer. Loading, empty, and error states stay inside the inventory panel.
+The inventory follows established newsroom CMS conventions. Desktop rows are 67px high with a 43px square thumbnail, single-line title and summary, language badge, section, burgundy published state, and tabular date. The title column receives 48% of table width, and the complete table holds a 920px minimum width. Row hover uses the warm paper surface. Search and section filters are 36px high; status tabs occupy 51px; pagination sits in a 52px footer. Loading, empty, and error states stay inside the inventory panel.
 
 At 560px each row becomes a card with a 48px thumbnail, two-line title, one-line summary, status, and date. Selection, language, and section cells yield to the core scan path. Status tabs form a stable two-column control group and the search field spans the panel.
 
@@ -233,9 +237,9 @@ Preview renders canonical Tiptap JSON through the same full-document renderer us
 
 ### Fields and Actions
 
-Primary and outline buttons are 32px high with 10px corners, 14px text, compact horizontal padding, and 16px icons. Primary buttons use institutional green; outline buttons use the canvas surface and hairline border. Hover adjusts fill, keyboard focus adds a three-pixel ring, active buttons move down one pixel, and disabled buttons use 50% opacity.
+Primary and outline actions are 36px high with compact corners, 14px text, compact horizontal padding, and 16px icons. Primary buttons use official burgundy; outline buttons use the canvas surface and hairline border. Hover adjusts fill, keyboard focus adds a three-pixel ring, active buttons move down one pixel, and disabled buttons use 50% opacity.
 
-Inventory fields are 35px high with 6px corners. Inspector fields use 7px corners and `9px 10px` padding. The article title and summary are borderless textareas; the title grows with content, and the summary carries a 600-character count plus a bottom rule that turns green on focus.
+Inventory fields are 36px high with 6px corners. Inspector fields use 7px corners and `9px 10px` padding. The article title and summary are borderless textareas; the title grows with content, and the summary carries a 600-character count plus a bottom rule that turns burgundy on focus.
 
 ### Mobile Workflow
 
@@ -254,7 +258,7 @@ The mobile action bar places article identity and save state above Preview and S
 
 ### Avoid
 
-- **Avoid** spreading institutional green across routine controls; its concentrated use signals editorial consequence.
+- **Avoid** spreading brand burgundy across routine controls; its concentrated use signals editorial consequence.
 - **Avoid** placing the inventory rail inside the focused article route.
 - **Avoid** replacing the 304px desktop inspector with detached settings dialogs or hidden metadata.
 - **Avoid** introducing public-site decoration, spacious marketing composition, or reader-facing ornament into this operating environment.

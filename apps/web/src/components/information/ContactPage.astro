@@ -1,0 +1,19 @@
+---
+import { contactGroups } from "../../content/information";
+---
+
+<div class="mt-9 grid grid-cols-2 gap-5 max-md:grid-cols-1">
+  {contactGroups.map((contact) => (
+    <section class="border-border border p-7 max-sm:p-5">
+      <p class="mb-5 text-[10px] font-bold uppercase tracking-[0.11em] text-primary">{contact.role}</p>
+      <h2 class="mb-5 font-serif text-[27px] leading-[1.12] tracking-[-0.015em]">{contact.name}</h2>
+      <div class="grid gap-2.5 text-sm">
+        <a class="w-fit font-medium underline decoration-primary/35 underline-offset-[3px] hover:text-primary hover:decoration-primary" href={`tel:${contact.phoneHref}`}>{contact.phone}</a>
+        <a class="w-fit break-all font-medium underline decoration-primary/35 underline-offset-[3px] hover:text-primary hover:decoration-primary" href={`mailto:${contact.email}`}>{contact.email}</a>
+      </div>
+    </section>
+  ))}
+</div>
+<p class="mt-7 text-center font-serif text-lg text-muted-foreground">
+  Dvasininkų kontaktus rasite <a class="font-medium text-primary underline decoration-primary/35 underline-offset-[3px] hover:decoration-primary" href="/p/dvasininkai.html">dvasininkų puslapyje</a>.
+</p>

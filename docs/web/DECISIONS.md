@@ -4,11 +4,11 @@
 
 ### Framework and Rendering
 
-- Astro generates the publication as static HTML.
+- Astro renders publication HTML in a Cloudflare Worker from published D1 records.
 - Reader-facing pages ship zero JavaScript by default.
 - Native HTML, CSS, and small scripts handle simple interaction.
 - Framework islands require a concrete interaction that earns their runtime cost.
-- Pagefind provides static multilingual search.
+- The archive and multilingual search query indexed publication fields in D1.
 
 ### Hosting
 
@@ -61,13 +61,17 @@
 ### CMS
 
 - The custom Studio is the production editorial interface.
+- TanStack Start and Router own the Studio application boundary. TanStack Query,
+  Form, and Table own server state, metadata forms, and inventory state.
 - Tiptap stores canonical article bodies; Drizzle owns every D1 read and write.
 - D1 stores articles, revisions, translation relationships, publication state,
   and media records. R2 stores media bytes.
-- Publishing exports approved D1 records and triggers the static Astro build.
-- The deployed Worker serves the static publication, D1-backed publication API,
-  and R2 media.
-- Production authentication uses Clerk in the production-authentication phase.
+- Publishing commits approved D1 records atomically; the Astro Worker reads the
+  current published state on the next request.
+- The deployed Worker serves the publication, D1-backed route models, and R2
+  media.
+- Clerk authenticates Studio sessions. The Worker allowlist authorizes every
+  editorial operation and derives reviewer identity from the session.
 - Homepage category rails rotate automatically to the two sections with the
   most recently published activity; each rail shows its newest eligible items.
 
@@ -90,5 +94,5 @@
 ## Pending Gate Decisions
 
 - First bounded translation batch, terminology glossary, and reviewer sampling.
-- Clerk production authentication.
+- Clerk production secret and allowlist provisioning.
 - Production domain cutover.

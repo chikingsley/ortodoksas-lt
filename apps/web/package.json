@@ -5,16 +5,20 @@
   "type": "module",
   "scripts": {
     "build": "astro build",
+    "build:production": "pnpm config:production && CLOUDFLARE_VITE_WRANGLER_CONFIG_PATH=./wrangler.production.jsonc pnpm build",
     "cf:types": "wrangler types",
     "cf:types:check": "wrangler types --check",
-    "check": "ultracite check && pnpm cf:types:check && astro check && pnpm typecheck && pnpm test && astro build && pnpm deploy:dry-run",
-    "deploy": "pnpm build && wrangler deploy --config dist/server/wrangler.json",
+    "check": "ultracite check && pnpm cf:types:check && astro check && pnpm typecheck && pnpm test:react && astro build && pnpm test:worker && pnpm deploy:dry-run",
+    "config:production": "node ../../scripts/create-production-wrangler-config.mjs",
+    "deploy": "pnpm build:production && wrangler deploy --config dist/server/wrangler.json",
     "deploy:dry-run": "wrangler deploy --config dist/server/wrangler.json --dry-run",
+    "deploy:dry-run:production": "pnpm build:production && wrangler deploy --config dist/server/wrangler.json --dry-run",
     "dev": "astro dev",
     "fix": "ultracite fix",
     "preview": "astro preview",
-    "test": "pnpm test:react",
+    "test": "pnpm test:react && pnpm build && pnpm test:worker",
     "test:react": "vitest run --config vitest.config.ts",
+    "test:worker": "vitest run --config vitest.worker.config.ts",
     "typecheck": "tsc -b"
   },
   "dependencies": {

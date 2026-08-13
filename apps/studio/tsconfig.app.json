@@ -4,7 +4,7 @@
     "target": "es2023",
     "lib": ["ES2023", "DOM"],
     "module": "esnext",
-    "types": ["vite/client"],
+    "types": ["vite/client", "./worker-configuration.d.ts"],
     "paths": {
       "@/*": ["./src/*"]
     },
@@ -26,5 +26,5 @@
     "noFallthroughCasesInSwitch": true,
     "strictNullChecks": true
   },
-  "include": ["src", "shared"]
+  "include": ["src", "worker", "shared"]
 }

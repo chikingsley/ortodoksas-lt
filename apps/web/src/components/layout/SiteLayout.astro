@@ -1,0 +1,88 @@
+---
+import "../../styles/globals.css";
+import type { SiteLocale } from "../../i18n/config";
+import { getLocaleLinks } from "../../server/publication-localization";
+import { site } from "../../site";
+import SiteFooter from "./SiteFooter.astro";
+import SiteHeader from "./SiteHeader.astro";
+
+interface AlternateLink {
+  href: string;
+  hreflang: string;
+}
+
+interface Props {
+  title: string;
+  description?: string;
+  canonicalPath?: string;
+  image?: string | null;
+  lang?: string;
+  locale?: SiteLocale;
+  type?: "website" | "article";
+  alternates?: AlternateLink[];
+  jsonLd?: Record<string, unknown>;
+}
+
+const {
+  title,
+  description = site.defaultDescription,
+  canonicalPath = Astro.url.pathname,
+  image,
+  lang = "lt",
+  locale = "lt",
+  type = "website",
+  alternates = [],
+  jsonLd,
+} = Astro.props;
+const siteUrl = Astro.site ?? new URL(site.origin);
+const canonical = new URL(canonicalPath, siteUrl).toString();
+const socialImage = image?.startsWith("/") ? new URL(image, siteUrl).toString() : image;
+const localeLinks = await getLocaleLinks(canonicalPath);
+const resolvedAlternates = alternates.length
+  ? alternates
+  : Object.entries(localeLinks)
+      .filter(([, destination]) => destination.hasCounterpart)
+      .map(([alternateLocale, destination]) => ({
+        href: new URL(destination.href, siteUrl).toString(),
+        hreflang: alternateLocale,
+      }));
+const baseSchema = {
+  "@context": "https://schema.org",
+  "@type": type === "article" ? "Article" : "WebSite",
+  name: title,
+  description,
+  url: canonical,
+  inLanguage: lang,
+  ...(type === "article" ? { publisher: { "@type": "Organization", name: site.name, logo: { "@type": "ImageObject", url: new URL(site.logoPath, siteUrl).toString() } } } : {}),
+  ...jsonLd,
+};
+---
+
+<!doctype html>
+<html class="[scrollbar-width:none] [&::-webkit-scrollbar]:hidden" lang={lang}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="theme-color" content="#af272f" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" type="application/rss+xml" title="ortodoksas.lt RSS" href={new URL("/rss.xml", siteUrl).toString()} />
+    {resolvedAlternates.map((alternate) => <link rel="alternate" hreflang={alternate.hreflang} href={alternate.href} />)}
+    <meta property="og:type" content={type} />
+    <meta property="og:site_name" content="ortodoksas.lt" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    {socialImage ? <meta property="og:image" content={socialImage} /> : null}
+    <meta name="twitter:card" content={socialImage ? "summary_large_image" : "summary"} />
+    <script type="application/ld+json" set:html={JSON.stringify(baseSchema).replace(/</g, "\\u003c")} />
+  </head>
+  <body class="m-0 min-w-80 bg-white font-sans text-foreground antialiased [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <div class="min-h-svh overflow-x-clip">
+      <SiteHeader currentPath={canonicalPath} locale={locale} localeLinks={localeLinks} />
+      <slot />
+      <SiteFooter locale={locale} />
+    </div>
+  </body>
+</html>

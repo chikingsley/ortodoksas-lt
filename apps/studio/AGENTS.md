@@ -1,6 +1,6 @@
 # Ortodoksas Studio Rules
 
-- Treat this repository as the independent editorial product. Keep the public publication in its separate repository.
+- Treat `apps/studio` as the independent editorial product inside this workspace. Share only explicit content, database, and editor contracts with `apps/web`.
 - Use upstream Vite with the Cloudflare Vite plugin and Workers Static Assets.
 - Keep every `/api` route in `assets.run_worker_first` so SPA fallback preserves Worker routing.
 - Store canonical article bodies as Tiptap JSON. Use the shared extension manifest for editing, validation, preview, and static rendering.

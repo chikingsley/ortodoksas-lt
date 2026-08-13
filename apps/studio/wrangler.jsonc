@@ -5,8 +5,8 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "ortodoksas-studio",
-  "main": "worker/index.ts",
-  "compatibility_date": "2026-08-05",
+  "main": "./src/server-entry.ts",
+  "compatibility_date": "2026-08-13",
   "routes": [
     {
       "pattern": "ortodoksas-studio.grassinside.com",
@@ -15,21 +15,20 @@
   ],
   "assets": {
     "binding": "ASSETS",
-    "not_found_handling": "single-page-application",
     "run_worker_first": ["/api/*"]
   },
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "ortodoksas-studio",
-      "database_id": "989ce1b7-0555-47e3-a635-0e79cdf21e07",
+      "database_id": "00000000-0000-0000-0000-000000000000",
       "migrations_dir": "../../packages/db/migrations"
     }
   ],
   "r2_buckets": [
     {
       "binding": "MEDIA",
-      "bucket_name": "ortodoksas-studio-media"
+      "bucket_name": "ortodoksas-media-local"
     }
   ],
   "images": {
@@ -40,7 +39,8 @@
   },
   "vars": {
     "CLERK_AUTHORIZED_PARTIES": "http://localhost:5173,http://127.0.0.1:5173,https://ortodoksas-studio.grassinside.com",
-    "PUBLICATION_ORIGIN": "https://ortodoksas.grassinside.com"
+    "PUBLICATION_ORIGIN": "https://ortodoksas.grassinside.com",
+    "STUDIO_WRITE_MODE": "open"
   },
   "env": {
     "studio": {
@@ -48,7 +48,7 @@
         {
           "binding": "DB",
           "database_name": "ortodoksas-studio",
-          "database_id": "989ce1b7-0555-47e3-a635-0e79cdf21e07",
+          "database_id": "00000000-0000-0000-0000-000000000000",
           "migrations_dir": "../../packages/db/migrations",
           "remote": true
         }
@@ -56,7 +56,7 @@
       "r2_buckets": [
         {
           "binding": "MEDIA",
-          "bucket_name": "ortodoksas-studio-media",
+          "bucket_name": "ortodoksas-media-local",
           "remote": true
         }
       ],
@@ -66,7 +66,9 @@
     }
   },
   "observability": {
-    "enabled": true
+    "enabled": true,
+    "logs": { "head_sampling_rate": 1 },
+    "traces": { "enabled": true, "head_sampling_rate": 0.01 }
   },
   "upload_source_maps": true,
   "compatibility_flags": ["nodejs_compat"]

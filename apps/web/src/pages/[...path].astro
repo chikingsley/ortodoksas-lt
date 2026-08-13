@@ -1,86 +1,11 @@
 ---
-import { getSectionLabel } from "@ortodoksas-lt/content/sections";
-import { getTranslationDisplayState } from "@ortodoksas-lt/content/translation";
-import EditorialImage from "../components/media/EditorialImage.astro";
-import ArticleBody from "../components/publication/ArticleBody.astro";
-import { localeShells, type SiteLocale } from "../i18n/config";
-import { ui } from "../i18n/ui";
-import SiteLayout from "../layouts/SiteLayout.astro";
-import { cleanHtml, formatDate, hasLeadFigure } from "../lib/publication";
-import { getCounterpart, getPage } from "../lib/publication-repository";
+import PublicationPage from "../components/publication/PublicationPage.astro";
+import { resolvePublicationPage } from "../components/publication/publication-page-model";
 
-const segments = (Astro.params.path ?? "").split("/");
-const requestedLocale = segments[0];
-const locale: SiteLocale = localeShells.includes(requestedLocale as never)
-  ? (requestedLocale as SiteLocale)
-  : "lt";
-const localized = locale !== "lt";
-const publicationPath = `/${(localized ? segments.slice(1) : segments).join("/")}`;
-const page = await getPage(locale, publicationPath);
-if (!page) {
+const model = await resolvePublicationPage(Astro.params.path ?? "");
+if (!model) {
   return Astro.rewrite("/404");
 }
-
-const copy = ui[locale];
-const canonicalPath = localized ? `/${locale}${page.path}` : page.path;
-const original = localized ? await getCounterpart("lt", canonicalPath) : undefined;
-const translationState = getTranslationDisplayState({
-  kind: page.translationKind ?? "original",
-  reviewStatus: page.translationReviewStatus ?? "not_required",
-});
-const translationDisclosure = translationState === "editor_reviewed"
-  ? copy.editorReviewedTranslation
-  : copy.automaticTranslation;
-const bodyOwnsLeadImage = hasLeadFigure(page.html);
-const heroFit = page.heroFit === "contain" ? "[&_img]:object-contain [&_img]:p-3" : "[&_img]:object-cover";
-const heroObjectPosition = `${page.heroFocalX}% ${page.heroFocalY}%`;
-const bodyHtml = page.path === "/p/biblioteka.html"
-  ? cleanHtml(page.html, { hero: page.hero, heroMediaId: page.heroMediaId }).replace(
-      /^\s*<div>\s*<\/div>\s*<table[\s\S]*?<\/table>/i,
-      ""
-    )
-  : cleanHtml(page.html, {
-      hero: bodyOwnsLeadImage ? null : page.hero,
-      heroMediaId: bodyOwnsLeadImage ? null : page.heroMediaId,
-      removeFirstMedia: page.kind === "article",
-    });
-const description = page.description || `${page.title} · ortodoksas.lt`;
-const articleSchema = page.kind === "article" ? {
-  articleSection: page.section,
-  dateModified: page.published ?? undefined,
-  datePublished: page.published ?? undefined,
-  headline: page.title,
-  keywords: page.labels.join(", "),
-  mainEntityOfPage: canonicalPath,
-} : undefined;
 ---
 
-<SiteLayout
-  title={`${page.title} · ${localized ? copy.edition : "ortodoksas.lt"}`}
-  description={description}
-  canonicalPath={canonicalPath}
-  image={page.hero}
-  jsonLd={articleSchema}
-  lang={locale}
-  locale={locale}
-  type={page.kind === "article" ? "article" : "website"}
->
-  <main>
-    <article class="mx-auto mb-[70px] mt-7 w-[min(790px,calc(100%-48px))] max-sm:mt-5 max-sm:w-[min(790px,calc(100%-28px))]">
-      <header class="text-center">
-        <div class="text-[10px] font-bold uppercase tracking-[0.08em] text-primary">{page.kind === "page" ? (localized ? copy.edition : "ortodoksas.lt") : getSectionLabel(page.section, locale)}</div>
-        <h1 class="mx-auto mb-5 mt-3 text-balance font-serif text-[clamp(40px,6vw,68px)] font-bold leading-[0.99] tracking-[-0.03em] [overflow-wrap:anywhere] max-sm:text-[clamp(35px,11vw,50px)]">{page.title}</h1>
-        {page.published ? <div class="flex justify-center gap-[18px] text-[10px] uppercase tracking-[0.06em] text-muted-foreground max-sm:flex-col max-sm:gap-[7px]"><time datetime={page.published}>{formatDate(page.published, locale)}</time></div> : null}
-        {localized && original && translationState !== "original" ? (
-          <p class="mb-7 mt-3 flex justify-center gap-1.5 text-xs leading-[1.4] text-muted-foreground">
-            {translationDisclosure}
-            <a class="font-bold text-primary" href={original.path}>{copy.viewOriginal}</a>
-          </p>
-        ) : null}
-        {page.hero && !bodyOwnsLeadImage ? <EditorialImage alt={page.heroAlt} class:list={["mx-[50%] mb-[46px] mt-[38px] block aspect-[1.72] w-[min(1080px,calc(100vw-48px))] -translate-x-1/2 overflow-hidden bg-muted max-sm:-mx-3.5 max-sm:mb-[34px] max-sm:mt-7 max-sm:w-[calc(100%+28px)] max-sm:translate-x-0 [&_img]:h-full [&_img]:w-full", heroFit]} objectPosition={heroObjectPosition} priority src={page.hero} /> : null}
-      </header>
-      <ArticleBody html={bodyHtml} />
-      {page.labels.length > 0 ? <footer class="mt-11 flex flex-wrap gap-2 border-t border-border pt-6">{page.labels.map((label) => <span class="rounded-full border border-border px-[11px] py-[7px] text-[10px] text-muted-foreground">{label}</span>)}</footer> : null}
-    </article>
-  </main>
-</SiteLayout>
+<PublicationPage model={model} />

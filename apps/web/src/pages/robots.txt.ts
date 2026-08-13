@@ -1,4 +1,4 @@
-import { absoluteUrl } from "../lib/publication";
+import { absoluteUrl } from "../components/publication/publication";
 
 export const prerender = true;
 

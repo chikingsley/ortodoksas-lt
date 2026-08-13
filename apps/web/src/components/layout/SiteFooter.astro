@@ -1,8 +1,11 @@
 ---
 import { ui } from "../../i18n/ui";
 import type { SiteLocale } from "../../i18n/config";
-import { getLocalizedCounterparts } from "../../lib/publication-repository";
-import { getContactNavigation, getPrimaryNavigation } from "../../navigation/publication";
+import { getLocalizedCounterparts } from "../../server/publication-localization";
+import {
+  getContactNavigation,
+  getPrimaryNavigation,
+} from "./publication-navigation";
 import PublicationLogo from "./publication-logo";
 
 interface Props {

@@ -2,7 +2,20 @@
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "root": false,
   "extends": ["ultracite/biome/core", "ultracite/biome/react"],
+  "files": {
+    "includes": ["!public/assets/brand/**/*.svg"]
+  },
   "overrides": [
+    {
+      "includes": ["src/routes/**"],
+      "linter": {
+        "rules": {
+          // TanStack Router reserves route filenames such as `api/$.ts` and
+          // `_studio.articles.$articleId.tsx` as its filesystem API.
+          "style": { "useFilenamingConvention": "off" }
+        }
+      }
+    },
     {
       "includes": [
         "src/components/tiptap-extension/**",

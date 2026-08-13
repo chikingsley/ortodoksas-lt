@@ -25,6 +25,7 @@ export const ui: Record<
     editorReviewedTranslation: string;
     footerDescription: string;
     home: string;
+    imageUnavailable: string;
     institution: string;
     languages: string;
     library: string;
@@ -77,6 +78,7 @@ export const ui: Record<
     footerDescription:
       "Праваслаўная вера, традыцыя і царкоўнае жыццё ў Літве і свеце.",
     home: "Галоўная",
+    imageUnavailable: "Выява недаступная",
     institution: "Экзархат Канстанцінопальскага патрыярхату ў Літве",
     languages: "Мовы",
     library: "Бібліятэка",
@@ -128,6 +130,7 @@ export const ui: Record<
     footerDescription:
       "Orthodox faith, tradition, and church life in Lithuania and beyond.",
     home: "Home",
+    imageUnavailable: "Image unavailable",
     institution: "Exarchate of the Ecumenical Patriarchate in Lithuania",
     languages: "Languages",
     library: "Library",
@@ -179,6 +182,7 @@ export const ui: Record<
     footerDescription:
       "Apie Ortodoksų Bažnyčią Lietuvoje ir pasaulyje, jos tikėjimą, tradiciją ir gyvenimą.",
     home: "Pradžia",
+    imageUnavailable: "Vaizdas nepasiekiamas",
     institution: "Konstantinopolio patriarchato egzarchatas Lietuvoje",
     languages: "Kalbos",
     library: "Biblioteka",
@@ -230,6 +234,7 @@ export const ui: Record<
     footerDescription:
       "Православная вера, традиция и церковная жизнь в Литве и мире.",
     home: "Главная",
+    imageUnavailable: "Изображение недоступно",
     institution: "Экзархат Вселенского патриархата в Литве",
     languages: "Языки",
     library: "Библиотека",
@@ -281,6 +286,7 @@ export const ui: Record<
     footerDescription:
       "Православна віра, традиція і церковне життя в Литві та світі.",
     home: "Головна",
+    imageUnavailable: "Зображення недоступне",
     institution: "Екзархат Вселенського патріархату в Литві",
     languages: "Мови",
     library: "Бібліотека",

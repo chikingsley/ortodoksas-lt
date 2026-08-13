@@ -13,6 +13,7 @@ dist
 dist-ssr
 *.local
 .wrangler/
+wrangler.production.jsonc
 apps/web/.canonical-content/
 .dev.vars*
 worker-configuration.d.ts.tmp

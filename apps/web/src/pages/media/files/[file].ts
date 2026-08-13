@@ -1,6 +1,6 @@
 import { env } from "cloudflare:workers";
 import type { APIRoute } from "astro";
-import { mediaResponse } from "../../../lib/media-response";
+import { mediaResponse } from "../../../server/media-response";
 
 const safeFile = /^[0-9a-f]{64}\.[a-z0-9]+$/i;
 export const ALL: APIRoute = ({ params, request }) => {

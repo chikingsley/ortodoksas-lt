@@ -13,10 +13,16 @@ export default defineConfig({
       );
 
       return {
+        main: "./dist/server/index.js",
         miniflare: {
           bindings: { TEST_MIGRATIONS: migrations },
+          compatibilityDate: "2026-08-08",
         },
-        wrangler: { configPath: "./wrangler.jsonc" },
+        wrangler: {
+          configPath:
+            process.env.CLOUDFLARE_VITE_WRANGLER_CONFIG_PATH ??
+            "./wrangler.jsonc",
+        },
       };
     }),
   ],

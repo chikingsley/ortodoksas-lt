@@ -1,10 +1,13 @@
 import { MailIcon, RssIcon } from "lucide-react";
 import { siFacebook, siInstagram, siYoutube } from "simple-icons";
-import { cn } from "@/lib/utils";
+import { cn } from "@/components/ui/utils";
+import type { SiteLocale } from "@/i18n/config";
+import { ui } from "@/i18n/ui";
 
 interface Props {
   className?: string;
-  locale?: "be" | "en" | "lt" | "ru" | "uk";
+  contactHref?: string;
+  locale?: SiteLocale;
 }
 
 const socialLinks = [
@@ -25,11 +28,15 @@ const socialLinks = [
   },
 ] as const;
 
-export default function SocialLinks({ className, locale = "lt" }: Props) {
-  const localPrefix = locale === "lt" ? "" : `/${locale}`;
+export default function SocialLinks({
+  className,
+  contactHref = "/p/kontaktai_30.html",
+  locale = "lt",
+}: Props) {
+  const copy = ui[locale];
   return (
     <nav
-      aria-label="Socialiniai kanalai"
+      aria-label={copy.contacts}
       className={cn("flex items-center", className)}
     >
       {socialLinks.map(({ href, icon, label }) => (
@@ -48,12 +55,12 @@ export default function SocialLinks({ className, locale = "lt" }: Props) {
         </a>
       ))}
       <a
-        aria-label="Kontaktai"
+        aria-label={copy.contact}
         className="grid size-11 place-items-center text-foreground transition-colors hover:text-primary focus-visible:text-primary [&_svg]:size-4"
-        href={`${localPrefix}/p/kontaktai_30.html`}
+        href={contactHref}
       >
         <MailIcon aria-hidden="true" />
-        <span className="sr-only">Kontaktai</span>
+        <span className="sr-only">{copy.contact}</span>
       </a>
       <a
         aria-label="RSS"

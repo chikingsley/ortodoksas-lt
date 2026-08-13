@@ -1,9 +1,9 @@
 ---
-import { formatDate, type CatalogEntry } from "../../lib/publication";
+import { formatDate, type CatalogEntry } from "./publication";
 import { getSectionLabel } from "@ortodoksas-lt/content/sections";
 import type { SiteLocale } from "../../i18n/config";
 import { ui } from "../../i18n/ui";
-import EditorialImage from "../media/EditorialImage.astro";
+import EditorialImage from "./EditorialImage.astro";
 
 interface Props {
   entry: CatalogEntry;
@@ -18,7 +18,7 @@ const objectPosition = `${entry.heroFocalX}% ${entry.heroFocalY}%`;
 ---
 
 <article class="group">
-  {entry.hero ? <EditorialImage alt={entry.heroAlt} class:list={["mb-[17px] block aspect-[1.65] overflow-hidden bg-muted max-lg:aspect-[1.8] max-sm:mb-4 max-sm:aspect-[1.35] [&_img]:h-full [&_img]:w-full [&_img]:transition-transform [&_img]:duration-500 group-hover:[&_img]:scale-[1.02]", imageFit]} href={href} label={`${copy.read}: ${entry.title}`} objectPosition={objectPosition} priority src={entry.hero} /> : null}
+  {entry.hero ? <EditorialImage alt={entry.heroAlt} class:list={["mb-[17px] block aspect-[1.65] overflow-hidden bg-muted max-lg:aspect-[1.8] max-sm:mb-4 max-sm:aspect-[1.35] [&_img]:h-full [&_img]:w-full [&_img]:transition-transform [&_img]:duration-500 group-hover:[&_img]:scale-[1.02]", imageFit]} href={href} label={`${copy.read}: ${entry.title}`} objectPosition={objectPosition} priority src={entry.hero} unavailableLabel={copy.imageUnavailable} /> : null}
   <div class="text-[10px] font-bold uppercase tracking-[0.08em] text-primary max-sm:mx-3.5">{getSectionLabel(entry.section, locale)}</div>
   <h1 class="mb-[11px] mt-1.5 max-w-[22ch] text-balance font-serif text-[clamp(32px,3vw,40px)] font-bold leading-[1.02] tracking-[-0.028em] max-sm:mx-3.5 max-sm:max-w-none max-sm:text-[clamp(29px,8vw,39px)]"><a class="hover:text-primary" href={href}>{entry.title}</a></h1>
   <p class="mb-3.5 max-w-[70ch] font-serif text-base leading-normal text-muted-foreground max-sm:mx-3.5 max-sm:text-[15px]">{entry.description}</p>

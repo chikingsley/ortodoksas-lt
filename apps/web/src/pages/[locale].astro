@@ -1,22 +1,16 @@
 ---
 import Homepage from "../components/home/Homepage.astro";
 import { type Locale, localeShells } from "../i18n/config";
-import SiteLayout from "../layouts/SiteLayout.astro";
-import { buildHomepageModel } from "../lib/homepage";
-import { getHomepageCatalog, getSections } from "../lib/publication-repository";
+import SiteLayout from "../components/layout/SiteLayout.astro";
+import { getHomepageModel } from "../server/publication-catalog";
 import { ui } from "../i18n/ui";
 
 const locale = Astro.params.locale as Locale;
 if (!localeShells.includes(locale)) {
   return Astro.rewrite("/404");
 }
-const [catalog, sections] = await Promise.all([
-  getHomepageCatalog(locale),
-  getSections(),
-]);
-const entries = catalog.filter((entry) => entry.kind === "article");
+const { entries, model } = await getHomepageModel(locale);
 const localizedCopy = ui[locale];
-const model = buildHomepageModel({ articles: entries, catalog, locale, sections });
 ---
 
 <SiteLayout title={`${localizedCopy.edition} · ortodoksas.lt`} description={entries.length ? `${entries.length} ${localizedCopy.articles.toLocaleLowerCase(locale)} · ${localizedCopy.edition}.` : localizedCopy.editionUnavailable} canonicalPath={`/${locale}`} lang={locale} locale={locale}>

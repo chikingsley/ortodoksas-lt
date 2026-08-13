@@ -2,11 +2,14 @@ import cloudflare from "@astrojs/cloudflare";
 import react from "@astrojs/react";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "astro/config";
-import { siteOrigin } from "./src/config/site";
 import { defaultLocale, siteLocales } from "./src/i18n/config";
+import { site } from "./src/site";
 
 export default defineConfig({
-  adapter: cloudflare(),
+  adapter: cloudflare({
+    configPath:
+      process.env.CLOUDFLARE_VITE_WRANGLER_CONFIG_PATH ?? "./wrangler.jsonc",
+  }),
   build: {
     format: "file",
   },
@@ -23,7 +26,7 @@ export default defineConfig({
   },
   integrations: [react()],
   output: "server",
-  site: siteOrigin,
+  site: site.origin,
   trailingSlash: "never",
   vite: {
     plugins: [tailwindcss()],
