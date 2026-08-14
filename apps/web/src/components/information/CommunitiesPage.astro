@@ -21,11 +21,11 @@ interface Props {
 
 const { communities = [], detail = false, locale } = Astro.props;
 const labels = {
-  be: { address: "Адрас", contacts: "Кантакты", next: "Наступнае фота", previous: "Папярэдняе фота", services: "Набажэнствы" },
-  en: { address: "Address", contacts: "Contacts", next: "Next photo", previous: "Previous photo", services: "Services" },
-  lt: { address: "Adresas", contacts: "Kontaktai", next: "Kita nuotrauka", previous: "Ankstesnė nuotrauka", services: "Pamaldos" },
-  ru: { address: "Адрес", contacts: "Контакты", next: "Следующее фото", previous: "Предыдущее фото", services: "Богослужения" },
-  uk: { address: "Адреса", contacts: "Контакти", next: "Наступне фото", previous: "Попереднє фото", services: "Богослужіння" },
+  be: { address: "Адрас", contacts: "Кантакты", gallery: "Фотагалерэя", next: "Наступнае фота", previous: "Папярэдняе фота", services: "Набажэнствы" },
+  en: { address: "Address", contacts: "Contacts", gallery: "Photo gallery", next: "Next photo", previous: "Previous photo", services: "Services" },
+  lt: { address: "Adresas", contacts: "Kontaktai", gallery: "Nuotraukų galerija", next: "Kita nuotrauka", previous: "Ankstesnė nuotrauka", services: "Pamaldos" },
+  ru: { address: "Адрес", contacts: "Контакты", gallery: "Фотогалерея", next: "Следующее фото", previous: "Предыдущее фото", services: "Богослужения" },
+  uk: { address: "Адреса", contacts: "Контакти", gallery: "Фотогалерея", next: "Наступне фото", previous: "Попереднє фото", services: "Богослужіння" },
 }[locale];
 ---
 
@@ -33,7 +33,7 @@ const labels = {
   {communities.map((community) => (
     <section class="worship-community flex min-w-0 flex-col overflow-hidden border border-border">
       <div class="group relative aspect-[1.62] w-full overflow-hidden bg-muted" data-gallery>
-        <div class="gallery-track flex h-full snap-x snap-mandatory overflow-x-auto scroll-smooth" data-gallery-track>
+        <div aria-label={`${labels.gallery}: ${community.name}`} class="gallery-track flex h-full snap-x snap-mandatory overflow-x-auto scroll-smooth" data-gallery-track role="region" tabindex="0">
           {community.media.map((image, imageIndex) => (
             <figure class="h-full w-full min-w-full snap-center" data-gallery-slide>
               <img class="h-full w-full object-cover" src={`/api/media/${image.mediaId}`} alt={image.altText} loading={imageIndex === 0 ? "eager" : "lazy"} />
