@@ -1,11 +1,7 @@
 ---
 import { getSectionLabel } from "@ortodoksas-lt/content/sections";
-import CalendarPage from "../information/CalendarPage.astro";
 import ClergyPage from "../information/ClergyPage.astro";
 import CommunitiesPage from "../information/CommunitiesPage.astro";
-import ContactPage from "../information/ContactPage.astro";
-import LibraryPage from "../information/LibraryPage.astro";
-import SupportPage from "../information/SupportPage.astro";
 import SiteLayout from "../layout/SiteLayout.astro";
 import ArticleBody from "./ArticleBody.astro";
 import EditorialImage from "./EditorialImage.astro";
@@ -22,16 +18,17 @@ const {
   bodyOwnsLeadImage,
   canonicalPath,
   copy,
-  customBody,
+  directoryData,
   description,
   displayTitle,
-  informationPage,
+  pageTemplate,
   locale,
   localized,
   original,
   page,
   translationDisclosure,
   translationState,
+  structuredTemplate,
   wideBody,
 } = Astro.props.model;
 const heroFit =
@@ -63,15 +60,12 @@ const heroObjectPosition = `${page.heroFocalX}% ${page.heroFocalY}%`;
             <a class="font-bold text-primary" href={original.path}>{copy.viewOriginal}</a>
           </p>
         ) : null}
-        {page.hero && !bodyOwnsLeadImage && !customBody ? <EditorialImage alt={page.heroAlt} class:list={["mx-[50%] mb-[46px] mt-[38px] block aspect-[1.72] w-[min(1080px,calc(100vw-48px))] -translate-x-1/2 overflow-hidden bg-muted max-sm:-mx-3.5 max-sm:mb-[34px] max-sm:mt-7 max-sm:w-[calc(100%+28px)] max-sm:translate-x-0 [&_img]:h-full [&_img]:w-full", heroFit]} objectPosition={heroObjectPosition} priority src={page.hero} unavailableLabel={copy.imageUnavailable} /> : null}
+        {page.hero && !bodyOwnsLeadImage && !structuredTemplate ? <EditorialImage alt={page.heroAlt} class:list={["mx-[50%] mb-[46px] mt-[38px] block aspect-[1.72] w-[min(1080px,calc(100vw-48px))] -translate-x-1/2 overflow-hidden bg-muted max-sm:-mx-3.5 max-sm:mb-[34px] max-sm:mt-7 max-sm:w-[calc(100%+28px)] max-sm:translate-x-0 [&_img]:h-full [&_img]:w-full", heroFit]} objectPosition={heroObjectPosition} priority src={page.hero} unavailableLabel={copy.imageUnavailable} /> : null}
       </header>
-      {customBody && informationPage === "library" ? <LibraryPage hero={page.hero} heroAlt={page.heroAlt} /> : null}
-      {customBody && informationPage === "contact" ? <ContactPage /> : null}
-      {customBody && informationPage === "support" ? <SupportPage /> : null}
-      {customBody && informationPage === "calendar" ? <CalendarPage /> : null}
-      {customBody && informationPage === "communities" ? <CommunitiesPage /> : null}
-      {customBody && informationPage === "clergy" ? <ClergyPage hero={page.hero} heroAlt={page.heroAlt || page.title} html={bodyHtml} /> : null}
-      {customBody ? null : <ArticleBody html={bodyHtml} />}
+      {structuredTemplate && bodyHtml ? <ArticleBody html={bodyHtml} /> : null}
+      {pageTemplate === "community_directory" ? <CommunitiesPage communities={directoryData} locale={locale} /> : null}
+      {pageTemplate === "people_directory" ? <ClergyPage hero={page.hero} heroAlt={page.heroAlt || page.title} people={directoryData} /> : null}
+      {structuredTemplate ? null : <ArticleBody html={bodyHtml} />}
       {page.labels.length > 0 ? <footer class="mt-11 flex flex-wrap gap-2 border-t border-border pt-6">{page.labels.map((label) => <span class="rounded-full border border-border px-[11px] py-[7px] text-[10px] text-muted-foreground">{label}</span>)}</footer> : null}
     </article>
   </main>

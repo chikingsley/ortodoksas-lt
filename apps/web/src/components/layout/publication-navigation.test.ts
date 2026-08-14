@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { siteLocales } from "../../i18n/config";
 import {
+  getContactNavigation,
   getPrimaryNavigation,
   isNavigationItemActive,
 } from "./publication-navigation";
@@ -8,10 +9,11 @@ import {
 describe("publication navigation contract", () => {
   it("uses one complete primary navigation in every locale", () => {
     for (const locale of siteLocales) {
-      const items = getPrimaryNavigation(locale);
+      const items = getPrimaryNavigation(locale, (path) => path);
       expect(items).toHaveLength(6);
       expect(new Set(items.map((item) => item.id)).size).toBe(6);
       expect(items.every((item) => item.label.length > 0)).toBe(true);
+      expect(items.every((item) => item.targetLocale === locale)).toBe(true);
     }
   });
 
@@ -37,5 +39,11 @@ describe("publication navigation contract", () => {
       href: "/en/p/clergy.html",
       targetLocale: "en",
     });
+  });
+
+  it("shows only published counterparts in a localized edition", () => {
+    const items = getPrimaryNavigation("en");
+    expect(items.map((item) => item.id)).toEqual(["home", "archive"]);
+    expect(getContactNavigation("en")).toEqual([]);
   });
 });

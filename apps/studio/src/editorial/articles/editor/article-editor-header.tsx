@@ -1,4 +1,5 @@
 import { UserButton } from "@clerk/tanstack-react-start";
+import { siteLocales } from "@ortodoksas-lt/content/site";
 import { ArrowLeft, Eye, LoaderCircle, Save, Send } from "lucide-react";
 import { type MouseEvent, useCallback, useState } from "react";
 
@@ -22,7 +23,7 @@ interface Props {
   translations: CatalogArticle[];
 }
 
-const EDITION_LANGUAGES = ["lt", "en", "ru", "uk", "be"] as const;
+const EDITION_LANGUAGES = siteLocales;
 
 interface CreateTranslationButtonProps {
   language: "en" | "ru" | "uk" | "be";

@@ -33,5 +33,11 @@ export default defineConfig({
     preview: {
       allowedHosts: ["ortodoksas-preview.grassinside.com"],
     },
+    resolve: {
+      dedupe: ["react", "react-dom"],
+    },
+    ssr: {
+      noExternal: ["lucide-react"],
+    },
   },
 });

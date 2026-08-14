@@ -37,7 +37,18 @@ pnpm --filter @ortodoksas-lt/studio exec wrangler d1 migrations list DB \
   --config wrangler.production.jsonc
 ```
 
-The duplicate query returns an empty result set. For this release, the migration list shows `0006_equal_vanisher.sql` as applied and `0007_legacy_revision_provenance.sql` as pending. Migration `0006` adds homepage layout compare-and-swap state. Migration `0007` marks imported revisions as partial and removes migration-time values for fields the legacy revision format never recorded.
+The duplicate query returns an empty result set. Record the complete pending-migration list in the release log. This release includes `0007_legacy_revision_provenance.sql`, `0008_wide_human_torch.sql`, `0009_red_vin_gonzales.sql`, and `0010_article_search_fts.sql`. Migration `0007` marks imported revisions as partial. Migration `0008` creates normalized publication groups plus the people and community directories, migrates the twelve clergy profiles from their five localized page bodies, and seeds the nine community records with five localizations each. Migration `0009` adds the database foreign key from every article to its publication group. Migration `0010` creates the FTS5 article-search index, backfills it from every article, and installs synchronization triggers for future inserts, updates, and deletes.
+
+Run the directory preflight against the same production database:
+
+```sh
+pnpm --filter @ortodoksas-lt/studio exec wrangler d1 execute DB \
+  --remote \
+  --config wrangler.production.jsonc \
+  --command "SELECT language, COUNT(*) AS clergy_pages FROM articles WHERE translation_group_id = 'edf497f7-11c8-4c2f-8fa5-c975fb4dbd2f' GROUP BY language; SELECT articles.language, COUNT(*) AS portrait_refs FROM articles, json_tree(articles.body_json) AS node WHERE articles.translation_group_id = 'edf497f7-11c8-4c2f-8fa5-c975fb4dbd2f' AND node.type = 'object' AND json_extract(node.value, '$.type') = 'figure' AND json_extract(node.value, '$.attrs.mediaId') IS NOT NULL GROUP BY articles.language;"
+```
+
+The first result contains one clergy page for each of `lt`, `en`, `ru`, `uk`, and `be`. The second result contains twelve portrait references for each language. Save both result sets beside the database export; they are the source-data evidence for the deterministic directory migration.
 
 ## 3. Capture the database recovery point
 
@@ -74,7 +85,7 @@ sha256sum "$ORTODOKSAS_BACKUP_DIR/pre-cutover.sql" \
   > "$ORTODOKSAS_BACKUP_DIR/pre-cutover.sql.sha256"
 ```
 
-Read the bookmark JSON and copy its bookmark value into the release log. The SQL export provides a durable audit artifact beyond D1's Time Travel retention window.
+Read the bookmark JSON and copy its bookmark value into the release log. The SQL export provides a durable audit artifact beyond D1's Time Travel retention window. Capture this export before applying `0010`: D1 export currently excludes databases that contain virtual tables. Later recovery captures can use Time Travel directly or a maintenance procedure that drops and recreates the derived `articles_fts` table around the export.
 
 ## 4. Configure production identity
 
@@ -97,7 +108,7 @@ pnpm --filter @ortodoksas-lt/studio exec wrangler d1 migrations apply DB \
   --config wrangler.production.jsonc
 ```
 
-Verify the revision provenance and active homepage layout after the migration:
+Verify the revision provenance, normalized directories, publication groups, referential integrity, and active homepage layout after the migration:
 
 ```sh
 pnpm --filter @ortodoksas-lt/studio exec wrangler d1 execute DB \
@@ -114,9 +125,19 @@ pnpm --filter @ortodoksas-lt/studio exec wrangler d1 execute DB \
   --remote \
   --config wrangler.production.jsonc \
   --command "SELECT COUNT(*) AS stale_homepage_placements FROM homepage_placements AS placement INNER JOIN homepage_layout_state AS layout ON layout.id = 'primary' WHERE placement.layout_revision <> layout.revision"
+
+pnpm --filter @ortodoksas-lt/studio exec wrangler d1 execute DB \
+  --remote \
+  --config wrangler.production.jsonc \
+  --command "SELECT COUNT(*) AS people FROM people; SELECT language, COUNT(*) AS localizations FROM person_localizations GROUP BY language ORDER BY language; SELECT COUNT(*) AS communities FROM communities; SELECT language, COUNT(*) AS localizations FROM community_localizations GROUP BY language ORDER BY language; SELECT kind, page_template, COUNT(*) AS groups FROM publication_groups GROUP BY kind, page_template ORDER BY kind, page_template; PRAGMA foreign_key_check;"
+
+pnpm --filter @ortodoksas-lt/studio exec wrangler d1 execute DB \
+  --remote \
+  --config wrangler.production.jsonc \
+  --command "INSERT INTO articles_fts(articles_fts) VALUES('integrity-check'); SELECT COUNT(*) AS indexed_matches FROM articles_fts WHERE articles_fts MATCH 'ortodoks*';"
 ```
 
-The provenance query reports imported history as `legacy_partial`; revisions created after the TanStack Studio release report `complete`. The stale-placement count returns zero, and the layout query returns one `primary` row.
+The provenance query reports imported history as `legacy_partial`; revisions created after the TanStack Studio release report `complete`. The directory query reports twelve people and twelve localizations in each language, nine communities and nine localizations in each language, and an empty foreign-key result. The publication-group totals reconcile exactly to the distinct `translation_group_id` values in `articles`. The FTS integrity command completes successfully and the representative term returns matches. The stale-placement count returns zero, and the layout query returns one `primary` row.
 
 ## 6. Deploy and verify
 

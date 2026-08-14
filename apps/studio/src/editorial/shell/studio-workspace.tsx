@@ -25,6 +25,19 @@ type WorkspaceRoute =
 const contentPath = (kind: CatalogArticle["kind"]) =>
   kind === "page" ? "/pages" : "/articles";
 
+const sidebarPath = (view: StudioView, kind: CatalogArticle["kind"]) => {
+  if (view === "homepage") {
+    return "/homepage" as const;
+  }
+  if (view === "people") {
+    return "/people" as const;
+  }
+  if (view === "communities") {
+    return "/communities" as const;
+  }
+  return contentPath(kind);
+};
+
 export const StudioWorkspace = (route: WorkspaceRoute) => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -60,10 +73,7 @@ export const StudioWorkspace = (route: WorkspaceRoute) => {
   const navigateSidebar = useCallback(
     (view: StudioView) =>
       navigate({
-        to:
-          view === "homepage"
-            ? "/homepage"
-            : contentPath(route.kind ?? "article"),
+        to: sidebarPath(view, route.kind ?? "article"),
       }),
     [navigate, route.kind]
   );

@@ -1,7 +1,11 @@
+import { sql } from "drizzle-orm";
 import {
   type AnySQLiteColumn,
+  check,
   index,
   integer,
+  primaryKey,
+  real,
   sqliteTable,
   text,
   uniqueIndex,
@@ -46,6 +50,31 @@ export const mediaAliases = sqliteTable(
   (table) => [index("media_aliases_media_id_idx").on(table.mediaId)]
 );
 
+export const publicationGroups = sqliteTable(
+  "publication_groups",
+  {
+    createdAt: integer("created_at").notNull(),
+    id: text("id").primaryKey(),
+    kind: text("kind").notNull(),
+    pageTemplate: text("page_template").notNull().default("standard"),
+    updatedAt: integer("updated_at").notNull(),
+  },
+  (table) => [
+    check(
+      "publication_groups_kind_check",
+      sql`${table.kind} IN ('article', 'page')`
+    ),
+    check(
+      "publication_groups_page_template_check",
+      sql`${table.pageTemplate} IN ('standard', 'calendar', 'people_directory', 'community_directory', 'contact', 'library', 'support')`
+    ),
+    check(
+      "publication_groups_kind_template_check",
+      sql`${table.kind} = 'page' OR ${table.pageTemplate} = 'standard'`
+    ),
+  ]
+);
+
 export const articles = sqliteTable(
   "articles",
   {
@@ -71,7 +100,9 @@ export const articles = sqliteTable(
     status: text("status").notNull().default("draft"),
     summary: text("summary").notNull().default(""),
     title: text("title").notNull(),
-    translationGroupId: text("translation_group_id").notNull(),
+    translationGroupId: text("translation_group_id")
+      .notNull()
+      .references(() => publicationGroups.id),
     translationKind: text("translation_kind").notNull().default("original"),
     translationReviewedAt: integer("translation_reviewed_at"),
     translationReviewedBy: text("translation_reviewed_by"),
@@ -208,5 +239,408 @@ export const homepagePlacements = sqliteTable(
       table.position
     ),
     index("homepage_placements_layout_revision_idx").on(table.layoutRevision),
+  ]
+);
+
+export const people = sqliteTable(
+  "people",
+  {
+    createdAt: integer("created_at").notNull(),
+    id: text("id").primaryKey(),
+    slug: text("slug").notNull(),
+    sortOrder: integer("sort_order").notNull().default(0),
+    status: text("status").notNull().default("draft"),
+    updatedAt: integer("updated_at").notNull(),
+  },
+  (table) => [
+    uniqueIndex("people_slug_unique").on(table.slug),
+    index("people_status_sort_idx").on(table.status, table.sortOrder),
+    check(
+      "people_status_check",
+      sql`${table.status} IN ('draft', 'published', 'archived')`
+    ),
+    check("people_sort_order_check", sql`${table.sortOrder} >= 0`),
+  ]
+);
+
+export const personLocalizations = sqliteTable(
+  "person_localizations",
+  {
+    biographyJson: text("biography_json").notNull(),
+    displayName: text("display_name").notNull(),
+    language: text("language").notNull(),
+    personId: text("person_id")
+      .notNull()
+      .references(() => people.id, { onDelete: "cascade" }),
+    seoDescription: text("seo_description").notNull().default(""),
+  },
+  (table) => [
+    primaryKey({ columns: [table.personId, table.language] }),
+    check(
+      "person_localizations_language_check",
+      sql`${table.language} IN ('lt', 'en', 'ru', 'uk', 'be')`
+    ),
+  ]
+);
+
+export const communities = sqliteTable(
+  "communities",
+  {
+    addressLine: text("address_line").notNull().default(""),
+    countryCode: text("country_code").notNull().default("LT"),
+    createdAt: integer("created_at").notNull(),
+    id: text("id").primaryKey(),
+    latitude: real("latitude"),
+    locality: text("locality").notNull().default(""),
+    longitude: real("longitude"),
+    operationalStatus: text("operational_status").notNull().default("active"),
+    postalCode: text("postal_code").notNull().default(""),
+    slug: text("slug").notNull(),
+    sortOrder: integer("sort_order").notNull().default(0),
+    status: text("status").notNull().default("draft"),
+    type: text("type").notNull().default("community"),
+    updatedAt: integer("updated_at").notNull(),
+  },
+  (table) => [
+    uniqueIndex("communities_slug_unique").on(table.slug),
+    index("communities_status_sort_idx").on(table.status, table.sortOrder),
+    check(
+      "communities_status_check",
+      sql`${table.status} IN ('draft', 'published', 'archived')`
+    ),
+    check(
+      "communities_type_check",
+      sql`${table.type} IN ('parish', 'church', 'chapel', 'mission', 'monastery', 'community')`
+    ),
+    check(
+      "communities_operational_status_check",
+      sql`${table.operationalStatus} IN ('active', 'forming', 'inactive')`
+    ),
+    check("communities_sort_order_check", sql`${table.sortOrder} >= 0`),
+    check(
+      "communities_coordinates_check",
+      sql`(${table.latitude} IS NULL AND ${table.longitude} IS NULL) OR (${table.latitude} IS NOT NULL AND ${table.longitude} IS NOT NULL)`
+    ),
+    check(
+      "communities_latitude_check",
+      sql`${table.latitude} IS NULL OR (${table.latitude} >= -90 AND ${table.latitude} <= 90)`
+    ),
+    check(
+      "communities_longitude_check",
+      sql`${table.longitude} IS NULL OR (${table.longitude} >= -180 AND ${table.longitude} <= 180)`
+    ),
+    check(
+      "communities_country_code_check",
+      sql`length(${table.countryCode}) = 2 AND ${table.countryCode} = upper(${table.countryCode})`
+    ),
+  ]
+);
+
+export const communityLocalizations = sqliteTable(
+  "community_localizations",
+  {
+    accessibility: text("accessibility").notNull().default(""),
+    addressLabel: text("address_label").notNull().default(""),
+    communityId: text("community_id")
+      .notNull()
+      .references(() => communities.id, { onDelete: "cascade" }),
+    description: text("description").notNull().default(""),
+    directions: text("directions").notNull().default(""),
+    language: text("language").notNull(),
+    name: text("name").notNull(),
+    operationalNotice: text("operational_notice").notNull().default(""),
+    seoDescription: text("seo_description").notNull().default(""),
+  },
+  (table) => [
+    primaryKey({ columns: [table.communityId, table.language] }),
+    check(
+      "community_localizations_language_check",
+      sql`${table.language} IN ('lt', 'en', 'ru', 'uk', 'be')`
+    ),
+  ]
+);
+
+export const personPositions = sqliteTable(
+  "person_positions",
+  {
+    communityId: text("community_id").references(() => communities.id, {
+      onDelete: "set null",
+    }),
+    createdAt: integer("created_at").notNull(),
+    endsAt: integer("ends_at"),
+    id: text("id").primaryKey(),
+    personId: text("person_id")
+      .notNull()
+      .references(() => people.id, { onDelete: "cascade" }),
+    roleKey: text("role_key").notNull(),
+    sortOrder: integer("sort_order").notNull().default(0),
+    startsAt: integer("starts_at"),
+    updatedAt: integer("updated_at").notNull(),
+  },
+  (table) => [
+    index("person_positions_person_sort_idx").on(
+      table.personId,
+      table.sortOrder
+    ),
+    index("person_positions_community_idx").on(table.communityId),
+    check("person_positions_sort_order_check", sql`${table.sortOrder} >= 0`),
+    check(
+      "person_positions_dates_check",
+      sql`${table.startsAt} IS NULL OR ${table.endsAt} IS NULL OR ${table.startsAt} <= ${table.endsAt}`
+    ),
+  ]
+);
+
+export const personContacts = sqliteTable(
+  "person_contacts",
+  {
+    createdAt: integer("created_at").notNull(),
+    href: text("href").notNull(),
+    id: text("id").primaryKey(),
+    kind: text("kind").notNull(),
+    personId: text("person_id")
+      .notNull()
+      .references(() => people.id, { onDelete: "cascade" }),
+    sortOrder: integer("sort_order").notNull().default(0),
+    updatedAt: integer("updated_at").notNull(),
+  },
+  (table) => [
+    index("person_contacts_person_sort_idx").on(
+      table.personId,
+      table.sortOrder
+    ),
+    check(
+      "person_contacts_kind_check",
+      sql`${table.kind} IN ('email', 'phone', 'website', 'facebook', 'instagram', 'telegram', 'other')`
+    ),
+    check("person_contacts_sort_order_check", sql`${table.sortOrder} >= 0`),
+  ]
+);
+
+export const personContactLocalizations = sqliteTable(
+  "person_contact_localizations",
+  {
+    label: text("label").notNull(),
+    language: text("language").notNull(),
+    personContactId: text("person_contact_id")
+      .notNull()
+      .references(() => personContacts.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    primaryKey({ columns: [table.personContactId, table.language] }),
+    check(
+      "person_contact_localizations_language_check",
+      sql`${table.language} IN ('lt', 'en', 'ru', 'uk', 'be')`
+    ),
+  ]
+);
+
+export const personPositionLocalizations = sqliteTable(
+  "person_position_localizations",
+  {
+    description: text("description").notNull().default(""),
+    language: text("language").notNull(),
+    positionId: text("position_id")
+      .notNull()
+      .references(() => personPositions.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.positionId, table.language] }),
+    check(
+      "person_position_localizations_language_check",
+      sql`${table.language} IN ('lt', 'en', 'ru', 'uk', 'be')`
+    ),
+  ]
+);
+
+export const communityContacts = sqliteTable(
+  "community_contacts",
+  {
+    communityId: text("community_id")
+      .notNull()
+      .references(() => communities.id, { onDelete: "cascade" }),
+    createdAt: integer("created_at").notNull(),
+    href: text("href").notNull(),
+    id: text("id").primaryKey(),
+    kind: text("kind").notNull(),
+    sortOrder: integer("sort_order").notNull().default(0),
+    updatedAt: integer("updated_at").notNull(),
+  },
+  (table) => [
+    index("community_contacts_community_sort_idx").on(
+      table.communityId,
+      table.sortOrder
+    ),
+    check(
+      "community_contacts_kind_check",
+      sql`${table.kind} IN ('email', 'phone', 'website', 'facebook', 'instagram', 'telegram', 'other')`
+    ),
+    check("community_contacts_sort_order_check", sql`${table.sortOrder} >= 0`),
+  ]
+);
+
+export const communityContactLocalizations = sqliteTable(
+  "community_contact_localizations",
+  {
+    communityContactId: text("community_contact_id")
+      .notNull()
+      .references(() => communityContacts.id, { onDelete: "cascade" }),
+    label: text("label").notNull(),
+    language: text("language").notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.communityContactId, table.language] }),
+    check(
+      "community_contact_localizations_language_check",
+      sql`${table.language} IN ('lt', 'en', 'ru', 'uk', 'be')`
+    ),
+  ]
+);
+
+export const communityServices = sqliteTable(
+  "community_services",
+  {
+    communityId: text("community_id")
+      .notNull()
+      .references(() => communities.id, { onDelete: "cascade" }),
+    createdAt: integer("created_at").notNull(),
+    endsAt: integer("ends_at"),
+    id: text("id").primaryKey(),
+    sortOrder: integer("sort_order").notNull().default(0),
+    startsAt: integer("starts_at"),
+    updatedAt: integer("updated_at").notNull(),
+  },
+  (table) => [
+    index("community_services_community_sort_idx").on(
+      table.communityId,
+      table.sortOrder
+    ),
+    check("community_services_sort_order_check", sql`${table.sortOrder} >= 0`),
+    check(
+      "community_services_dates_check",
+      sql`${table.startsAt} IS NULL OR ${table.endsAt} IS NULL OR ${table.startsAt} <= ${table.endsAt}`
+    ),
+  ]
+);
+
+export const communityServiceLocalizations = sqliteTable(
+  "community_service_localizations",
+  {
+    communityServiceId: text("community_service_id")
+      .notNull()
+      .references(() => communityServices.id, { onDelete: "cascade" }),
+    language: text("language").notNull(),
+    scheduleText: text("schedule_text").notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.communityServiceId, table.language] }),
+    check(
+      "community_service_localizations_language_check",
+      sql`${table.language} IN ('lt', 'en', 'ru', 'uk', 'be')`
+    ),
+  ]
+);
+
+export const personMedia = sqliteTable(
+  "person_media",
+  {
+    createdAt: integer("created_at").notNull(),
+    id: text("id").primaryKey(),
+    mediaId: text("media_id")
+      .notNull()
+      .references(() => mediaAssets.id, { onDelete: "restrict" }),
+    personId: text("person_id")
+      .notNull()
+      .references(() => people.id, { onDelete: "cascade" }),
+    role: text("role").notNull().default("gallery"),
+    sortOrder: integer("sort_order").notNull().default(0),
+  },
+  (table) => [
+    uniqueIndex("person_media_person_media_unique").on(
+      table.personId,
+      table.mediaId
+    ),
+    index("person_media_person_sort_idx").on(table.personId, table.sortOrder),
+    uniqueIndex("person_media_one_primary_unique")
+      .on(table.personId)
+      .where(sql`${table.role} = 'primary'`),
+    check(
+      "person_media_role_check",
+      sql`${table.role} IN ('primary', 'gallery')`
+    ),
+    check("person_media_sort_order_check", sql`${table.sortOrder} >= 0`),
+  ]
+);
+
+export const communityMedia = sqliteTable(
+  "community_media",
+  {
+    communityId: text("community_id")
+      .notNull()
+      .references(() => communities.id, { onDelete: "cascade" }),
+    createdAt: integer("created_at").notNull(),
+    id: text("id").primaryKey(),
+    mediaId: text("media_id")
+      .notNull()
+      .references(() => mediaAssets.id, { onDelete: "restrict" }),
+    role: text("role").notNull().default("gallery"),
+    sortOrder: integer("sort_order").notNull().default(0),
+  },
+  (table) => [
+    uniqueIndex("community_media_community_media_unique").on(
+      table.communityId,
+      table.mediaId
+    ),
+    index("community_media_community_sort_idx").on(
+      table.communityId,
+      table.sortOrder
+    ),
+    uniqueIndex("community_media_one_primary_unique")
+      .on(table.communityId)
+      .where(sql`${table.role} = 'primary'`),
+    check(
+      "community_media_role_check",
+      sql`${table.role} IN ('primary', 'gallery')`
+    ),
+    check("community_media_sort_order_check", sql`${table.sortOrder} >= 0`),
+  ]
+);
+
+export const personMediaLocalizations = sqliteTable(
+  "person_media_localizations",
+  {
+    altText: text("alt_text").notNull(),
+    caption: text("caption").notNull().default(""),
+    language: text("language").notNull(),
+    personMediaId: text("person_media_id")
+      .notNull()
+      .references(() => personMedia.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    primaryKey({ columns: [table.personMediaId, table.language] }),
+    check(
+      "person_media_localizations_language_check",
+      sql`${table.language} IN ('lt', 'en', 'ru', 'uk', 'be')`
+    ),
+  ]
+);
+
+export const communityMediaLocalizations = sqliteTable(
+  "community_media_localizations",
+  {
+    altText: text("alt_text").notNull(),
+    caption: text("caption").notNull().default(""),
+    communityMediaId: text("community_media_id")
+      .notNull()
+      .references(() => communityMedia.id, { onDelete: "cascade" }),
+    language: text("language").notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.communityMediaId, table.language] }),
+    check(
+      "community_media_localizations_language_check",
+      sql`${table.language} IN ('lt', 'en', 'ru', 'uk', 'be')`
+    ),
   ]
 );

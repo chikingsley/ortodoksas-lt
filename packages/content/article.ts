@@ -1,8 +1,6 @@
 import type { JSONContent } from "@tiptap/core";
 import { z } from "zod";
-
-const languageTagPattern =
-  /^[a-z]{2,3}(?:-[A-Z][a-z]{3})?(?:-[A-Z]{2}|-[0-9]{3})?$/;
+import { pageTemplateSchema, siteLocaleSchema } from "./site";
 
 export const articleStatusSchema = z.enum([
   "draft",
@@ -63,7 +61,8 @@ export const createArticleSchema = z.strictObject({
   heroSourceUrl: z.string().trim().min(1).max(4096).optional(),
   kind: z.enum(["article", "page"]).default("article"),
   labels: z.array(z.string().trim().min(1).max(120)).default([]),
-  language: z.string().regex(languageTagPattern),
+  language: siteLocaleSchema,
+  pageTemplate: pageTemplateSchema.default("standard"),
   publishedAt: z.number().int().nonnegative().nullable().optional(),
   section: z.string().trim().max(160).default(""),
   slug: z.string().trim().min(1).max(240),
@@ -108,7 +107,6 @@ export const updateArticleSchema = createArticleSchema
     heroFocalX: true,
     heroFocalY: true,
     heroSourceUrl: true,
-    kind: true,
     labels: true,
     language: true,
     publishedAt: true,
@@ -117,7 +115,6 @@ export const updateArticleSchema = createArticleSchema
     status: true,
     summary: true,
     title: true,
-    translationGroupId: true,
     translationKind: true,
   })
   .extend({

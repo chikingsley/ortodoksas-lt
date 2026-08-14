@@ -46,7 +46,6 @@ describe("article service contracts", () => {
       heroFit: "cover",
       heroFocalX: 50,
       heroFocalY: 50,
-      kind: "article",
       labels: [],
       language: "en",
       section: "News",

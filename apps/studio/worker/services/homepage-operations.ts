@@ -2,6 +2,7 @@ import {
   articles,
   homepageLayoutState,
   homepagePlacements,
+  publicationGroups,
 } from "@ortodoksas-lt/db";
 import { and, asc, eq, exists, inArray, isNotNull, ne, sql } from "drizzle-orm";
 import { z } from "zod";
@@ -110,10 +111,14 @@ export const updateHomepagePlacements = async (input: {
     const eligible = await input.database
       .select({ id: articles.id })
       .from(articles)
+      .innerJoin(
+        publicationGroups,
+        eq(publicationGroups.id, articles.translationGroupId)
+      )
       .where(
         and(
           inArray(articles.id, requestedIds),
-          eq(articles.kind, "article"),
+          eq(publicationGroups.kind, "article"),
           eq(articles.language, "lt"),
           eq(articles.status, "published"),
           isNotNull(articles.heroMediaId)
@@ -135,10 +140,14 @@ export const updateHomepagePlacements = async (input: {
       input.database
         .select({ id: articles.id })
         .from(articles)
+        .innerJoin(
+          publicationGroups,
+          eq(publicationGroups.id, articles.translationGroupId)
+        )
         .where(
           and(
             eq(articles.id, articleId),
-            eq(articles.kind, "article"),
+            eq(publicationGroups.kind, "article"),
             eq(articles.language, "lt"),
             eq(articles.status, "published"),
             isNotNull(articles.heroMediaId)

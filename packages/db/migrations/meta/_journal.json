@@ -43,6 +43,27 @@
       "when": 1786643000000,
       "tag": "0007_legacy_revision_provenance",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1786655497119,
+      "tag": "0008_wide_human_torch",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1786658269345,
+      "tag": "0009_red_vin_gonzales",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1786659280023,
+      "tag": "0010_article_search_fts",
+      "breakpoints": true
     }
   ]
 }

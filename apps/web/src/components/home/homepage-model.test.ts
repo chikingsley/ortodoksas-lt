@@ -45,6 +45,7 @@ function catalogEntry(
     heroMediaId: `media_${path}`,
     kind: "article",
     labels: [],
+    pageTemplate: "standard",
     path,
     published,
     section: "Naujienos",

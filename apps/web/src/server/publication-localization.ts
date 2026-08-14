@@ -1,4 +1,4 @@
-import { articles } from "@ortodoksas-lt/db";
+import { articles, publicationGroups } from "@ortodoksas-lt/db";
 import { and, eq, inArray } from "drizzle-orm";
 
 import type {
@@ -20,6 +20,8 @@ import {
   htmlSuffix,
   leadingSlash,
 } from "./publication-data";
+
+const COMMUNITY_DETAIL_PATH_PATTERN = /^\/community\/[^/]+$/u;
 
 function stripLocale(path: string) {
   for (const locale of localeShells) {
@@ -65,6 +67,10 @@ export async function getTranslationGroupCounterpart(
   const rows = await database()
     .select(catalogSelection)
     .from(articles)
+    .innerJoin(
+      publicationGroups,
+      eq(publicationGroups.id, articles.translationGroupId)
+    )
     .where(
       and(
         eq(articles.status, "published"),
@@ -112,6 +118,10 @@ export async function getLocalizedCounterparts(
   const localizedRows = await database()
     .select(catalogSelection)
     .from(articles)
+    .innerJoin(
+      publicationGroups,
+      eq(publicationGroups.id, articles.translationGroupId)
+    )
     .where(
       and(
         eq(articles.status, "published"),
@@ -154,6 +164,20 @@ export async function getLocaleLinks(currentPath: string) {
       ru: { hasCounterpart: true, href: "/ru/paieska" },
       uk: { hasCounterpart: true, href: "/uk/paieska" },
     } satisfies Record<SiteLocale, LocaleDestination>;
+  }
+  if (COMMUNITY_DETAIL_PATH_PATTERN.test(publicationPath)) {
+    return Object.fromEntries(
+      siteLocales.map((locale) => [
+        locale,
+        {
+          hasCounterpart: true,
+          href:
+            locale === defaultLocale
+              ? publicationPath
+              : `/${locale}${publicationPath}`,
+        },
+      ])
+    ) as Record<SiteLocale, LocaleDestination>;
   }
   const slug = publicationPath
     .replace(leadingSlash, "")

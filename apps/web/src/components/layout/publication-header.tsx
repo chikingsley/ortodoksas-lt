@@ -30,6 +30,24 @@ interface Props {
   navigationItems: NavigationItem[];
 }
 
+const languageControlClassName = (input: {
+  active: boolean;
+  available: boolean;
+  mobile: boolean;
+}) => {
+  const { active, available, mobile } = input;
+  const size = mobile
+    ? "min-h-11 min-w-11 text-[10px]"
+    : "min-h-9 min-w-8 text-[10px]";
+  if (active) {
+    return `inline-flex items-center justify-center font-bold text-primary ${size}`;
+  }
+  const state = available
+    ? "hover:text-primary"
+    : "cursor-not-allowed opacity-55";
+  return `inline-flex items-center justify-center border-0 bg-transparent p-0 font-bold text-muted-foreground transition-colors ${state} ${size}`;
+};
+
 export default function PublicationHeader({
   contactHref,
   currentPath,
@@ -43,41 +61,50 @@ export default function PublicationHeader({
   const searchHref = localized ? `/${locale}/paieska` : "/paieska";
   const searchActive = currentPath === searchHref;
 
-  const languageLink = (code: SiteLocale, mobile = false) => (
-    <a
-      aria-current={code === locale ? "page" : undefined}
-      aria-label={`${localeMetadata[code].languageName}${
-        localeLinks[code].hasCounterpart ? "" : `. ${copy.pageUnavailable}`
-      }`}
-      className={
-        code === locale
-          ? `inline-flex items-center justify-center font-bold text-primary ${
-              mobile
-                ? "min-h-11 min-w-11 text-[10px]"
-                : "min-h-9 min-w-8 text-[10px]"
-            }`
-          : `inline-flex items-center justify-center font-bold text-muted-foreground transition-colors hover:text-primary data-[counterpart=unavailable]:opacity-55 ${
-              mobile
-                ? "min-h-11 min-w-11 text-[10px]"
-                : "min-h-9 min-w-8 text-[10px]"
-            }`
-      }
-      data-counterpart={
-        localeLinks[code].hasCounterpart ? "available" : "unavailable"
-      }
-      href={localeLinks[code].href}
-      key={`${mobile ? "mobile" : "desktop"}-${code}`}
-      lang={code}
-      title={
-        localeLinks[code].hasCounterpart
-          ? localeMetadata[code].languageName
-          : `${localeMetadata[code].languageName} — ${copy.pageUnavailable}`
-      }
-      translate="no"
-    >
-      {localeMetadata[code].displayCode}
-    </a>
-  );
+  const languageLink = (code: SiteLocale, mobile = false) => {
+    const destination = localeLinks[code];
+    const className = languageControlClassName({
+      active: code === locale,
+      available: destination.hasCounterpart,
+      mobile,
+    });
+    const label = `${localeMetadata[code].languageName}${
+      destination.hasCounterpart ? "" : `. ${copy.pageUnavailable}`
+    }`;
+    const content = localeMetadata[code].displayCode;
+    const key = `${mobile ? "mobile" : "desktop"}-${code}`;
+    const title = destination.hasCounterpart
+      ? localeMetadata[code].languageName
+      : `${localeMetadata[code].languageName} — ${copy.pageUnavailable}`;
+
+    return destination.hasCounterpart ? (
+      <a
+        aria-current={code === locale ? "page" : undefined}
+        aria-label={label}
+        className={className}
+        href={destination.href}
+        key={key}
+        lang={code}
+        title={title}
+        translate="no"
+      >
+        {content}
+      </a>
+    ) : (
+      <button
+        aria-label={label}
+        className={className}
+        disabled
+        key={key}
+        lang={code}
+        title={title}
+        translate="no"
+        type="button"
+      >
+        {content}
+      </button>
+    );
+  };
 
   return (
     <header className="relative z-20 bg-white text-foreground">

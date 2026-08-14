@@ -1,3 +1,4 @@
+import type { PageTemplate } from "@ortodoksas-lt/content/site";
 import type {
   TranslationKind,
   TranslationReviewStatus,
@@ -18,6 +19,7 @@ export interface CatalogEntry {
   homepageOrder?: number;
   kind: "article" | "page";
   labels: string[];
+  pageTemplate: PageTemplate;
   path: string;
   published: string | null;
   section: string;

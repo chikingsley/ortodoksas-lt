@@ -3,6 +3,7 @@ import {
   articles,
   homepageLayoutState,
   homepagePlacements,
+  publicationGroups,
 } from "@ortodoksas-lt/db";
 import { renderArticleBody } from "@ortodoksas-lt/editor/render";
 import { and, desc, eq } from "drizzle-orm";
@@ -111,13 +112,17 @@ export async function getArticles(language: SiteLocale = defaultLocale) {
 
 export async function getRecentArticles(language: SiteLocale, limit: number) {
   const rows = await database()
-    .select(catalogSelection)
+    .select({ ...catalogSelection, bodyJson: articles.bodyJson })
     .from(articles)
+    .innerJoin(
+      publicationGroups,
+      eq(publicationGroups.id, articles.translationGroupId)
+    )
     .where(
       and(
         eq(articles.status, "published"),
         eq(articles.language, language),
-        eq(articles.kind, "article")
+        eq(publicationGroups.kind, "article")
       )
     )
     .orderBy(desc(articles.publishedAt))
@@ -129,8 +134,12 @@ export async function getRecentArticles(language: SiteLocale, limit: number) {
 export async function getPage(language: SiteLocale, path: string) {
   const slug = path.replace(leadingSlash, "").replace(htmlSuffix, "");
   const rows = await database()
-    .select()
+    .select({ ...catalogSelection, bodyJson: articles.bodyJson })
     .from(articles)
+    .innerJoin(
+      publicationGroups,
+      eq(publicationGroups.id, articles.translationGroupId)
+    )
     .where(
       and(
         eq(articles.status, "published"),

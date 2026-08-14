@@ -12,6 +12,7 @@ import {
   articles,
   homepageLayoutState,
   homepagePlacements,
+  publicationGroups,
 } from "@ortodoksas-lt/db";
 import {
   annotateArticleBody,
@@ -41,6 +42,19 @@ import {
 } from "./article-translation";
 
 type ArticleRecord = typeof articles.$inferSelect;
+
+const sanitizeDirectoryBody = (
+  body: TiptapDocument,
+  pageTemplate: string
+): TiptapDocument => {
+  if (pageTemplate === "community_directory") {
+    return { content: [], type: "doc" };
+  }
+  if (pageTemplate === "people_directory") {
+    return { content: body.content?.slice(0, 1) ?? [], type: "doc" };
+  }
+  return body;
+};
 
 const mutableArticleValues = ({
   createdAt: _createdAt,
@@ -112,22 +126,14 @@ const hasArticleContentChanged = (
 
 const hasEditionIdentityChanged = (
   article: ArticleRecord,
-  next: Pick<
-    UpdateArticleInput,
-    "language" | "translationGroupId" | "translationKind"
-  >
+  next: Pick<UpdateArticleInput, "language" | "translationKind">
 ) =>
   next.language !== article.language ||
-  next.translationKind !== article.translationKind ||
-  (next.translationGroupId ?? article.translationGroupId) !==
-    article.translationGroupId;
+  next.translationKind !== article.translationKind;
 
 const resolveEditionIdentity = (
   article: ArticleRecord | undefined,
-  next: Pick<
-    UpdateArticleInput,
-    "language" | "translationGroupId" | "translationKind"
-  >
+  next: Pick<UpdateArticleInput, "language" | "translationKind">
 ):
   | { article: ArticleRecord; ok: true }
   | { failure: StudioOperationFailure; ok: false } => {
@@ -661,6 +667,16 @@ export const createArticle = async (input: {
       status: 422,
     };
   }
+  if (
+    parsed.data.kind === "article" &&
+    parsed.data.pageTemplate !== "standard"
+  ) {
+    return {
+      error: "Article records use the standard page type",
+      ok: false,
+      status: 422,
+    };
+  }
   if (parsed.data.status === "published") {
     const qualityIssues = await getPublicationQualityIssues(
       input.database,
@@ -679,6 +695,22 @@ export const createArticle = async (input: {
   const id = crypto.randomUUID();
   const translationGroupId =
     parsed.data.translationGroupId ?? crypto.randomUUID();
+  const existingGroup = parsed.data.translationGroupId
+    ? await input.database.query.publicationGroups.findFirst({
+        where: eq(publicationGroups.id, parsed.data.translationGroupId),
+      })
+    : undefined;
+  if (
+    existingGroup &&
+    (existingGroup.kind !== parsed.data.kind ||
+      existingGroup.pageTemplate !== parsed.data.pageTemplate)
+  ) {
+    return {
+      error: "Publication group kind and template are immutable",
+      ok: false,
+      status: 409,
+    };
+  }
   const timestamp = Date.now();
   const baseline = parsed.data.baseline ?? {
     body: parsed.data.body,
@@ -746,6 +778,16 @@ export const createArticle = async (input: {
   };
 
   await input.database.batch([
+    input.database
+      .insert(publicationGroups)
+      .values({
+        createdAt: timestamp,
+        id: translationGroupId,
+        kind: parsed.data.kind,
+        pageTemplate: parsed.data.pageTemplate,
+        updatedAt: timestamp,
+      })
+      .onConflictDoNothing({ target: publicationGroups.id }),
     input.database.insert(articles).values(articleRecord),
     input.database.insert(articleRevisions).values({
       articleId: id,
@@ -908,7 +950,7 @@ export const updateArticle = async (input: {
     heroFocalX: parsed.data.heroFocalX,
     heroFocalY: parsed.data.heroFocalY,
     heroMediaId,
-    kind: parsed.data.kind,
+    kind: existingArticle.kind,
     labelsJson: JSON.stringify(parsed.data.labels),
     language: parsed.data.language,
     publishedAt,
@@ -917,8 +959,7 @@ export const updateArticle = async (input: {
     status: parsed.data.status,
     summary: parsed.data.summary,
     title: parsed.data.title,
-    translationGroupId:
-      parsed.data.translationGroupId ?? existingArticle.translationGroupId,
+    translationGroupId: existingArticle.translationGroupId,
     translationKind: parsed.data.translationKind,
     translationSourceHash: reviewResolution.translationSourceHash,
     updatedAt: timestamp,
@@ -1075,18 +1116,28 @@ export const restoreArticleRevision = async (input: {
     currentArticle
   );
   const timestamp = Date.now();
-  const [baseline] = await input.database
-    .select({
-      bodyJson: articleBaselines.bodyJson,
-      summary: articleBaselines.summary,
-      title: articleBaselines.title,
-    })
-    .from(articleBaselines)
-    .where(eq(articleBaselines.articleId, input.articleId))
-    .limit(1);
+  const [[baseline], publicationGroup] = await Promise.all([
+    input.database
+      .select({
+        bodyJson: articleBaselines.bodyJson,
+        summary: articleBaselines.summary,
+        title: articleBaselines.title,
+      })
+      .from(articleBaselines)
+      .where(eq(articleBaselines.articleId, input.articleId))
+      .limit(1),
+    input.database.query.publicationGroups.findFirst({
+      where: eq(publicationGroups.id, currentArticle.translationGroupId),
+    }),
+  ]);
   const restoredBody = await attachMediaRecords(
     input.database,
-    JSON.parse(revision.bodyJson) as TiptapDocument
+    metadata.snapshotCompleteness === "legacy_partial"
+      ? sanitizeDirectoryBody(
+          JSON.parse(revision.bodyJson) as TiptapDocument,
+          publicationGroup?.pageTemplate ?? "standard"
+        )
+      : (JSON.parse(revision.bodyJson) as TiptapDocument)
   );
   const annotated = baseline
     ? annotateArticleBody(
@@ -1124,7 +1175,7 @@ export const restoreArticleRevision = async (input: {
     heroFocalX: metadata.heroFocalX,
     heroFocalY: metadata.heroFocalY,
     heroMediaId: metadata.heroMediaId,
-    kind: metadata.kind,
+    kind: currentArticle.kind,
     labelsJson: JSON.stringify(metadata.labels),
     language: metadata.language,
     publishedAt: metadata.publishedAt,
@@ -1138,7 +1189,7 @@ export const restoreArticleRevision = async (input: {
     status: metadata.status,
     summary: metadata.summary,
     title: metadata.title,
-    translationGroupId: metadata.translationGroupId,
+    translationGroupId: currentArticle.translationGroupId,
     translationKind: metadata.translationKind,
     translationSourceArticleId: metadata.translationSourceArticleId,
     translationSourceHash: metadata.translationSourceHash,

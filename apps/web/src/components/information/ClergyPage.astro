@@ -1,16 +1,21 @@
 ---
-import { structureClergyHtml } from "./clergy-html";
 import ArticleBody from "../publication/ArticleBody.astro";
 import EditorialImage from "../publication/EditorialImage.astro";
 
 interface Props {
   hero: string | null;
   heroAlt: string;
-  html: string;
+  people?: {
+    biographyHtml: string;
+    contacts: { href: string; label: string }[];
+    displayName: string;
+    id: string;
+    media: { altText: string; mediaId: string; role: string }[];
+    positions: { title: string }[];
+  }[];
 }
 
-const { hero, heroAlt, html } = Astro.props;
-const directory = structureClergyHtml(html);
+const { hero, heroAlt, people = [] } = Astro.props;
 ---
 
 <div class="clergy-directory mt-9">
@@ -22,27 +27,28 @@ const directory = structureClergyHtml(html);
       src={hero}
     />
   ) : null}
-  {directory.introductionHtml ? (
-    <div class="mx-auto mb-10 max-w-[780px]">
-      <ArticleBody html={directory.introductionHtml} />
-    </div>
-  ) : null}
   <div class="grid">
-    {directory.profiles.map((profile) => (
+    {people.map((person) => {
+      const portrait = person.media.find((item) => item.role === "primary");
+      return (
       <section class="clergy-profile grid grid-cols-[210px_minmax(0,1fr)] gap-9 border-border border-t py-9 max-sm:grid-cols-1 max-sm:gap-5 max-sm:py-8">
-        <div class="clergy-portrait" set:html={profile.figureHtml} />
-        <div class="clergy-details min-w-0" set:html={profile.detailsHtml} />
+        <div class="clergy-portrait">
+          {portrait ? <img alt={portrait.altText} height="210" loading="lazy" src={`/api/media/${portrait.mediaId}`} width="210" /> : null}
+        </div>
+        <div class="clergy-details min-w-0">
+          {person.positions.map((position) => <p class="clergy-role">{position.title}</p>)}
+          <h2 class="clergy-name">{person.displayName}</h2>
+          <ArticleBody html={person.biographyHtml} />
+          {person.contacts.length > 0 ? <div class="mt-4 flex flex-wrap gap-3">{person.contacts.map((contact) => <a href={contact.href}>{contact.label}</a>)}</div> : null}
+        </div>
       </section>
-    ))}
+      );
+    })}
   </div>
 </div>
 
 <style>
-  .clergy-portrait :global(figure) {
-    margin: 0;
-  }
-
-  .clergy-portrait :global(img) {
+  .clergy-portrait img {
     aspect-ratio: 1;
     border-radius: 9999px;
     display: block;
@@ -52,11 +58,7 @@ const directory = structureClergyHtml(html);
     width: 210px;
   }
 
-  .clergy-portrait :global(figcaption:empty) {
-    display: none;
-  }
-
-  .clergy-details :global(.clergy-role) {
+  .clergy-role {
     color: var(--color-primary);
     font-family: var(--font-sans);
     font-size: 11px;
@@ -66,7 +68,7 @@ const directory = structureClergyHtml(html);
     text-transform: uppercase;
   }
 
-  .clergy-details :global(.clergy-name) {
+  .clergy-name {
     font-family: var(--font-serif);
     font-size: 32px;
     line-height: 1.08;
@@ -91,13 +93,13 @@ const directory = structureClergyHtml(html);
   }
 
   @media (max-width: 640px) {
-    .clergy-portrait :global(img) {
+    .clergy-portrait img {
       height: 168px;
       margin-inline: auto;
       width: 168px;
     }
 
-    .clergy-details :global(.clergy-name) {
+    .clergy-name {
       font-size: 28px;
     }
 

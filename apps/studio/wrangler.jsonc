@@ -6,7 +6,7 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "ortodoksas-studio",
   "main": "./src/server-entry.ts",
-  "compatibility_date": "2026-08-13",
+  "compatibility_date": "2026-08-08",
   "routes": [
     {
       "pattern": "ortodoksas-studio.grassinside.com",

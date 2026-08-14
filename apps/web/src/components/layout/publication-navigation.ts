@@ -71,15 +71,14 @@ function localizedHome(locale: SiteLocale) {
 /**
  * Resolve the publication's shared primary navigation.
  *
- * Localized institutional pages become locale-prefixed once a translated
- * counterpart exists. Until that content is published, links deliberately
- * target the complete Lithuanian source page instead of an empty placeholder.
+ * Localized institutional pages appear once their translated counterpart is
+ * published. This keeps every visible link inside the selected edition.
  */
 export function getPrimaryNavigation(
   locale: SiteLocale,
   resolveLocalizedPath: (path: string) => string | undefined = () => undefined
 ): NavigationItem[] {
-  return primaryNavigation.map((item) => {
+  return primaryNavigation.flatMap((item) => {
     if (item.id === "home") {
       return {
         href: localizedHome(locale),
@@ -98,11 +97,14 @@ export function getPrimaryNavigation(
     }
     const localizedPath =
       locale === defaultLocale ? undefined : resolveLocalizedPath(item.path);
+    if (locale !== defaultLocale && !localizedPath) {
+      return [];
+    }
     return {
       href: localizedPath ? `/${locale}${localizedPath}` : item.path,
       id: item.id,
       label: ui[locale][item.label],
-      targetLocale: localizedPath ? locale : defaultLocale,
+      targetLocale: locale,
     };
   });
 }
@@ -111,14 +113,17 @@ export function getContactNavigation(
   locale: SiteLocale,
   resolveLocalizedPath: (path: string) => string | undefined = () => undefined
 ): ContactNavigationItem[] {
-  return contactNavigation.map((item) => {
+  return contactNavigation.flatMap((item) => {
     const localizedPath =
       locale === defaultLocale ? undefined : resolveLocalizedPath(item.path);
+    if (locale !== defaultLocale && !localizedPath) {
+      return [];
+    }
     return {
       href: localizedPath ? `/${locale}${localizedPath}` : item.path,
       id: item.id,
       label: ui[locale][item.label],
-      targetLocale: localizedPath ? locale : defaultLocale,
+      targetLocale: locale,
     };
   });
 }

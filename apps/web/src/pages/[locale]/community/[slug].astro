@@ -1,0 +1,21 @@
+---
+import CommunityDetailPage from "../../../components/information/CommunityDetailPage.astro";
+import { localeShells, type SiteLocale } from "../../../i18n/config";
+import { getCommunityDirectory } from "../../../server/directory-data";
+
+const requestedLocale = Astro.params.locale as SiteLocale;
+const locale = localeShells.includes(requestedLocale as never) ? requestedLocale : undefined;
+const communities = locale ? await getCommunityDirectory(locale) : [];
+const community = communities.find(({ slug }) => slug === Astro.params.slug);
+const unavailable = {
+  be: "Супольнасць не знойдзена.",
+  en: "Community unavailable.",
+  ru: "Община не найдена.",
+  uk: "Громаду не знайдено.",
+} as const;
+if (!community) {
+  Astro.response.status = 404;
+}
+---
+
+{community && locale ? <CommunityDetailPage community={community} locale={locale} /> : <p>{locale ? unavailable[locale] : "Not found."}</p>}

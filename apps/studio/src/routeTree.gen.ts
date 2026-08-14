@@ -14,8 +14,10 @@ import { Route as StudioRouteImport } from './routes/_studio'
 import { Route as AccessDeniedRouteImport } from './routes/access-denied'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as StudioArticlesRouteImport } from './routes/_studio.articles'
+import { Route as StudioCommunitiesRouteImport } from './routes/_studio.communities'
 import { Route as StudioHomepageRouteImport } from './routes/_studio.homepage'
 import { Route as StudioPagesRouteImport } from './routes/_studio.pages'
+import { Route as StudioPeopleRouteImport } from './routes/_studio.people'
 import { Route as ApiMediaRouteImport } from './routes/api/media'
 import { Route as StudioArticlesArticleIdRouteImport } from './routes/_studio.articles.$articleId'
 import { Route as StudioPagesArticleIdRouteImport } from './routes/_studio.pages.$articleId'
@@ -45,6 +47,11 @@ const StudioArticlesRoute = StudioArticlesRouteImport.update({
   path: '/articles',
   getParentRoute: () => StudioRoute,
 } as any)
+const StudioCommunitiesRoute = StudioCommunitiesRouteImport.update({
+  id: '/communities',
+  path: '/communities',
+  getParentRoute: () => StudioRoute,
+} as any)
 const StudioHomepageRoute = StudioHomepageRouteImport.update({
   id: '/homepage',
   path: '/homepage',
@@ -53,6 +60,11 @@ const StudioHomepageRoute = StudioHomepageRouteImport.update({
 const StudioPagesRoute = StudioPagesRouteImport.update({
   id: '/pages',
   path: '/pages',
+  getParentRoute: () => StudioRoute,
+} as any)
+const StudioPeopleRoute = StudioPeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
   getParentRoute: () => StudioRoute,
 } as any)
 const ApiMediaRoute = ApiMediaRouteImport.update({
@@ -81,8 +93,10 @@ export interface FileRoutesByFullPath {
   '/access-denied': typeof AccessDeniedRoute
   '/sign-in': typeof SignInRoute
   '/articles': typeof StudioArticlesRouteWithChildren
+  '/communities': typeof StudioCommunitiesRoute
   '/homepage': typeof StudioHomepageRoute
   '/pages': typeof StudioPagesRouteWithChildren
+  '/people': typeof StudioPeopleRoute
   '/api/media': typeof ApiMediaRouteWithChildren
   '/articles/$articleId': typeof StudioArticlesArticleIdRoute
   '/pages/$articleId': typeof StudioPagesArticleIdRoute
@@ -93,8 +107,10 @@ export interface FileRoutesByTo {
   '/access-denied': typeof AccessDeniedRoute
   '/sign-in': typeof SignInRoute
   '/articles': typeof StudioArticlesRouteWithChildren
+  '/communities': typeof StudioCommunitiesRoute
   '/homepage': typeof StudioHomepageRoute
   '/pages': typeof StudioPagesRouteWithChildren
+  '/people': typeof StudioPeopleRoute
   '/api/media': typeof ApiMediaRouteWithChildren
   '/articles/$articleId': typeof StudioArticlesArticleIdRoute
   '/pages/$articleId': typeof StudioPagesArticleIdRoute
@@ -107,8 +123,10 @@ export interface FileRoutesById {
   '/access-denied': typeof AccessDeniedRoute
   '/sign-in': typeof SignInRoute
   '/_studio/articles': typeof StudioArticlesRouteWithChildren
+  '/_studio/communities': typeof StudioCommunitiesRoute
   '/_studio/homepage': typeof StudioHomepageRoute
   '/_studio/pages': typeof StudioPagesRouteWithChildren
+  '/_studio/people': typeof StudioPeopleRoute
   '/api/media': typeof ApiMediaRouteWithChildren
   '/_studio/articles/$articleId': typeof StudioArticlesArticleIdRoute
   '/_studio/pages/$articleId': typeof StudioPagesArticleIdRoute
@@ -121,8 +139,10 @@ export interface FileRouteTypes {
     | '/access-denied'
     | '/sign-in'
     | '/articles'
+    | '/communities'
     | '/homepage'
     | '/pages'
+    | '/people'
     | '/api/media'
     | '/articles/$articleId'
     | '/pages/$articleId'
@@ -133,8 +153,10 @@ export interface FileRouteTypes {
     | '/access-denied'
     | '/sign-in'
     | '/articles'
+    | '/communities'
     | '/homepage'
     | '/pages'
+    | '/people'
     | '/api/media'
     | '/articles/$articleId'
     | '/pages/$articleId'
@@ -146,8 +168,10 @@ export interface FileRouteTypes {
     | '/access-denied'
     | '/sign-in'
     | '/_studio/articles'
+    | '/_studio/communities'
     | '/_studio/homepage'
     | '/_studio/pages'
+    | '/_studio/people'
     | '/api/media'
     | '/_studio/articles/$articleId'
     | '/_studio/pages/$articleId'
@@ -199,6 +223,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudioArticlesRouteImport
       parentRoute: typeof StudioRoute
     }
+    '/_studio/communities': {
+      id: '/_studio/communities'
+      path: '/communities'
+      fullPath: '/communities'
+      preLoaderRoute: typeof StudioCommunitiesRouteImport
+      parentRoute: typeof StudioRoute
+    }
     '/_studio/homepage': {
       id: '/_studio/homepage'
       path: '/homepage'
@@ -211,6 +242,13 @@ declare module '@tanstack/react-router' {
       path: '/pages'
       fullPath: '/pages'
       preLoaderRoute: typeof StudioPagesRouteImport
+      parentRoute: typeof StudioRoute
+    }
+    '/_studio/people': {
+      id: '/_studio/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof StudioPeopleRouteImport
       parentRoute: typeof StudioRoute
     }
     '/api/media': {
@@ -270,14 +308,18 @@ const StudioPagesRouteWithChildren = StudioPagesRoute._addFileChildren(
 
 interface StudioRouteChildren {
   StudioArticlesRoute: typeof StudioArticlesRouteWithChildren
+  StudioCommunitiesRoute: typeof StudioCommunitiesRoute
   StudioHomepageRoute: typeof StudioHomepageRoute
   StudioPagesRoute: typeof StudioPagesRouteWithChildren
+  StudioPeopleRoute: typeof StudioPeopleRoute
 }
 
 const StudioRouteChildren: StudioRouteChildren = {
   StudioArticlesRoute: StudioArticlesRouteWithChildren,
+  StudioCommunitiesRoute: StudioCommunitiesRoute,
   StudioHomepageRoute: StudioHomepageRoute,
   StudioPagesRoute: StudioPagesRouteWithChildren,
+  StudioPeopleRoute: StudioPeopleRoute,
 }
 
 const StudioRouteWithChildren =

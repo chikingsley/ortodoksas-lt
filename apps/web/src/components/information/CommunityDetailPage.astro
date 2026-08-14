@@ -1,0 +1,39 @@
+---
+import type { SiteLocale } from "../../i18n/config";
+import type { getCommunityDirectory } from "../../server/directory-data";
+import SiteLayout from "../layout/SiteLayout.astro";
+import CommunitiesPage from "./CommunitiesPage.astro";
+
+type CommunityRecord = Awaited<ReturnType<typeof getCommunityDirectory>>[number];
+
+interface Props {
+  community: CommunityRecord;
+  locale: SiteLocale;
+}
+
+const { community, locale } = Astro.props;
+const localePrefix = locale === "lt" ? "" : `/${locale}`;
+const canonicalPath = `${localePrefix}/community/${community.slug}`;
+const primaryImage = community.media.find((image) => image.role === "primary") ?? community.media[0];
+const description = community.description || community.operationalNotice || community.addressLabel;
+---
+
+<SiteLayout
+  canonicalPath={canonicalPath}
+  description={description}
+  image={primaryImage ? `/api/media/${primaryImage.mediaId}` : undefined}
+  lang={locale}
+  locale={locale}
+  title={`${community.name} · ortodoksas.lt`}
+>
+  <main>
+    <article class="mx-auto mb-[70px] mt-7 w-[min(1000px,calc(100%-48px))] max-sm:mt-5 max-sm:w-[min(1000px,calc(100%-28px))]">
+      <header class="text-center">
+        <h1 class="mx-auto mb-5 text-balance font-bold font-serif text-[clamp(40px,6vw,68px)] leading-[0.99] tracking-[-0.03em] [overflow-wrap:anywhere] max-sm:text-[clamp(35px,11vw,50px)]">
+          {community.name}
+        </h1>
+      </header>
+      <CommunitiesPage communities={[community]} detail locale={locale} />
+    </article>
+  </main>
+</SiteLayout>

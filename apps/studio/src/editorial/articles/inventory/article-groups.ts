@@ -1,8 +1,9 @@
+import { type SiteLocale, siteLocales } from "@ortodoksas-lt/content/site";
 import type { CatalogArticle } from "../types";
 
-export const EDITION_LANGUAGES = ["lt", "en", "ru", "uk", "be"] as const;
+export const EDITION_LANGUAGES = siteLocales;
 
-export type EditionLanguage = (typeof EDITION_LANGUAGES)[number];
+export type EditionLanguage = SiteLocale;
 
 export const PAGE_ROLE_ORDER = [
   "navigation",

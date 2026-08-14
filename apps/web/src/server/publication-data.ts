@@ -1,9 +1,10 @@
 import { env } from "cloudflare:workers";
+import { pageTemplateSchema } from "@ortodoksas-lt/content/site";
 import type {
   TranslationKind,
   TranslationReviewStatus,
 } from "@ortodoksas-lt/content/translation";
-import { articles, mediaAssets } from "@ortodoksas-lt/db";
+import { articles, mediaAssets, publicationGroups } from "@ortodoksas-lt/db";
 import { and, desc, eq, inArray } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
 
@@ -28,7 +29,7 @@ export type PublicationRow = Pick<
   | "translationGroupId"
   | "translationKind"
   | "translationReviewStatus"
->;
+> & { pageTemplate: string };
 
 export const catalogSelection = {
   heroFit: articles.heroFit,
@@ -36,8 +37,9 @@ export const catalogSelection = {
   heroFocalY: articles.heroFocalY,
   heroMediaId: articles.heroMediaId,
   id: articles.id,
-  kind: articles.kind,
+  kind: publicationGroups.kind,
   labelsJson: articles.labelsJson,
+  pageTemplate: publicationGroups.pageTemplate,
   publishedAt: articles.publishedAt,
   section: articles.section,
   slug: articles.slug,
@@ -108,6 +110,7 @@ export function catalogEntry(
     ...(placement ? { homepageOrder: placement.position } : {}),
     kind: row.kind === "page" ? "page" : "article",
     labels: parseLabels(row.labelsJson),
+    pageTemplate: pageTemplateSchema.catch("standard").parse(row.pageTemplate),
     path: articlePath(row.slug),
     published: row.publishedAt ? new Date(row.publishedAt).toISOString() : null,
     section: row.section,
@@ -123,6 +126,10 @@ export function publishedRows(language: SiteLocale) {
   return database()
     .select(catalogSelection)
     .from(articles)
+    .innerJoin(
+      publicationGroups,
+      eq(publicationGroups.id, articles.translationGroupId)
+    )
     .where(
       and(eq(articles.status, "published"), eq(articles.language, language))
     )

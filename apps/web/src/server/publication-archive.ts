@@ -1,6 +1,18 @@
+import { env } from "cloudflare:workers";
 import { getSectionOptions } from "@ortodoksas-lt/content/sections";
-import { articles } from "@ortodoksas-lt/db";
-import { and, count, desc, eq, gte, like, lt, or, type SQL } from "drizzle-orm";
+import { articles, publicationGroups } from "@ortodoksas-lt/db";
+import {
+  and,
+  count,
+  desc,
+  eq,
+  gte,
+  inArray,
+  like,
+  lt,
+  or,
+  type SQL,
+} from "drizzle-orm";
 
 import { defaultLocale, type SiteLocale } from "../i18n/config";
 import {
@@ -12,6 +24,14 @@ import {
 } from "./publication-data";
 
 const fourDigitYear = /^\d{4}$/u;
+const searchWords = /[\p{L}\p{N}]+/gu;
+
+function toFtsQuery(query: string) {
+  return (query.normalize("NFC").match(searchWords) ?? [])
+    .slice(0, 12)
+    .map((word) => `"${word.slice(0, 64)}"*`)
+    .join(" AND ");
+}
 
 interface ArchiveQuery {
   label?: string;
@@ -29,7 +49,7 @@ export async function getArchiveArticles(
   const conditions: SQL[] = [
     eq(articles.status, "published"),
     eq(articles.language, language),
-    eq(articles.kind, "article"),
+    eq(publicationGroups.kind, "article"),
   ];
   if (options.query) {
     const pattern = `%${options.query.replace(/[%_]/gu, (character) => `\\${character}`)}%`;
@@ -60,11 +80,22 @@ export async function getArchiveArticles(
     database()
       .select(catalogSelection)
       .from(articles)
+      .innerJoin(
+        publicationGroups,
+        eq(publicationGroups.id, articles.translationGroupId)
+      )
       .where(where)
       .orderBy(desc(articles.publishedAt))
       .limit(options.limit)
       .offset(options.offset),
-    database().select({ value: count() }).from(articles).where(where),
+    database()
+      .select({ value: count() })
+      .from(articles)
+      .innerJoin(
+        publicationGroups,
+        eq(publicationGroups.id, articles.translationGroupId)
+      )
+      .where(where),
   ]);
   const heroes = await heroMap(rows);
   return {
@@ -81,11 +112,15 @@ export async function getArchiveFacets(language: SiteLocale = defaultLocale) {
       section: articles.section,
     })
     .from(articles)
+    .innerJoin(
+      publicationGroups,
+      eq(publicationGroups.id, articles.translationGroupId)
+    )
     .where(
       and(
         eq(articles.status, "published"),
         eq(articles.language, language),
-        eq(articles.kind, "article")
+        eq(publicationGroups.kind, "article")
       )
     );
   return {
@@ -111,32 +146,57 @@ export async function searchArticles(
   query: string,
   options: { limit: number; offset: number }
 ) {
-  const pattern = `%${query.replace(/[%_]/gu, (character) => `\\${character}`)}%`;
-  const searchCondition = or(
-    like(articles.title, pattern),
-    like(articles.summary, pattern),
-    like(articles.section, pattern),
-    like(articles.labelsJson, pattern)
-  );
-  const where = and(
-    eq(articles.status, "published"),
-    eq(articles.language, language),
-    searchCondition
-  );
-  const [rows, totals] = await Promise.all([
-    database()
-      .select(catalogSelection)
-      .from(articles)
-      .where(where)
-      .orderBy(desc(articles.publishedAt))
-      .limit(options.limit)
-      .offset(options.offset),
-    database().select({ value: count() }).from(articles).where(where),
-  ]);
-  const heroes = await heroMap(rows);
+  const ftsQuery = toFtsQuery(query);
+  if (!ftsQuery) {
+    return { entries: [], total: 0 };
+  }
+
+  const matches = await env.DB.prepare(
+    `SELECT articles.id
+       FROM articles_fts
+       INNER JOIN articles ON articles.rowid = articles_fts.rowid
+       INNER JOIN publication_groups ON publication_groups.id = articles.translation_group_id
+      WHERE articles_fts MATCH ?
+        AND articles.status = 'published'
+        AND articles.language = ?
+        AND publication_groups.kind = 'article'
+      ORDER BY bm25(articles_fts, 10.0, 5.0, 3.0, 2.0, 1.0), articles.published_at DESC
+      LIMIT ? OFFSET ?`
+  )
+    .bind(ftsQuery, language, options.limit, options.offset)
+    .all<{ id: string }>();
+  const ids = matches.results.map((match) => match.id);
+  const total = await env.DB.prepare(
+    `SELECT COUNT(*) AS value
+       FROM articles_fts
+       INNER JOIN articles ON articles.rowid = articles_fts.rowid
+       INNER JOIN publication_groups ON publication_groups.id = articles.translation_group_id
+      WHERE articles_fts MATCH ?
+        AND articles.status = 'published'
+        AND articles.language = ?
+        AND publication_groups.kind = 'article'`
+  )
+    .bind(ftsQuery, language)
+    .first<number>("value");
+
+  if (ids.length === 0) {
+    return { entries: [], total: total ?? 0 };
+  }
+
+  const rows = await database()
+    .select(catalogSelection)
+    .from(articles)
+    .innerJoin(
+      publicationGroups,
+      eq(publicationGroups.id, articles.translationGroupId)
+    )
+    .where(inArray(articles.id, ids));
+  const rowsById = new Map(rows.map((row) => [row.id, row]));
+  const rankedRows = ids.flatMap((id) => rowsById.get(id) ?? []);
+  const heroes = await heroMap(rankedRows);
   return {
-    entries: rows.map((row) => catalogEntry(row, heroes)),
-    total: totals[0]?.value ?? 0,
+    entries: rankedRows.map((row) => catalogEntry(row, heroes)),
+    total: total ?? 0,
   };
 }
 
@@ -144,11 +204,15 @@ export async function getSections(language: SiteLocale = defaultLocale) {
   const rows = await database()
     .selectDistinct({ section: articles.section })
     .from(articles)
+    .innerJoin(
+      publicationGroups,
+      eq(publicationGroups.id, articles.translationGroupId)
+    )
     .where(
       and(
         eq(articles.status, "published"),
         eq(articles.language, language),
-        eq(articles.kind, "article")
+        eq(publicationGroups.kind, "article")
       )
     );
   return getSectionOptions(rows.map((row) => row.section));

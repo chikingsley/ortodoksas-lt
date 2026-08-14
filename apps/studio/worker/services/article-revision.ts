@@ -8,7 +8,6 @@ const articleRevisionMetadataSchema = z.looseObject({
   heroFocalX: z.number().int().optional(),
   heroFocalY: z.number().int().optional(),
   heroMediaId: z.string().nullable().optional(),
-  kind: z.enum(["article", "page"]).optional(),
   labels: z.array(z.string()).optional(),
   language: z.string().optional(),
   publishedAt: z.number().int().nullable().optional(),
@@ -17,14 +16,13 @@ const articleRevisionMetadataSchema = z.looseObject({
   seoTitle: z.string().nullable().optional(),
   slug: z.string().optional(),
   snapshotCompleteness: z.enum(["complete", "legacy_partial"]).optional(),
-  snapshotVersion: z.literal(2).optional(),
+  snapshotVersion: z.union([z.literal(2), z.literal(3)]).optional(),
   sourceArticleId: z.string().nullable().optional(),
   sourceCapture: z.string().nullable().optional(),
   sourceUrl: z.string().nullable().optional(),
   status: z.enum(["archived", "draft", "published", "scheduled"]).optional(),
   summary: z.string().optional(),
   title: z.string().optional(),
-  translationGroupId: z.string().optional(),
   translationKind: z.enum(["human", "machine", "original"]).optional(),
   translationReviewedAt: z.number().int().nullable().optional(),
   translationReviewedBy: z.string().nullable().optional(),
@@ -40,7 +38,6 @@ export interface ArticleRevisionMetadata {
   heroFocalX: number;
   heroFocalY: number;
   heroMediaId: string | null;
-  kind: "article" | "page";
   labels: string[];
   language: string;
   publishedAt: number | null;
@@ -49,14 +46,13 @@ export interface ArticleRevisionMetadata {
   seoTitle: string | null;
   slug: string;
   snapshotCompleteness: "complete" | "legacy_partial";
-  snapshotVersion: 2;
+  snapshotVersion: 3;
   sourceArticleId: string | null;
   sourceCapture: string | null;
   sourceUrl: string | null;
   status: "archived" | "draft" | "published" | "scheduled";
   summary: string;
   title: string;
-  translationGroupId: string;
   translationKind: "human" | "machine" | "original";
   translationReviewedAt: number | null;
   translationReviewedBy: string | null;
@@ -83,7 +79,6 @@ export const articleRevisionMetadata = (
   heroFocalX: article.heroFocalX,
   heroFocalY: article.heroFocalY,
   heroMediaId: article.heroMediaId,
-  kind: article.kind === "page" ? "page" : "article",
   labels: parseLabels(article.labelsJson),
   language: article.language,
   publishedAt: article.publishedAt,
@@ -92,7 +87,7 @@ export const articleRevisionMetadata = (
   seoTitle: article.seoTitle,
   slug: article.slug,
   snapshotCompleteness: "complete",
-  snapshotVersion: 2,
+  snapshotVersion: 3,
   sourceArticleId: article.sourceArticleId,
   sourceCapture: article.sourceCapture,
   sourceUrl: article.sourceUrl,
@@ -104,7 +99,6 @@ export const articleRevisionMetadata = (
       : "draft",
   summary: article.summary,
   title: article.title,
-  translationGroupId: article.translationGroupId,
   translationKind:
     article.translationKind === "human" || article.translationKind === "machine"
       ? article.translationKind
@@ -129,5 +123,7 @@ export const parseArticleRevisionMetadata = (
   const parsed = articleRevisionMetadataSchema.safeParse(
     JSON.parse(metadataJson)
   );
-  return parsed.success ? { ...fallback, ...parsed.data } : fallback;
+  return parsed.success
+    ? { ...fallback, ...parsed.data, snapshotVersion: 3 }
+    : fallback;
 };

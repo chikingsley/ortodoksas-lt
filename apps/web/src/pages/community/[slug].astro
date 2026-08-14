@@ -1,0 +1,12 @@
+---
+import CommunityDetailPage from "../../components/information/CommunityDetailPage.astro";
+import { getCommunityDirectory } from "../../server/directory-data";
+
+const communities = await getCommunityDirectory("lt");
+const community = communities.find(({ slug }) => slug === Astro.params.slug);
+if (!community) {
+  Astro.response.status = 404;
+}
+---
+
+{community ? <CommunityDetailPage community={community} locale="lt" /> : <p>Bendruomenė nerasta.</p>}

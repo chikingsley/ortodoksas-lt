@@ -1,8 +1,13 @@
-export const siteLocales = ["lt", "en", "ru", "uk", "be"] as const;
+import {
+  type SiteLocale as SharedSiteLocale,
+  siteLocales as sharedSiteLocales,
+} from "@ortodoksas-lt/content/site";
+
+export const siteLocales = sharedSiteLocales;
 
 export const defaultLocale = "lt" as const;
 
-export type SiteLocale = (typeof siteLocales)[number];
+export type SiteLocale = SharedSiteLocale;
 export type Locale = Exclude<SiteLocale, typeof defaultLocale>;
 
 export const localeShells = siteLocales.filter(

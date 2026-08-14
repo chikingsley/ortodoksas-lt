@@ -1,16 +1,18 @@
 import { UserButton, useUser } from "@clerk/tanstack-react-start";
-import { BookOpenText, Home } from "lucide-react";
+import { BookOpenText, Building2, Home, Users } from "lucide-react";
 import { type MouseEvent, useCallback } from "react";
 
 import { cn } from "@/lib/utils";
 
 const publicationLogoUrl = "/assets/brand/ortodoksas-logo-official.svg";
 
-export type StudioView = "content" | "homepage";
+export type StudioView = "communities" | "content" | "homepage" | "people";
 
 const navItems = [
   { icon: BookOpenText, label: "Content", value: "content" },
   { icon: Home, label: "Homepage", value: "homepage" },
+  { icon: Users, label: "People", value: "people" },
+  { icon: Building2, label: "Communities", value: "communities" },
 ] as const;
 
 interface Props {

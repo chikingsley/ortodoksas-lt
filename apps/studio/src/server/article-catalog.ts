@@ -4,10 +4,10 @@ import {
   translationKindSchema,
   translationReviewStatusSchema,
 } from "@ortodoksas-lt/content/article";
-import { articles } from "@ortodoksas-lt/db";
+import { articles, publicationGroups } from "@ortodoksas-lt/db";
 import { queryOptions } from "@tanstack/react-query";
 import { createServerFn } from "@tanstack/react-start";
-import { desc } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 
 import type { CatalogArticle } from "@/editorial/articles/types";
 import { getDatabase } from "../../worker/db";
@@ -23,7 +23,7 @@ const getArticleCatalog = createServerFn({ method: "GET" }).handler(
         file: articles.sourceArticleId,
         heroMediaId: articles.heroMediaId,
         id: articles.id,
-        kind: articles.kind,
+        kind: publicationGroups.kind,
         labelsJson: articles.labelsJson,
         language: articles.language,
         path: articles.slug,
@@ -37,6 +37,10 @@ const getArticleCatalog = createServerFn({ method: "GET" }).handler(
         translationReviewStatus: articles.translationReviewStatus,
       })
       .from(articles)
+      .innerJoin(
+        publicationGroups,
+        eq(publicationGroups.id, articles.translationGroupId)
+      )
       .orderBy(desc(articles.updatedAt));
 
     return result.map((article) => ({
