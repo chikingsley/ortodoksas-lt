@@ -23,7 +23,7 @@ import { requireStudioWritesOpen } from "./write-mode";
 const articleIdSchema = z.object({ articleId: z.string().uuid() });
 const articleMutationSchema = articleIdSchema.extend({ payload: z.unknown() });
 const restoreRevisionSchema = articleIdSchema.extend({
-  expectedVersion: z.number().int().positive(),
+  expectedVersion: z.number().int().nonnegative(),
   version: z.number().int().positive(),
 });
 const translationDraftSchema = articleIdSchema.extend({

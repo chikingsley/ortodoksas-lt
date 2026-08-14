@@ -22,6 +22,7 @@ export interface ArticleWorkspaceResponse {
   changes: BaselineResponse["changes"];
   revisions: Revision[];
   translationSource: StoredArticle | null;
+  translationSourceCurrentHash: string | null;
 }
 
 interface PersistedArticle {

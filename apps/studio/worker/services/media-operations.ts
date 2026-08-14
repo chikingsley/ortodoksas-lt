@@ -1,4 +1,4 @@
-import { mediaAliases, mediaAssets } from "@ortodoksas-lt/db";
+import { mediaAssets } from "@ortodoksas-lt/db";
 import { eq } from "drizzle-orm";
 
 import type { StudioDatabase } from "../db";
@@ -147,7 +147,7 @@ export const uploadMedia = async (input: {
   }
 
   const id = `media_${sha256}`;
-  const key = `uploads/${sha256}.${extension}`;
+  const key = `media/originals/${sha256}.${extension}`;
   const fileName = decodeFileName(input.request.headers.get("x-file-name"));
   const timestamp = Date.now();
   await input.media.put(key, bytes, {
@@ -157,25 +157,18 @@ export const uploadMedia = async (input: {
   });
 
   try {
-    await input.database.batch([
-      input.database.insert(mediaAssets).values({
-        byteSize: bytes.byteLength,
-        createdAt: timestamp,
-        fileName,
-        height: imageInfo.height,
-        id,
-        mimeType,
-        r2Key: key,
-        sha256,
-        updatedAt: timestamp,
-        width: imageInfo.width,
-      }),
-      input.database.insert(mediaAliases).values({
-        alias: `/api/media/${id}`,
-        createdAt: timestamp,
-        mediaId: id,
-      }),
-    ]);
+    await input.database.insert(mediaAssets).values({
+      byteSize: bytes.byteLength,
+      createdAt: timestamp,
+      fileName,
+      height: imageInfo.height,
+      id,
+      mimeType,
+      r2Key: key,
+      sha256,
+      updatedAt: timestamp,
+      width: imageInfo.width,
+    });
   } catch (error: unknown) {
     const [concurrent] = await input.database
       .select(mediaSelection)

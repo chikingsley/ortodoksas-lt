@@ -177,6 +177,8 @@ export function ArticleEditor({
     summary: string;
     title: string;
   } | null>(null);
+  const [translationSourceCurrentHash, setTranslationSourceCurrentHash] =
+    useState<string | null>(null);
   const [warnings, setWarnings] = useState<string[]>([]);
   const hasUnsavedChanges = saveState !== "saved";
   const navigationBlocker = useBlocker({
@@ -215,6 +217,7 @@ export function ArticleEditor({
           changes: baselineChanges,
           revisions: loadedRevisions,
           translationSource,
+          translationSourceCurrentHash: loadedTranslationSourceHash,
         } = await fetchArticleWorkspace(article.id, controller.signal);
         const sourceRecord: SourceArticle = {
           ...article,
@@ -264,6 +267,7 @@ export function ArticleEditor({
               }
             : null
         );
+        setTranslationSourceCurrentHash(loadedTranslationSourceHash);
         setRevisions(loadedRevisions);
         setLoadState("ready");
         setSaveError(null);
@@ -332,9 +336,13 @@ export function ArticleEditor({
       const payload = {
         body,
         expectedVersion: Math.max(
-          1,
+          0,
           ...revisions.map((revision) => revision.version)
         ),
+        ...(submitMeta.translationReviewAction === "approve" &&
+        translationSourceCurrentHash
+          ? { expectedTranslationSourceHash: translationSourceCurrentHash }
+          : {}),
         heroFit,
         heroFocalX,
         heroFocalY,
@@ -400,6 +408,7 @@ export function ArticleEditor({
       source,
       translationGroupId,
       translationKind,
+      translationSourceCurrentHash,
     ]
   );
   persistValidatedArticle.current = saveValidatedArticle;
@@ -509,7 +518,7 @@ export function ArticleEditor({
       const restoredArticle = await restoreArticleRevision(
         articleId,
         version,
-        Math.max(1, ...revisions.map((revision) => revision.version))
+        Math.max(0, ...revisions.map((revision) => revision.version))
       );
       if (restoredArticle) {
         setBody(

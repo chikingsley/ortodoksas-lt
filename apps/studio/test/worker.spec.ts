@@ -1,5 +1,5 @@
 import { env } from "cloudflare:test";
-import { articleRevisions } from "@ortodoksas-lt/db";
+import { articleRevisions, mediaAliases, mediaAssets } from "@ortodoksas-lt/db";
 import { and, eq } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
 
@@ -27,6 +27,8 @@ const IMAGE_BYTES = Uint8Array.from(
   (character) => character.charCodeAt(0)
 );
 const EDITOR_ID = "clerk-test-editor";
+const ORIGINAL_MEDIA_KEY_PATTERN = /^media\/originals\/[0-9a-f]{64}\.png$/u;
+const SHA256_PATTERN = /^[0-9a-f]{64}$/u;
 
 const uploadHero = async (fileName: string) => {
   const response = await uploadMedia({
@@ -117,14 +119,65 @@ describe("Studio Worker services", () => {
     expect(result).toMatchObject({ ok: false, status: 422 });
   });
 
+  it("accepts version zero for an imported article without revision history", async () => {
+    const database = getDatabase(env.DB);
+    const slug = `revisionless-${crypto.randomUUID()}`;
+    const created = await createArticle({
+      database,
+      editorId: EDITOR_ID,
+      payload: {
+        body: { content: [{ type: "paragraph" }], type: "doc" },
+        language: "lt",
+        slug,
+        summary: "Imported article",
+        title: "Imported article",
+      },
+    });
+    expect(created.ok).toBe(true);
+    if (!created.ok) {
+      return;
+    }
+    await database
+      .delete(articleRevisions)
+      .where(eq(articleRevisions.articleId, created.data.id));
+
+    const saved = await updateArticle({
+      articleId: created.data.id,
+      database,
+      editorId: EDITOR_ID,
+      payload: {
+        body: { content: [{ type: "paragraph" }], type: "doc" },
+        expectedVersion: 0,
+        language: "lt",
+        slug,
+        summary: "Imported article ready for review",
+        title: "Imported article",
+      },
+    });
+    expect(saved).toMatchObject({ data: { version: 1 }, ok: true });
+  });
+
   it("stores, deduplicates, and serves an uploaded image through R2", async () => {
     const first = await uploadHero("service-image.png");
     const second = await uploadHero("service-image-copy.png");
     expect(second.media.id).toBe(first.media.id);
     expect(second.reused).toBe(true);
 
+    const database = getDatabase(env.DB);
+    const [stored] = await database
+      .select({ r2Key: mediaAssets.r2Key })
+      .from(mediaAssets)
+      .where(eq(mediaAssets.id, first.media.id))
+      .limit(1);
+    expect(stored?.r2Key).toMatch(ORIGINAL_MEDIA_KEY_PATTERN);
+    const canonicalAliases = await database
+      .select({ alias: mediaAliases.alias })
+      .from(mediaAliases)
+      .where(eq(mediaAliases.alias, first.media.url));
+    expect(canonicalAliases).toEqual([]);
+
     const response = await serveMedia({
-      database: getDatabase(env.DB),
+      database,
       id: first.media.id,
       images: env.IMAGES,
       media: env.MEDIA,
@@ -387,6 +440,13 @@ describe("Studio Worker services", () => {
       return;
     }
     const translationId = translationDraft.article.id;
+    const initialTranslationWorkspace = await getArticleWorkspace(
+      database,
+      translationId
+    );
+    const initialSourceHash =
+      initialTranslationWorkspace?.translationSourceCurrentHash;
+    expect(initialSourceHash).toMatch(SHA256_PATTERN);
     const translationPayload = {
       body: {
         content: [
@@ -410,6 +470,7 @@ describe("Studio Worker services", () => {
       editorId: EDITOR_ID,
       payload: {
         ...translationPayload,
+        expectedTranslationSourceHash: initialSourceHash,
         expectedVersion: 1,
         translationReviewAction: "approve",
       },
@@ -490,6 +551,7 @@ describe("Studio Worker services", () => {
           ],
           type: "doc",
         },
+        expectedTranslationSourceHash: initialSourceHash,
         expectedVersion: 4,
         translationReviewAction: "approve",
       },
@@ -562,6 +624,32 @@ describe("Studio Worker services", () => {
       translationSourceArticleId: source.data.id,
     });
 
+    const staleApproval = await updateArticle({
+      articleId: translationId,
+      database,
+      editorId: EDITOR_ID,
+      payload: {
+        ...translationPayload,
+        body: {
+          content: [
+            {
+              content: [{ text: "Edited translation", type: "text" }],
+              type: "paragraph",
+            },
+          ],
+          type: "doc",
+        },
+        expectedTranslationSourceHash: initialSourceHash,
+        expectedVersion: 6,
+        translationReviewAction: "approve",
+      },
+    });
+    expect(staleApproval).toEqual({
+      error: "Translation source changed since this editor loaded it",
+      ok: false,
+      status: 409,
+    });
+
     const approvedAfterSourceEdit = await updateArticle({
       articleId: translationId,
       database,
@@ -577,6 +665,8 @@ describe("Studio Worker services", () => {
           ],
           type: "doc",
         },
+        expectedTranslationSourceHash:
+          sourceInvalidatedWorkspace?.translationSourceCurrentHash,
         expectedVersion: 6,
         translationReviewAction: "approve",
       },
@@ -641,6 +731,8 @@ describe("Studio Worker services", () => {
             ],
             type: "doc",
           },
+          expectedTranslationSourceHash:
+            restoreInvalidatedWorkspace?.translationSourceCurrentHash,
           expectedVersion: 8,
           translationReviewAction: "approve",
         },
@@ -715,6 +807,8 @@ describe("Studio Worker services", () => {
           ],
           type: "doc",
         },
+        expectedTranslationSourceHash:
+          preRestoreTranslation.translationSourceCurrentHash,
         expectedVersion: preRestoreTranslation.revisions[0]?.version,
         translationReviewAction: "approve",
       },

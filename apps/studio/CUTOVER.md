@@ -46,16 +46,22 @@ pnpm --filter @ortodoksas-lt/studio exec wrangler d1 execute DB \
   --remote \
   --config wrangler.production.jsonc \
   --command "SELECT language, COUNT(*) AS clergy_pages FROM articles WHERE translation_group_id = 'edf497f7-11c8-4c2f-8fa5-c975fb4dbd2f' GROUP BY language; SELECT articles.language, COUNT(*) AS portrait_refs FROM articles, json_tree(articles.body_json) AS node WHERE articles.translation_group_id = 'edf497f7-11c8-4c2f-8fa5-c975fb4dbd2f' AND node.type = 'object' AND json_extract(node.value, '$.type') = 'figure' AND json_extract(node.value, '$.attrs.mediaId') IS NOT NULL GROUP BY articles.language;"
+
+pnpm --filter @ortodoksas-lt/studio exec wrangler d1 execute DB \
+  --remote \
+  --config wrangler.production.jsonc \
+  --file ../../packages/db/preflight/0008_directory_source.sql
 ```
 
-The first result contains one clergy page for each of `lt`, `en`, `ru`, `uk`, and `be`. The second result contains twelve portrait references for each language. Save both result sets beside the database export; they are the source-data evidence for the deterministic directory migration.
+The first result contains one clergy page for each of `lt`, `en`, `ru`, `uk`, and `be`. The second result contains twelve portrait references for each language. The semantic report contains exactly sixty rows, shows the expected person beside each localized display name and media ID, and reports `valid` for every row. Save all three result sets beside the database export and review the semantic report before the maintenance window. Migration `0008` repeats these structural and non-empty semantic checks as a database constraint before it creates directory tables or changes source bodies.
 
 ## 3. Capture the database recovery point
 
 First deploy the release candidate in maintenance mode. This activates the
 server-enforced write gate for article saves, revision restores, translation
-creation, homepage changes, and media uploads while keeping editorial reads
-available.
+creation, homepage changes, and media uploads. Schedule the database export as
+a maintenance window: a running D1 export blocks other requests to the database,
+including database-backed public-site and Studio reads.
 
 ```sh
 export ORTODOKSAS_STUDIO_WRITE_MODE="frozen"
@@ -152,10 +158,10 @@ pnpm --filter @ortodoksas-lt/studio exec wrangler d1 execute DB \
 pnpm --filter @ortodoksas-lt/studio exec wrangler d1 execute DB \
   --remote \
   --config wrangler.production.jsonc \
-  --command "INSERT INTO articles_fts(articles_fts) VALUES('integrity-check'); SELECT COUNT(*) AS indexed_matches FROM articles_fts WHERE articles_fts MATCH 'ortodoks*';"
+  --command "INSERT INTO articles_fts(articles_fts) VALUES('integrity-check'); SELECT (SELECT COUNT(*) FROM articles) AS article_rows, (SELECT COUNT(*) FROM articles_fts) AS indexed_rows; SELECT COUNT(*) AS articles_missing_from_fts FROM articles LEFT JOIN articles_fts ON articles_fts.rowid = articles.rowid WHERE articles_fts.rowid IS NULL; SELECT COUNT(*) AS fts_rows_missing_from_articles FROM articles_fts LEFT JOIN articles ON articles.rowid = articles_fts.rowid WHERE articles.rowid IS NULL; SELECT COUNT(*) AS indexed_matches FROM articles_fts WHERE articles_fts MATCH 'ortodoks*';"
 ```
 
-The provenance query reports imported history as `legacy_partial`; revisions created after the TanStack Studio release report `complete`. The directory query reports twelve people and twelve localizations in each language, nine communities and nine localizations in each language, four publication-group integrity triggers, zero orphaned article groups, and an empty foreign-key result. The publication-group totals reconcile exactly to the distinct `translation_group_id` values in `articles`. The FTS integrity command completes successfully and the representative term returns matches. The stale-placement count returns zero, and the layout query returns one `primary` row.
+The provenance query reports imported history as `legacy_partial`; revisions created after the TanStack Studio release report `complete`. The directory query reports twelve people and twelve localizations in each language, nine communities and nine localizations in each language, four publication-group integrity triggers, zero orphaned article groups, and an empty foreign-key result. The publication-group totals reconcile exactly to the distinct `translation_group_id` values in `articles`. The FTS article and index counts match, both two-way rowid checks return zero, the integrity command completes successfully, and the representative term returns matches. The stale-placement count returns zero, and the layout query returns one `primary` row.
 
 ## 6. Deploy and verify
 
@@ -184,11 +190,16 @@ The previous deployed Worker version remains the immediate rollback target throu
 
 ## 7. Roll back a failed cutover
 
-First deploy the release candidate with `ORTODOKSAS_STUDIO_WRITE_MODE=frozen`,
-confirm the maintenance response, and roll the Studio Worker back to the
-recorded pre-cutover version. A code-only failure ends here.
+First deploy the release candidate with `ORTODOKSAS_STUDIO_WRITE_MODE=frozen`
+and confirm the maintenance response. A code-only failure uses the recorded
+pre-cutover version of the affected Worker.
 
 A database rollback requires explicit production-write approval because D1 restores overwrite the database in place and cancel in-flight queries. Use the bookmark recorded in step 3:
+
+Before restoring a pre-migration bookmark, roll both the public Worker and the
+Studio Worker back to their recorded pre-cutover versions. Those versions use
+the pre-migration schema. Keep Studio frozen and treat the public site as under
+maintenance throughout the coordinated Worker rollback and D1 restore.
 
 ```sh
 pnpm --filter @ortodoksas-lt/studio exec wrangler d1 time-travel restore DB \
@@ -196,4 +207,9 @@ pnpm --filter @ortodoksas-lt/studio exec wrangler d1 time-travel restore DB \
   --config wrangler.production.jsonc
 ```
 
-Record the restore command's previous bookmark, which supports an undo restore. Verify migration state, article counts, revision counts, media-record counts, and the public homepage before reopening editorial writes. R2 media objects use immutable content-addressed keys, so the database restore re-establishes the corresponding references while retained upload orphans remain safe for later reconciliation.
+Record the restore command's previous bookmark, which supports an undo restore.
+Verify migration state, article counts, revision counts, media-record counts,
+and the public homepage against the pre-cutover Workers before reopening
+editorial writes. R2 media objects use immutable content-addressed keys, so the
+database restore re-establishes the corresponding references while retained
+upload orphans remain safe for later reconciliation.

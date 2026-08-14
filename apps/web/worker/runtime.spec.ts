@@ -154,5 +154,25 @@ describe("Astro Worker runtime", () => {
     );
     expect(updated.status).toBe(200);
     await expect(updated.text()).resolves.toContain("Paieškos straipsnis");
+
+    const parity = await env.DB.prepare(
+      `SELECT
+        (SELECT COUNT(*) FROM articles) AS articleRows,
+        (SELECT COUNT(*) FROM articles_fts) AS indexedRows,
+        (SELECT COUNT(*) FROM articles
+          LEFT JOIN articles_fts ON articles_fts.rowid = articles.rowid
+          WHERE articles_fts.rowid IS NULL) AS articlesMissingFromFts,
+        (SELECT COUNT(*) FROM articles_fts
+          LEFT JOIN articles ON articles.rowid = articles_fts.rowid
+          WHERE articles.rowid IS NULL) AS ftsRowsMissingFromArticles`
+    ).first<{
+      articleRows: number;
+      articlesMissingFromFts: number;
+      ftsRowsMissingFromArticles: number;
+      indexedRows: number;
+    }>();
+    expect(parity?.articleRows).toBe(parity?.indexedRows);
+    expect(parity?.articlesMissingFromFts).toBe(0);
+    expect(parity?.ftsRowsMissingFromArticles).toBe(0);
   });
 });

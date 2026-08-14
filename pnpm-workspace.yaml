@@ -1,6 +1,7 @@
 packages:
   - apps/*
   - packages/*
+  - tools/migrations/*
 
 allowBuilds:
   '@parcel/watcher': true
@@ -26,6 +27,7 @@ minimumReleaseAgeExclude:
   - '@clerk/cli-win32-arm64@3.1.0'
   - '@clerk/cli-win32-x64@3.1.0'
   - clerk@3.1.0
+  - '@aws-sdk/client-s3@3.1110.0'
 peerDependencyRules:
   allowAny:
     - vite

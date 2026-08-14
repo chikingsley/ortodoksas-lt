@@ -1,3 +1,80 @@
+CREATE TABLE `__migration_0008_preflight` (
+	`ok` integer NOT NULL CHECK (`ok` = 1)
+);
+--> statement-breakpoint
+WITH `profile_map` (`person_id`, `figure_index`, `name_index`, `bio_start`, `bio_end`, `contact_index`, `role_index`) AS (
+	VALUES
+		('person-panaretos', 1, 2, 3, 2, NULL, NULL),
+		('person-vitalijus-mockus', 4, 6, 7, 7, 8, 5),
+		('person-vladimiras-seliavko', 10, 11, 12, 12, 13, NULL),
+		('person-georgy-roy', 15, 16, 17, 17, 18, NULL),
+		('person-georgy-ananiev', 20, 21, 22, 22, 23, NULL),
+		('person-aliaksandr-kukhta', 25, 26, 27, 27, 28, NULL),
+		('person-gintaras-sungaila', 29, 31, 32, 32, 33, 30),
+		('person-jeremiah-yurchenko', 35, 36, 37, 37, 38, NULL),
+		('person-viktoras-miniotas', 40, 41, 42, 41, 42, NULL),
+		('person-andrey-kuraev', 44, 45, 46, 47, NULL, NULL),
+		('person-ioann-ovchinnikov', 49, 50, 51, 51, 52, NULL),
+		('person-platon-konishchev', 54, 55, 56, 56, 57, NULL)
+), `source_profiles` AS (
+	SELECT `articles`.`body_json`, `articles`.`language`, `profile_map`.*
+	FROM `articles`
+	CROSS JOIN `profile_map`
+	WHERE `articles`.`translation_group_id` = 'edf497f7-11c8-4c2f-8fa5-c975fb4dbd2f'
+), `invalid_profiles` AS (
+	SELECT 1
+	FROM `source_profiles`
+	WHERE
+		json_extract(`body_json`, '$.content[' || `figure_index` || '].type') <> 'figure'
+		OR NULLIF(json_extract(`body_json`, '$.content[' || `figure_index` || '].attrs.mediaId'), '') IS NULL
+		OR NOT EXISTS (
+			SELECT 1 FROM `media_assets`
+			WHERE `media_assets`.`id` = json_extract(`body_json`, '$.content[' || `figure_index` || '].attrs.mediaId')
+		)
+		OR NULLIF(TRIM(COALESCE((
+			SELECT `name_text`.`value`
+			FROM json_tree(json_extract(`body_json`, '$.content[' || `name_index` || ']')) AS `name_text`
+			WHERE `name_text`.`key` = 'text'
+			ORDER BY `name_text`.`id`
+			LIMIT 1
+		), '')), '') IS NULL
+		OR (`bio_start` <= `bio_end` AND (
+			json_extract(`body_json`, '$.content[' || `bio_start` || ']') IS NULL
+			OR json_extract(`body_json`, '$.content[' || `bio_end` || ']') IS NULL
+		))
+		OR (`contact_index` IS NOT NULL AND (
+			json_extract(`body_json`, '$.content[' || `contact_index` || ']') IS NULL
+			OR (
+				NOT EXISTS (
+					SELECT 1
+					FROM json_tree(json_extract(`body_json`, '$.content[' || `contact_index` || ']')) AS `contact_link`
+					WHERE `contact_link`.`key` = 'href' AND NULLIF(`contact_link`.`value`, '') IS NOT NULL
+				)
+				AND `person_id` NOT IN ('person-jeremiah-yurchenko', 'person-ioann-ovchinnikov', 'person-platon-konishchev')
+			)
+		))
+		OR (`role_index` IS NOT NULL AND NULLIF(TRIM(COALESCE((
+			SELECT group_concat(`role_text`.`value`, '')
+			FROM json_tree(json_extract(`body_json`, '$.content[' || `role_index` || ']')) AS `role_text`
+			WHERE `role_text`.`key` = 'text'
+		), '')), '') IS NULL)
+)
+INSERT INTO `__migration_0008_preflight` (`ok`)
+SELECT CASE WHEN
+	(
+		(SELECT COUNT(*) FROM `articles` WHERE `translation_group_id` IN ('edf497f7-11c8-4c2f-8fa5-c975fb4dbd2f', 'b7e18d0e-ddd5-49ed-9590-253666cf2d3f')) = 0
+		OR (
+			(SELECT COUNT(*) FROM `articles` WHERE `translation_group_id` = 'edf497f7-11c8-4c2f-8fa5-c975fb4dbd2f') = 5
+			AND (SELECT COUNT(DISTINCT `language`) FROM `articles` WHERE `translation_group_id` = 'edf497f7-11c8-4c2f-8fa5-c975fb4dbd2f' AND `language` IN ('lt', 'en', 'ru', 'uk', 'be')) = 5
+			AND (SELECT COUNT(*) FROM `source_profiles`) = 60
+			AND (SELECT COUNT(*) FROM `invalid_profiles`) = 0
+			AND (SELECT COUNT(*) FROM `articles` WHERE `translation_group_id` = 'b7e18d0e-ddd5-49ed-9590-253666cf2d3f') = 5
+		)
+	)
+	THEN 1 ELSE 0 END;
+--> statement-breakpoint
+DROP TABLE `__migration_0008_preflight`;
+--> statement-breakpoint
 CREATE TABLE `communities` (
 	`address_line` text DEFAULT '' NOT NULL,
 	`country_code` text DEFAULT 'LT' NOT NULL,

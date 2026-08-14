@@ -20,6 +20,9 @@ describe("article mutation boundaries", () => {
     expect(
       updateArticleSchema.safeParse({ ...article, expectedVersion: 1 }).success
     ).toBe(true);
+    expect(
+      updateArticleSchema.safeParse({ ...article, expectedVersion: 0 }).success
+    ).toBe(true);
   });
 
   it("rejects client-supplied reviewer identity and time", () => {

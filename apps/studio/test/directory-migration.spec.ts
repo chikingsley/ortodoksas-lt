@@ -63,5 +63,19 @@ describe("structured directory migration", () => {
         .bind("referenced-publication-group")
         .run()
     ).rejects.toThrow("publication group is referenced");
+
+    await expect(
+      env.DB.prepare(
+        "UPDATE articles SET translation_group_id = ? WHERE id = ?"
+      )
+        .bind("missing-publication-group", "valid-group-article")
+        .run()
+    ).rejects.toThrow("translation_group_id must reference");
+
+    await expect(
+      env.DB.prepare("UPDATE publication_groups SET id = ? WHERE id = ?")
+        .bind("renamed-publication-group", "referenced-publication-group")
+        .run()
+    ).rejects.toThrow("publication group is referenced");
   });
 });

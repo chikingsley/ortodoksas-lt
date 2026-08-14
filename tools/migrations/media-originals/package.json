@@ -1,0 +1,13 @@
+{
+  "name": "@ortodoksas-lt/media-originals-migration",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node --check src/cli.mjs && node --check src/core.mjs && node --test",
+    "migrate": "node src/cli.mjs"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "3.1110.0"
+  }
+}

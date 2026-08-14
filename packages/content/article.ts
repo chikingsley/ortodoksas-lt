@@ -118,7 +118,11 @@ export const updateArticleSchema = createArticleSchema
     translationKind: true,
   })
   .extend({
-    expectedVersion: z.number().int().positive(),
+    expectedTranslationSourceHash: z
+      .string()
+      .regex(/^[0-9a-f]{64}$/u)
+      .optional(),
+    expectedVersion: z.number().int().nonnegative(),
     translationReviewAction: translationReviewActionSchema.optional(),
   });
 

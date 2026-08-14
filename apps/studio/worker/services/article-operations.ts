@@ -190,6 +190,7 @@ const resolveTranslationReviewUpdate = async (input: {
   contentChanged: boolean;
   database: StudioDatabase;
   editorId: string;
+  expectedTranslationSourceHash: string | undefined;
   reviewAction: UpdateArticleInput["translationReviewAction"];
   timestamp: number;
   translationKind: UpdateArticleInput["translationKind"];
@@ -249,6 +250,16 @@ const resolveTranslationReviewUpdate = async (input: {
     };
   }
   const currentSourceHash = await getTranslationSourceHash(translationSource);
+  if (
+    input.reviewAction === "approve" &&
+    input.expectedTranslationSourceHash !== currentSourceHash
+  ) {
+    return {
+      error: "Translation source changed since this editor loaded it",
+      ok: false as const,
+      status: 409 as const,
+    };
+  }
   if (
     input.reviewAction !== "approve" &&
     currentSourceHash !== input.article.translationSourceHash
@@ -641,6 +652,9 @@ export const getArticleWorkspace = async (
     changes: baselineRecord?.changes ?? [],
     revisions,
     translationSource: translationSource ?? null,
+    translationSourceCurrentHash: translationSource
+      ? await getTranslationSourceHash(translationSource)
+      : null,
   };
 };
 
@@ -936,6 +950,7 @@ export const updateArticle = async (input: {
     contentChanged,
     database: input.database,
     editorId: input.editorId,
+    expectedTranslationSourceHash: parsed.data.expectedTranslationSourceHash,
     reviewAction: parsed.data.translationReviewAction,
     timestamp,
     translationKind: parsed.data.translationKind,
