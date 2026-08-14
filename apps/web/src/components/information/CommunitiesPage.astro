@@ -35,6 +35,7 @@ const labels = {
 <div class:list={["mt-9 grid items-stretch gap-5", detail ? "grid-cols-1" : "grid-cols-2 max-md:grid-cols-1"]}>
   {communities.map((community) => (
     <section class="worship-community flex min-w-0 flex-col overflow-hidden border border-border">
+      {community.media.length > 0 ? (
       <div class="group relative aspect-[1.62] w-full overflow-hidden bg-muted" data-gallery>
         <div aria-label={`${labels.gallery}: ${community.name}`} class="gallery-track flex h-full snap-x snap-mandatory overflow-x-auto scroll-smooth" data-gallery-track role="region" tabindex="0">
           {community.media.map((image, imageIndex) => (
@@ -51,6 +52,7 @@ const labels = {
           </div>
         ) : null}
       </div>
+      ) : null}
       <div class="flex flex-1 flex-col p-7 max-sm:p-5">
         {detail ? null : (
           <h2 class="mb-5 text-balance font-serif text-[29px] leading-[1.08] tracking-[-0.015em] [overflow-wrap:anywhere] max-sm:text-[26px]">

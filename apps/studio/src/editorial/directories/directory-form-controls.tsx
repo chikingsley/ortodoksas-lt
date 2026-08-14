@@ -5,6 +5,12 @@ import { useCallback, useId } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -33,6 +39,35 @@ export const Field = ({
     <div className="grid gap-1.5">
       <Label htmlFor={id}>{label}</Label>
       <Input {...props} id={id} />
+    </div>
+  );
+};
+
+export const InputActionField = ({
+  actionLabel,
+  actionText,
+  label,
+  onAction,
+  ...props
+}: React.ComponentProps<typeof Input> & {
+  actionLabel: string;
+  actionText: string;
+  label: string;
+  onAction: () => void;
+}) => {
+  const generatedId = useId();
+  const id = props.id ?? generatedId;
+  return (
+    <div className="grid gap-1.5">
+      <Label htmlFor={id}>{label}</Label>
+      <InputGroup>
+        <InputGroupInput {...props} id={id} />
+        <InputGroupAddon align="inline-end">
+          <InputGroupButton aria-label={actionLabel} onClick={onAction}>
+            {actionText}
+          </InputGroupButton>
+        </InputGroupAddon>
+      </InputGroup>
     </div>
   );
 };

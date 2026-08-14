@@ -18,6 +18,7 @@ import { SimpleEditor } from "@/components/tiptap-templates/simple/simple-editor
 import { Button } from "@/components/ui/button";
 import {
   Field,
+  InputActionField,
   LocaleTabs,
   localeLabel,
   Section,
@@ -181,14 +182,6 @@ export const PersonEditor = ({
     form.setFieldValue("slug", slugifyDirectoryName(lithuanianName ?? ""));
     setSlugOverride(false);
   }, [form, values.localizations]);
-  const generateSeo = useCallback(() => {
-    if (localization) {
-      updateLocalization((value) => ({
-        ...value,
-        seoDescription: generatedSeoDescription(value),
-      }));
-    }
-  }, [localization, updateLocalization]);
   const upload = useCallback(
     async (file: File) => {
       setMessage("Uploading image…");
@@ -719,25 +712,17 @@ export const PersonEditor = ({
       </Section>
       <Section title="Search and publishing">
         <div className="grid gap-4 md:grid-cols-3">
-          <div className="grid gap-1.5">
-            <Field
-              label="URL slug"
-              onChange={(event) => {
-                setSlugOverride(true);
-                form.setFieldValue("slug", event.target.value);
-              }}
-              value={values.slug}
-            />
-            <Button
-              className="w-fit px-0"
-              onClick={generateSlug}
-              size="xs"
-              type="button"
-              variant="link"
-            >
-              Generate from Lithuanian name
-            </Button>
-          </div>
+          <InputActionField
+            actionLabel="Reset slug from Lithuanian name"
+            actionText="Reset"
+            label="URL slug"
+            onAction={generateSlug}
+            onChange={(event) => {
+              setSlugOverride(true);
+              form.setFieldValue("slug", event.target.value);
+            }}
+            value={values.slug}
+          />
           <SelectField
             label="Publication status"
             onChange={(status) => form.setFieldValue("status", status)}
@@ -763,17 +748,9 @@ export const PersonEditor = ({
                 seoDescription: event.target.value,
               }))
             }
+            placeholder="Generated from the name and biography when empty."
             value={localization?.seoDescription ?? ""}
           />
-          <Button
-            className="w-fit px-0"
-            onClick={generateSeo}
-            size="xs"
-            type="button"
-            variant="link"
-          >
-            Generate from name and biography
-          </Button>
         </div>
       </Section>
     </form>
