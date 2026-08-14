@@ -2,7 +2,7 @@
 import PublicationPage from "../components/publication/PublicationPage.astro";
 import { resolvePublicationPage } from "../components/publication/publication-page-model";
 
-const model = await resolvePublicationPage(Astro.params.path ?? "");
+const model = await resolvePublicationPage(Astro.url.pathname.slice(1));
 if (!model) {
   return Astro.rewrite("/404");
 }

@@ -2,7 +2,7 @@
 
 ## Scope
 
-Every imported or newly created article enters Studio as one canonical Tiptap document. Imported records retain their original source for comparison. Automatic checks evaluate canonical structure, copy boundaries, media metadata, and publication readiness whenever the document changes.
+Every imported or newly created article enters Studio as one canonical Tiptap document. Imported records retain an immutable canonical baseline, field-level changes, and revision history for comparison. Automatic checks evaluate canonical structure, copy boundaries, media metadata, and publication readiness whenever the document changes.
 
 ## Summary
 
@@ -26,7 +26,7 @@ Every imported or newly created article enters Studio as one canonical Tiptap do
 - Compare sentence dashes within aligned source fields, treating en and em dashes as equivalent source punctuation.
 - Treat sentence dashes introduced beyond an aligned source field as publication-blocking review items.
 - Use spaced en dashes for Ukrainian sentence punctuation under the 2026 official orthography.
-- Use the source-comparison view to resolve every punctuation-fidelity item before publication.
+- Use the baseline-change view to resolve every punctuation-fidelity item before publication.
 
 ## Media
 
@@ -62,4 +62,4 @@ The calibration set contains three manually reviewed articles:
 - Besarabija: a seven-country weekly roundup with deliberate headings, dividers, notes, lead caption/source, byline, and copy corrections.
 - Sakartvelas: a ten-story weekly roundup with deliberate headings, dividers, byline/copy corrections, and one reviewed removal of a duplicated lead/body image.
 
-Every conversion preserves an immutable baseline, records canonical changes with provenance, and remains reviewable through source comparison, revisions, and public preview. Automatic structural checks replace a separate manual review-notes workflow.
+Every conversion preserves an immutable baseline, records canonical changes with provenance, and remains reviewable through baseline comparison, revisions, and public preview. Automatic structural checks replace a separate manual review-notes workflow.

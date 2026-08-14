@@ -1,9 +1,5 @@
 import type { TiptapDocument } from "@ortodoksas-lt/content/article";
 import { renderToHTMLString } from "@tiptap/static-renderer/pm/html-string";
-import {
-  resolveRecoveredMediaUrl,
-  resolveTiptapMediaUrls,
-} from "../content/media-url";
 import { articleEditorExtensions } from "./extensions";
 
 export const renderArticleBody = (document: TiptapDocument): string =>
@@ -63,5 +59,5 @@ export const renderArticleDocument = ({
     @media(max-width:520px){article{width:min(100% - 32px,760px);padding:42px 0 80px}h1{font-size:38px}.summary{font-size:18px;margin-bottom:34px}main{font-size:18px}}
   </style>
 </head>
-  <body><article><h1>${escapeHtml(title)}</h1><p class="summary">${escapeHtml(summary)}</p>${hero && !hasLeadFigure(body) ? `<img class="lead" src="${escapeHtml(resolveRecoveredMediaUrl(hero))}" alt="">` : ""}<main>${renderArticleBody(resolveTiptapMediaUrls(body))}</main></article></body>
+  <body><article><h1>${escapeHtml(title)}</h1><p class="summary">${escapeHtml(summary)}</p>${hero && !hasLeadFigure(body) ? `<img class="lead" src="${escapeHtml(hero)}" alt="">` : ""}<main>${renderArticleBody(body)}</main></article></body>
 </html>`;

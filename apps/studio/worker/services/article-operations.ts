@@ -5,6 +5,7 @@ import {
   type UpdateArticleInput,
   updateArticleSchema,
 } from "@ortodoksas-lt/content/article";
+import { canonicalizePublicationDocument } from "@ortodoksas-lt/content/publication-link";
 import {
   articleBaselines,
   articleContentChanges,
@@ -24,7 +25,6 @@ import { alias } from "drizzle-orm/sqlite-core";
 
 import type { StudioDatabase } from "../db";
 import {
-  attachMediaRecords,
   contentChangeInsertQueries,
   findMediaId,
   hashText,
@@ -329,10 +329,7 @@ const getDependentReviewInvalidationQueries = (input: {
     'seoTitle', ${invalidationArticle.seoTitle},
     'slug', ${invalidationArticle.slug},
     'snapshotCompleteness', 'complete',
-    'snapshotVersion', 2,
-    'sourceArticleId', ${invalidationArticle.sourceArticleId},
-    'sourceCapture', ${invalidationArticle.sourceCapture},
-    'sourceUrl', ${invalidationArticle.sourceUrl},
+    'snapshotVersion', 4,
     'status', ${invalidationArticle.status},
     'summary', ${invalidationArticle.summary},
     'title', ${invalidationArticle.title},
@@ -732,14 +729,8 @@ export const createArticle = async (input: {
     summary: parsed.data.summary,
     title: parsed.data.title,
   };
-  const currentBody = await attachMediaRecords(
-    input.database,
-    parsed.data.body
-  );
-  const comparableBaselineBody = await attachMediaRecords(
-    input.database,
-    baseline.body
-  );
+  const currentBody = canonicalizePublicationDocument(parsed.data.body);
+  const comparableBaselineBody = canonicalizePublicationDocument(baseline.body);
   const annotated = annotateArticleBody(currentBody, comparableBaselineBody);
   const bodyJson = JSON.stringify(annotated.body);
   const heroMediaId = await findMediaId(
@@ -774,10 +765,6 @@ export const createArticle = async (input: {
     seoDescription: null,
     seoTitle: null,
     slug: parsed.data.slug,
-    sourceArticleId: parsed.data.sourceArticleId ?? null,
-    sourceCapture: parsed.data.sourceCapture ?? null,
-    sourceHtml: parsed.data.sourceHtml ?? null,
-    sourceUrl: parsed.data.sourceUrl ?? null,
     status: parsed.data.status,
     summary: parsed.data.summary,
     title: parsed.data.title,
@@ -915,14 +902,8 @@ export const updateArticle = async (input: {
   const baselineBody = baseline?.bodyJson
     ? (JSON.parse(baseline.bodyJson) as TiptapDocument)
     : parsed.data.body;
-  const currentBody = await attachMediaRecords(
-    input.database,
-    parsed.data.body
-  );
-  const comparableBaselineBody = await attachMediaRecords(
-    input.database,
-    baselineBody
-  );
+  const currentBody = canonicalizePublicationDocument(parsed.data.body);
+  const comparableBaselineBody = canonicalizePublicationDocument(baselineBody);
   const annotated = annotateArticleBody(currentBody, comparableBaselineBody);
   const bodyJson = JSON.stringify(annotated.body);
   const heroMediaId =
@@ -1145,8 +1126,7 @@ export const restoreArticleRevision = async (input: {
       where: eq(publicationGroups.id, currentArticle.translationGroupId),
     }),
   ]);
-  const restoredBody = await attachMediaRecords(
-    input.database,
+  const restoredBody = canonicalizePublicationDocument(
     metadata.snapshotCompleteness === "legacy_partial"
       ? sanitizeDirectoryBody(
           JSON.parse(revision.bodyJson) as TiptapDocument,
@@ -1157,8 +1137,7 @@ export const restoreArticleRevision = async (input: {
   const annotated = baseline
     ? annotateArticleBody(
         restoredBody,
-        await attachMediaRecords(
-          input.database,
+        canonicalizePublicationDocument(
           JSON.parse(baseline.bodyJson) as TiptapDocument
         )
       )
@@ -1198,9 +1177,6 @@ export const restoreArticleRevision = async (input: {
     seoDescription: metadata.seoDescription,
     seoTitle: metadata.seoTitle,
     slug: metadata.slug,
-    sourceArticleId: metadata.sourceArticleId,
-    sourceCapture: metadata.sourceCapture,
-    sourceUrl: metadata.sourceUrl,
     status: metadata.status,
     summary: metadata.summary,
     title: metadata.title,

@@ -71,6 +71,27 @@
       "when": 1786696000000,
       "tag": "0011_translation_readiness_backfill",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1786714165191,
+      "tag": "0012_blogger_content_cleanup",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "6",
+      "when": 1786715317741,
+      "tag": "0013_repair_malformed_publication_link_text",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "6",
+      "when": 1786715557406,
+      "tag": "0014_outstanding_korvac",
+      "breakpoints": true
     }
   ]
 }

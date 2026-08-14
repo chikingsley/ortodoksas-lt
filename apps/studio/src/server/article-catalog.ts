@@ -18,9 +18,7 @@ const getArticleCatalog = createServerFn({ method: "GET" }).handler(
     await requireStudioEditor(env);
     const result = await getDatabase(env.DB)
       .select({
-        capture: articles.sourceCapture,
         description: articles.summary,
-        file: articles.sourceArticleId,
         heroMediaId: articles.heroMediaId,
         id: articles.id,
         kind: publicationGroups.kind,
@@ -29,7 +27,6 @@ const getArticleCatalog = createServerFn({ method: "GET" }).handler(
         path: articles.slug,
         publishedAt: articles.publishedAt,
         section: articles.section,
-        source: articles.sourceUrl,
         status: articles.status,
         title: articles.title,
         translationGroupId: articles.translationGroupId,
@@ -44,9 +41,7 @@ const getArticleCatalog = createServerFn({ method: "GET" }).handler(
       .orderBy(desc(articles.updatedAt));
 
     return result.map((article) => ({
-      capture: article.capture ?? "",
       description: article.description,
-      file: article.file ?? article.id,
       hero: article.heroMediaId ? `/api/media/${article.heroMediaId}` : null,
       id: article.id,
       kind: article.kind === "page" ? "page" : "article",
@@ -57,7 +52,6 @@ const getArticleCatalog = createServerFn({ method: "GET" }).handler(
         ? new Date(article.publishedAt).toISOString()
         : null,
       section: article.section,
-      source: article.source ?? "",
       status: articleStatusSchema.parse(article.status),
       thumbnail: article.heroMediaId
         ? `/api/media/${article.heroMediaId}`

@@ -174,7 +174,7 @@ export const StudioWorkspace = (route: WorkspaceRoute) => {
       >
         <ArticleEditor
           article={selectedArticle}
-          key={selectedArticle.file}
+          key={selectedArticle.id}
           onBack={closeArticle}
           onCreateTranslation={createTranslation}
           onOpenTranslation={openArticle}

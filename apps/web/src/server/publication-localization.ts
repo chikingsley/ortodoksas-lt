@@ -17,7 +17,6 @@ import {
   catalogSelection,
   database,
   heroMap,
-  historicalHtmlSuffix,
   leadingSlash,
 } from "./publication-data";
 
@@ -45,7 +44,7 @@ async function currentTranslationGroup(currentPath: string) {
   if (path === "/") {
     return;
   }
-  const slug = path.replace(leadingSlash, "").replace(historicalHtmlSuffix, "");
+  const slug = path.replace(leadingSlash, "");
   const [row] = await database()
     .select({ translationGroupId: articles.translationGroupId })
     .from(articles)
@@ -91,9 +90,7 @@ export async function getLocalizedCounterparts(
   locale: Exclude<SiteLocale, "lt">,
   sourcePaths: string[]
 ) {
-  const sourceSlugs = sourcePaths.map((path) =>
-    path.replace(leadingSlash, "").replace(historicalHtmlSuffix, "")
-  );
+  const sourceSlugs = sourcePaths.map((path) => path.replace(leadingSlash, ""));
   if (sourceSlugs.length === 0) {
     return new Map<string, CatalogEntry>();
   }
@@ -179,9 +176,7 @@ export async function getLocaleLinks(currentPath: string) {
       ])
     ) as Record<SiteLocale, LocaleDestination>;
   }
-  const slug = publicationPath
-    .replace(leadingSlash, "")
-    .replace(historicalHtmlSuffix, "");
+  const slug = publicationPath.replace(leadingSlash, "");
   const group = await currentTranslationGroup(currentPath);
   const rows = await database()
     .select({ language: articles.language, slug: articles.slug })

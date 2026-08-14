@@ -63,15 +63,6 @@ describe("Astro Worker runtime", () => {
     await expect(english.text()).resolves.toContain(
       "Vilnius Holy Trinity Community"
     );
-
-    const historical = await SELF.fetch(
-      "https://ortodoksas.test/p/bendruomenes-test.html?source=bookmark",
-      { redirect: "manual" }
-    );
-    expect(historical.status).toBe(301);
-    expect(historical.headers.get("location")).toBe(
-      "/p/bendruomenes-test?source=bookmark"
-    );
   });
 
   it("searches published articles through the localized FTS5 index", async () => {

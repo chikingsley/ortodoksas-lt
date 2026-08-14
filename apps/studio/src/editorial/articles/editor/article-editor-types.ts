@@ -13,9 +13,6 @@ export interface StoredArticle {
   publishedAt: number | null;
   section: string;
   slug: string;
-  sourceCapture: string | null;
-  sourceHtml: string | null;
-  sourceUrl: string | null;
   status: "draft" | "scheduled" | "published" | "archived";
   summary: string;
   title: string;
@@ -66,7 +63,6 @@ export interface PersistArticleInput {
     title: string;
   };
   payload: Record<string, unknown>;
-  sourceArticleId: string;
 }
 
 export interface PublicationVerification {

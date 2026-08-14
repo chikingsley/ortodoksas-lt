@@ -16,10 +16,9 @@ const articleRevisionMetadataSchema = z.looseObject({
   seoTitle: z.string().nullable().optional(),
   slug: z.string().optional(),
   snapshotCompleteness: z.enum(["complete", "legacy_partial"]).optional(),
-  snapshotVersion: z.union([z.literal(2), z.literal(3)]).optional(),
-  sourceArticleId: z.string().nullable().optional(),
-  sourceCapture: z.string().nullable().optional(),
-  sourceUrl: z.string().nullable().optional(),
+  snapshotVersion: z
+    .union([z.literal(2), z.literal(3), z.literal(4)])
+    .optional(),
   status: z.enum(["archived", "draft", "published", "scheduled"]).optional(),
   summary: z.string().optional(),
   title: z.string().optional(),
@@ -46,10 +45,7 @@ export interface ArticleRevisionMetadata {
   seoTitle: string | null;
   slug: string;
   snapshotCompleteness: "complete" | "legacy_partial";
-  snapshotVersion: 3;
-  sourceArticleId: string | null;
-  sourceCapture: string | null;
-  sourceUrl: string | null;
+  snapshotVersion: 4;
   status: "archived" | "draft" | "published" | "scheduled";
   summary: string;
   title: string;
@@ -87,10 +83,7 @@ export const articleRevisionMetadata = (
   seoTitle: article.seoTitle,
   slug: article.slug,
   snapshotCompleteness: "complete",
-  snapshotVersion: 3,
-  sourceArticleId: article.sourceArticleId,
-  sourceCapture: article.sourceCapture,
-  sourceUrl: article.sourceUrl,
+  snapshotVersion: 4,
   status:
     article.status === "archived" ||
     article.status === "published" ||
@@ -124,6 +117,6 @@ export const parseArticleRevisionMetadata = (
     JSON.parse(metadataJson)
   );
   return parsed.success
-    ? { ...fallback, ...parsed.data, snapshotVersion: 3 }
+    ? { ...fallback, ...parsed.data, snapshotVersion: 4 }
     : fallback;
 };

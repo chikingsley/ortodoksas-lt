@@ -1,8 +1,4 @@
 import { tiptapDocumentSchema } from "@ortodoksas-lt/content/article";
-import {
-  resolveRecoveredMediaUrl,
-  resolveTiptapMediaUrls,
-} from "@ortodoksas-lt/content/media-url";
 import { getArticleQualityIssues } from "@ortodoksas-lt/editor/quality";
 import { renderArticleDocument } from "@ortodoksas-lt/editor/render";
 import { useForm, useStore } from "@tanstack/react-form";
@@ -22,7 +18,7 @@ import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import { StudioDialog } from "@/editorial/shared/studio-dialog";
-import type { CatalogArticle, SourceArticle } from "../types";
+import type { CatalogArticle } from "../types";
 import {
   fetchArticleBaseline,
   fetchArticleRevisions,
@@ -61,7 +57,6 @@ const EMPTY_DOCUMENT: JSONContent = {
 const LEADING_SLASH_PATTERN = /^\/+/;
 const LITHUANIAN_PREFIX_PATTERN = /^lt\//;
 const TRAILING_SLASH_PATTERN = /\/$/;
-const WWW_PREFIX_PATTERN = /^www\./u;
 const editorialMetadataSchema = z.object({
   language: z.string().trim().min(2).max(16),
   section: z.string().trim().max(160),
@@ -74,17 +69,6 @@ interface ArticleSubmitMeta {
   nextStatus: StoredArticle["status"];
   translationReviewAction?: TranslationReviewAction;
 }
-
-const formatSourceName = (sourceUrl: string | undefined): string => {
-  if (!sourceUrl) {
-    return "Original website";
-  }
-  try {
-    return new URL(sourceUrl).hostname.replace(WWW_PREFIX_PATTERN, "");
-  } catch {
-    return "Original website";
-  }
-};
 
 const getSlug = (path: string): string =>
   path
@@ -159,8 +143,6 @@ export function ArticleEditor({
   const [revisions, setRevisions] = useState<Revision[]>([]);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [restoringVersion, setRestoringVersion] = useState<number | null>(null);
-  const [source, setSource] = useState<SourceArticle | null>(null);
-  const [sourceReviewOpen, setSourceReviewOpen] = useState(false);
   const [status, setStatus] = useState<StoredArticle["status"]>("draft");
   const [translationGroupId, setTranslationGroupId] = useState(
     article.translationGroupId
@@ -179,7 +161,6 @@ export function ArticleEditor({
   } | null>(null);
   const [translationSourceCurrentHash, setTranslationSourceCurrentHash] =
     useState<string | null>(null);
-  const [warnings, setWarnings] = useState<string[]>([]);
   const hasUnsavedChanges = saveState !== "saved";
   const navigationBlocker = useBlocker({
     disabled: !hasUnsavedChanges,
@@ -219,26 +200,11 @@ export function ArticleEditor({
           translationSource,
           translationSourceCurrentHash: loadedTranslationSourceHash,
         } = await fetchArticleWorkspace(article.id, controller.signal);
-        const sourceRecord: SourceArticle = {
-          ...article,
-          capture: canonical.sourceCapture ?? article.capture,
-          html: canonical.sourceHtml ?? "",
-          labels: JSON.parse(canonical.labelsJson) as string[],
-          section: canonical.section,
-          source: canonical.sourceUrl ?? article.source,
-        };
-
-        setSource(sourceRecord);
         setBaselineBody(
           tiptapDocumentSchema.parse(JSON.parse(baseline.body_json))
         );
         setChanges(baselineChanges);
-        setWarnings([]);
-        setBody(
-          resolveTiptapMediaUrls(
-            tiptapDocumentSchema.parse(JSON.parse(canonical.bodyJson))
-          )
-        );
+        setBody(tiptapDocumentSchema.parse(JSON.parse(canonical.bodyJson)));
         setArticleId(canonical.id);
         metadataForm.reset({
           language: canonical.language,
@@ -366,12 +332,11 @@ export function ArticleEditor({
         articleId,
         baseline: {
           body: baselineBody,
-          converterVersion: "legacy-html-v1",
-          summary: source?.description ?? "",
-          title: source?.title ?? article.title,
+          converterVersion: "native-v1",
+          summary: article.description,
+          title: article.title,
         },
         payload,
-        sourceArticleId: article.file,
       });
       if (!response.ok) {
         setSaveError(response.issues?.[0] ?? response.error);
@@ -405,7 +370,6 @@ export function ArticleEditor({
       loadRevisions,
       publishedAt,
       revisions,
-      source,
       translationGroupId,
       translationKind,
       translationSourceCurrentHash,
@@ -464,9 +428,6 @@ export function ArticleEditor({
     setPublicationVerification(null);
     setPublicationOpen(true);
   }, []);
-  const openSourceReview = useCallback(() => {
-    setSourceReviewOpen(true);
-  }, []);
   const openChanges = useCallback(() => setChangesOpen(true), []);
 
   const publishOrVerify = useCallback(async (): Promise<void> => {
@@ -522,9 +483,7 @@ export function ArticleEditor({
       );
       if (restoredArticle) {
         setBody(
-          resolveTiptapMediaUrls(
-            tiptapDocumentSchema.parse(JSON.parse(restoredArticle.bodyJson))
-          )
+          tiptapDocumentSchema.parse(JSON.parse(restoredArticle.bodyJson))
         );
         setHeroFit(restoredArticle.heroFit);
         setHeroFocalX(restoredArticle.heroFocalX);
@@ -631,7 +590,6 @@ export function ArticleEditor({
             onBodyChange={updateBody}
             onSummaryChange={updateSummary}
             onTitleChange={updateTitle}
-            resolveHeroUrl={resolveRecoveredMediaUrl}
             summary={summary}
             title={title}
           />
@@ -648,7 +606,6 @@ export function ArticleEditor({
             onHeroFocalYChange={updateHeroFocalY}
             onMarkReviewed={markEditorReviewed}
             onOpenChanges={openChanges}
-            onOpenSource={openSourceReview}
             onRestoreRevision={restoreRevisionFromButton}
             onSectionChange={updateSection}
             onToggleHistory={toggleHistory}
@@ -658,7 +615,6 @@ export function ArticleEditor({
             revisions={revisions}
             saveState={saveState}
             section={section}
-            sourceName={formatSourceName(source?.source)}
             status={status}
             translationKind={translationKind}
             translationReviewStatus={translationReviewStatus}
@@ -671,12 +627,8 @@ export function ArticleEditor({
         changesOpen={changesOpen}
         onChangesOpenChange={setChangesOpen}
         onPreviewOpenChange={setPreviewOpen}
-        onSourceOpenChange={setSourceReviewOpen}
         previewDocument={previewDocument}
         previewOpen={previewOpen}
-        sourceHtml={source?.html ?? ""}
-        sourceOpen={sourceReviewOpen}
-        warnings={warnings}
       />
       <ArticlePublicationDialog
         errorMessage={publicationError}

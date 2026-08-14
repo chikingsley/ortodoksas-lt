@@ -39,11 +39,11 @@ pnpm --filter @ortodoksas-lt/studio exec wrangler d1 execute DB --remote \
   --command "SELECT id, r2_key, sha256, mime_type, byte_size FROM media_assets ORDER BY id" \
   > "$ORTODOKSAS_BACKUP_DIR/media-before.json"
 
-pnpm --filter @ortodoksas-lt/media-originals-migration migrate -- manifest \
+pnpm --filter @ortodoksas-lt/media-originals-migration migrate manifest \
   --inventory "$ORTODOKSAS_BACKUP_DIR/media-before.json" \
   --output "$ORTODOKSAS_BACKUP_DIR/media-manifest.json"
 
-pnpm --filter @ortodoksas-lt/media-originals-migration migrate -- plan \
+pnpm --filter @ortodoksas-lt/media-originals-migration migrate plan \
   --manifest "$ORTODOKSAS_BACKUP_DIR/media-manifest.json" \
   --output "$ORTODOKSAS_BACKUP_DIR/media-plan.json"
 ```
@@ -52,12 +52,12 @@ Copy and independently verify the canonical destinations. Both operations are
 idempotent. The copy checkpoint records completed objects after each batch.
 
 ```sh
-pnpm --filter @ortodoksas-lt/media-originals-migration migrate -- copy \
+pnpm --filter @ortodoksas-lt/media-originals-migration migrate copy \
   --manifest "$ORTODOKSAS_BACKUP_DIR/media-manifest.json" \
   --checkpoint "$ORTODOKSAS_BACKUP_DIR/media-copy-checkpoint.json" \
   --concurrency 4
 
-pnpm --filter @ortodoksas-lt/media-originals-migration migrate -- verify \
+pnpm --filter @ortodoksas-lt/media-originals-migration migrate verify \
   --manifest "$ORTODOKSAS_BACKUP_DIR/media-manifest.json" \
   --output "$ORTODOKSAS_BACKUP_DIR/media-verification.json" \
   --concurrency 4
@@ -67,10 +67,12 @@ Generate the D1 cutover SQL from that exact manifest and receipt. The SQL uses
 a temporary manifest table plus pre-update and post-update constraint gates. A
 rerun accepts rows at either the source or destination key and updates only
 source rows. It also removes redundant `/api/media/<id>` aliases; the canonical
-route resolves media IDs directly, while historical source aliases remain.
+route resolves media IDs directly. Migration `0012_blogger_content_cleanup.sql`
+later canonicalizes recoverable historical figures and retires the source-alias
+table after the recovery export is verified.
 
 ```sh
-pnpm --filter @ortodoksas-lt/media-originals-migration migrate -- d1-sql \
+pnpm --filter @ortodoksas-lt/media-originals-migration migrate d1-sql \
   --manifest "$ORTODOKSAS_BACKUP_DIR/media-manifest.json" \
   --verification "$ORTODOKSAS_BACKUP_DIR/media-verification.json" \
   --output "$ORTODOKSAS_BACKUP_DIR/media-d1-cutover.sql"
@@ -86,7 +88,7 @@ Source cleanup requires that exact D1 evidence, the verification receipt, an
 explicit confirmation phrase, and a separate resumable checkpoint:
 
 ```sh
-pnpm --filter @ortodoksas-lt/media-originals-migration migrate -- delete-source \
+pnpm --filter @ortodoksas-lt/media-originals-migration migrate delete-source \
   --manifest "$ORTODOKSAS_BACKUP_DIR/media-manifest.json" \
   --verification "$ORTODOKSAS_BACKUP_DIR/media-verification.json" \
   --cutover-inventory "$ORTODOKSAS_BACKUP_DIR/media-after.json" \

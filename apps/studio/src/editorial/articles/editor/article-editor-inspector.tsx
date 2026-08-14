@@ -21,7 +21,6 @@ interface Props {
   onHeroFocalYChange: (value: number) => void;
   onMarkReviewed: () => void;
   onOpenChanges: () => void;
-  onOpenSource: () => void;
   onRestoreRevision: (event: MouseEvent<HTMLButtonElement>) => void;
   onSectionChange: (value: string) => void;
   onToggleHistory: () => void;
@@ -31,7 +30,6 @@ interface Props {
   revisions: Revision[];
   saveState: "saved" | "dirty" | "saving" | "error";
   section: string;
-  sourceName: string;
   status: StoredArticle["status"];
   translationKind: StoredArticle["translationKind"];
   translationReviewStatus: StoredArticle["translationReviewStatus"];
@@ -53,7 +51,6 @@ export function ArticleEditorInspector({
   onHeroFocalYChange,
   onMarkReviewed,
   onOpenChanges,
-  onOpenSource,
   onRestoreRevision,
   onSectionChange,
   onToggleHistory,
@@ -63,7 +60,6 @@ export function ArticleEditorInspector({
   revisions,
   saveState,
   section,
-  sourceName,
   status,
   translationKind,
   translationReviewStatus,
@@ -95,10 +91,6 @@ export function ArticleEditorInspector({
               <i className="size-2 rounded-full bg-primary" />
               {formatPublicationStatus(status)}
             </dd>
-          </div>
-          <div>
-            <dt>Source</dt>
-            <dd>{sourceName}</dd>
           </div>
           <div>
             <dt>Translation</dt>
@@ -211,9 +203,6 @@ export function ArticleEditorInspector({
           </ul>
         ) : null}
         <div className="grid gap-2 [&_button]:w-full">
-          <Button onClick={onOpenSource} variant="outline">
-            Compare source
-          </Button>
           <Button
             disabled={changesCount === 0}
             onClick={onOpenChanges}

@@ -12,16 +12,13 @@ import type { CatalogArticle } from "../src/editorial/articles/types";
 const article = (
   overrides: Partial<CatalogArticle> & Pick<CatalogArticle, "id" | "language">
 ): CatalogArticle => ({
-  capture: "",
   description: "Description",
-  file: "",
   hero: null,
   kind: "article",
   labels: [],
   path: `/p/${overrides.id}`,
   published: null,
   section: "faith",
-  source: "",
   status: "draft",
   thumbnail: null,
   title: `Title ${overrides.language}`,

@@ -16,7 +16,6 @@ interface Props {
   onBodyChange: (body: JSONContent) => void;
   onSummaryChange: (event: ChangeEvent<HTMLTextAreaElement>) => void;
   onTitleChange: (event: ChangeEvent<HTMLTextAreaElement>) => void;
-  resolveHeroUrl: (url: string) => string;
   summary: string;
   title: string;
 }
@@ -32,7 +31,6 @@ export function ArticleEditorDocument({
   onBodyChange,
   onSummaryChange,
   onTitleChange,
-  resolveHeroUrl,
   summary,
   title,
 }: Props) {
@@ -70,11 +68,7 @@ export function ArticleEditorDocument({
               alt={`Lead for ${title}`}
               className={`block h-[280px] w-full rounded-lg bg-secondary ${heroFit === "contain" ? "object-contain" : "object-cover"}`}
               height="900"
-              src={
-                heroMediaId
-                  ? `/api/media/${heroMediaId}`
-                  : resolveHeroUrl(heroUrl)
-              }
+              src={heroMediaId ? `/api/media/${heroMediaId}` : heroUrl}
               style={{ objectPosition: `${heroFocalX}% ${heroFocalY}%` }}
               width="1600"
             />

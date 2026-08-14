@@ -214,17 +214,19 @@ export const validateCutoverInventory = (manifest, input) => {
 const sqlString = (value) => `'${String(value).replaceAll("'", "''")}'`;
 
 export const createD1CutoverSql = (manifest, manifestSha256) => {
+  const planTable = "_media_originals_cutover_plan";
+  const gateTable = "_media_originals_cutover_gate";
   const lines = [
     `-- Generated from verified media manifest SHA-256 ${manifestSha256}`,
     "-- Apply with Studio writes frozen. This script is idempotent.",
-    "DROP TABLE IF EXISTS temp.media_originals_plan;",
-    "DROP TABLE IF EXISTS temp.media_originals_gate;",
-    "CREATE TEMP TABLE media_originals_plan (id TEXT PRIMARY KEY, source_key TEXT NOT NULL, destination_key TEXT NOT NULL, sha256 TEXT NOT NULL);",
+    `DROP TABLE IF EXISTS ${planTable};`,
+    `DROP TABLE IF EXISTS ${gateTable};`,
+    `CREATE TABLE ${planTable} (id TEXT PRIMARY KEY, source_key TEXT NOT NULL, destination_key TEXT NOT NULL, sha256 TEXT NOT NULL);`,
   ];
   for (let index = 0; index < manifest.items.length; index += 100) {
     const batch = manifest.items.slice(index, index + 100);
     lines.push(
-      "INSERT INTO media_originals_plan (id, source_key, destination_key, sha256) VALUES\n" +
+      `INSERT INTO ${planTable} (id, source_key, destination_key, sha256) VALUES\n` +
         batch
           .map(
             (item) =>
@@ -235,16 +237,16 @@ export const createD1CutoverSql = (manifest, manifestSha256) => {
     );
   }
   lines.push(
-    "CREATE TEMP TABLE media_originals_gate (mismatch_count INTEGER NOT NULL CHECK (mismatch_count = 0));",
-    "INSERT INTO media_originals_gate (mismatch_count) SELECT COUNT(*) FROM media_originals_plan AS plan LEFT JOIN media_assets AS asset ON asset.id = plan.id WHERE asset.id IS NULL OR asset.sha256 IS NOT plan.sha256 OR asset.r2_key NOT IN (plan.source_key, plan.destination_key);",
-    "UPDATE media_assets SET r2_key = (SELECT destination_key FROM media_originals_plan AS plan WHERE plan.id = media_assets.id) WHERE EXISTS (SELECT 1 FROM media_originals_plan AS plan WHERE plan.id = media_assets.id AND media_assets.r2_key = plan.source_key);",
-    "DELETE FROM media_originals_gate;",
-    "INSERT INTO media_originals_gate (mismatch_count) SELECT COUNT(*) FROM media_originals_plan AS plan LEFT JOIN media_assets AS asset ON asset.id = plan.id WHERE asset.id IS NULL OR asset.sha256 IS NOT plan.sha256 OR asset.r2_key <> plan.destination_key;",
+    `CREATE TABLE ${gateTable} (mismatch_count INTEGER NOT NULL CHECK (mismatch_count = 0));`,
+    `INSERT INTO ${gateTable} (mismatch_count) SELECT COUNT(*) FROM ${planTable} AS plan LEFT JOIN media_assets AS asset ON asset.id = plan.id WHERE asset.id IS NULL OR asset.sha256 IS NOT plan.sha256 OR asset.r2_key NOT IN (plan.source_key, plan.destination_key);`,
+    `UPDATE media_assets SET r2_key = (SELECT destination_key FROM ${planTable} AS plan WHERE plan.id = media_assets.id) WHERE EXISTS (SELECT 1 FROM ${planTable} AS plan WHERE plan.id = media_assets.id AND media_assets.r2_key = plan.source_key);`,
+    `DELETE FROM ${gateTable};`,
+    `INSERT INTO ${gateTable} (mismatch_count) SELECT COUNT(*) FROM ${planTable} AS plan LEFT JOIN media_assets AS asset ON asset.id = plan.id WHERE asset.id IS NULL OR asset.sha256 IS NOT plan.sha256 OR asset.r2_key <> plan.destination_key;`,
     "DELETE FROM media_aliases WHERE alias = '/api/media/' || media_id;",
-    "SELECT COUNT(*) AS migrated_media_assets FROM media_originals_plan;",
+    `SELECT COUNT(*) AS migrated_media_assets FROM ${planTable};`,
     "SELECT changes() AS removed_redundant_canonical_aliases;",
-    "DROP TABLE media_originals_gate;",
-    "DROP TABLE media_originals_plan;",
+    `DROP TABLE ${gateTable};`,
+    `DROP TABLE ${planTable};`,
     ""
   );
   return lines.join("\n");

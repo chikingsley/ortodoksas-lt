@@ -7,7 +7,7 @@
     "./article": "./article.ts",
     "./directory": "./directory.ts",
     "./machine-translation": "./machine-translation.ts",
-    "./media-url": "./media-url.ts",
+    "./publication-link": "./publication-link.ts",
     "./sections": "./sections.ts",
     "./site": "./site.ts",
     "./translation": "./translation.ts"

@@ -74,7 +74,6 @@ export function persistArticle({
   articleId,
   baseline,
   payload,
-  sourceArticleId,
 }: PersistArticleInput): Promise<StudioOperationResult<PersistedArticle>> {
   const interactivePayload = Object.fromEntries(
     Object.entries(payload).filter(
@@ -84,7 +83,7 @@ export function persistArticle({
   return articleId
     ? updateArticleMutation({ data: { articleId, payload } })
     : createArticleMutation({
-        data: { ...interactivePayload, baseline, sourceArticleId },
+        data: { ...interactivePayload, baseline },
       });
 }
 

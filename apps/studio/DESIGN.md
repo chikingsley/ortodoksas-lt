@@ -177,7 +177,7 @@ The inventory uses a 232px sticky rail and a fluid main area. Its content reache
 
 Opening an article removes the inventory rail and dedicates the viewport to editing. The 64px sticky action bar keeps route identity, save state, Preview, and Save draft visible. The workspace reaches 1320px and divides into a fluid document plus a 304px inspector; at 1040px the inspector contracts to 280px. The document uses `48px clamp(28px, 5vw, 72px) 96px` padding. Title, summary, lead image, and editor frame share an 860px maximum width; Tiptap content itself reaches 760px. Lead images use the available width with a 280px maximum height and contained cropping.
 
-At 780px the editor becomes one column. The sticky header becomes a 102px two-row control band, the document padding becomes `32px 18px 56px`, and the inspector follows the document. A compact three-column status summary appears directly after the summary, followed by full-width source comparison. The editor toolbar sticks beneath the action bar at 102px. At 520px action labels compact, dialog padding and radii collapse to a true full-screen workflow, and public preview uses 16px side margins.
+At 780px the editor becomes one column. The sticky header becomes a 102px two-row control band, the document padding becomes `32px 18px 56px`, and the inspector follows the document. A compact three-column status summary appears directly after the summary, followed by full-width baseline changes. The editor toolbar sticks beneath the action bar at 102px. At 520px action labels compact, dialog padding and radii collapse to a true full-screen workflow, and public preview uses 16px side margins.
 
 Preview and conversion comparison use viewport-contained overlays. Public preview reaches 1180 × 860px; comparison reaches 1440 × 860px. Comparison presents archived source and canonical result in equal columns on desktop, stacks them into 520px-minimum sections at 780px, and keeps import warnings in a scrollable footer.
 
@@ -221,11 +221,11 @@ The working frame has a 640px minimum height and a 590px minimum content area. D
 
 ### Desktop Inspector
 
-The inspector is a persistent pale surface separated by a left hairline. Sections use 24px padding and contain Workflow, Automatic quality checks, and Publication. Workflow presents status, recovered-archive source, current version, latest save time, editor identity, and an expandable revision history. Automatic quality checks present a pass or fail state, concrete structural findings, and the source-comparison entry point. Publication presents language and public path.
+The inspector is a persistent pale surface separated by a left hairline. Sections use 24px padding and contain Workflow, Automatic quality checks, and Publication. Workflow presents status, current version, latest save time, editor identity, and an expandable revision history. Automatic quality checks present a pass or fail state, concrete structural findings, and the baseline-change entry point. Publication presents language and public path.
 
-### Source Comparison
+### Baseline Comparison
 
-Recovered source HTML and normalized canonical output share the same comparison window. Equal desktop panes support direct visual checking; the responsive stack keeps each pane tall enough for meaningful reading. Numbered import warnings occupy the footer while automatic checks remain visible in the inspector.
+The immutable canonical baseline and current article produce field-level changes with recorded provenance. Editors review original and current values in one responsive dialog while automatic checks remain visible in the inspector.
 
 ### Revision History
 
@@ -233,7 +233,7 @@ Each save appends a numbered D1 revision with title metadata, editor identity, a
 
 ### Shared Preview
 
-Preview renders canonical Tiptap JSON through the same full-document renderer used by the canonical comparison pane. The dialog combines title, summary, and body in a centered 760px publication measure. Georgia creates the reading voice for headline and prose; Helvetica-compatible sans serif separates the summary. The preview becomes edge-to-edge at 520px and retains its close action in a 62px header.
+Preview renders canonical Tiptap JSON through the shared full-document renderer. The dialog combines title, summary, and body in a centered 760px publication measure. Georgia creates the reading voice for headline and prose; Helvetica-compatible sans serif separates the summary. The preview becomes edge-to-edge at 520px and retains its close action in a 62px header.
 
 ### Fields and Actions
 
@@ -243,7 +243,7 @@ Inventory fields are 36px high with 6px corners. Inspector fields use 7px corner
 
 ### Mobile Workflow
 
-The mobile action bar places article identity and save state above Preview and Save draft. The compact status card exposes quality, current version, language, and source comparison before the lead image and article body. The full inspector follows the document for revision and publication work, while the sticky Tiptap toolbar remains directly beneath the 102px action bar.
+The mobile action bar places article identity and save state above Preview and Save draft. The compact status card exposes quality, current version, and language before the lead image and article body. The full inspector follows the document for revision and publication work, while the sticky Tiptap toolbar remains directly beneath the 102px action bar.
 
 ## Do's and Don'ts
 
@@ -252,7 +252,7 @@ The mobile action bar places article identity and save state above Preview and S
 - **Do** preserve the desktop inventory’s table density and the phone inventory’s card readability.
 - **Do** give the article route full-page focus with sticky preview and save controls intact.
 - **Do** keep automatic quality findings, conversion evidence, media provenance, version numbers, and editor identity visible at their established workflow points.
-- **Do** use the shared renderer for both public preview and canonical conversion comparison.
+- **Do** use the shared renderer for public preview and canonical publication output.
 - **Do** preserve the official Tiptap capabilities, toolbar grouping, content styling, and mobile sub-toolbar behavior.
 - **Do** restore older history entries as new revisions so the complete editorial sequence remains available.
 

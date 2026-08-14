@@ -1,19 +1,15 @@
-import type { TiptapDocument } from "@ortodoksas-lt/content/article";
 import {
   articleContentChanges,
   articleRevisions,
-  mediaAliases,
   mediaAssets,
 } from "@ortodoksas-lt/db";
 import type { ContentChange } from "@ortodoksas-lt/editor/provenance";
-import { eq, inArray, sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { alias, unionAll } from "drizzle-orm/sqlite-core";
 
 import type { StudioDatabase } from "../db";
 
 const CONTENT_CHANGE_INSERT_SIZE = 10;
-const WAYBACK_URL_PATTERN =
-  /^https:\/\/web\.archive\.org\/web\/\d+[a-z_]*\/(https?:\/\/)/u;
 const MEDIA_PATH_PATTERN = /^\/api\/media\/(media_[0-9a-f]{64})$/u;
 
 const toHex = (value: ArrayBuffer): string =>
@@ -97,46 +93,6 @@ export const contentChangeInsertQueries = (
   });
 };
 
-export const attachMediaRecords = async (
-  database: StudioDatabase,
-  body: TiptapDocument
-): Promise<TiptapDocument> => {
-  const content = await Promise.all(
-    (body.content ?? []).map(async (node) => {
-      const source = node.attrs?.src;
-      if (
-        node.type !== "figure" ||
-        typeof source !== "string" ||
-        node.attrs?.mediaId
-      ) {
-        return node;
-      }
-      const candidates = [
-        source,
-        source.replace(WAYBACK_URL_PATTERN, "$1"),
-      ].filter((value, index, values) => values.indexOf(value) === index);
-      const [media] = await database
-        .select({ id: mediaAssets.id })
-        .from(mediaAliases)
-        .innerJoin(mediaAssets, eq(mediaAssets.id, mediaAliases.mediaId))
-        .where(inArray(mediaAliases.alias, candidates))
-        .limit(1);
-      if (!media) {
-        return node;
-      }
-      return {
-        ...node,
-        attrs: {
-          ...node.attrs,
-          mediaId: media.id,
-          src: `/api/media/${media.id}`,
-        },
-      };
-    })
-  );
-  return { ...body, content };
-};
-
 export const findMediaId = async (
   database: StudioDatabase,
   source: string | undefined
@@ -145,20 +101,13 @@ export const findMediaId = async (
     return null;
   }
   const mediaPath = MEDIA_PATH_PATTERN.exec(source);
-  if (mediaPath) {
-    const [record] = await database
-      .select({ id: mediaAssets.id })
-      .from(mediaAssets)
-      .where(eq(mediaAssets.id, mediaPath[1]))
-      .limit(1);
-    if (record) {
-      return record.id;
-    }
+  if (!mediaPath) {
+    return null;
   }
-  const [media] = await database
-    .select({ mediaId: mediaAliases.mediaId })
-    .from(mediaAliases)
-    .where(eq(mediaAliases.alias, source))
+  const [record] = await database
+    .select({ id: mediaAssets.id })
+    .from(mediaAssets)
+    .where(eq(mediaAssets.id, mediaPath[1]))
     .limit(1);
-  return media?.mediaId ?? null;
+  return record?.id ?? null;
 };

@@ -1,5 +1,5 @@
 import { env } from "cloudflare:test";
-import { articleRevisions, mediaAliases, mediaAssets } from "@ortodoksas-lt/db";
+import { articleRevisions, mediaAssets } from "@ortodoksas-lt/db";
 import { and, eq } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
 
@@ -170,12 +170,6 @@ describe("Studio Worker services", () => {
       .where(eq(mediaAssets.id, first.media.id))
       .limit(1);
     expect(stored?.r2Key).toMatch(ORIGINAL_MEDIA_KEY_PATTERN);
-    const canonicalAliases = await database
-      .select({ alias: mediaAliases.alias })
-      .from(mediaAliases)
-      .where(eq(mediaAliases.alias, first.media.url));
-    expect(canonicalAliases).toEqual([]);
-
     const response = await serveMedia({
       database,
       id: first.media.id,

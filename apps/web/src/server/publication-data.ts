@@ -52,7 +52,6 @@ export const catalogSelection = {
 
 export const database = () => drizzle(env.DB);
 export const leadingSlash = /^\//u;
-export const historicalHtmlSuffix = /\.html$/u;
 
 export function articlePath(slug: string) {
   return `/${slug}`;

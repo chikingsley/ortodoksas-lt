@@ -28,7 +28,6 @@ export const mediaAssets = sqliteTable(
     provenance: text("provenance").notNull().default("uploaded"),
     r2Key: text("r2_key").notNull(),
     sha256: text("sha256"),
-    sourceUrl: text("source_url"),
     updatedAt: integer("updated_at").notNull(),
     width: integer("width"),
   },
@@ -36,18 +35,6 @@ export const mediaAssets = sqliteTable(
     uniqueIndex("media_assets_r2_key_unique").on(table.r2Key),
     uniqueIndex("media_assets_sha256_unique").on(table.sha256),
   ]
-);
-
-export const mediaAliases = sqliteTable(
-  "media_aliases",
-  {
-    alias: text("alias").primaryKey(),
-    createdAt: integer("created_at").notNull(),
-    mediaId: text("media_id")
-      .notNull()
-      .references(() => mediaAssets.id, { onDelete: "cascade" }),
-  },
-  (table) => [index("media_aliases_media_id_idx").on(table.mediaId)]
 );
 
 export const publicationGroups = sqliteTable(
@@ -93,10 +80,6 @@ export const articles = sqliteTable(
     seoDescription: text("seo_description"),
     seoTitle: text("seo_title"),
     slug: text("slug").notNull(),
-    sourceArticleId: text("source_article_id"),
-    sourceCapture: text("source_capture"),
-    sourceHtml: text("source_html"),
-    sourceUrl: text("source_url"),
     status: text("status").notNull().default("draft"),
     summary: text("summary").notNull().default(""),
     title: text("title").notNull(),
@@ -266,8 +249,10 @@ export const people = sqliteTable(
 export const personLocalizations = sqliteTable(
   "person_localizations",
   {
+    alternateName: text("alternate_name").notNull().default(""),
     biographyJson: text("biography_json").notNull(),
     displayName: text("display_name").notNull(),
+    honorific: text("honorific").notNull().default(""),
     language: text("language").notNull(),
     personId: text("person_id")
       .notNull()

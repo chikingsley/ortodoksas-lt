@@ -20,15 +20,11 @@ export default defineConfig(({ mode }) => ({
             codeSplitting: {
               groups: [
                 {
-                  includeDependenciesRecursively: false,
-                  maxSize: 300_000,
                   name: "editor-engine",
                   priority: 20,
                   test: EDITOR_ENGINE_PATTERN,
                 },
                 {
-                  includeDependenciesRecursively: false,
-                  maxSize: 400_000,
                   name: "editor-runtime",
                   priority: 10,
                   test: TIPTAP_MODULE_PATTERN,

@@ -19,7 +19,7 @@ Ortodoksas Studio is the staff editorial workspace for the `ortodoksas.lt` publi
 
 ## Content model
 
-Every historical and newly created article uses the same canonical article schema. Imported Blogger content and new editorial work pass the same deterministic structural and media checks before publication. Original source HTML remains available for comparison.
+Every historical and newly created article uses the same canonical article schema. Imported Blogger content and new editorial work pass the same deterministic structural and media checks before publication. Immutable canonical baselines, field-level changes, and numbered revisions preserve the editorial comparison record after the raw import corpus moves to the external recovery archive.
 
 Each article carries:
 
@@ -37,7 +37,7 @@ The Studio and public publication are separate products connected through shared
 
 ## Current implementation
 
-The canonical corpus contains 2,375 published records in D1, including 18 public information pages. Studio provides archive search and filters, the official Tiptap Simple Editor, automatic content-quality checks, semantic image figures, source comparison, shared-renderer preview, D1 saves, optimistic conflict protection, numbered revisions, restore-as-new-version history, translation state, R2 media, and atomic homepage placement. TanStack Start owns routing and server functions; TanStack Query, Form, and Table own their corresponding browser state. The public Astro Worker reads published D1 records and serves media through the R2-backed delivery layer.
+The canonical corpus contains 2,375 published records in D1, including 18 public information pages. Studio provides archive search and filters, the official Tiptap Simple Editor, automatic content-quality checks, semantic image figures, baseline comparison, shared-renderer preview, D1 saves, optimistic conflict protection, numbered revisions, restore-as-new-version history, translation state, R2 media, and atomic homepage placement. TanStack Start owns routing and server functions; TanStack Query, Form, and Table own their corresponding browser state. The public Astro Worker reads published D1 records and serves media through the R2-backed delivery layer.
 
 ## Design direction
 
