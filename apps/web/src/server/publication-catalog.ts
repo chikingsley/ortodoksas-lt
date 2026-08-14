@@ -20,7 +20,7 @@ import {
   catalogSelection,
   database,
   heroMap,
-  htmlSuffix,
+  historicalHtmlSuffix,
   leadingSlash,
   publishedRows,
 } from "./publication-data";
@@ -132,7 +132,7 @@ export async function getRecentArticles(language: SiteLocale, limit: number) {
 }
 
 export async function getPage(language: SiteLocale, path: string) {
-  const slug = path.replace(leadingSlash, "").replace(htmlSuffix, "");
+  const slug = path.replace(leadingSlash, "").replace(historicalHtmlSuffix, "");
   const rows = await database()
     .select({ ...catalogSelection, bodyJson: articles.bodyJson })
     .from(articles)

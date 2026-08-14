@@ -111,7 +111,7 @@ describe("selectHomepageArticles", () => {
       catalogEntry("/six", "2026-07-31"),
       catalogEntry("/seven", "2026-07-30"),
     ];
-    const library = catalogEntry("/p/biblioteka.html", null, {
+    const library = catalogEntry("/p/biblioteka", null, {
       description: "Library description",
       kind: "page",
       title: "Biblioteka",

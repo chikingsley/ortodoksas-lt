@@ -39,29 +39,29 @@ const primaryNavigation: readonly PrimaryNavigationDefinition[] = [
   {
     id: "worship",
     label: "worship",
-    path: "/p/bendruomenes_21.html",
+    path: "/p/bendruomenes_21",
   },
   {
     id: "clergy",
     label: "clergy",
-    path: "/p/dvasininkai.html",
+    path: "/p/dvasininkai",
   },
   {
     id: "library",
     label: "library",
-    path: "/p/biblioteka.html",
+    path: "/p/biblioteka",
   },
   {
     id: "calendar",
     label: "calendar",
-    path: "/p/kalendorius.html",
+    path: "/p/kalendorius",
   },
   { id: "archive", label: "archive", path: "/archyvas" },
 ] as const;
 
 const contactNavigation = [
-  { id: "contacts", label: "contacts", path: "/p/kontaktai_30.html" },
-  { id: "support", label: "support", path: "/p/paremti.html" },
+  { id: "contacts", label: "contacts", path: "/p/kontaktai_30" },
+  { id: "support", label: "support", path: "/p/paremti" },
 ] as const;
 
 function localizedHome(locale: SiteLocale) {

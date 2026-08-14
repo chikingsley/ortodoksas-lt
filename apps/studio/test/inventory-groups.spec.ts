@@ -18,7 +18,7 @@ const article = (
   hero: null,
   kind: "article",
   labels: [],
-  path: `/p/${overrides.id}.html`,
+  path: `/p/${overrides.id}`,
   published: null,
   section: "faith",
   source: "",

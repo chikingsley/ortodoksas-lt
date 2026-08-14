@@ -48,20 +48,29 @@ describe("Astro Worker runtime", () => {
     ]);
 
     const lithuanian = await SELF.fetch(
-      "https://ortodoksas.test/p/bendruomenes-test.html"
+      "https://ortodoksas.test/p/bendruomenes-test"
     );
     expect(lithuanian.status).toBe(200);
     const lithuanianHtml = await lithuanian.text();
-    expect(lithuanianHtml).toContain('href="/en/p/communities-test.html"');
+    expect(lithuanianHtml).toContain('href="/en/p/communities-test"');
     expect(lithuanianHtml).toMatch(disabledRussianLocale);
     expect(lithuanianHtml).not.toContain('href="/ru"');
 
     const english = await SELF.fetch(
-      "https://ortodoksas.test/en/p/communities-test.html"
+      "https://ortodoksas.test/en/p/communities-test"
     );
     expect(english.status).toBe(200);
     await expect(english.text()).resolves.toContain(
       "Vilnius Holy Trinity Community"
+    );
+
+    const historical = await SELF.fetch(
+      "https://ortodoksas.test/p/bendruomenes-test.html?source=bookmark",
+      { redirect: "manual" }
+    );
+    expect(historical.status).toBe(301);
+    expect(historical.headers.get("location")).toBe(
+      "/p/bendruomenes-test?source=bookmark"
     );
   });
 
@@ -109,8 +118,27 @@ describe("Astro Worker runtime", () => {
     expect(lithuanian.status).toBe(200);
     const lithuanianHtml = await lithuanian.text();
     expect(lithuanianHtml).toContain("Paieškos straipsnis");
+    expect(lithuanianHtml).toContain('href="/2026/fts-paieska"');
+    expect(lithuanianHtml).not.toContain('href="/2026/fts-paieska.html"');
     expect(lithuanianHtml).not.toContain("Paieškos puslapis");
     expect(lithuanianHtml).not.toContain("English search article");
+
+    const publication = await SELF.fetch(
+      "https://ortodoksas.test/2026/fts-paieska"
+    );
+    expect(publication.status).toBe(200);
+    await expect(publication.text()).resolves.toContain(
+      '<link rel="canonical" href="https://ortodoksas.grassinside.com/2026/fts-paieska"'
+    );
+
+    const rss = await SELF.fetch("https://ortodoksas.test/rss.xml");
+    expect(await rss.text()).toContain(
+      "https://ortodoksas.grassinside.com/2026/fts-paieska"
+    );
+    const sitemap = await SELF.fetch("https://ortodoksas.test/sitemap.xml");
+    expect(await sitemap.text()).toContain(
+      "https://ortodoksas.grassinside.com/2026/fts-paieska"
+    );
 
     await env.DB.prepare(
       "UPDATE articles SET body_json = ?, updated_at = 2 WHERE id = ?"

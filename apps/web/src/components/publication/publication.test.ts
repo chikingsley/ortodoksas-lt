@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { cleanHtml, hasLeadFigure } from "./publication";
+import {
+  canonicalizePublicationLinks,
+  cleanHtml,
+  getInternalPublicationPaths,
+  hasLeadFigure,
+  localizePublicationLinks,
+} from "./publication";
 
 describe("cleanHtml", () => {
   it("promotes a standalone bold subheading to a semantic heading", () => {
@@ -50,5 +56,35 @@ describe("hasLeadFigure", () => {
         '<p>Introduction</p><figure class="article-figure" data-figure-role="content"><img src="/photo.png"></figure>'
       )
     ).toBe(false);
+  });
+});
+
+describe("publication links", () => {
+  it("recognizes clean and historical internal publication paths", () => {
+    expect(
+      getInternalPublicationPaths(
+        '<a href="/2026/08/clean">Clean</a><a href="https://ortodoksas.lt/p/history.html?ref=old#section">Historical</a>'
+      )
+    ).toEqual(["/2026/08/clean", "/p/history"]);
+  });
+
+  it("canonicalizes historical internal links while preserving suffixes", () => {
+    expect(
+      canonicalizePublicationLinks(
+        '<a href="/p/history.html?ref=old#section">Page</a><a href="https://www.ortodoksas.lt/en/2026/08/story.html">Story</a>'
+      )
+    ).toBe(
+      '<a href="/p/history?ref=old#section">Page</a><a href="/en/2026/08/story">Story</a>'
+    );
+  });
+
+  it("localizes internal links to clean translated counterparts", () => {
+    expect(
+      localizePublicationLinks(
+        '<a href="/p/history.html?ref=old#section">Page</a>',
+        "en",
+        new Map([["/p/history", "/p/history-en"]])
+      )
+    ).toBe('<a href="/en/p/history-en?ref=old#section">Page</a>');
   });
 });

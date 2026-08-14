@@ -32,4 +32,36 @@ describe("structured directory migration", () => {
     const integrity = await env.DB.prepare("PRAGMA foreign_key_check").all();
     expect(integrity.results).toEqual([]);
   });
+
+  it("enforces the article publication-group relationship in D1", async () => {
+    await expect(
+      env.DB.prepare(
+        `INSERT INTO articles (
+          body_json, created_at, id, language, slug, status, summary, title,
+          translation_group_id, updated_at
+        ) VALUES ('{}', 1, 'invalid-group-article', 'lt',
+          'invalid-group-article', 'draft', '', 'Invalid group',
+          'missing-publication-group', 1)`
+      ).run()
+    ).rejects.toThrow("translation_group_id must reference");
+
+    await env.DB.prepare(
+      `INSERT INTO publication_groups (
+        created_at, id, kind, page_template, updated_at
+      ) VALUES (1, 'referenced-publication-group', 'article', 'standard', 1)`
+    ).run();
+    await env.DB.prepare(
+      `INSERT INTO articles (
+        body_json, created_at, id, language, slug, status, summary, title,
+        translation_group_id, updated_at
+      ) VALUES ('{}', 1, 'valid-group-article', 'lt', 'valid-group-article',
+        'draft', '', 'Valid group', 'referenced-publication-group', 1)`
+    ).run();
+
+    await expect(
+      env.DB.prepare("DELETE FROM publication_groups WHERE id = ?")
+        .bind("referenced-publication-group")
+        .run()
+    ).rejects.toThrow("publication group is referenced");
+  });
 });

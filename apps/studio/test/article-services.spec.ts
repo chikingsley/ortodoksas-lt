@@ -15,10 +15,10 @@ describe("article service contracts", () => {
   it("builds canonical public URLs for Lithuanian and localized articles", () => {
     expect(
       publicArticleUrl("https://publication.test", "lt", "/news/example.html")
-    ).toBe("https://publication.test/news/example.html");
+    ).toBe("https://publication.test/news/example");
     expect(
       publicArticleUrl("https://publication.test/", "en", "news/example")
-    ).toBe("https://publication.test/en/news/example.html");
+    ).toBe("https://publication.test/en/news/example");
   });
 
   it("assigns and preserves publication timestamps", () => {

@@ -15,12 +15,12 @@ interface Props {
 const { locale = "lt" } = Astro.props;
 const copy = ui[locale];
 const paths = [
-  "/p/bendruomenes_21.html",
-  "/p/dvasininkai.html",
-  "/p/biblioteka.html",
-  "/p/kalendorius.html",
-  "/p/kontaktai_30.html",
-  "/p/paremti.html",
+  "/p/bendruomenes_21",
+  "/p/dvasininkai",
+  "/p/biblioteka",
+  "/p/kalendorius",
+  "/p/kontaktai_30",
+  "/p/paremti",
 ];
 const localizedEntries =
   locale === "lt" ? new Map() : await getLocalizedCounterparts(locale, paths);

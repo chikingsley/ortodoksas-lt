@@ -53,10 +53,11 @@ const openingFigurePattern = /^\s*<figure\b/i;
 const figurePattern = /<figure\b[^>]*>[\s\S]*?<\/figure>/gi;
 const figureMediaIdPattern = /\bdata-media-id=(?:"([^"]+)"|'([^']+)')/i;
 const hrefPattern = /\bhref\s*=\s*(["'])([^"']+)\1/giu;
-const hrefSuffixPattern = /[?#]/u;
 const localizedPathPattern = /^\/(?:be|en|ru|uk)(?:\/|$)/u;
 const publicationPathPattern =
-  /^\/(?:p\/[^?#]+|\d{4}\/\d{2}\/[^?#]+)\.html(?:[?#].*)?$/u;
+  /^\/(?:p\/[^/?#]+|\d{4}\/\d{2}\/[^/?#]+)(?:\.html)?$/u;
+const historicalHtmlSuffixPattern = /\.html$/u;
+const localizedPublicationPathPattern = /^\/(be|en|ru|uk)(\/.*)$/u;
 
 export function formatDate(
   value: string | null | undefined,
@@ -158,18 +159,39 @@ export function hasLeadFigure(value: string) {
   return leadFigurePattern.test(value) || openingFigurePattern.test(value);
 }
 
-function internalPublicationPath(href: string) {
-  if (href.startsWith("/")) {
-    return publicationPathPattern.test(href)
-      ? href.split(hrefSuffixPattern)[0]
-      : undefined;
-  }
+interface InternalPublicationHref {
+  locale?: Exclude<SiteLocale, "lt">;
+  path: string;
+  suffix: string;
+}
+
+function canonicalPublicationPath(pathname: string) {
+  return publicationPathPattern.test(pathname)
+    ? pathname.replace(historicalHtmlSuffixPattern, "")
+    : undefined;
+}
+
+function internalPublicationHref(
+  href: string
+): InternalPublicationHref | undefined {
   try {
-    const url = new URL(href);
+    const url = new URL(href, "https://ortodoksas.lt");
     if (!["ortodoksas.lt", "www.ortodoksas.lt"].includes(url.hostname)) {
       return;
     }
-    return publicationPathPattern.test(url.pathname) ? url.pathname : undefined;
+    const localizedMatch = url.pathname.match(localizedPublicationPathPattern);
+    const path = canonicalPublicationPath(localizedMatch?.[2] ?? url.pathname);
+    return path
+      ? {
+          ...(localizedMatch?.[1]
+            ? {
+                locale: localizedMatch[1] as Exclude<SiteLocale, "lt">,
+              }
+            : {}),
+          path,
+          suffix: `${url.search}${url.hash}`,
+        }
+      : undefined;
   } catch (error) {
     if (error instanceof TypeError) {
       return;
@@ -182,8 +204,8 @@ export function getInternalPublicationPaths(value: string) {
   return [
     ...new Set(
       [...value.matchAll(hrefPattern)].flatMap((match) => {
-        const path = internalPublicationPath(match[2] ?? "");
-        return path ? [path] : [];
+        const internalHref = internalPublicationHref(match[2] ?? "");
+        return internalHref ? [internalHref.path] : [];
       })
     ),
   ];
@@ -200,13 +222,24 @@ export function localizePublicationLinks(
       if (localizedPathPattern.test(href)) {
         return attribute;
       }
-      const sourcePath = internalPublicationPath(href);
-      if (!sourcePath) {
+      const source = internalPublicationHref(href);
+      if (!source) {
         return attribute;
       }
-      const suffix = href.slice(href.indexOf(sourcePath) + sourcePath.length);
-      const destination = localizedPaths.get(sourcePath) ?? sourcePath;
-      return `href=${quote}/${locale}${destination}${suffix}${quote}`;
+      const destination = localizedPaths.get(source.path) ?? source.path;
+      return `href=${quote}/${locale}${destination}${source.suffix}${quote}`;
+    }
+  );
+}
+
+export function canonicalizePublicationLinks(value: string) {
+  return value.replace(
+    hrefPattern,
+    (attribute, quote: string, href: string) => {
+      const internalHref = internalPublicationHref(href);
+      return internalHref
+        ? `href=${quote}${internalHref.locale ? `/${internalHref.locale}` : ""}${internalHref.path}${internalHref.suffix}${quote}`
+        : attribute;
     }
   );
 }

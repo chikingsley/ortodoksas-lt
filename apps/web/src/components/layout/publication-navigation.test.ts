@@ -28,15 +28,15 @@ describe("publication navigation contract", () => {
     }
     expect(isNavigationItemActive("/en", home)).toBe(true);
     expect(isNavigationItemActive("/en", archive)).toBe(false);
-    expect(isNavigationItemActive("/en/2022/article.html", home)).toBe(false);
+    expect(isNavigationItemActive("/en/2022/article", home)).toBe(false);
   });
 
   it("routes published localized institutional pages to their locale", () => {
     const items = getPrimaryNavigation("en", (path) =>
-      path.endsWith("dvasininkai.html") ? "/p/clergy.html" : undefined
+      path.endsWith("dvasininkai") ? "/p/clergy" : undefined
     );
     expect(items.find((item) => item.id === "clergy")).toMatchObject({
-      href: "/en/p/clergy.html",
+      href: "/en/p/clergy",
       targetLocale: "en",
     });
   });

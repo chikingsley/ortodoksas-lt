@@ -11,6 +11,7 @@ import {
   getTranslationGroupCounterpart,
 } from "../../server/publication-localization";
 import {
+  canonicalizePublicationLinks,
   cleanHtml,
   getInternalPublicationPaths,
   hasLeadFigure,
@@ -38,13 +39,14 @@ const getLocalizedHtml = async (
   html: string,
   locale: SiteLocale
 ): Promise<string> => {
+  const canonicalHtml = canonicalizePublicationLinks(html);
   if (locale === "lt") {
-    return html;
+    return canonicalHtml;
   }
-  const sourceLinks = getInternalPublicationPaths(html);
+  const sourceLinks = getInternalPublicationPaths(canonicalHtml);
   const localizedLinks = await getLocalizedCounterparts(locale, sourceLinks);
   return localizePublicationLinks(
-    html,
+    canonicalHtml,
     locale,
     new Map(
       [...localizedLinks].map(([sourcePath, entry]) => [sourcePath, entry.path])

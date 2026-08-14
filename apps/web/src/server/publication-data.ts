@@ -52,10 +52,10 @@ export const catalogSelection = {
 
 export const database = () => drizzle(env.DB);
 export const leadingSlash = /^\//u;
-export const htmlSuffix = /\.html$/u;
+export const historicalHtmlSuffix = /\.html$/u;
 
 export function articlePath(slug: string) {
-  return `/${slug}.html`;
+  return `/${slug}`;
 }
 
 export function parseLabels(value: string) {

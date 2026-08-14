@@ -17,11 +17,11 @@ interface Props {
 const { currentPath, locale = "lt", localeLinks: suppliedLocaleLinks } = Astro.props;
 const localeLinks = suppliedLocaleLinks ?? await getLocaleLinks(currentPath);
 const headerPaths = [
-  "/p/bendruomenes_21.html",
-  "/p/dvasininkai.html",
-  "/p/biblioteka.html",
-  "/p/kalendorius.html",
-  "/p/kontaktai_30.html",
+  "/p/bendruomenes_21",
+  "/p/dvasininkai",
+  "/p/biblioteka",
+  "/p/kalendorius",
+  "/p/kontaktai_30",
 ];
 const localizedEntries =
   locale === "lt" ? new Map() : await getLocalizedCounterparts(locale, headerPaths);
@@ -33,8 +33,8 @@ const navigationItems = getPrimaryNavigation(
   locale === "lt" ? undefined : (path) => localizedPaths.get(path)
 );
 const contactHref = locale === "lt"
-  ? "/p/kontaktai_30.html"
-  : `/${locale}${localizedPaths.get("/p/kontaktai_30.html") ?? "/p/kontaktai_30.html"}`;
+  ? "/p/kontaktai_30"
+  : `/${locale}${localizedPaths.get("/p/kontaktai_30") ?? "/p/kontaktai_30"}`;
 ---
 
 <PublicationHeader client:load contactHref={contactHref} currentPath={currentPath} locale={locale} localeLinks={localeLinks} navigationItems={navigationItems} />

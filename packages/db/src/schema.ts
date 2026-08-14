@@ -100,9 +100,9 @@ export const articles = sqliteTable(
     status: text("status").notNull().default("draft"),
     summary: text("summary").notNull().default(""),
     title: text("title").notNull(),
-    translationGroupId: text("translation_group_id")
-      .notNull()
-      .references(() => publicationGroups.id),
+    // D1 migration 0009 enforces this relationship with restrict-style
+    // triggers so production never requires a full articles-table rebuild.
+    translationGroupId: text("translation_group_id").notNull(),
     translationKind: text("translation_kind").notNull().default("original"),
     translationReviewedAt: integer("translation_reviewed_at"),
     translationReviewedBy: text("translation_reviewed_by"),

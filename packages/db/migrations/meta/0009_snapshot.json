@@ -487,15 +487,6 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "articles_translation_group_id_publication_groups_id_fk": {
-          "name": "articles_translation_group_id_publication_groups_id_fk",
-          "tableFrom": "articles",
-          "tableTo": "publication_groups",
-          "columnsFrom": ["translation_group_id"],
-          "columnsTo": ["id"],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
         "articles_translation_source_article_id_articles_id_fk": {
           "name": "articles_translation_source_article_id_articles_id_fk",
           "tableFrom": "articles",

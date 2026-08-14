@@ -138,7 +138,7 @@ export function buildHomepageModel({
   }
 
   const library = catalog.find(
-    (entry) => entry.kind === "page" && entry.path === "/p/biblioteka.html"
+    (entry) => entry.kind === "page" && entry.path === "/p/biblioteka"
   );
   const rotatingSections = sections
     .map((title) => ({

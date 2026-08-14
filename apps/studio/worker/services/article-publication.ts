@@ -20,6 +20,5 @@ export const publicArticleUrl = (
     .replace(LEADING_SLASHES_PATTERN, "")
     .replace(HTML_SUFFIX_PATTERN, "");
   const localePrefix = language === "lt" ? "" : `${language}/`;
-  return new URL(`${localePrefix}${normalizedSlug}.html`, normalizedOrigin)
-    .href;
+  return new URL(`${localePrefix}${normalizedSlug}`, normalizedOrigin).href;
 };

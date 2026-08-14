@@ -30,7 +30,7 @@ const socialLinks = [
 
 export default function SocialLinks({
   className,
-  contactHref = "/p/kontaktai_30.html",
+  contactHref = "/p/kontaktai_30",
   locale = "lt",
 }: Props) {
   const copy = ui[locale];
