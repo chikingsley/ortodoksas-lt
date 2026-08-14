@@ -15,7 +15,7 @@ const { community, locale } = Astro.props;
 const localePrefix = locale === "lt" ? "" : `/${locale}`;
 const canonicalPath = `${localePrefix}/community/${community.slug}`;
 const primaryImage = community.media.find((image) => image.role === "primary") ?? community.media[0];
-const description = community.description || community.operationalNotice || community.addressLabel;
+const description = community.seoDescription || community.description || community.operationalNotice || community.addressLabel;
 ---
 
 <SiteLayout

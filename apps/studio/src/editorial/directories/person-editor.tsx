@@ -237,43 +237,7 @@ export const PersonEditor = ({
           </Button>
         </div>
       </div>
-      <Section title="Identity and publication">
-        <div className="grid gap-4 md:grid-cols-3">
-          <div className="grid gap-1.5">
-            <Field
-              label="URL slug"
-              onChange={(event) => {
-                setSlugOverride(true);
-                form.setFieldValue("slug", event.target.value);
-              }}
-              value={values.slug}
-            />
-            <Button
-              className="w-fit px-0"
-              onClick={generateSlug}
-              size="xs"
-              type="button"
-              variant="link"
-            >
-              Generate from Lithuanian name
-            </Button>
-          </div>
-          <SelectField
-            label="Publication status"
-            onChange={(status) => form.setFieldValue("status", status)}
-            options={publicationStatusOptions}
-            value={values.status}
-          />
-          <Field
-            label="Sort order"
-            min="0"
-            onChange={(event) =>
-              form.setFieldValue("sortOrder", Number(event.target.value))
-            }
-            type="number"
-            value={values.sortOrder}
-          />
-        </div>
+      <Section title="Profile">
         <div className="grid gap-4 md:grid-cols-3">
           <Field
             label={`Honorific — ${localeLabel[locale]}`}
@@ -291,7 +255,7 @@ export const PersonEditor = ({
             value={localization?.displayName ?? ""}
           />
           <Field
-            label={`Alternate name — ${localeLabel[locale]}`}
+            label={`Civil or alternate name — ${localeLabel[locale]}`}
             onChange={(event) =>
               updateLocalization((value) => ({
                 ...value,
@@ -300,27 +264,6 @@ export const PersonEditor = ({
             }
             value={localization?.alternateName ?? ""}
           />
-        </div>
-        <div className="grid gap-1.5">
-          <Field
-            label={`SEO description — ${localeLabel[locale]}`}
-            onChange={(event) =>
-              updateLocalization((value) => ({
-                ...value,
-                seoDescription: event.target.value,
-              }))
-            }
-            value={localization?.seoDescription ?? ""}
-          />
-          <Button
-            className="w-fit px-0"
-            onClick={generateSeo}
-            size="xs"
-            type="button"
-            variant="link"
-          >
-            Generate from name and biography
-          </Button>
         </div>
       </Section>
       <Section title={`Biography — ${localeLabel[locale]}`}>
@@ -772,6 +715,65 @@ export const PersonEditor = ({
               </div>
             );
           })}
+        </div>
+      </Section>
+      <Section title="Search and publishing">
+        <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-1.5">
+            <Field
+              label="URL slug"
+              onChange={(event) => {
+                setSlugOverride(true);
+                form.setFieldValue("slug", event.target.value);
+              }}
+              value={values.slug}
+            />
+            <Button
+              className="w-fit px-0"
+              onClick={generateSlug}
+              size="xs"
+              type="button"
+              variant="link"
+            >
+              Generate from Lithuanian name
+            </Button>
+          </div>
+          <SelectField
+            label="Publication status"
+            onChange={(status) => form.setFieldValue("status", status)}
+            options={publicationStatusOptions}
+            value={values.status}
+          />
+          <Field
+            label="Sort order"
+            min="0"
+            onChange={(event) =>
+              form.setFieldValue("sortOrder", Number(event.target.value))
+            }
+            type="number"
+            value={values.sortOrder}
+          />
+        </div>
+        <div className="grid gap-1.5">
+          <Field
+            label={`SEO description — ${localeLabel[locale]}`}
+            onChange={(event) =>
+              updateLocalization((value) => ({
+                ...value,
+                seoDescription: event.target.value,
+              }))
+            }
+            value={localization?.seoDescription ?? ""}
+          />
+          <Button
+            className="w-fit px-0"
+            onClick={generateSeo}
+            size="xs"
+            type="button"
+            variant="link"
+          >
+            Generate from name and biography
+          </Button>
         </div>
       </Section>
     </form>

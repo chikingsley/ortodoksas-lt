@@ -139,12 +139,15 @@ export async function getPersonDirectoryEntry(
 export async function getCommunityDirectory(locale: SiteLocale) {
   const records = await database()
     .select({
+      accessibility: communityLocalizations.accessibility,
       addressLabel: communityLocalizations.addressLabel,
       description: communityLocalizations.description,
+      directions: communityLocalizations.directions,
       id: communities.id,
       name: communityLocalizations.name,
       operationalNotice: communityLocalizations.operationalNotice,
       operationalStatus: communities.operationalStatus,
+      seoDescription: communityLocalizations.seoDescription,
       slug: communities.slug,
     })
     .from(communities)

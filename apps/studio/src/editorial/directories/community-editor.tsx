@@ -1,5 +1,6 @@
 // biome-ignore-all lint/performance/noJsxPropsBind: TanStack Form collection controls bind each input to its typed field path.
 import type { CommunityEditorInput } from "@ortodoksas-lt/content/directory";
+import { slugifyDirectoryName } from "@ortodoksas-lt/content/directory";
 import type { SiteLocale } from "@ortodoksas-lt/content/site";
 import { useForm, useStore } from "@tanstack/react-form";
 import { ImagePlus, Plus, Save, Trash2 } from "lucide-react";
@@ -34,7 +35,7 @@ const contactKindOptions = [
 ] as const;
 
 const mediaRoleOptions = [
-  { label: "Primary portrait", value: "primary" },
+  { label: "Primary image", value: "primary" },
   { label: "Gallery", value: "gallery" },
 ] as const;
 
@@ -80,6 +81,7 @@ export const CommunityEditor = ({
   onSaved: (id: string) => Promise<void>;
 }) => {
   const [message, setMessage] = useState("");
+  const [slugOverride, setSlugOverride] = useState(Boolean(initialValue.slug));
   const form = useForm({
     defaultValues: initialValue,
     onSubmit: async ({ value }) => {
@@ -122,6 +124,22 @@ export const CommunityEditor = ({
       ),
     [form, locale]
   );
+  const updateName = useCallback(
+    (name: string) => {
+      updateLocalization((value) => ({ ...value, name }));
+      if (locale === "lt" && !slugOverride) {
+        form.setFieldValue("slug", slugifyDirectoryName(name));
+      }
+    },
+    [form, locale, slugOverride, updateLocalization]
+  );
+  const generateSlug = useCallback(() => {
+    const lithuanianName = values.localizations.find(
+      (value) => value.language === "lt"
+    )?.name;
+    form.setFieldValue("slug", slugifyDirectoryName(lithuanianName ?? ""));
+    setSlugOverride(false);
+  }, [form, values.localizations]);
   const upload = useCallback(
     async (file: File) => {
       setMessage("Uploading image…");
@@ -164,53 +182,12 @@ export const CommunityEditor = ({
           </Button>
         </div>
       </div>
-      <Section title="Community identity">
-        <div className="grid gap-4 md:grid-cols-3">
-          <Field
-            label="Stable slug"
-            onChange={(event) => form.setFieldValue("slug", event.target.value)}
-            value={values.slug}
-          />
+      <Section title="Overview">
+        <div className="grid gap-4">
           <Field
             label={`Name — ${localeLabel[locale]}`}
-            onChange={(event) =>
-              updateLocalization((value) => ({
-                ...value,
-                name: event.target.value,
-              }))
-            }
+            onChange={(event) => updateName(event.target.value)}
             value={localization?.name ?? ""}
-          />
-          <Field
-            label="Sort order"
-            min="0"
-            onChange={(event) =>
-              form.setFieldValue("sortOrder", Number(event.target.value))
-            }
-            type="number"
-            value={values.sortOrder}
-          />
-        </div>
-        <div className="grid gap-4 md:grid-cols-3">
-          <SelectField
-            label="Publication status"
-            onChange={(status) => form.setFieldValue("status", status)}
-            options={publicationStatusOptions}
-            value={values.status}
-          />
-          <SelectField
-            label="Operational state"
-            onChange={(operationalStatus) =>
-              form.setFieldValue("operationalStatus", operationalStatus)
-            }
-            options={communityOperationalStatusOptions}
-            value={values.operationalStatus}
-          />
-          <SelectField
-            label="Type"
-            onChange={(type) => form.setFieldValue("type", type)}
-            options={communityTypeOptions}
-            value={values.type}
           />
         </div>
         <TextareaField
@@ -223,17 +200,6 @@ export const CommunityEditor = ({
           }
           rows={5}
           value={localization?.description ?? ""}
-        />
-        <TextareaField
-          label={`Operational notice — ${localeLabel[locale]}`}
-          onChange={(event) =>
-            updateLocalization((value) => ({
-              ...value,
-              operationalNotice: event.target.value,
-            }))
-          }
-          rows={3}
-          value={localization?.operationalNotice ?? ""}
         />
       </Section>
       <Section title="Address and access">
@@ -260,6 +226,38 @@ export const CommunityEditor = ({
             value={values.postalCode}
           />
         </div>
+        <Field
+          label={`Address as displayed — ${localeLabel[locale]}`}
+          onChange={(event) =>
+            updateLocalization((value) => ({
+              ...value,
+              addressLabel: event.target.value,
+            }))
+          }
+          value={localization?.addressLabel ?? ""}
+        />
+        <TextareaField
+          label={`Directions — ${localeLabel[locale]}`}
+          onChange={(event) =>
+            updateLocalization((value) => ({
+              ...value,
+              directions: event.target.value,
+            }))
+          }
+          rows={3}
+          value={localization?.directions ?? ""}
+        />
+        <TextareaField
+          label={`Accessibility — ${localeLabel[locale]}`}
+          onChange={(event) =>
+            updateLocalization((value) => ({
+              ...value,
+              accessibility: event.target.value,
+            }))
+          }
+          rows={3}
+          value={localization?.accessibility ?? ""}
+        />
         <div className="grid gap-4 md:grid-cols-3">
           <Field
             label="Country code"
@@ -577,6 +575,85 @@ export const CommunityEditor = ({
             );
           })}
         </div>
+      </Section>
+      <Section title="Operations">
+        <div className="grid gap-4 md:grid-cols-2">
+          <SelectField
+            label="Operational state"
+            onChange={(operationalStatus) =>
+              form.setFieldValue("operationalStatus", operationalStatus)
+            }
+            options={communityOperationalStatusOptions}
+            value={values.operationalStatus}
+          />
+          <SelectField
+            label="Community type"
+            onChange={(type) => form.setFieldValue("type", type)}
+            options={communityTypeOptions}
+            value={values.type}
+          />
+        </div>
+        <TextareaField
+          label={`Temporary public notice — ${localeLabel[locale]}`}
+          onChange={(event) =>
+            updateLocalization((value) => ({
+              ...value,
+              operationalNotice: event.target.value,
+            }))
+          }
+          placeholder="Use for temporary closures, relocated services, construction, or access disruptions."
+          rows={3}
+          value={localization?.operationalNotice ?? ""}
+        />
+      </Section>
+      <Section title="Search and publishing">
+        <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-1.5">
+            <Field
+              label="URL slug"
+              onChange={(event) => {
+                setSlugOverride(true);
+                form.setFieldValue("slug", event.target.value);
+              }}
+              value={values.slug}
+            />
+            <Button
+              className="w-fit px-0"
+              onClick={generateSlug}
+              size="xs"
+              type="button"
+              variant="link"
+            >
+              Generate from Lithuanian name
+            </Button>
+          </div>
+          <SelectField
+            label="Publication status"
+            onChange={(status) => form.setFieldValue("status", status)}
+            options={publicationStatusOptions}
+            value={values.status}
+          />
+          <Field
+            label="Sort order"
+            min="0"
+            onChange={(event) =>
+              form.setFieldValue("sortOrder", Number(event.target.value))
+            }
+            type="number"
+            value={values.sortOrder}
+          />
+        </div>
+        <TextareaField
+          label={`SEO description — ${localeLabel[locale]}`}
+          onChange={(event) =>
+            updateLocalization((value) => ({
+              ...value,
+              seoDescription: event.target.value,
+            }))
+          }
+          rows={3}
+          value={localization?.seoDescription ?? ""}
+        />
       </Section>
     </form>
   );
