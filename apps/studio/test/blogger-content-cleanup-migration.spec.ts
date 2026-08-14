@@ -3,12 +3,18 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import cleanupMigration from "../../../packages/db/migrations/0012_blogger_content_cleanup.sql?raw";
 import linkTextRepairMigration from "../../../packages/db/migrations/0013_repair_malformed_publication_link_text.sql?raw";
+import baselineMediaMigration from "../../../packages/db/migrations/0015_canonicalize_baseline_media.sql?raw";
+import externalReferenceRepairMigration from "../../../packages/db/migrations/0016_repair_external_reference_url.sql?raw";
 
 const mediaId = `media_${"a".repeat(64)}`;
 const recoveredSource = "https://legacy.example/recovered.jpg";
 const unresolvedSource = "https://legacy.example/unresolved.jpg";
 const malformedInternalLinkText =
   "http://ortodhttp://ortodoksas.blogspot.com/2013/11/sv-jono-auksaburnio-liturgija-su.htmloksas.blogspot.com/2013/11/sv-jono-auksaburnio-liturgija-su.html";
+const malformedExternalReference =
+  "http://www.religion.in.ua/news/ukrainian_news/24945-sinod-upc-kp-viznachiv-pripiniti-pominannya-vladi-za-bogosluzhinnyam.html,";
+const canonicalExternalReference =
+  "https://www.religion.in.ua/news/ukrainian_news/24945-sinod-upc-kp-viznachiv-pripiniti-pominannya-vladi-za-bogosluzhinnyam.html";
 
 const linkDocument = JSON.stringify({
   content: [
@@ -46,6 +52,16 @@ const linkDocument = JSON.stringify({
             },
           ],
           text: malformedInternalLinkText,
+          type: "text",
+        },
+        {
+          marks: [
+            {
+              attrs: { href: malformedExternalReference },
+              type: "link",
+            },
+          ],
+          text: malformedExternalReference,
           type: "text",
         },
       ],
@@ -138,6 +154,12 @@ describe("Blogger content cleanup migration", () => {
     database.exec(
       linkTextRepairMigration.replaceAll("--> statement-breakpoint", "")
     );
+    database.exec(
+      externalReferenceRepairMigration.replaceAll(
+        "--> statement-breakpoint",
+        ""
+      )
+    );
 
     const article = JSON.parse(
       String(
@@ -160,6 +182,10 @@ describe("Blogger content cleanup migration", () => {
         },
       ],
       text: "https://ortodoksas.lt/2013/11/sv-jono-auksaburnio-liturgija-su",
+    });
+    expect(article.content[0].content[3]).toMatchObject({
+      marks: [{ attrs: { href: canonicalExternalReference } }],
+      text: canonicalExternalReference,
     });
 
     const revision = database
@@ -200,5 +226,81 @@ describe("Blogger content cleanup migration", () => {
         )
         .get()?.count
     ).toBe(0);
+  });
+});
+
+describe("Baseline media canonicalization migration", () => {
+  it("copies canonical media references from the matching current figures", () => {
+    const database = new DatabaseSync(":memory:");
+    const secondMediaId = `media_${"c".repeat(64)}`;
+    const document = (firstAttrs: object, secondAttrs: object) =>
+      JSON.stringify({
+        content: [
+          { attrs: firstAttrs, type: "figure" },
+          {
+            content: [{ attrs: secondAttrs, type: "figure" }],
+            type: "blockquote",
+          },
+        ],
+        type: "doc",
+      });
+
+    database.exec(`
+      CREATE TABLE media_assets (id TEXT PRIMARY KEY, r2_key TEXT NOT NULL);
+      CREATE TABLE articles (id TEXT PRIMARY KEY, body_json TEXT NOT NULL);
+      CREATE TABLE article_baselines (
+        article_id TEXT PRIMARY KEY,
+        body_json TEXT NOT NULL
+      );
+    `);
+    database
+      .prepare("INSERT INTO media_assets (id, r2_key) VALUES (?, ?), (?, ?)")
+      .run(
+        mediaId,
+        "media/originals/first.jpg",
+        secondMediaId,
+        "media/originals/second.jpg"
+      );
+    database
+      .prepare("INSERT INTO articles (id, body_json) VALUES ('article', ?)")
+      .run(
+        document(
+          { mediaId, src: `/api/media/${mediaId}` },
+          { mediaId: secondMediaId, src: `/api/media/${secondMediaId}` }
+        )
+      );
+    database
+      .prepare(
+        "INSERT INTO article_baselines (article_id, body_json) VALUES ('article', ?)"
+      )
+      .run(
+        document(
+          { mediaId: null, src: "https://legacy.example/first.jpg" },
+          { mediaId: null, src: "https://legacy.example/second.jpg" }
+        )
+      );
+
+    database.exec(
+      baselineMediaMigration.replaceAll("--> statement-breakpoint", "")
+    );
+
+    const baseline = JSON.parse(
+      String(
+        database
+          .prepare(
+            "SELECT body_json FROM article_baselines WHERE article_id = 'article'"
+          )
+          .get()?.body_json
+      )
+    );
+    expect(baseline.content[0].attrs).toEqual({
+      mediaId,
+      src: `/api/media/${mediaId}`,
+    });
+    expect(baseline.content[1].content[0].attrs).toEqual({
+      mediaId: secondMediaId,
+      src: `/api/media/${secondMediaId}`,
+    });
+    database.close();
   });
 });

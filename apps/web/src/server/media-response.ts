@@ -1,8 +1,12 @@
 const mediaCacheControl = "public, max-age=31536000, immutable";
 
-function applyRangeHeaders(object: R2Object, headers: Headers) {
+function applyRangeHeaders(
+  object: R2Object,
+  headers: Headers,
+  rangeRequested: boolean
+) {
   const { range } = object;
-  if (!range) {
+  if (!(rangeRequested && range)) {
     headers.set("content-length", String(object.size));
     return false;
   }
@@ -63,6 +67,10 @@ export async function mediaResponse(
   if (!("body" in object)) {
     return new Response(null, { headers, status: 412 });
   }
-  const partial = applyRangeHeaders(object, headers);
+  const partial = applyRangeHeaders(
+    object,
+    headers,
+    request.headers.has("range")
+  );
   return new Response(object.body, { headers, status: partial ? 206 : 200 });
 }

@@ -29,6 +29,44 @@ describe("Astro Worker runtime", () => {
     expect(response.status).toBe(404);
   });
 
+  it("serves complete media as 200 and requested byte ranges as 206", async () => {
+    const mediaId = `media_${"b".repeat(64)}`;
+    const r2Key = "media/originals/range-semantics.jpg";
+    const bytes = new TextEncoder().encode("0123456789");
+    await env.MEDIA.put(r2Key, bytes, {
+      httpMetadata: { contentType: "image/jpeg" },
+    });
+    await env.DB.prepare(
+      `INSERT INTO media_assets (
+        id, r2_key, file_name, mime_type, byte_size, created_at, updated_at
+      ) VALUES (?, ?, 'range-semantics.jpg', 'image/jpeg', ?, 1, 1)`
+    )
+      .bind(mediaId, r2Key, bytes.byteLength)
+      .run();
+
+    const url = `https://ortodoksas.test/api/media/${mediaId}`;
+    const complete = await SELF.fetch(url);
+    expect(complete.status).toBe(200);
+    expect(complete.headers.get("content-length")).toBe("10");
+    expect(complete.headers.get("content-range")).toBeNull();
+    expect(new TextDecoder().decode(await complete.arrayBuffer())).toBe(
+      "0123456789"
+    );
+
+    const partial = await SELF.fetch(url, {
+      headers: { Range: "bytes=2-5" },
+    });
+    expect(partial.status).toBe(206);
+    expect(partial.headers.get("content-length")).toBe("4");
+    expect(partial.headers.get("content-range")).toBe("bytes 2-5/10");
+    expect(new TextDecoder().decode(await partial.arrayBuffer())).toBe("2345");
+
+    const head = await SELF.fetch(url, { method: "HEAD" });
+    expect(head.status).toBe(200);
+    expect(head.headers.get("content-length")).toBe("10");
+    expect(head.headers.get("content-range")).toBeNull();
+  });
+
   it("keeps the publication group while switching a directory locale", async () => {
     const groupId = "11111111-1111-4111-8111-111111111111";
     const body = JSON.stringify({
