@@ -37,6 +37,10 @@ const {
 const siteUrl = Astro.site ?? new URL(site.origin);
 const canonical = new URL(canonicalPath, siteUrl).toString();
 const socialImage = image?.startsWith("/") ? new URL(image, siteUrl).toString() : image;
+const resolvedJsonLd =
+  typeof jsonLd?.image === "string" && jsonLd.image.startsWith("/")
+    ? { ...jsonLd, image: new URL(jsonLd.image, siteUrl).toString() }
+    : jsonLd;
 const localeLinks = await getLocaleLinks(canonicalPath);
 const resolvedAlternates = alternates.length
   ? alternates
@@ -54,7 +58,7 @@ const baseSchema = {
   url: canonical,
   inLanguage: lang,
   ...(type === "article" ? { publisher: { "@type": "Organization", name: site.name, logo: { "@type": "ImageObject", url: new URL(site.logoPath, siteUrl).toString() } } } : {}),
-  ...jsonLd,
+  ...resolvedJsonLd,
 };
 ---
 

@@ -1,0 +1,11 @@
+---
+import PersonDetailPage from "../../components/information/PersonDetailPage.astro";
+import { getPersonDirectoryEntry } from "../../server/directory-data";
+
+const person = await getPersonDirectoryEntry("lt", Astro.params.slug ?? "");
+if (!person) {
+  Astro.response.status = 404;
+}
+---
+
+{person ? <PersonDetailPage locale="lt" person={person} /> : <p>Asmuo nerastas.</p>}

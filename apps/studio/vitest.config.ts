@@ -30,6 +30,7 @@ export default defineConfig({
     exclude: [
       "test/article-content.spec.ts",
       "test/blogger-content-cleanup-migration.spec.ts",
+      "test/person-directory-normalization-migration.spec.ts",
       "test/translation-readiness-migration.spec.ts",
     ],
     include: ["test/**/*.spec.ts"],

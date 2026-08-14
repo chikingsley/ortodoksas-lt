@@ -1,0 +1,135 @@
+---
+import type { SiteLocale } from "../../i18n/config";
+import type { getPersonDirectoryEntry } from "../../server/directory-data";
+import SiteLayout from "../layout/SiteLayout.astro";
+import ArticleBody from "../publication/ArticleBody.astro";
+
+type PersonRecord = NonNullable<
+  Awaited<ReturnType<typeof getPersonDirectoryEntry>>
+>;
+
+interface Props {
+  locale: SiteLocale;
+  person: PersonRecord;
+}
+
+const { locale, person } = Astro.props;
+const localePrefix = locale === "lt" ? "" : `/${locale}`;
+const canonicalPath = `${localePrefix}/person/${person.slug}`;
+const portrait =
+  person.media.find((image) => image.role === "primary") ?? person.media[0];
+const gallery = person.media.filter((image) => image !== portrait);
+const title = [person.honorific, person.displayName].filter(Boolean).join(" ");
+const description =
+  person.seoDescription || `${title} · ortodoksas.lt`;
+const labels = {
+  be: { contacts: "Кантакты", gallery: "Фотаздымкі", positions: "Служэнне" },
+  en: { contacts: "Contacts", gallery: "Gallery", positions: "Roles" },
+  lt: { contacts: "Kontaktai", gallery: "Galerija", positions: "Pareigos" },
+  ru: { contacts: "Контакты", gallery: "Фотографии", positions: "Служение" },
+  uk: { contacts: "Контакти", gallery: "Світлини", positions: "Служіння" },
+} as const;
+const dateFormatter = new Intl.DateTimeFormat(locale, {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+});
+const positionDates = (startsAt: number | null, endsAt: number | null) => {
+  const start = startsAt ? dateFormatter.format(new Date(startsAt)) : "";
+  const end = endsAt ? dateFormatter.format(new Date(endsAt)) : "";
+  return [start, end].filter(Boolean).join(" – ");
+};
+---
+
+<SiteLayout
+  canonicalPath={canonicalPath}
+  description={description}
+  image={portrait ? `/api/media/${portrait.mediaId}` : undefined}
+  jsonLd={{
+    "@type": "Person",
+    alternateName: person.alternateName || undefined,
+    description,
+    image: portrait ? `/api/media/${portrait.mediaId}` : undefined,
+    name: title,
+  }}
+  lang={locale}
+  locale={locale}
+  title={`${title} · ortodoksas.lt`}
+>
+  <main>
+    <article class="mx-auto mb-[70px] mt-8 grid w-[min(1000px,calc(100%-48px))] grid-cols-[minmax(220px,320px)_minmax(0,1fr)] gap-[clamp(32px,6vw,72px)] max-md:grid-cols-1 max-sm:w-[min(1000px,calc(100%-28px))]">
+      {portrait ? (
+        <figure class="m-0">
+          <img
+            alt={portrait.altText}
+            class="aspect-[4/5] w-full rounded-xl bg-muted/30 object-contain"
+            height="640"
+            loading="eager"
+            src={`/api/media/${portrait.mediaId}`}
+            width="512"
+          />
+          {portrait.caption ? <figcaption class="mt-2 text-muted-foreground text-sm">{portrait.caption}</figcaption> : null}
+        </figure>
+      ) : null}
+      <div class="min-w-0">
+        {person.honorific ? <p class="mb-3 font-bold text-primary text-xs uppercase tracking-[0.09em]">{person.honorific}</p> : null}
+        <h1 class="m-0 text-balance font-bold font-serif text-[clamp(42px,7vw,72px)] leading-[0.98] tracking-[-0.035em] [overflow-wrap:anywhere]">
+          {person.displayName}
+        </h1>
+        {person.alternateName ? <p class="mb-8 mt-3 text-muted-foreground">{person.alternateName}</p> : null}
+        {person.positions.length ? (
+          <section class="mt-8 border-t pt-6">
+            <h2 class="mb-3 font-bold text-primary text-xs uppercase tracking-[0.09em]">{labels[locale].positions}</h2>
+            {person.positions.map((position) => (
+              <div class="mb-4">
+                <h3 class="m-0 font-semibold text-lg">{position.title}</h3>
+                {position.communitySlug && position.communityName ? (
+                  <a class="mt-1 inline-block text-primary underline underline-offset-4" href={`${localePrefix}/community/${position.communitySlug}`}>
+                    {position.communityName}
+                  </a>
+                ) : null}
+                {positionDates(position.startsAt, position.endsAt) ? (
+                  <p class="mt-1 text-muted-foreground text-sm">{positionDates(position.startsAt, position.endsAt)}</p>
+                ) : null}
+                {position.description ? <p class="mt-1 text-muted-foreground">{position.description}</p> : null}
+              </div>
+            ))}
+          </section>
+        ) : null}
+        <section class="mt-8 border-t pt-6">
+          <ArticleBody html={person.biographyHtml} />
+        </section>
+        {person.contacts.length ? (
+          <section class="mt-8 border-t pt-6">
+            <h2 class="mb-3 font-bold text-primary text-xs uppercase tracking-[0.09em]">{labels[locale].contacts}</h2>
+            <div class="flex flex-wrap gap-3">
+              {person.contacts.map((contact) => (
+                <a class="text-primary underline underline-offset-4" href={contact.href}>{contact.label}</a>
+              ))}
+            </div>
+          </section>
+        ) : null}
+        {gallery.length ? (
+          <section class="mt-8 border-t pt-6">
+            <h2 class="mb-4 font-bold text-primary text-xs uppercase tracking-[0.09em]">{labels[locale].gallery}</h2>
+            <div class="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
+              {gallery.map((image) => (
+                <figure class="m-0">
+                  <img
+                    alt={image.altText}
+                    class="aspect-[4/5] w-full rounded-xl bg-muted/30 object-contain"
+                    height="640"
+                    loading="lazy"
+                    src={`/api/media/${image.mediaId}`}
+                    width="512"
+                  />
+                  {image.caption ? <figcaption class="mt-2 text-muted-foreground text-sm">{image.caption}</figcaption> : null}
+                </figure>
+              ))}
+            </div>
+          </section>
+        ) : null}
+      </div>
+    </article>
+  </main>
+</SiteLayout>

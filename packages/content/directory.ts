@@ -14,6 +14,15 @@ const slugSchema = z
   .min(1)
   .max(160)
   .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/u);
+
+export const slugifyDirectoryName = (value: string) =>
+  value
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/gu, "")
+    .toLocaleLowerCase("en-US")
+    .replace(/[^a-z0-9]+/gu, "-")
+    .replace(/^-+|-+$/gu, "")
+    .slice(0, 160);
 const optionalText = (maximum: number) =>
   z.string().trim().max(maximum).default("");
 
@@ -25,8 +34,10 @@ export const personSchema = z.strictObject({
 });
 
 export const personLocalizationSchema = z.strictObject({
+  alternateName: optionalText(240),
   biography: tiptapDocumentSchema,
   displayName: z.string().trim().min(1).max(240),
+  honorific: optionalText(240),
   language: siteLocaleSchema,
   personId: entityIdSchema,
   seoDescription: optionalText(600),

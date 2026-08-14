@@ -75,6 +75,7 @@ import { useWindowSize } from "@/hooks/use-window-size";
 
 // --- Lib ---
 import { handleImageUpload, MAX_FILE_SIZE } from "@/lib/tiptap-utils";
+import { cn } from "@/lib/utils";
 
 // --- Styles ---
 import "@/styles/_variables.scss";
@@ -203,16 +204,47 @@ const MobileToolbarContent = ({
   </>
 );
 
+const CompactToolbarContent = ({
+  isMobile,
+  onLinkClick,
+}: {
+  isMobile: boolean;
+  onLinkClick: () => void;
+}) => (
+  <>
+    <ToolbarGroup>
+      <UndoRedoButton action="undo" />
+      <UndoRedoButton action="redo" />
+    </ToolbarGroup>
+    <ToolbarSeparator />
+    <ToolbarGroup>
+      <MarkButton type="bold" />
+      <MarkButton type="italic" />
+      {isMobile ? <LinkButton onClick={onLinkClick} /> : <LinkPopover />}
+    </ToolbarGroup>
+    <ToolbarSeparator />
+    <ToolbarGroup>
+      <ListDropdownMenu modal={false} types={["bulletList", "orderedList"]} />
+    </ToolbarGroup>
+  </>
+);
+
 interface SimpleEditorProps {
+  ariaLabel?: string;
+  className?: string;
   content: JSONContent;
   onReady?: (editor: Editor) => void;
   onUpdate?: (content: JSONContent) => void;
+  variant?: "article" | "compact";
 }
 
 export function SimpleEditor({
+  ariaLabel = "Main content area, start typing to enter text.",
+  className,
   content,
   onReady,
   onUpdate,
+  variant = "article",
 }: SimpleEditorProps) {
   const isMobile = useIsBreakpoint();
   const { height } = useWindowSize();
@@ -227,7 +259,7 @@ export function SimpleEditor({
     content,
     editorProps: {
       attributes: {
-        "aria-label": "Main content area, start typing to enter text.",
+        "aria-label": ariaLabel,
         "aria-multiline": "true",
         autocapitalize: "off",
         autocomplete: "off",
@@ -307,7 +339,10 @@ export function SimpleEditor({
   const showMainToolbar = useCallback(() => setMobileView("main"), []);
 
   return (
-    <div className="simple-editor-wrapper">
+    <div
+      className={cn("simple-editor-wrapper", className)}
+      data-variant={variant}
+    >
       <EditorContext.Provider value={{ editor }}>
         <Toolbar
           ref={toolbarRef}
@@ -320,14 +355,21 @@ export function SimpleEditor({
           }}
         >
           {mobileView === "main" ? (
-            <MainToolbarContent
-              isMobile={isMobile}
-              isSearchAndReplaceOpen={isSearchAndReplaceOpen}
-              onHighlighterClick={openHighlighter}
-              onLinkClick={openLink}
-              onSearchAndReplaceClick={toggleSearchAndReplace}
-              searchAndReplaceButtonRef={searchAndReplaceButtonRef}
-            />
+            variant === "compact" ? (
+              <CompactToolbarContent
+                isMobile={isMobile}
+                onLinkClick={openLink}
+              />
+            ) : (
+              <MainToolbarContent
+                isMobile={isMobile}
+                isSearchAndReplaceOpen={isSearchAndReplaceOpen}
+                onHighlighterClick={openHighlighter}
+                onLinkClick={openLink}
+                onSearchAndReplaceClick={toggleSearchAndReplace}
+                searchAndReplaceButtonRef={searchAndReplaceButtonRef}
+              />
+            )
           ) : (
             <MobileToolbarContent
               onBack={showMainToolbar}
@@ -336,13 +378,15 @@ export function SimpleEditor({
           )}
         </Toolbar>
 
-        <SearchAndReplace
-          className="simple-editor-search-and-replace"
-          onClose={closeSearchAndReplace}
-          onOpen={openSearchAndReplace}
-          open={isSearchAndReplaceOpen}
-          scrollIntoViewOptions={SEARCH_AND_REPLACE_SCROLL_OPTIONS}
-        />
+        {variant === "article" ? (
+          <SearchAndReplace
+            className="simple-editor-search-and-replace"
+            onClose={closeSearchAndReplace}
+            onOpen={openSearchAndReplace}
+            open={isSearchAndReplaceOpen}
+            scrollIntoViewOptions={SEARCH_AND_REPLACE_SCROLL_OPTIONS}
+          />
+        ) : null}
 
         <EditorContent
           className="simple-editor-content"

@@ -1,3 +1,4 @@
+import { siteLocaleSchema } from "@ortodoksas-lt/content/site";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { lazy, Suspense, useCallback, useMemo, useState } from "react";
@@ -9,7 +10,8 @@ import {
   createArticleMutation,
   createTranslationDraftMutation,
 } from "@/server/article-functions";
-import { StudioSidebar, type StudioView } from "./studio-sidebar";
+import { StudioShell } from "./studio-shell";
+import type { StudioView } from "./studio-sidebar";
 
 const ArticleEditor = lazy(() =>
   import("@/editorial/articles/editor/article-editor").then((module) => ({
@@ -71,10 +73,16 @@ export const StudioWorkspace = (route: WorkspaceRoute) => {
     await navigate({ to: contentPath(route.kind ?? "article") });
   }, [navigate, refreshCatalog, route.kind]);
   const navigateSidebar = useCallback(
-    (view: StudioView) =>
-      navigate({
-        to: sidebarPath(view, route.kind ?? "article"),
-      }),
+    (view: StudioView) => {
+      const path = sidebarPath(view, route.kind ?? "article");
+      if (view === "people" || view === "communities") {
+        const language = siteLocaleSchema
+          .catch("lt")
+          .parse(localStorage.getItem("ortodoksas-studio-directory-language"));
+        return navigate({ search: { language }, to: path });
+      }
+      return navigate({ to: path });
+    },
     [navigate, route.kind]
   );
   const selectContentKind = useCallback(
@@ -188,21 +196,16 @@ export const StudioWorkspace = (route: WorkspaceRoute) => {
     );
   }
 
+  if (route.view === "editor") {
+    return <div className="min-h-screen min-w-0">{workspace}</div>;
+  }
+
   return (
-    <div
-      className={
-        route.view === "editor"
-          ? "grid min-h-screen grid-cols-[minmax(0,1fr)]"
-          : "grid min-h-screen grid-cols-[232px_minmax(0,1fr)] max-[801px]:block max-[1101px]:grid-cols-[196px_minmax(0,1fr)]"
-      }
+    <StudioShell
+      activeView={route.view === "homepage" ? "homepage" : "content"}
+      onNavigate={navigateSidebar}
     >
-      {route.view === "editor" ? null : (
-        <StudioSidebar
-          activeView={route.view === "homepage" ? "homepage" : "content"}
-          onNavigate={navigateSidebar}
-        />
-      )}
       <div className="min-w-0">{workspace}</div>
-    </div>
+    </StudioShell>
   );
 };

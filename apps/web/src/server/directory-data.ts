@@ -25,8 +25,10 @@ import { database } from "./publication-data";
 export async function getPeopleDirectory(locale: SiteLocale) {
   const records = await database()
     .select({
+      alternateName: personLocalizations.alternateName,
       biographyJson: personLocalizations.biographyJson,
       displayName: personLocalizations.displayName,
+      honorific: personLocalizations.honorific,
       id: people.id,
       seoDescription: personLocalizations.seoDescription,
       slug: people.slug,
@@ -48,9 +50,13 @@ export async function getPeopleDirectory(locale: SiteLocale) {
   const [positions, contacts, media] = await Promise.all([
     database()
       .select({
+        communityName: communityLocalizations.name,
+        communitySlug: communities.slug,
         description: personPositionLocalizations.description,
+        endsAt: personPositions.endsAt,
         personId: personPositions.personId,
         roleKey: personPositions.roleKey,
+        startsAt: personPositions.startsAt,
         title: personPositionLocalizations.title,
       })
       .from(personPositions)
@@ -59,6 +65,20 @@ export async function getPeopleDirectory(locale: SiteLocale) {
         and(
           eq(personPositionLocalizations.positionId, personPositions.id),
           eq(personPositionLocalizations.language, locale)
+        )
+      )
+      .leftJoin(
+        communities,
+        and(
+          eq(communities.id, personPositions.communityId),
+          eq(communities.status, "published")
+        )
+      )
+      .leftJoin(
+        communityLocalizations,
+        and(
+          eq(communityLocalizations.communityId, communities.id),
+          eq(communityLocalizations.language, locale)
         )
       )
       .where(inArray(personPositions.personId, ids))
@@ -106,6 +126,14 @@ export async function getPeopleDirectory(locale: SiteLocale) {
     media: media.filter(({ personId }) => personId === record.id),
     positions: positions.filter(({ personId }) => personId === record.id),
   }));
+}
+
+export async function getPersonDirectoryEntry(
+  locale: SiteLocale,
+  slug: string
+) {
+  const records = await getPeopleDirectory(locale);
+  return records.find((person) => person.slug === slug);
 }
 
 export async function getCommunityDirectory(locale: SiteLocale) {

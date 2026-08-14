@@ -114,8 +114,10 @@ export const savePersonDirectory = async (input: {
       }),
     ...payload.localizations.map((localization) =>
       database.insert(personLocalizations).values({
+        alternateName: localization.alternateName,
         biographyJson: JSON.stringify(localization.biography),
         displayName: localization.displayName,
+        honorific: localization.honorific,
         language: localization.language,
         personId: id,
         seoDescription: localization.seoDescription,

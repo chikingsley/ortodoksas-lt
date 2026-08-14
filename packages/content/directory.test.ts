@@ -1,12 +1,18 @@
 import { describe, expect, it } from "vitest";
 
-import { communityEditorSchema, personEditorSchema } from "./directory";
+import {
+  communityEditorSchema,
+  personEditorSchema,
+  slugifyDirectoryName,
+} from "./directory";
 import { siteLocales } from "./site";
 
 const biography = { content: [{ type: "paragraph" }], type: "doc" } as const;
 const peopleLocalizations = siteLocales.map((language) => ({
+  alternateName: "",
   biography,
   displayName: `Name ${language}`,
+  honorific: "",
   language,
   seoDescription: "",
 }));
@@ -22,6 +28,15 @@ const person = {
 };
 
 describe("directory publication contracts", () => {
+  it("generates stable URL slugs from Lithuanian names", () => {
+    expect(slugifyDirectoryName("  Jo Ekselencija Panaretas  ")).toBe(
+      "jo-ekselencija-panaretas"
+    );
+    expect(slugifyDirectoryName("Viačeslav Jurčenko")).toBe(
+      "viaceslav-jurcenko"
+    );
+  });
+
   it("requires every locale for published people", () => {
     expect(personEditorSchema.safeParse(person).success).toBe(true);
     expect(

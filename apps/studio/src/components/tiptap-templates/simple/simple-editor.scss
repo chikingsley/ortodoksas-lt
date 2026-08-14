@@ -38,6 +38,27 @@
   font-family: "Geist Variable", sans-serif;
 }
 
+.simple-editor-wrapper[data-variant="compact"] {
+  min-height: 14rem;
+}
+
+.simple-editor-wrapper[data-variant="compact"] .simple-editor-content,
+.simple-editor-wrapper[data-variant="compact"]
+  .simple-editor-content
+  .tiptap.ProseMirror.simple-editor {
+  min-height: 11rem;
+}
+
+.simple-editor-wrapper[data-variant="compact"] .simple-editor-content {
+  max-width: none;
+}
+
+.simple-editor-wrapper[data-variant="compact"]
+  .simple-editor-content
+  .tiptap.ProseMirror.simple-editor {
+  padding: 1.25rem 1.5rem 3rem;
+}
+
 @media screen and (max-width: 640px) {
   .simple-editor-wrapper {
     min-height: 540px;
@@ -56,5 +77,22 @@
 
   .simple-editor-content .tiptap.ProseMirror.simple-editor {
     padding: 2rem 1.25rem 8rem;
+  }
+
+  .simple-editor-wrapper[data-variant="compact"] {
+    min-height: 12rem;
+  }
+
+  .simple-editor-wrapper[data-variant="compact"] .simple-editor-content,
+  .simple-editor-wrapper[data-variant="compact"]
+    .simple-editor-content
+    .tiptap.ProseMirror.simple-editor {
+    min-height: 9rem;
+  }
+
+  .simple-editor-wrapper[data-variant="compact"]
+    .simple-editor-content
+    .tiptap.ProseMirror.simple-editor {
+    padding: 1rem 1rem 2.5rem;
   }
 }

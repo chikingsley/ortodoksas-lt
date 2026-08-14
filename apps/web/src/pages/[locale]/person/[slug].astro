@@ -1,0 +1,24 @@
+---
+import PersonDetailPage from "../../../components/information/PersonDetailPage.astro";
+import { localeShells, type SiteLocale } from "../../../i18n/config";
+import { getPersonDirectoryEntry } from "../../../server/directory-data";
+
+const requestedLocale = Astro.params.locale as SiteLocale;
+const locale = localeShells.includes(requestedLocale as never)
+  ? requestedLocale
+  : undefined;
+const person = locale
+  ? await getPersonDirectoryEntry(locale, Astro.params.slug ?? "")
+  : undefined;
+const unavailable = {
+  be: "Асоба не знойдзена.",
+  en: "Person unavailable.",
+  ru: "Человек не найден.",
+  uk: "Особу не знайдено.",
+} as const;
+if (!person) {
+  Astro.response.status = 404;
+}
+---
+
+{person && locale ? <PersonDetailPage locale={locale} person={person} /> : <p>{locale ? unavailable[locale] : "Not found."}</p>}

@@ -9,6 +9,7 @@ export default defineConfig({
       "test/authorized-parties.spec.ts",
       "test/blogger-content-cleanup-migration.spec.ts",
       "test/inventory-groups.spec.ts",
+      "test/person-directory-normalization-migration.spec.ts",
       "test/translation-readiness-migration.spec.ts",
     ],
   },

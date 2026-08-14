@@ -1,4 +1,11 @@
-import { articles, publicationGroups } from "@ortodoksas-lt/db";
+import {
+  articles,
+  communities,
+  communityLocalizations,
+  people,
+  personLocalizations,
+  publicationGroups,
+} from "@ortodoksas-lt/db";
 import { and, eq, inArray } from "drizzle-orm";
 
 import type {
@@ -20,7 +27,52 @@ import {
   leadingSlash,
 } from "./publication-data";
 
-const COMMUNITY_DETAIL_PATH_PATTERN = /^\/community\/[^/]+$/u;
+const DIRECTORY_DETAIL_PATH_PATTERN = /^\/(?:community|person)\/[^/]+$/u;
+const DIRECTORY_DETAIL_PARTS_PATTERN = /^\/(community|person)\/([^/]+)$/u;
+
+async function getDirectoryLocaleLinks(publicationPath: string) {
+  const match = DIRECTORY_DETAIL_PARTS_PATTERN.exec(publicationPath);
+  if (!match) {
+    return;
+  }
+  const [, kind, slug] = match;
+  if (!(kind && slug)) {
+    return;
+  }
+  const rows =
+    kind === "person"
+      ? await database()
+          .select({ language: personLocalizations.language })
+          .from(people)
+          .innerJoin(
+            personLocalizations,
+            eq(personLocalizations.personId, people.id)
+          )
+          .where(and(eq(people.slug, slug), eq(people.status, "published")))
+      : await database()
+          .select({ language: communityLocalizations.language })
+          .from(communities)
+          .innerJoin(
+            communityLocalizations,
+            eq(communityLocalizations.communityId, communities.id)
+          )
+          .where(
+            and(eq(communities.slug, slug), eq(communities.status, "published"))
+          );
+  const available = new Set(rows.map(({ language }) => language));
+  return Object.fromEntries(
+    siteLocales.map((locale) => [
+      locale,
+      {
+        hasCounterpart: available.has(locale),
+        href:
+          locale === defaultLocale
+            ? publicationPath
+            : `/${locale}${publicationPath}`,
+      },
+    ])
+  ) as Record<SiteLocale, LocaleDestination>;
+}
 
 function stripLocale(path: string) {
   for (const locale of localeShells) {
@@ -162,19 +214,11 @@ export async function getLocaleLinks(currentPath: string) {
       uk: { hasCounterpart: true, href: "/uk/paieska" },
     } satisfies Record<SiteLocale, LocaleDestination>;
   }
-  if (COMMUNITY_DETAIL_PATH_PATTERN.test(publicationPath)) {
-    return Object.fromEntries(
-      siteLocales.map((locale) => [
-        locale,
-        {
-          hasCounterpart: true,
-          href:
-            locale === defaultLocale
-              ? publicationPath
-              : `/${locale}${publicationPath}`,
-        },
-      ])
-    ) as Record<SiteLocale, LocaleDestination>;
+  if (DIRECTORY_DETAIL_PATH_PATTERN.test(publicationPath)) {
+    const localeLinks = await getDirectoryLocaleLinks(publicationPath);
+    if (localeLinks) {
+      return localeLinks;
+    }
   }
   const slug = publicationPath.replace(leadingSlash, "");
   const group = await currentTranslationGroup(currentPath);
