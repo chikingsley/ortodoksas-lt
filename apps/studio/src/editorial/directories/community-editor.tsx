@@ -457,6 +457,9 @@ export const CommunityEditor = ({
         </Button>
       </Section>
       <Section title="Primary image and gallery">
+        <p className="m-0 text-muted-foreground text-sm">
+          Published communities require one primary image.
+        </p>
         <label className="inline-flex cursor-pointer items-center gap-2 text-sm">
           <ImagePlus className="size-4" /> Upload image
           <input

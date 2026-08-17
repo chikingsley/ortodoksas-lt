@@ -26,6 +26,16 @@ export const slugifyDirectoryName = (value: string) =>
 const optionalText = (maximum: number) =>
   z.string().trim().max(maximum).default("");
 
+export const prepareDirectoryRecordForEditing = (record: {
+  [key: string]: unknown;
+  media: readonly { role: string }[];
+  status: string;
+}) =>
+  record.status === "published" &&
+  !record.media.some(({ role }) => role === "primary")
+    ? { ...record, status: "draft" }
+    : record;
+
 export const personSchema = z.strictObject({
   id: entityIdSchema,
   slug: slugSchema,
@@ -303,10 +313,20 @@ export const personEditorSchema = personSchema
         requireComplete,
       });
     }
-    if (value.media.filter(({ role }) => role === "primary").length > 1) {
+    const primaryImageCount = value.media.filter(
+      ({ role }) => role === "primary"
+    ).length;
+    if (primaryImageCount > 1) {
       context.addIssue({
         code: "custom",
         message: "A person may have one primary image",
+        path: ["media"],
+      });
+    }
+    if (requireComplete && primaryImageCount !== 1) {
+      context.addIssue({
+        code: "custom",
+        message: "Published people require one primary portrait",
         path: ["media"],
       });
     }
@@ -377,10 +397,20 @@ export const communityEditorSchema = communityBaseSchema
         });
       }
     }
-    if (value.media.filter(({ role }) => role === "primary").length > 1) {
+    const primaryImageCount = value.media.filter(
+      ({ role }) => role === "primary"
+    ).length;
+    if (primaryImageCount > 1) {
       context.addIssue({
         code: "custom",
         message: "A community may have one primary image",
+        path: ["media"],
+      });
+    }
+    if (requireComplete && primaryImageCount !== 1) {
+      context.addIssue({
+        code: "custom",
+        message: "Published communities require one primary image",
         path: ["media"],
       });
     }

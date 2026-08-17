@@ -590,6 +590,9 @@ export const PersonEditor = ({
         </Button>
       </Section>
       <Section title="Portrait and gallery">
+        <p className="m-0 text-muted-foreground text-sm">
+          Published people require one primary portrait.
+        </p>
         <label className="inline-flex cursor-pointer items-center gap-2 text-sm">
           <ImagePlus className="size-4" /> Upload image
           <input
@@ -608,104 +611,107 @@ export const PersonEditor = ({
             type="file"
           />
         </label>
-        <div className="grid gap-5">
+        <div className="grid gap-4">
           {values.media.map((item, index) => {
             const translated = item.localizations.find(
               (value) => value.language === locale
             );
             return (
-              <div
-                className="grid gap-3 border-t pt-4 first:border-t-0 first:pt-0"
+              <article
+                className="grid gap-4 border-t pt-4 first:border-t-0 first:pt-0 sm:grid-cols-[minmax(160px,220px)_minmax(0,1fr)]"
                 key={item.id ?? item.mediaId}
               >
                 <img
                   alt={translated?.altText ?? ""}
-                  className="aspect-[4/5] w-full max-w-64 rounded-lg bg-muted/35 object-contain"
+                  className="aspect-square w-full rounded-lg bg-muted/35 object-contain"
                   height="640"
                   src={`/api/media/${item.mediaId}`}
-                  width="512"
+                  width="640"
                 />
-                <SelectField
-                  label="Image role"
-                  onChange={(role) =>
-                    form.setFieldValue("media", (current) =>
-                      current.map((value, valueIndex) =>
-                        valueIndex === index ? { ...value, role } : value
+                <div className="grid content-start gap-3">
+                  <SelectField
+                    label="Image role"
+                    onChange={(role) =>
+                      form.setFieldValue("media", (current) =>
+                        current.map((value, valueIndex) =>
+                          valueIndex === index ? { ...value, role } : value
+                        )
                       )
-                    )
-                  }
-                  options={mediaRoleOptions}
-                  value={item.role}
-                />
-                <Field
-                  label={`Alt text — ${localeLabel[locale]}`}
-                  onChange={(event) =>
-                    form.setFieldValue("media", (current) =>
-                      current.map((value, valueIndex) =>
-                        valueIndex === index
-                          ? {
-                              ...value,
-                              localizations: upsertLocalization(
-                                value.localizations,
-                                locale,
-                                () => ({
-                                  altText: "",
-                                  caption: "",
-                                  language: locale,
-                                }),
-                                (localized) => ({
-                                  ...localized,
-                                  altText: event.target.value,
-                                })
-                              ),
-                            }
-                          : value
+                    }
+                    options={mediaRoleOptions}
+                    value={item.role}
+                  />
+                  <Field
+                    label={`Alt text — ${localeLabel[locale]}`}
+                    onChange={(event) =>
+                      form.setFieldValue("media", (current) =>
+                        current.map((value, valueIndex) =>
+                          valueIndex === index
+                            ? {
+                                ...value,
+                                localizations: upsertLocalization(
+                                  value.localizations,
+                                  locale,
+                                  () => ({
+                                    altText: "",
+                                    caption: "",
+                                    language: locale,
+                                  }),
+                                  (localized) => ({
+                                    ...localized,
+                                    altText: event.target.value,
+                                  })
+                                ),
+                              }
+                            : value
+                        )
                       )
-                    )
-                  }
-                  value={translated?.altText ?? ""}
-                />
-                <TextareaField
-                  label={`Caption — ${localeLabel[locale]}`}
-                  onChange={(event) =>
-                    form.setFieldValue("media", (current) =>
-                      current.map((value, valueIndex) =>
-                        valueIndex === index
-                          ? {
-                              ...value,
-                              localizations: upsertLocalization(
-                                value.localizations,
-                                locale,
-                                () => ({
-                                  altText: "",
-                                  caption: "",
-                                  language: locale,
-                                }),
-                                (localized) => ({
-                                  ...localized,
-                                  caption: event.target.value,
-                                })
-                              ),
-                            }
-                          : value
+                    }
+                    value={translated?.altText ?? ""}
+                  />
+                  <TextareaField
+                    label={`Caption — ${localeLabel[locale]}`}
+                    onChange={(event) =>
+                      form.setFieldValue("media", (current) =>
+                        current.map((value, valueIndex) =>
+                          valueIndex === index
+                            ? {
+                                ...value,
+                                localizations: upsertLocalization(
+                                  value.localizations,
+                                  locale,
+                                  () => ({
+                                    altText: "",
+                                    caption: "",
+                                    language: locale,
+                                  }),
+                                  (localized) => ({
+                                    ...localized,
+                                    caption: event.target.value,
+                                  })
+                                ),
+                              }
+                            : value
+                        )
                       )
-                    )
-                  }
-                  rows={2}
-                  value={translated?.caption ?? ""}
-                />
-                <Button
-                  onClick={() =>
-                    form.setFieldValue("media", (current) =>
-                      current.filter((_, valueIndex) => valueIndex !== index)
-                    )
-                  }
-                  type="button"
-                  variant="ghost"
-                >
-                  <Trash2 /> Remove
-                </Button>
-              </div>
+                    }
+                    rows={2}
+                    value={translated?.caption ?? ""}
+                  />
+                  <Button
+                    className="justify-self-start"
+                    onClick={() =>
+                      form.setFieldValue("media", (current) =>
+                        current.filter((_, valueIndex) => valueIndex !== index)
+                      )
+                    }
+                    type="button"
+                    variant="ghost"
+                  >
+                    <Trash2 /> Remove
+                  </Button>
+                </div>
+              </article>
             );
           })}
         </div>

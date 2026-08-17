@@ -6,6 +6,7 @@ import type {
 import {
   communityEditorSchema,
   personEditorSchema,
+  prepareDirectoryRecordForEditing,
 } from "@ortodoksas-lt/content/directory";
 import type { SiteLocale } from "@ortodoksas-lt/content/site";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
@@ -123,52 +124,54 @@ const PeopleWorkspace = ({
       return personDraft();
     }
     const { createdAt: _createdAt, updatedAt: _updatedAt, ...person } = record;
-    return personEditorSchema.parse({
-      ...person,
-      contacts: data.contacts
-        .filter((item) => item.personId === record.id)
-        .map(
-          ({
-            createdAt: _contactCreatedAt,
-            personId: _personId,
-            updatedAt: _contactUpdatedAt,
-            ...item
-          }) => ({
-            ...item,
-            localizations: data.contactLocalizations
-              .filter((value) => value.personContactId === item.id)
-              .map(({ personContactId: _id, ...value }) => value),
-          })
-        ),
-      localizations: data.localizations
-        .filter((item) => item.personId === record.id)
-        .map(({ personId: _id, ...item }) => item),
-      media: data.media
-        .filter((item) => item.personId === record.id)
-        .map(
-          ({ createdAt: _mediaCreatedAt, personId: _personId, ...item }) => ({
-            ...item,
-            localizations: data.mediaLocalizations
-              .filter((value) => value.personMediaId === item.id)
-              .map(({ personMediaId: _id, ...value }) => value),
-          })
-        ),
-      positions: data.positions
-        .filter((item) => item.personId === record.id)
-        .map(
-          ({
-            createdAt: _positionCreatedAt,
-            personId: _personId,
-            updatedAt: _positionUpdatedAt,
-            ...item
-          }) => ({
-            ...item,
-            localizations: data.positionLocalizations
-              .filter((value) => value.positionId === item.id)
-              .map(({ positionId: _id, ...value }) => value),
-          })
-        ),
-    });
+    return personEditorSchema.parse(
+      prepareDirectoryRecordForEditing({
+        ...person,
+        contacts: data.contacts
+          .filter((item) => item.personId === record.id)
+          .map(
+            ({
+              createdAt: _contactCreatedAt,
+              personId: _personId,
+              updatedAt: _contactUpdatedAt,
+              ...item
+            }) => ({
+              ...item,
+              localizations: data.contactLocalizations
+                .filter((value) => value.personContactId === item.id)
+                .map(({ personContactId: _id, ...value }) => value),
+            })
+          ),
+        localizations: data.localizations
+          .filter((item) => item.personId === record.id)
+          .map(({ personId: _id, ...item }) => item),
+        media: data.media
+          .filter((item) => item.personId === record.id)
+          .map(
+            ({ createdAt: _mediaCreatedAt, personId: _personId, ...item }) => ({
+              ...item,
+              localizations: data.mediaLocalizations
+                .filter((value) => value.personMediaId === item.id)
+                .map(({ personMediaId: _id, ...value }) => value),
+            })
+          ),
+        positions: data.positions
+          .filter((item) => item.personId === record.id)
+          .map(
+            ({
+              createdAt: _positionCreatedAt,
+              personId: _personId,
+              updatedAt: _positionUpdatedAt,
+              ...item
+            }) => ({
+              ...item,
+              localizations: data.positionLocalizations
+                .filter((value) => value.positionId === item.id)
+                .map(({ positionId: _id, ...value }) => value),
+            })
+          ),
+      })
+    );
   }, [data, selectedId]);
   const onSaved = useCallback(
     async (id: string) => {
@@ -232,56 +235,58 @@ const CommunitiesWorkspace = ({
       updatedAt: _updatedAt,
       ...community
     } = record;
-    return communityEditorSchema.parse({
-      ...community,
-      contacts: data.contacts
-        .filter((item) => item.communityId === record.id)
-        .map(
-          ({
-            communityId: _communityId,
-            createdAt: _contactCreatedAt,
-            updatedAt: _contactUpdatedAt,
-            ...item
-          }) => ({
-            ...item,
-            localizations: data.contactLocalizations
-              .filter((value) => value.communityContactId === item.id)
-              .map(({ communityContactId: _id, ...value }) => value),
-          })
-        ),
-      localizations: data.localizations
-        .filter((item) => item.communityId === record.id)
-        .map(({ communityId: _id, ...item }) => item),
-      media: data.media
-        .filter((item) => item.communityId === record.id)
-        .map(
-          ({
-            communityId: _communityId,
-            createdAt: _mediaCreatedAt,
-            ...item
-          }) => ({
-            ...item,
-            localizations: data.mediaLocalizations
-              .filter((value) => value.communityMediaId === item.id)
-              .map(({ communityMediaId: _id, ...value }) => value),
-          })
-        ),
-      services: data.services
-        .filter((item) => item.communityId === record.id)
-        .map(
-          ({
-            communityId: _communityId,
-            createdAt: _serviceCreatedAt,
-            updatedAt: _serviceUpdatedAt,
-            ...item
-          }) => ({
-            ...item,
-            localizations: data.serviceLocalizations
-              .filter((value) => value.communityServiceId === item.id)
-              .map(({ communityServiceId: _id, ...value }) => value),
-          })
-        ),
-    });
+    return communityEditorSchema.parse(
+      prepareDirectoryRecordForEditing({
+        ...community,
+        contacts: data.contacts
+          .filter((item) => item.communityId === record.id)
+          .map(
+            ({
+              communityId: _communityId,
+              createdAt: _contactCreatedAt,
+              updatedAt: _contactUpdatedAt,
+              ...item
+            }) => ({
+              ...item,
+              localizations: data.contactLocalizations
+                .filter((value) => value.communityContactId === item.id)
+                .map(({ communityContactId: _id, ...value }) => value),
+            })
+          ),
+        localizations: data.localizations
+          .filter((item) => item.communityId === record.id)
+          .map(({ communityId: _id, ...item }) => item),
+        media: data.media
+          .filter((item) => item.communityId === record.id)
+          .map(
+            ({
+              communityId: _communityId,
+              createdAt: _mediaCreatedAt,
+              ...item
+            }) => ({
+              ...item,
+              localizations: data.mediaLocalizations
+                .filter((value) => value.communityMediaId === item.id)
+                .map(({ communityMediaId: _id, ...value }) => value),
+            })
+          ),
+        services: data.services
+          .filter((item) => item.communityId === record.id)
+          .map(
+            ({
+              communityId: _communityId,
+              createdAt: _serviceCreatedAt,
+              updatedAt: _serviceUpdatedAt,
+              ...item
+            }) => ({
+              ...item,
+              localizations: data.serviceLocalizations
+                .filter((value) => value.communityServiceId === item.id)
+                .map(({ communityServiceId: _id, ...value }) => value),
+            })
+          ),
+      })
+    );
   }, [data, selectedId]);
   const onSaved = useCallback(
     async (id: string) => {
@@ -364,7 +369,7 @@ const DirectoryShell = ({
     `New ${title.toLowerCase().replace(TRAILING_S_PATTERN, "")}`;
   return (
     <StudioShell activeView={activeView} onNavigate={onNavigate}>
-      <div className="grid min-h-svh min-w-0 grid-cols-[250px_minmax(0,1fr)] max-[1000px]:block">
+      <div className="grid min-h-svh min-w-0 grid-cols-[224px_minmax(0,1fr)] max-[1000px]:block">
         <aside className="border-r bg-muted/25 p-3 max-[1000px]:hidden">
           <div className="mb-3 flex items-center justify-between">
             <h1 className="m-0 font-semibold text-sm">{title}</h1>
@@ -379,8 +384,8 @@ const DirectoryShell = ({
           </div>
           {recordList}
         </aside>
-        <main className="min-w-0 px-[clamp(16px,4vw,56px)] py-6 sm:py-8">
-          <div className="mx-auto mb-4 hidden max-w-5xl items-center justify-between gap-3 max-[1000px]:flex">
+        <main className="min-w-0 px-[clamp(16px,3vw,40px)] py-6 sm:py-8">
+          <div className="mx-auto mb-4 hidden max-w-6xl items-center justify-between gap-3 max-[1000px]:flex">
             <Sheet onOpenChange={setMobilePickerOpen} open={mobilePickerOpen}>
               <SheetTrigger
                 render={
@@ -403,7 +408,7 @@ const DirectoryShell = ({
               <Plus /> Add
             </Button>
           </div>
-          <div className="mx-auto max-w-5xl">{children}</div>
+          <div className="mx-auto max-w-6xl">{children}</div>
         </main>
       </div>
     </StudioShell>

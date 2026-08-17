@@ -22,7 +22,7 @@ export function StudioShell({ activeView, children, onNavigate }: Props) {
     <SidebarProvider
       style={
         {
-          "--sidebar-width": "232px",
+          "--sidebar-width": "224px",
         } as React.CSSProperties
       }
     >

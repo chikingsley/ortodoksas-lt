@@ -46,7 +46,7 @@ export const StudioBrand = ({ className, logoClassName }: StudioBrandProps) => (
       src={publicationLogoUrl}
       width="1022"
     />
-    <span className="border-brand-dark/25 border-l pl-2 font-semibold text-[10px] text-brand-dark uppercase tracking-[0.14em]">
+    <span className="font-semibold text-[10px] text-brand-dark uppercase tracking-[0.14em]">
       Studio
     </span>
   </div>
@@ -72,7 +72,7 @@ export const StudioSidebar = ({ activeView, onNavigate }: Props) => {
 
   return (
     <Sidebar collapsible="offcanvas">
-      <SidebarHeader className="h-[var(--studio-shell-header-height)] justify-center border-b px-[18px]">
+      <SidebarHeader className="h-[var(--studio-shell-header-height)] justify-center px-4">
         <StudioBrand />
       </SidebarHeader>
       <SidebarContent>
@@ -104,8 +104,8 @@ export const StudioSidebar = ({ activeView, onNavigate }: Props) => {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="border-t">
-        <div className="grid grid-cols-[32px_minmax(0,1fr)] items-center gap-2.5 px-2 py-1.5">
+      <SidebarFooter className="pb-3">
+        <div className="grid grid-cols-[32px_minmax(0,1fr)] items-center gap-2.5 rounded-md bg-sidebar-accent/60 px-2 py-2">
           <UserButton />
           <span className="min-w-0">
             <strong className="block truncate text-xs">{displayName}</strong>
