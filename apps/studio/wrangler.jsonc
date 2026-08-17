@@ -35,7 +35,7 @@
     "binding": "IMAGES"
   },
   "cache": {
-    "enabled": true
+    "enabled": false
   },
   "vars": {
     "CLERK_AUTHORIZED_PARTIES": "http://localhost:5173,http://127.0.0.1:5173,https://ortodoksas-studio.grassinside.com",
