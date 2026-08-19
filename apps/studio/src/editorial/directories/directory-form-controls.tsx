@@ -2,16 +2,8 @@ import type { SiteLocale } from "@ortodoksas-lt/content/site";
 import { siteLocales } from "@ortodoksas-lt/content/site";
 import { useCallback, useId } from "react";
 
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupInput,
-} from "@/components/ui/input-group";
-import { Label } from "@/components/ui/label";
+import { FieldLabel, Field as ShadcnField } from "@/components/ui/field";
 import {
   Select,
   SelectContent,
@@ -19,7 +11,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 
 export const localeLabel: Record<SiteLocale, string> = {
   be: "Беларуская",
@@ -29,62 +20,10 @@ export const localeLabel: Record<SiteLocale, string> = {
   uk: "Українська",
 };
 
-export const Field = ({
-  label,
-  ...props
-}: React.ComponentProps<typeof Input> & { label: string }) => {
-  const generatedId = useId();
-  const id = props.id ?? generatedId;
-  return (
-    <div className="grid gap-1.5">
-      <Label htmlFor={id}>{label}</Label>
-      <Input {...props} id={id} />
-    </div>
-  );
-};
-
-export const InputActionField = ({
-  actionLabel,
-  actionText,
-  label,
-  onAction,
-  ...props
-}: React.ComponentProps<typeof Input> & {
-  actionLabel: string;
-  actionText: string;
-  label: string;
-  onAction: () => void;
-}) => {
-  const generatedId = useId();
-  const id = props.id ?? generatedId;
-  return (
-    <div className="grid gap-1.5">
-      <Label htmlFor={id}>{label}</Label>
-      <InputGroup>
-        <InputGroupInput {...props} id={id} />
-        <InputGroupAddon align="inline-end">
-          <InputGroupButton aria-label={actionLabel} onClick={onAction}>
-            {actionText}
-          </InputGroupButton>
-        </InputGroupAddon>
-      </InputGroup>
-    </div>
-  );
-};
-
-export const TextareaField = ({
-  label,
-  ...props
-}: React.ComponentProps<typeof Textarea> & { label: string }) => {
-  const generatedId = useId();
-  const id = props.id ?? generatedId;
-  return (
-    <div className="grid gap-1.5">
-      <Label htmlFor={id}>{label}</Label>
-      <Textarea {...props} id={id} />
-    </div>
-  );
-};
+export const localeOptions = siteLocales.map((locale) => ({
+  label: localeLabel[locale],
+  value: locale,
+}));
 
 export const Section = ({
   children,
@@ -99,54 +38,6 @@ export const Section = ({
     </CardHeader>
     <CardContent className="grid gap-4">{children}</CardContent>
   </Card>
-);
-
-const LocaleTab = ({
-  candidate,
-  locale,
-  onChange,
-}: {
-  candidate: SiteLocale;
-  locale: SiteLocale;
-  onChange: (locale: SiteLocale) => void;
-}) => {
-  const selectLocale = useCallback(
-    () => onChange(candidate),
-    [candidate, onChange]
-  );
-  return (
-    <Button
-      aria-pressed={candidate === locale}
-      onClick={selectLocale}
-      size="sm"
-      type="button"
-      variant={candidate === locale ? "default" : "outline"}
-    >
-      {localeLabel[candidate]}
-    </Button>
-  );
-};
-
-export const LocaleTabs = ({
-  locale,
-  onChange,
-}: {
-  locale: SiteLocale;
-  onChange: (locale: SiteLocale) => void;
-}) => (
-  <fieldset
-    aria-label="Content language"
-    className="flex flex-wrap gap-1 border-0 p-0"
-  >
-    {siteLocales.map((candidate) => (
-      <LocaleTab
-        candidate={candidate}
-        key={candidate}
-        locale={locale}
-        onChange={onChange}
-      />
-    ))}
-  </fieldset>
 );
 
 interface SelectFieldProps<T extends string> {
@@ -173,8 +64,8 @@ export function SelectField<T extends string>({
     [onChange]
   );
   return (
-    <div className="grid gap-1.5">
-      <Label htmlFor={id}>{label}</Label>
+    <ShadcnField>
+      <FieldLabel htmlFor={id}>{label}</FieldLabel>
       <Select onValueChange={update} value={value}>
         <SelectTrigger className="w-full" id={id}>
           <SelectValue>{selected?.label ?? value}</SelectValue>
@@ -187,6 +78,6 @@ export function SelectField<T extends string>({
           ))}
         </SelectContent>
       </Select>
-    </div>
+    </ShadcnField>
   );
 }

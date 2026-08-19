@@ -1,30 +1,35 @@
 // biome-ignore-all lint/performance/noJsxPropsBind: TanStack Form collection controls bind each input to its typed field path.
 import { tiptapDocumentSchema } from "@ortodoksas-lt/content/article";
-import type { PersonEditorInput } from "@ortodoksas-lt/content/directory";
-import { slugifyDirectoryName } from "@ortodoksas-lt/content/directory";
-import type { SiteLocale } from "@ortodoksas-lt/content/site";
-import { useForm, useStore } from "@tanstack/react-form";
 import {
-  ChevronDown,
-  ChevronUp,
-  ImagePlus,
-  Plus,
-  Save,
-  Trash2,
-} from "lucide-react";
+  type PersonEditorInput,
+  personEditorSchema,
+  slugifyDirectoryName,
+} from "@ortodoksas-lt/content/directory";
+import type { SiteLocale } from "@ortodoksas-lt/content/site";
+import { useForm, useSelector } from "@tanstack/react-form";
+import { ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react";
 import { useCallback, useState } from "react";
 
 import { SimpleEditor } from "@/components/tiptap-templates/simple/simple-editor";
 import { Button } from "@/components/ui/button";
+import { Field, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { DirectoryContactMethods } from "@/editorial/directories/directory-contact-methods";
+import { DirectoryEditorHeader } from "@/editorial/directories/directory-editor-header";
 import {
-  Field,
-  InputActionField,
-  LocaleTabs,
   localeLabel,
   Section,
   SelectField,
-  TextareaField,
 } from "@/editorial/directories/directory-form-controls";
+import {
+  directoryIssueMessage,
+  normalizedFormSchema,
+  upsertLocalization,
+} from "@/editorial/directories/directory-form-data";
+import { DirectoryMediaGallery } from "@/editorial/directories/directory-media-gallery";
+import { DirectoryPublishingFields } from "@/editorial/directories/directory-publishing-fields";
+import { DirectoryUnsavedChanges } from "@/editorial/directories/directory-unsaved-changes";
 import { handleImageUpload } from "@/lib/tiptap-utils";
 import { savePersonDirectoryMutation } from "@/server/directories/directory.functions";
 
@@ -32,27 +37,6 @@ const emptyDocument: PersonEditorInput["localizations"][number]["biography"] = {
   content: [{ type: "paragraph" }],
   type: "doc",
 };
-
-const publicationStatusOptions = [
-  { label: "Draft", value: "draft" },
-  { label: "Published", value: "published" },
-  { label: "Archived", value: "archived" },
-] as const;
-
-const contactKindOptions = [
-  { label: "Email", value: "email" },
-  { label: "Phone", value: "phone" },
-  { label: "Website", value: "website" },
-  { label: "Facebook", value: "facebook" },
-  { label: "Instagram", value: "instagram" },
-  { label: "Telegram", value: "telegram" },
-  { label: "Other", value: "other" },
-] as const;
-
-const mediaRoleOptions = [
-  { label: "Primary portrait", value: "primary" },
-  { label: "Gallery", value: "gallery" },
-] as const;
 
 const documentText = (value: unknown): string => {
   if (Array.isArray(value)) {
@@ -86,21 +70,6 @@ interface DirectoryOption {
   value: string;
 }
 
-const upsertLocalization = <T extends { language: SiteLocale }>(
-  values: T[],
-  locale: SiteLocale,
-  create: () => T,
-  update: (value: T) => T
-) => {
-  const index = values.findIndex((value) => value.language === locale);
-  if (index < 0) {
-    return [...values, update(create())];
-  }
-  return values.map((value, valueIndex) =>
-    valueIndex === index ? update(value) : value
-  );
-};
-
 export const PersonEditor = ({
   communityOptions,
   initialValue,
@@ -132,17 +101,37 @@ export const PersonEditor = ({
         const result = await savePersonDirectoryMutation({
           data: preparedValue,
         });
+        form.reset({ ...preparedValue, id: result.id });
         await onSaved(result.id);
         setMessage("Saved");
       } catch (error) {
         setMessage(error instanceof Error ? error.message : "Save failed");
       }
     },
+    onSubmitInvalid: ({ value }) => {
+      const activeLocalization = value.localizations.find(
+        (item) => item.language === locale
+      );
+      if (!activeLocalization?.displayName.trim()) {
+        setMessage(
+          `Enter a display name in ${localeLabel[locale]} before saving.`
+        );
+        return;
+      }
+      const result = personEditorSchema.safeParse(value);
+      const issue = result.success ? undefined : result.error.issues[0];
+      setMessage(directoryIssueMessage(issue));
+    },
+    validators: {
+      onSubmit: normalizedFormSchema(personEditorSchema),
+    },
   });
-  const values = useStore(form.store, (state) => state.values);
-  const localization = values.localizations.find(
-    (value) => value.language === locale
+  const localizations = useSelector(
+    form.store,
+    (state) => state.values.localizations
   );
+  const positions = useSelector(form.store, (state) => state.values.positions);
+  const localization = localizations.find((value) => value.language === locale);
   const updateLocalization = useCallback(
     (
       update: (
@@ -169,19 +158,19 @@ export const PersonEditor = ({
   const updateDisplayName = useCallback(
     (displayName: string) => {
       updateLocalization((value) => ({ ...value, displayName }));
-      if (locale === "lt" && !slugOverride) {
+      if (!slugOverride) {
         form.setFieldValue("slug", slugifyDirectoryName(displayName));
       }
     },
-    [form, locale, slugOverride, updateLocalization]
+    [form, slugOverride, updateLocalization]
   );
   const generateSlug = useCallback(() => {
-    const lithuanianName = values.localizations.find(
-      (value) => value.language === "lt"
-    )?.displayName;
-    form.setFieldValue("slug", slugifyDirectoryName(lithuanianName ?? ""));
+    const sourceName =
+      localizations.find((value) => value.language === "lt")?.displayName ??
+      localization?.displayName;
+    form.setFieldValue("slug", slugifyDirectoryName(sourceName ?? ""));
     setSlugOverride(false);
-  }, [form, values.localizations]);
+  }, [form, localization?.displayName, localizations]);
   const upload = useCallback(
     async (file: File) => {
       setMessage("Uploading image…");
@@ -221,42 +210,73 @@ export const PersonEditor = ({
         form.handleSubmit().catch(() => setMessage("Save failed"));
       }}
     >
-      <div className="flex items-center justify-between gap-3">
-        <LocaleTabs locale={locale} onChange={onLocaleChange} />
-        <div className="flex items-center gap-3 text-muted-foreground text-xs">
-          <span aria-live="polite">{message}</span>
-          <Button type="submit">
-            <Save /> Save person
-          </Button>
-        </div>
-      </div>
+      <form.Subscribe
+        selector={(state) => [
+          state.canSubmit,
+          state.isDirty,
+          state.isSubmitting,
+        ]}
+      >
+        {([canSubmit, isDirty, isSubmitting]) => (
+          <DirectoryEditorHeader
+            canSubmit={canSubmit}
+            isDirty={isDirty}
+            isSubmitting={isSubmitting}
+            locale={locale}
+            message={message}
+            onLocaleChange={onLocaleChange}
+            recordTitle={
+              localization?.displayName || initialValue.slug || "New person"
+            }
+            saveLabel="Save person"
+          />
+        )}
+      </form.Subscribe>
+      <form.Subscribe selector={(state) => state.isDirty}>
+        {(isDirty) => <DirectoryUnsavedChanges isDirty={isDirty} />}
+      </form.Subscribe>
       <Section title="Profile">
         <div className="grid gap-4 md:grid-cols-3">
-          <Field
-            label={`Honorific — ${localeLabel[locale]}`}
-            onChange={(event) =>
-              updateLocalization((value) => ({
-                ...value,
-                honorific: event.target.value,
-              }))
-            }
-            value={localization?.honorific ?? ""}
-          />
-          <Field
-            label={`Display name — ${localeLabel[locale]}`}
-            onChange={(event) => updateDisplayName(event.target.value)}
-            value={localization?.displayName ?? ""}
-          />
-          <Field
-            label={`Civil or alternate name — ${localeLabel[locale]}`}
-            onChange={(event) =>
-              updateLocalization((value) => ({
-                ...value,
-                alternateName: event.target.value,
-              }))
-            }
-            value={localization?.alternateName ?? ""}
-          />
+          <Field>
+            <FieldLabel htmlFor={`person-honorific-${locale}`}>
+              Honorific — {localeLabel[locale]}
+            </FieldLabel>
+            <Input
+              id={`person-honorific-${locale}`}
+              onChange={(event) =>
+                updateLocalization((value) => ({
+                  ...value,
+                  honorific: event.target.value,
+                }))
+              }
+              value={localization?.honorific ?? ""}
+            />
+          </Field>
+          <Field>
+            <FieldLabel htmlFor={`person-display-name-${locale}`}>
+              Display name — {localeLabel[locale]}
+            </FieldLabel>
+            <Input
+              id={`person-display-name-${locale}`}
+              onChange={(event) => updateDisplayName(event.target.value)}
+              value={localization?.displayName ?? ""}
+            />
+          </Field>
+          <Field>
+            <FieldLabel htmlFor={`person-alternate-name-${locale}`}>
+              Civil or alternate name — {localeLabel[locale]}
+            </FieldLabel>
+            <Input
+              id={`person-alternate-name-${locale}`}
+              onChange={(event) =>
+                updateLocalization((value) => ({
+                  ...value,
+                  alternateName: event.target.value,
+                }))
+              }
+              value={localization?.alternateName ?? ""}
+            />
+          </Field>
         </div>
       </Section>
       <Section title={`Biography — ${localeLabel[locale]}`}>
@@ -275,7 +295,7 @@ export const PersonEditor = ({
         />
       </Section>
       <Section title="Positions">
-        {values.positions.map((position, index) => {
+        {positions.map((position, index) => {
           const translated = position.localizations.find(
             (item) => item.language === locale
           );
@@ -304,6 +324,7 @@ export const PersonEditor = ({
                   : item
               )
             );
+          const positionId = position.id ?? String(index);
           return (
             <div
               className="grid gap-4 border-t pt-4 first:border-t-0 first:pt-0"
@@ -336,7 +357,7 @@ export const PersonEditor = ({
                   </Button>
                   <Button
                     aria-label="Move position down"
-                    disabled={index === values.positions.length - 1}
+                    disabled={index === positions.length - 1}
                     onClick={() =>
                       form.setFieldValue("positions", (current) => {
                         const next = [...current];
@@ -377,19 +398,24 @@ export const PersonEditor = ({
                 </div>
               </div>
               <div className="grid gap-4 md:grid-cols-2">
-                <Field
-                  label="Internal role key"
-                  onChange={(event) =>
-                    form.setFieldValue("positions", (current) =>
-                      current.map((item, itemIndex) =>
-                        itemIndex === index
-                          ? { ...item, roleKey: event.target.value }
-                          : item
+                <Field>
+                  <FieldLabel htmlFor={`position-${positionId}-role`}>
+                    Internal role key
+                  </FieldLabel>
+                  <Input
+                    id={`position-${positionId}-role`}
+                    onChange={(event) =>
+                      form.setFieldValue("positions", (current) =>
+                        current.map((item, itemIndex) =>
+                          itemIndex === index
+                            ? { ...item, roleKey: event.target.value }
+                            : item
+                        )
                       )
-                    )
-                  }
-                  value={position.roleKey}
-                />
+                    }
+                    value={position.roleKey}
+                  />
+                </Field>
                 <SelectField
                   label="Assigned community"
                   onChange={(communityId) =>
@@ -414,62 +440,84 @@ export const PersonEditor = ({
                   value={position.communityId ?? "unassigned"}
                 />
               </div>
-              <Field
-                label={`Display title — ${localeLabel[locale]}`}
-                onChange={(event) =>
-                  updatePositionLocalization((value) => ({
-                    ...value,
-                    title: event.target.value,
-                  }))
-                }
-                value={translated?.title ?? ""}
-              />
-              <TextareaField
-                label={`Description — ${localeLabel[locale]}`}
-                onChange={(event) =>
-                  updatePositionLocalization((value) => ({
-                    ...value,
-                    description: event.target.value,
-                  }))
-                }
-                rows={3}
-                value={translated?.description ?? ""}
-              />
+              <Field>
+                <FieldLabel htmlFor={`position-${positionId}-title-${locale}`}>
+                  Display title — {localeLabel[locale]}
+                </FieldLabel>
+                <Input
+                  id={`position-${positionId}-title-${locale}`}
+                  onChange={(event) =>
+                    updatePositionLocalization((value) => ({
+                      ...value,
+                      title: event.target.value,
+                    }))
+                  }
+                  value={translated?.title ?? ""}
+                />
+              </Field>
+              <Field>
+                <FieldLabel
+                  htmlFor={`position-${positionId}-description-${locale}`}
+                >
+                  Description — {localeLabel[locale]}
+                </FieldLabel>
+                <Textarea
+                  id={`position-${positionId}-description-${locale}`}
+                  onChange={(event) =>
+                    updatePositionLocalization((value) => ({
+                      ...value,
+                      description: event.target.value,
+                    }))
+                  }
+                  rows={3}
+                  value={translated?.description ?? ""}
+                />
+              </Field>
               <div className="grid gap-4 sm:grid-cols-2">
-                <Field
-                  label="Start date"
-                  onChange={(event) =>
-                    form.setFieldValue("positions", (current) =>
-                      current.map((item, itemIndex) =>
-                        itemIndex === index
-                          ? {
-                              ...item,
-                              startsAt: dateTimestamp(event.target.value),
-                            }
-                          : item
+                <Field>
+                  <FieldLabel htmlFor={`position-${positionId}-start`}>
+                    Start date
+                  </FieldLabel>
+                  <Input
+                    id={`position-${positionId}-start`}
+                    onChange={(event) =>
+                      form.setFieldValue("positions", (current) =>
+                        current.map((item, itemIndex) =>
+                          itemIndex === index
+                            ? {
+                                ...item,
+                                startsAt: dateTimestamp(event.target.value),
+                              }
+                            : item
+                        )
                       )
-                    )
-                  }
-                  type="date"
-                  value={dateInputValue(position.startsAt)}
-                />
-                <Field
-                  label="End date"
-                  onChange={(event) =>
-                    form.setFieldValue("positions", (current) =>
-                      current.map((item, itemIndex) =>
-                        itemIndex === index
-                          ? {
-                              ...item,
-                              endsAt: dateTimestamp(event.target.value),
-                            }
-                          : item
+                    }
+                    type="date"
+                    value={dateInputValue(position.startsAt)}
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor={`position-${positionId}-end`}>
+                    End date
+                  </FieldLabel>
+                  <Input
+                    id={`position-${positionId}-end`}
+                    onChange={(event) =>
+                      form.setFieldValue("positions", (current) =>
+                        current.map((item, itemIndex) =>
+                          itemIndex === index
+                            ? {
+                                ...item,
+                                endsAt: dateTimestamp(event.target.value),
+                              }
+                            : item
+                        )
                       )
-                    )
-                  }
-                  type="date"
-                  value={dateInputValue(position.endsAt)}
-                />
+                    }
+                    type="date"
+                    value={dateInputValue(position.endsAt)}
+                  />
+                </Field>
               </div>
             </div>
           );
@@ -496,269 +544,66 @@ export const PersonEditor = ({
           <Plus /> Add position
         </Button>
       </Section>
-      <Section title="Contact methods">
-        {values.contacts.map((contact, index) => {
-          const translated = contact.localizations.find(
-            (item) => item.language === locale
-          );
-          return (
-            <div
-              className="grid gap-3 rounded-lg border p-3 md:grid-cols-[1fr_2fr_2fr_auto]"
-              key={contact.id ?? index}
-            >
-              <SelectField
-                label="Kind"
-                onChange={(kind) =>
-                  form.setFieldValue("contacts", (current) =>
-                    current.map((item, itemIndex) =>
-                      itemIndex === index ? { ...item, kind } : item
-                    )
-                  )
-                }
-                options={contactKindOptions}
-                value={contact.kind}
-              />
-              <Field
-                label="URL"
-                onChange={(event) =>
-                  form.setFieldValue("contacts", (current) =>
-                    current.map((item, itemIndex) =>
-                      itemIndex === index
-                        ? { ...item, href: event.target.value }
-                        : item
-                    )
-                  )
-                }
-                value={contact.href}
-              />
-              <Field
-                label={`Label — ${localeLabel[locale]}`}
-                onChange={(event) =>
-                  form.setFieldValue("contacts", (current) =>
-                    current.map((item, itemIndex) =>
-                      itemIndex === index
-                        ? {
-                            ...item,
-                            localizations: upsertLocalization(
-                              item.localizations,
-                              locale,
-                              () => ({ label: "", language: locale }),
-                              (value) => ({
-                                ...value,
-                                label: event.target.value,
-                              })
-                            ),
-                          }
-                        : item
-                    )
-                  )
-                }
-                value={translated?.label ?? ""}
-              />
-              <Button
-                aria-label="Remove contact"
-                onClick={() =>
-                  form.setFieldValue("contacts", (current) =>
-                    current.filter((_, itemIndex) => itemIndex !== index)
-                  )
-                }
-                size="icon"
-                type="button"
-                variant="ghost"
-              >
-                <Trash2 />
-              </Button>
-            </div>
-          );
-        })}
-        <Button
-          onClick={() =>
-            form.setFieldValue("contacts", (current) => [
-              ...current,
-              {
-                href: "https://",
-                kind: "website" as const,
-                localizations: [{ label: "", language: locale }],
-                sortOrder: current.length,
-              },
-            ])
-          }
-          type="button"
-          variant="outline"
-        >
-          <Plus /> Add contact
-        </Button>
-      </Section>
-      <Section title="Portrait and gallery">
-        <p className="m-0 text-muted-foreground text-sm">
-          Published people require one primary portrait.
-        </p>
-        <label className="inline-flex cursor-pointer items-center gap-2 text-sm">
-          <ImagePlus className="size-4" /> Upload image
-          <input
-            accept="image/*"
-            className="sr-only"
-            onChange={(event) => {
-              const file = event.target.files?.[0];
-              if (file) {
-                upload(file).catch((error) =>
-                  setMessage(
-                    error instanceof Error ? error.message : "Upload failed"
-                  )
-                );
-              }
-            }}
-            type="file"
+      <form.Field name="contacts">
+        {(field) => (
+          <DirectoryContactMethods
+            contacts={field.state.value}
+            locale={locale}
+            onChange={field.handleChange}
           />
-        </label>
-        <div className="grid gap-4">
-          {values.media.map((item, index) => {
-            const translated = item.localizations.find(
-              (value) => value.language === locale
-            );
-            return (
-              <article
-                className="grid gap-4 border-t pt-4 first:border-t-0 first:pt-0 sm:grid-cols-[minmax(160px,220px)_minmax(0,1fr)]"
-                key={item.id ?? item.mediaId}
-              >
-                <img
-                  alt={translated?.altText ?? ""}
-                  className="aspect-square w-full rounded-lg bg-muted/35 object-contain"
-                  height="640"
-                  src={`/api/media/${item.mediaId}`}
-                  width="640"
-                />
-                <div className="grid content-start gap-3">
-                  <SelectField
-                    label="Image role"
-                    onChange={(role) =>
-                      form.setFieldValue("media", (current) =>
-                        current.map((value, valueIndex) =>
-                          valueIndex === index ? { ...value, role } : value
-                        )
-                      )
+        )}
+      </form.Field>
+      <form.Field name="media">
+        {(field) => (
+          <DirectoryMediaGallery
+            imageClassName="aspect-square object-contain"
+            locale={locale}
+            media={field.state.value}
+            onChange={field.handleChange}
+            onUpload={upload}
+            onUploadError={setMessage}
+            requirement="Published people require one primary portrait."
+            title="Portrait and gallery"
+          />
+        )}
+      </form.Field>
+      <form.Field name="slug">
+        {(slugField) => (
+          <form.Field name="status">
+            {(statusField) => (
+              <form.Field name="sortOrder">
+                {(sortOrderField) => (
+                  <DirectoryPublishingFields
+                    entityId="person"
+                    locale={locale}
+                    onSeoDescriptionChange={(seoDescription) =>
+                      updateLocalization((value) => ({
+                        ...value,
+                        seoDescription,
+                      }))
                     }
-                    options={mediaRoleOptions}
-                    value={item.role}
+                    onSlugBlur={slugField.handleBlur}
+                    onSlugChange={(slug) => {
+                      setSlugOverride(true);
+                      slugField.handleChange(slug);
+                    }}
+                    onSlugReset={generateSlug}
+                    onSortOrderBlur={sortOrderField.handleBlur}
+                    onSortOrderChange={sortOrderField.handleChange}
+                    onStatusChange={statusField.handleChange}
+                    seoDescription={localization?.seoDescription ?? ""}
+                    slug={slugField.state.value}
+                    slugErrors={slugField.state.meta.errors}
+                    sortOrder={sortOrderField.state.value}
+                    sortOrderErrors={sortOrderField.state.meta.errors}
+                    status={statusField.state.value}
                   />
-                  <Field
-                    label={`Alt text — ${localeLabel[locale]}`}
-                    onChange={(event) =>
-                      form.setFieldValue("media", (current) =>
-                        current.map((value, valueIndex) =>
-                          valueIndex === index
-                            ? {
-                                ...value,
-                                localizations: upsertLocalization(
-                                  value.localizations,
-                                  locale,
-                                  () => ({
-                                    altText: "",
-                                    caption: "",
-                                    language: locale,
-                                  }),
-                                  (localized) => ({
-                                    ...localized,
-                                    altText: event.target.value,
-                                  })
-                                ),
-                              }
-                            : value
-                        )
-                      )
-                    }
-                    value={translated?.altText ?? ""}
-                  />
-                  <TextareaField
-                    label={`Caption — ${localeLabel[locale]}`}
-                    onChange={(event) =>
-                      form.setFieldValue("media", (current) =>
-                        current.map((value, valueIndex) =>
-                          valueIndex === index
-                            ? {
-                                ...value,
-                                localizations: upsertLocalization(
-                                  value.localizations,
-                                  locale,
-                                  () => ({
-                                    altText: "",
-                                    caption: "",
-                                    language: locale,
-                                  }),
-                                  (localized) => ({
-                                    ...localized,
-                                    caption: event.target.value,
-                                  })
-                                ),
-                              }
-                            : value
-                        )
-                      )
-                    }
-                    rows={2}
-                    value={translated?.caption ?? ""}
-                  />
-                  <Button
-                    className="justify-self-start"
-                    onClick={() =>
-                      form.setFieldValue("media", (current) =>
-                        current.filter((_, valueIndex) => valueIndex !== index)
-                      )
-                    }
-                    type="button"
-                    variant="ghost"
-                  >
-                    <Trash2 /> Remove
-                  </Button>
-                </div>
-              </article>
-            );
-          })}
-        </div>
-      </Section>
-      <Section title="Search and publishing">
-        <div className="grid gap-4 md:grid-cols-3">
-          <InputActionField
-            actionLabel="Reset slug from Lithuanian name"
-            actionText="Reset"
-            label="URL slug"
-            onAction={generateSlug}
-            onChange={(event) => {
-              setSlugOverride(true);
-              form.setFieldValue("slug", event.target.value);
-            }}
-            value={values.slug}
-          />
-          <SelectField
-            label="Publication status"
-            onChange={(status) => form.setFieldValue("status", status)}
-            options={publicationStatusOptions}
-            value={values.status}
-          />
-          <Field
-            label="Sort order"
-            min="0"
-            onChange={(event) =>
-              form.setFieldValue("sortOrder", Number(event.target.value))
-            }
-            type="number"
-            value={values.sortOrder}
-          />
-        </div>
-        <div className="grid gap-1.5">
-          <Field
-            label={`SEO description — ${localeLabel[locale]}`}
-            onChange={(event) =>
-              updateLocalization((value) => ({
-                ...value,
-                seoDescription: event.target.value,
-              }))
-            }
-            placeholder="Generated from the name and biography when empty."
-            value={localization?.seoDescription ?? ""}
-          />
-        </div>
-      </Section>
+                )}
+              </form.Field>
+            )}
+          </form.Field>
+        )}
+      </form.Field>
     </form>
   );
 };

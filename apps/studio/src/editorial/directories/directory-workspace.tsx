@@ -12,7 +12,7 @@ import type { SiteLocale } from "@ortodoksas-lt/content/site";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -55,9 +55,11 @@ interface WorkspaceProps {
   locale: SiteLocale;
   onLocaleChange: (locale: SiteLocale) => void;
   onNavigate: (view: StudioView) => void;
+  onRecordChange: (record: string, replace?: boolean) => void;
+  recordKey?: string;
 }
 
-const personDraft = (): PersonEditorInput => ({
+const personDraft = (locale: SiteLocale): PersonEditorInput => ({
   contacts: [],
   localizations: [
     {
@@ -65,7 +67,7 @@ const personDraft = (): PersonEditorInput => ({
       biography: emptyDocument,
       displayName: "",
       honorific: "",
-      language: "lt",
+      language: locale,
       seoDescription: "",
     },
   ],
@@ -76,7 +78,7 @@ const personDraft = (): PersonEditorInput => ({
   status: "draft",
 });
 
-const communityDraft = (): CommunityEditorInput => ({
+const communityDraft = (locale: SiteLocale): CommunityEditorInput => ({
   addressLine: "",
   contacts: [],
   countryCode: "LT",
@@ -88,7 +90,7 @@ const communityDraft = (): CommunityEditorInput => ({
       addressLabel: "",
       description: "",
       directions: "",
-      language: "lt",
+      language: locale,
       name: "",
       operationalNotice: "",
       seoDescription: "",
@@ -109,19 +111,30 @@ const PeopleWorkspace = ({
   locale,
   onLocaleChange,
   onNavigate,
-}: Pick<WorkspaceProps, "locale" | "onLocaleChange" | "onNavigate">) => {
+  onRecordChange,
+  recordKey,
+}: Omit<WorkspaceProps, "kind">) => {
   const queryClient = useQueryClient();
   const { data } = useSuspenseQuery(peopleDirectoryQueryOptions());
   const { data: communityData } = useSuspenseQuery(
     communityDirectoryQueryOptions()
   );
-  const [selectedId, setSelectedId] = useState<string | null>(
-    data.records[0]?.id ?? null
-  );
+  const selectedId =
+    recordKey === "new"
+      ? null
+      : (data.records.find((record) => record.id === recordKey)?.id ??
+        data.records[0]?.id ??
+        null);
+  useEffect(() => {
+    const normalizedRecord = selectedId ?? "new";
+    if (recordKey !== normalizedRecord) {
+      onRecordChange(normalizedRecord, true);
+    }
+  }, [onRecordChange, recordKey, selectedId]);
   const selected = useMemo<PersonEditorInput>(() => {
     const record = data.records.find((item) => item.id === selectedId);
     if (!record) {
-      return personDraft();
+      return personDraft(locale);
     }
     const { createdAt: _createdAt, updatedAt: _updatedAt, ...person } = record;
     return personEditorSchema.parse(
@@ -172,20 +185,20 @@ const PeopleWorkspace = ({
           ),
       })
     );
-  }, [data, selectedId]);
+  }, [data, locale, selectedId]);
   const onSaved = useCallback(
     async (id: string) => {
       await queryClient.invalidateQueries(peopleDirectoryQueryOptions());
-      setSelectedId(id);
+      onRecordChange(id, true);
     },
-    [queryClient]
+    [onRecordChange, queryClient]
   );
   return (
     <DirectoryShell
       activeView="people"
-      onCreate={() => setSelectedId(null)}
+      onCreate={() => onRecordChange("new")}
       onNavigate={onNavigate}
-      onSelect={setSelectedId}
+      onSelect={onRecordChange}
       records={data.records.map((record) => ({
         id: record.id,
         label:
@@ -219,16 +232,27 @@ const CommunitiesWorkspace = ({
   locale,
   onLocaleChange,
   onNavigate,
-}: Pick<WorkspaceProps, "locale" | "onLocaleChange" | "onNavigate">) => {
+  onRecordChange,
+  recordKey,
+}: Omit<WorkspaceProps, "kind">) => {
   const queryClient = useQueryClient();
   const { data } = useSuspenseQuery(communityDirectoryQueryOptions());
-  const [selectedId, setSelectedId] = useState<string | null>(
-    data.records[0]?.id ?? null
-  );
+  const selectedId =
+    recordKey === "new"
+      ? null
+      : (data.records.find((record) => record.id === recordKey)?.id ??
+        data.records[0]?.id ??
+        null);
+  useEffect(() => {
+    const normalizedRecord = selectedId ?? "new";
+    if (recordKey !== normalizedRecord) {
+      onRecordChange(normalizedRecord, true);
+    }
+  }, [onRecordChange, recordKey, selectedId]);
   const selected = useMemo<CommunityEditorInput>(() => {
     const record = data.records.find((item) => item.id === selectedId);
     if (!record) {
-      return communityDraft();
+      return communityDraft(locale);
     }
     const {
       createdAt: _createdAt,
@@ -287,20 +311,20 @@ const CommunitiesWorkspace = ({
           ),
       })
     );
-  }, [data, selectedId]);
+  }, [data, locale, selectedId]);
   const onSaved = useCallback(
     async (id: string) => {
       await queryClient.invalidateQueries(communityDirectoryQueryOptions());
-      setSelectedId(id);
+      onRecordChange(id, true);
     },
-    [queryClient]
+    [onRecordChange, queryClient]
   );
   return (
     <DirectoryShell
       activeView="communities"
-      onCreate={() => setSelectedId(null)}
+      onCreate={() => onRecordChange("new")}
       onNavigate={onNavigate}
-      onSelect={setSelectedId}
+      onSelect={onRecordChange}
       records={data.records.map((record) => ({
         id: record.id,
         label:
@@ -370,8 +394,8 @@ const DirectoryShell = ({
   return (
     <StudioShell activeView={activeView} onNavigate={onNavigate}>
       <div className="grid min-h-svh min-w-0 grid-cols-[224px_minmax(0,1fr)] max-[1000px]:block">
-        <aside className="border-r bg-muted/25 p-3 max-[1000px]:hidden">
-          <div className="mb-3 flex items-center justify-between">
+        <aside className="sticky top-0 hidden h-svh min-h-0 flex-col border-r bg-muted/25 max-[1000px]:hidden min-[1001px]:flex">
+          <div className="flex shrink-0 items-center justify-between border-b px-3 py-3">
             <h1 className="m-0 font-semibold text-sm">{title}</h1>
             <Button
               aria-label={`Add ${title.toLowerCase()}`}
@@ -382,9 +406,9 @@ const DirectoryShell = ({
               <Plus />
             </Button>
           </div>
-          {recordList}
+          <div className="min-h-0 flex-1 overflow-y-auto p-3">{recordList}</div>
         </aside>
-        <main className="min-w-0 px-[clamp(16px,3vw,40px)] py-6 sm:py-8">
+        <div className="min-w-0 px-[clamp(16px,3vw,40px)] py-6 sm:py-8">
           <div className="mx-auto mb-4 hidden max-w-6xl items-center justify-between gap-3 max-[1000px]:flex">
             <Sheet onOpenChange={setMobilePickerOpen} open={mobilePickerOpen}>
               <SheetTrigger
@@ -409,7 +433,7 @@ const DirectoryShell = ({
             </Button>
           </div>
           <div className="mx-auto max-w-6xl">{children}</div>
-        </main>
+        </div>
       </div>
     </StudioShell>
   );
@@ -420,18 +444,24 @@ export const DirectoryWorkspace = ({
   locale,
   onLocaleChange,
   onNavigate,
+  onRecordChange,
+  recordKey,
 }: WorkspaceProps) =>
   kind === "people" ? (
     <PeopleWorkspace
       locale={locale}
       onLocaleChange={onLocaleChange}
       onNavigate={onNavigate}
+      onRecordChange={onRecordChange}
+      recordKey={recordKey}
     />
   ) : (
     <CommunitiesWorkspace
       locale={locale}
       onLocaleChange={onLocaleChange}
       onNavigate={onNavigate}
+      onRecordChange={onRecordChange}
+      recordKey={recordKey}
     />
   );
 
@@ -439,14 +469,21 @@ export const DirectoryRouteWorkspace = ({
   kind,
   locale,
   onLocaleChange,
+  onRecordChange,
+  recordKey,
 }: {
   kind: DirectoryKind;
   locale: SiteLocale;
   onLocaleChange: (locale: SiteLocale) => void;
+  onRecordChange: (record: string, replace?: boolean) => void;
+  recordKey?: string;
 }) => {
   const navigate = useNavigate();
   const onNavigate = useCallback(
     (view: StudioView) => {
+      if (view === kind) {
+        return;
+      }
       if (view === "people" || view === "communities") {
         return navigate({
           search: { language: locale },
@@ -455,7 +492,7 @@ export const DirectoryRouteWorkspace = ({
       }
       return navigate({ to: studioPaths[view] });
     },
-    [locale, navigate]
+    [kind, locale, navigate]
   );
   return (
     <DirectoryWorkspace
@@ -463,6 +500,8 @@ export const DirectoryRouteWorkspace = ({
       locale={locale}
       onLocaleChange={onLocaleChange}
       onNavigate={onNavigate}
+      onRecordChange={onRecordChange}
+      recordKey={recordKey}
     />
   );
 };

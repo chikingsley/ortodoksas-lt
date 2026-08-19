@@ -13,6 +13,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarRail,
+  SidebarSeparator,
+  SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 
@@ -41,7 +44,7 @@ export const StudioBrand = ({ className, logoClassName }: StudioBrandProps) => (
   <div className={cn("flex min-w-0 items-center gap-2.5", className)}>
     <img
       alt="ortodoksas.lt"
-      className={cn("block h-auto w-[132px] shrink-0", logoClassName)}
+      className={cn("block h-auto w-[112px] shrink-0", logoClassName)}
       height="193"
       src={publicationLogoUrl}
       width="1022"
@@ -71,10 +74,21 @@ export const StudioSidebar = ({ activeView, onNavigate }: Props) => {
   );
 
   return (
-    <Sidebar collapsible="offcanvas">
-      <SidebarHeader className="h-[var(--studio-shell-header-height)] justify-center px-4">
-        <StudioBrand />
+    <Sidebar
+      aria-label="Studio navigation"
+      collapsible="icon"
+      role="navigation"
+    >
+      <SidebarHeader className="h-[var(--studio-shell-header-height)] justify-center px-3">
+        <div className="flex min-w-0 items-center gap-2">
+          <StudioBrand className="flex-1 group-data-[collapsible=icon]:hidden" />
+          <SidebarTrigger
+            aria-label="Toggle Studio navigation"
+            className="shrink-0"
+          />
+        </div>
       </SidebarHeader>
+      <SidebarSeparator />
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Publication</SidebarGroupLabel>
@@ -93,6 +107,7 @@ export const StudioSidebar = ({ activeView, onNavigate }: Props) => {
                           value={item.value}
                         />
                       }
+                      tooltip={item.label}
                     >
                       <Icon />
                       <span>{item.label}</span>
@@ -105,16 +120,25 @@ export const StudioSidebar = ({ activeView, onNavigate }: Props) => {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter className="pb-3">
-        <div className="grid grid-cols-[32px_minmax(0,1fr)] items-center gap-2.5 rounded-md bg-sidebar-accent/60 px-2 py-2">
-          <UserButton />
-          <span className="min-w-0">
-            <strong className="block truncate text-xs">{displayName}</strong>
-            <small className="mt-0.5 block truncate text-[10px] text-muted-foreground">
-              {accountLabel}
-            </small>
-          </span>
-        </div>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <div className="flex h-12 w-full items-center gap-2 overflow-hidden rounded-md p-2 group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:p-0">
+              <div className="grid size-8 shrink-0 place-items-center">
+                <UserButton />
+              </div>
+              <span className="min-w-0 group-data-[collapsible=icon]:hidden">
+                <strong className="block truncate text-xs">
+                  {displayName}
+                </strong>
+                <small className="mt-0.5 block truncate text-[10px] text-muted-foreground">
+                  {accountLabel}
+                </small>
+              </span>
+            </div>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarFooter>
+      <SidebarRail />
     </Sidebar>
   );
 };
