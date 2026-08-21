@@ -7,7 +7,6 @@ import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  localeLabel,
   Section,
   SelectField,
 } from "@/editorial/directories/directory-form-controls";
@@ -103,7 +102,7 @@ export function DirectoryMediaGallery({
                 />
                 <Field>
                   <FieldLabel htmlFor={`media-${item.mediaId}-alt`}>
-                    Alt text — {localeLabel[locale]}
+                    Alt text
                   </FieldLabel>
                   <Input
                     id={`media-${item.mediaId}-alt`}
@@ -136,7 +135,7 @@ export function DirectoryMediaGallery({
                 </Field>
                 <Field>
                   <FieldLabel htmlFor={`media-${item.mediaId}-caption`}>
-                    Caption — {localeLabel[locale]}
+                    Caption
                   </FieldLabel>
                   <Textarea
                     id={`media-${item.mediaId}-caption`}

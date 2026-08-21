@@ -14,8 +14,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-  SidebarSeparator,
-  SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 
@@ -57,16 +55,9 @@ export const StudioBrand = ({ className, logoClassName }: StudioBrandProps) => (
 
 export const StudioSidebar = ({ activeView, onNavigate }: Props) => {
   const { user } = useUser();
-  const displayName =
-    user?.fullName ??
-    user?.primaryEmailAddress?.emailAddress ??
-    "Studio editor";
+  const displayName = user?.fullName ?? user?.username ?? "Studio editor";
   const emailAddress = user?.primaryEmailAddress?.emailAddress;
-  const accessLabel =
-    user?.publicMetadata.role === "admin" ? "Administrator" : "Editor access";
-  const accountLabel = emailAddress
-    ? `${accessLabel} · ${emailAddress}`
-    : accessLabel;
+  const accountLabel = emailAddress ?? "Editor account";
   const navigate = useCallback(
     (event: MouseEvent<HTMLButtonElement>) =>
       onNavigate(event.currentTarget.value as StudioView),
@@ -79,16 +70,9 @@ export const StudioSidebar = ({ activeView, onNavigate }: Props) => {
       collapsible="icon"
       role="navigation"
     >
-      <SidebarHeader className="h-[var(--studio-shell-header-height)] justify-center px-3">
-        <div className="flex min-w-0 items-center gap-2">
-          <StudioBrand className="flex-1 group-data-[collapsible=icon]:hidden" />
-          <SidebarTrigger
-            aria-label="Toggle Studio navigation"
-            className="shrink-0"
-          />
-        </div>
+      <SidebarHeader className="h-[var(--studio-shell-header-height)] justify-center border-sidebar-border border-b px-3">
+        <StudioBrand className="group-data-[collapsible=icon]:hidden" />
       </SidebarHeader>
-      <SidebarSeparator />
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Publication</SidebarGroupLabel>

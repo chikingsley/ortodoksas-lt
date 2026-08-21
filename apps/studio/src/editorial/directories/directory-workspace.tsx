@@ -15,6 +15,7 @@ import { Plus } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
   SheetContent,
@@ -23,6 +24,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { CommunityEditor } from "@/editorial/directories/community-editor";
 import { PersonEditor } from "@/editorial/directories/person-editor";
 import { StudioShell } from "@/editorial/shell/studio-shell";
@@ -395,8 +397,15 @@ const DirectoryShell = ({
     <StudioShell activeView={activeView} onNavigate={onNavigate}>
       <div className="grid min-h-svh min-w-0 grid-cols-[224px_minmax(0,1fr)] max-[1000px]:block">
         <aside className="sticky top-0 hidden h-svh min-h-0 flex-col border-r bg-muted/25 max-[1000px]:hidden min-[1001px]:flex">
-          <div className="flex shrink-0 items-center justify-between border-b px-3 py-3">
-            <h1 className="m-0 font-semibold text-sm">{title}</h1>
+          <div className="flex h-[var(--studio-shell-header-height)] shrink-0 items-center justify-between border-b px-3">
+            <div className="flex min-w-0 items-center gap-2">
+              <SidebarTrigger className="-ml-1" />
+              <Separator
+                className="data-vertical:h-4 data-vertical:self-auto"
+                orientation="vertical"
+              />
+              <h1 className="m-0 truncate font-semibold text-sm">{title}</h1>
+            </div>
             <Button
               aria-label={`Add ${title.toLowerCase()}`}
               onClick={onCreate}
@@ -408,8 +417,8 @@ const DirectoryShell = ({
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto p-3">{recordList}</div>
         </aside>
-        <div className="min-w-0 px-[clamp(16px,3vw,40px)] py-6 sm:py-8">
-          <div className="mx-auto mb-4 hidden max-w-6xl items-center justify-between gap-3 max-[1000px]:flex">
+        <div className="min-w-0 px-[clamp(16px,3vw,40px)] py-4 sm:py-6 min-[1001px]:py-8">
+          <div className="mx-auto mb-3 hidden max-w-6xl items-center justify-between gap-3 max-[1000px]:flex">
             <Sheet onOpenChange={setMobilePickerOpen} open={mobilePickerOpen}>
               <SheetTrigger
                 render={

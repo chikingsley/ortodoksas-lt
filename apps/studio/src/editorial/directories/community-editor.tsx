@@ -16,7 +16,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { DirectoryContactMethods } from "@/editorial/directories/directory-contact-methods";
 import { DirectoryEditorHeader } from "@/editorial/directories/directory-editor-header";
 import {
-  localeLabel,
   Section,
   SelectField,
 } from "@/editorial/directories/directory-form-controls";
@@ -77,7 +76,7 @@ export const CommunityEditor = ({
         (item) => item.language === locale
       );
       if (!activeLocalization?.name.trim()) {
-        setMessage(`Enter a name in ${localeLabel[locale]} before saving.`);
+        setMessage("Enter a name before saving.");
         return;
       }
       const result = communityEditorSchema.safeParse(value);
@@ -195,9 +194,7 @@ export const CommunityEditor = ({
       </form.Subscribe>
       <Section title="Overview">
         <Field>
-          <FieldLabel htmlFor={`community-name-${locale}`}>
-            Name — {localeLabel[locale]}
-          </FieldLabel>
+          <FieldLabel htmlFor={`community-name-${locale}`}>Name</FieldLabel>
           <Input
             id={`community-name-${locale}`}
             onChange={(event) => updateName(event.target.value)}
@@ -206,7 +203,7 @@ export const CommunityEditor = ({
         </Field>
         <Field>
           <FieldLabel htmlFor={`community-description-${locale}`}>
-            Description — {localeLabel[locale]}
+            Description
           </FieldLabel>
           <Textarea
             id={`community-description-${locale}`}
@@ -274,7 +271,7 @@ export const CommunityEditor = ({
         </div>
         <Field>
           <FieldLabel htmlFor={`community-address-label-${locale}`}>
-            Address as displayed — {localeLabel[locale]}
+            Address as displayed
           </FieldLabel>
           <Input
             id={`community-address-label-${locale}`}
@@ -289,7 +286,7 @@ export const CommunityEditor = ({
         </Field>
         <Field>
           <FieldLabel htmlFor={`community-directions-${locale}`}>
-            Directions — {localeLabel[locale]}
+            Directions
           </FieldLabel>
           <Textarea
             id={`community-directions-${locale}`}
@@ -305,7 +302,7 @@ export const CommunityEditor = ({
         </Field>
         <Field>
           <FieldLabel htmlFor={`community-accessibility-${locale}`}>
-            Accessibility — {localeLabel[locale]}
+            Accessibility
           </FieldLabel>
           <Textarea
             id={`community-accessibility-${locale}`}
@@ -400,7 +397,7 @@ export const CommunityEditor = ({
             >
               <Field>
                 <FieldLabel htmlFor={`service-${serviceId}-${locale}`}>
-                  Schedule — {localeLabel[locale]}
+                  Schedule
                 </FieldLabel>
                 <Input
                   id={`service-${serviceId}-${locale}`}
@@ -509,7 +506,7 @@ export const CommunityEditor = ({
         </div>
         <Field>
           <FieldLabel htmlFor={`community-notice-${locale}`}>
-            Temporary public notice — {localeLabel[locale]}
+            Temporary public notice
           </FieldLabel>
           <Textarea
             id={`community-notice-${locale}`}

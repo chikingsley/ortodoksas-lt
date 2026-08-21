@@ -113,9 +113,7 @@ export const PersonEditor = ({
         (item) => item.language === locale
       );
       if (!activeLocalization?.displayName.trim()) {
-        setMessage(
-          `Enter a display name in ${localeLabel[locale]} before saving.`
-        );
+        setMessage("Enter a display name before saving.");
         return;
       }
       const result = personEditorSchema.safeParse(value);
@@ -239,7 +237,7 @@ export const PersonEditor = ({
         <div className="grid gap-4 md:grid-cols-3">
           <Field>
             <FieldLabel htmlFor={`person-honorific-${locale}`}>
-              Honorific — {localeLabel[locale]}
+              Honorific
             </FieldLabel>
             <Input
               id={`person-honorific-${locale}`}
@@ -254,7 +252,7 @@ export const PersonEditor = ({
           </Field>
           <Field>
             <FieldLabel htmlFor={`person-display-name-${locale}`}>
-              Display name — {localeLabel[locale]}
+              Display name
             </FieldLabel>
             <Input
               id={`person-display-name-${locale}`}
@@ -264,7 +262,7 @@ export const PersonEditor = ({
           </Field>
           <Field>
             <FieldLabel htmlFor={`person-alternate-name-${locale}`}>
-              Civil or alternate name — {localeLabel[locale]}
+              Civil or alternate name
             </FieldLabel>
             <Input
               id={`person-alternate-name-${locale}`}
@@ -279,7 +277,7 @@ export const PersonEditor = ({
           </Field>
         </div>
       </Section>
-      <Section title={`Biography — ${localeLabel[locale]}`}>
+      <Section title="Biography">
         <SimpleEditor
           ariaLabel={`Biography in ${localeLabel[locale]}`}
           className="overflow-hidden rounded-lg border"
@@ -442,7 +440,7 @@ export const PersonEditor = ({
               </div>
               <Field>
                 <FieldLabel htmlFor={`position-${positionId}-title-${locale}`}>
-                  Display title — {localeLabel[locale]}
+                  Display title
                 </FieldLabel>
                 <Input
                   id={`position-${positionId}-title-${locale}`}
@@ -459,7 +457,7 @@ export const PersonEditor = ({
                 <FieldLabel
                   htmlFor={`position-${positionId}-description-${locale}`}
                 >
-                  Description — {localeLabel[locale]}
+                  Description
                 </FieldLabel>
                 <Textarea
                   id={`position-${positionId}-description-${locale}`}

@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
-  localeLabel,
   Section,
   SelectField,
 } from "@/editorial/directories/directory-form-controls";
@@ -77,9 +76,7 @@ export function DirectoryContactMethods({
               />
             </Field>
             <Field>
-              <FieldLabel htmlFor={`contact-${rowId}-label`}>
-                Label — {localeLabel[locale]}
-              </FieldLabel>
+              <FieldLabel htmlFor={`contact-${rowId}-label`}>Label</FieldLabel>
               <Input
                 id={`contact-${rowId}-label`}
                 onChange={(event) =>

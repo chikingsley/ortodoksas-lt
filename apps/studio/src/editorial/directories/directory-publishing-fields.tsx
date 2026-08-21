@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/input-group";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  localeLabel,
   Section,
   SelectField,
 } from "@/editorial/directories/directory-form-controls";
@@ -121,7 +120,7 @@ export function DirectoryPublishingFields({
       </div>
       <Field>
         <FieldLabel htmlFor={`${entityId}-seo-description-${locale}`}>
-          SEO description — {localeLabel[locale]}
+          SEO description
         </FieldLabel>
         <Textarea
           id={`${entityId}-seo-description-${locale}`}
