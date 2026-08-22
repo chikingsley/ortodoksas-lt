@@ -18,6 +18,14 @@ import {
 import { cn } from "@/lib/utils";
 
 const publicationLogoUrl = "/assets/brand/ortodoksas-logo-official.svg";
+const emailNameSeparatorPattern = /[._+-]+/u;
+
+const titleCaseIdentifier = (value: string) =>
+  value
+    .split(emailNameSeparatorPattern)
+    .filter(Boolean)
+    .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
+    .join(" ");
 
 export type StudioView = "communities" | "content" | "homepage" | "people";
 
@@ -55,8 +63,12 @@ export const StudioBrand = ({ className, logoClassName }: StudioBrandProps) => (
 
 export const StudioSidebar = ({ activeView, onNavigate }: Props) => {
   const { user } = useUser();
-  const displayName = user?.fullName ?? user?.username ?? "Studio editor";
   const emailAddress = user?.primaryEmailAddress?.emailAddress;
+  const emailName = emailAddress?.split("@")[0];
+  const displayName =
+    user?.fullName ||
+    user?.username ||
+    (emailName ? titleCaseIdentifier(emailName) : "Studio editor");
   const accountLabel = emailAddress ?? "Editor account";
   const navigate = useCallback(
     (event: MouseEvent<HTMLButtonElement>) =>

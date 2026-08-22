@@ -7,12 +7,18 @@ import {
 import type { SiteLocale } from "@ortodoksas-lt/content/site";
 import { useForm, useSelector } from "@tanstack/react-form";
 import { Plus, Trash2 } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { CommunityAddressSearch } from "@/editorial/directories/community-address-search";
 import { DirectoryContactMethods } from "@/editorial/directories/directory-contact-methods";
 import { DirectoryEditorHeader } from "@/editorial/directories/directory-editor-header";
 import {
@@ -28,6 +34,7 @@ import { DirectoryMediaGallery } from "@/editorial/directories/directory-media-g
 import { DirectoryPublishingFields } from "@/editorial/directories/directory-publishing-fields";
 import { DirectoryUnsavedChanges } from "@/editorial/directories/directory-unsaved-changes";
 import { handleImageUpload } from "@/lib/tiptap-utils";
+import type { CommunityAddressSuggestion } from "@/server/directories/community-geocoding";
 import { saveCommunityDirectoryMutation } from "@/server/directories/directory.functions";
 
 const communityOperationalStatusOptions = [
@@ -45,6 +52,28 @@ const communityTypeOptions = [
   { label: "Monastery", value: "monastery" },
 ] as const;
 
+const structuredAddressFingerprint = ({
+  addressLine,
+  locality,
+  postalCode,
+}: Pick<CommunityEditorInput, "addressLine" | "locality" | "postalCode">) =>
+  [addressLine, locality, postalCode]
+    .map((value) => value.trim().toLocaleLowerCase("lt-LT"))
+    .join("\u0000");
+
+const createCommunityLocalization = (
+  language: SiteLocale
+): CommunityEditorInput["localizations"][number] => ({
+  accessibility: "",
+  addressLabel: "",
+  description: "",
+  directions: "",
+  language,
+  name: "",
+  operationalNotice: "",
+  seoDescription: "",
+});
+
 export const CommunityEditor = ({
   initialValue,
   locale,
@@ -58,6 +87,19 @@ export const CommunityEditor = ({
 }) => {
   const [message, setMessage] = useState("");
   const [slugOverride, setSlugOverride] = useState(Boolean(initialValue.slug));
+  const labelAddressFingerprints = useRef(
+    new Map(
+      initialValue.localizations
+        .filter((value) => Boolean(value.addressLabel.trim()))
+        .map(
+          (value) =>
+            [
+              value.language,
+              structuredAddressFingerprint(initialValue),
+            ] as const
+        )
+    )
+  );
   const form = useForm({
     defaultValues: initialValue,
     onSubmit: async ({ value }) => {
@@ -103,16 +145,7 @@ export const CommunityEditor = ({
         upsertLocalization(
           current,
           locale,
-          () => ({
-            accessibility: "",
-            addressLabel: "",
-            description: "",
-            directions: "",
-            language: locale,
-            name: "",
-            operationalNotice: "",
-            seoDescription: "",
-          }),
+          () => createCommunityLocalization(locale),
           update
         )
       ),
@@ -134,6 +167,61 @@ export const CommunityEditor = ({
     form.setFieldValue("slug", slugifyDirectoryName(sourceName ?? ""));
     setSlugOverride(false);
   }, [form, localization?.name, localizations]);
+  const selectAddress = useCallback(
+    (suggestion: CommunityAddressSuggestion) => {
+      const suggestionFingerprint = structuredAddressFingerprint(suggestion);
+      const currentAddressFingerprint = structuredAddressFingerprint(
+        form.state.values
+      );
+      const localizedLabelsReferenceAnotherAddress = [
+        ...labelAddressFingerprints.current.values(),
+      ].some((fingerprint) => fingerprint !== suggestionFingerprint);
+      const physicalAddressChanged =
+        currentAddressFingerprint !== suggestionFingerprint ||
+        localizedLabelsReferenceAnotherAddress;
+      const labelAddressFingerprint =
+        labelAddressFingerprints.current.get(locale);
+      form.setFieldValue("addressLine", suggestion.addressLine);
+      form.setFieldValue("countryCode", suggestion.countryCode);
+      form.setFieldValue("latitude", suggestion.latitude);
+      form.setFieldValue("locality", suggestion.locality);
+      form.setFieldValue("longitude", suggestion.longitude);
+      form.setFieldValue("postalCode", suggestion.postalCode);
+      form.setFieldValue("localizations", (current) => {
+        const updated = upsertLocalization(
+          current,
+          locale,
+          () => createCommunityLocalization(locale),
+          (value) => {
+            const preserveCuratedLabel =
+              Boolean(value.addressLabel.trim()) &&
+              labelAddressFingerprint === suggestionFingerprint;
+            return preserveCuratedLabel
+              ? value
+              : { ...value, addressLabel: suggestion.addressLabel };
+          }
+        );
+        if (!physicalAddressChanged) {
+          labelAddressFingerprints.current.set(locale, suggestionFingerprint);
+          return updated;
+        }
+        return updated.map((value) => {
+          labelAddressFingerprints.current.set(
+            value.language,
+            suggestionFingerprint
+          );
+          return { ...value, addressLabel: suggestion.addressLabel };
+        });
+      });
+      setMessage("Address details filled");
+    },
+    [form, locale]
+  );
+  const clearMapLocation = useCallback(() => {
+    form.setFieldValue("latitude", null);
+    form.setFieldValue("longitude", null);
+    setMessage("Choose an address result to refresh map coordinates");
+  }, [form]);
   const upload = useCallback(
     async (file: File) => {
       setMessage("Uploading image…");
@@ -219,6 +307,7 @@ export const CommunityEditor = ({
         </Field>
       </Section>
       <Section title="Address and access">
+        <CommunityAddressSearch onSelect={selectAddress} />
         <div className="grid gap-4 md:grid-cols-3">
           <form.Field name="addressLine">
             {(field) => (
@@ -229,7 +318,10 @@ export const CommunityEditor = ({
                   id={field.name}
                   name={field.name}
                   onBlur={field.handleBlur}
-                  onChange={(event) => field.handleChange(event.target.value)}
+                  onChange={(event) => {
+                    field.handleChange(event.target.value);
+                    clearMapLocation();
+                  }}
                   value={field.state.value}
                 />
                 <FieldError errors={field.state.meta.errors} />
@@ -245,7 +337,10 @@ export const CommunityEditor = ({
                   id={field.name}
                   name={field.name}
                   onBlur={field.handleBlur}
-                  onChange={(event) => field.handleChange(event.target.value)}
+                  onChange={(event) => {
+                    field.handleChange(event.target.value);
+                    clearMapLocation();
+                  }}
                   value={field.state.value}
                 />
                 <FieldError errors={field.state.meta.errors} />
@@ -261,7 +356,10 @@ export const CommunityEditor = ({
                   id={field.name}
                   name={field.name}
                   onBlur={field.handleBlur}
-                  onChange={(event) => field.handleChange(event.target.value)}
+                  onChange={(event) => {
+                    field.handleChange(event.target.value);
+                    clearMapLocation();
+                  }}
                   value={field.state.value}
                 />
                 <FieldError errors={field.state.meta.errors} />
@@ -275,12 +373,21 @@ export const CommunityEditor = ({
           </FieldLabel>
           <Input
             id={`community-address-label-${locale}`}
-            onChange={(event) =>
+            onChange={(event) => {
+              const nextLabel = event.target.value;
+              if (nextLabel.trim()) {
+                labelAddressFingerprints.current.set(
+                  locale,
+                  structuredAddressFingerprint(form.state.values)
+                );
+              } else {
+                labelAddressFingerprints.current.delete(locale);
+              }
               updateLocalization((value) => ({
                 ...value,
-                addressLabel: event.target.value,
-              }))
-            }
+                addressLabel: nextLabel,
+              }));
+            }}
             value={localization?.addressLabel ?? ""}
           />
         </Field>
@@ -316,73 +423,31 @@ export const CommunityEditor = ({
             value={localization?.accessibility ?? ""}
           />
         </Field>
-        <div className="grid gap-4 md:grid-cols-3">
-          <form.Field name="countryCode">
-            {(field) => (
-              <Field data-invalid={!field.state.meta.isValid}>
-                <FieldLabel htmlFor={field.name}>Country code</FieldLabel>
-                <Input
-                  aria-invalid={!field.state.meta.isValid}
-                  id={field.name}
-                  maxLength={2}
-                  name={field.name}
-                  onBlur={field.handleBlur}
-                  onChange={(event) =>
-                    field.handleChange(event.target.value.toUpperCase())
-                  }
-                  value={field.state.value}
-                />
-                <FieldError errors={field.state.meta.errors} />
-              </Field>
-            )}
-          </form.Field>
-          <form.Field name="latitude">
-            {(field) => (
-              <Field data-invalid={!field.state.meta.isValid}>
-                <FieldLabel htmlFor={field.name}>Latitude</FieldLabel>
-                <Input
-                  aria-invalid={!field.state.meta.isValid}
-                  id={field.name}
-                  name={field.name}
-                  onBlur={field.handleBlur}
-                  onChange={(event) =>
-                    field.handleChange(
-                      event.target.value === ""
-                        ? null
-                        : Number(event.target.value)
-                    )
-                  }
-                  type="number"
-                  value={field.state.value ?? ""}
-                />
-                <FieldError errors={field.state.meta.errors} />
-              </Field>
-            )}
-          </form.Field>
-          <form.Field name="longitude">
-            {(field) => (
-              <Field data-invalid={!field.state.meta.isValid}>
-                <FieldLabel htmlFor={field.name}>Longitude</FieldLabel>
-                <Input
-                  aria-invalid={!field.state.meta.isValid}
-                  id={field.name}
-                  name={field.name}
-                  onBlur={field.handleBlur}
-                  onChange={(event) =>
-                    field.handleChange(
-                      event.target.value === ""
-                        ? null
-                        : Number(event.target.value)
-                    )
-                  }
-                  type="number"
-                  value={field.state.value ?? ""}
-                />
-                <FieldError errors={field.state.meta.errors} />
-              </Field>
-            )}
-          </form.Field>
-        </div>
+        <form.Subscribe
+          selector={(state) => [state.values.latitude, state.values.longitude]}
+        >
+          {([latitude, longitude]) =>
+            latitude !== null && longitude !== null ? (
+              <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-muted/25 px-3 py-2 text-sm">
+                <span>
+                  Map location: {latitude.toFixed(6)}, {longitude.toFixed(6)}
+                </span>
+                <a
+                  className="font-medium underline underline-offset-4"
+                  href={`https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=17/${latitude}/${longitude}`}
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  Open in OpenStreetMap
+                </a>
+              </div>
+            ) : (
+              <FieldDescription>
+                Choose a search result to add map coordinates.
+              </FieldDescription>
+            )
+          }
+        </form.Subscribe>
       </Section>
       <Section title="Service schedule">
         {services.map((service, index) => {

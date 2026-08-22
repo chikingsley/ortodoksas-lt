@@ -5,10 +5,12 @@ import {
 } from "@ortodoksas-lt/content/directory";
 import { queryOptions } from "@tanstack/react-query";
 import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
 
 import { getDatabase } from "../../../worker/db";
 import { requireStudioEditor } from "../auth";
 import { requireStudioWritesOpen } from "../write-mode";
+import { searchCommunityAddresses } from "./community-geocoding";
 import {
   listCommunityDirectory,
   listPeopleDirectory,
@@ -17,6 +19,10 @@ import {
   saveCommunityDirectory,
   savePersonDirectory,
 } from "./directory.service";
+
+const communityAddressSearchSchema = z.object({
+  query: z.string().trim().min(3).max(160),
+});
 
 export const loadPeopleDirectory = createServerFn({ method: "GET" }).handler(
   async () => {
@@ -52,6 +58,13 @@ export const saveCommunityDirectoryMutation = createServerFn({ method: "POST" })
       database: getDatabase(env.DB),
       payload: data,
     });
+  });
+
+export const searchCommunityAddressesQuery = createServerFn({ method: "GET" })
+  .validator((input: unknown) => communityAddressSearchSchema.parse(input))
+  .handler(async ({ data }) => {
+    await requireStudioEditor(env);
+    return searchCommunityAddresses(data.query);
   });
 
 export const peopleDirectoryQueryOptions = () =>
