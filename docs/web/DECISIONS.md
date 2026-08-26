@@ -73,8 +73,8 @@
   current published state on the next request.
 - The deployed Worker serves the publication, D1-backed route models, and R2
   media.
-- Clerk authenticates Studio sessions. The Worker allowlist authorizes every
-  editorial operation and derives reviewer identity from the session.
+- Clerk authenticates Studio sessions. The active Organization role authorizes
+  every editorial operation and derives reviewer identity from the session.
 - Homepage category rails rotate automatically to the two sections with the
   most recently published activity; each rail shows its newest eligible items.
 

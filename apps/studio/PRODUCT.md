@@ -33,7 +33,7 @@ Each article carries:
 
 ## Product boundaries
 
-The Studio and public publication are separate products connected through shared D1 and R2 contracts. Staff work entirely in the Studio browser interface. Clerk provides authentication, and the Worker enforces the approved-editor allowlist for every editorial read and write. Cloudflare Workers, D1, and R2 provide the application runtime and storage.
+The Studio and public publication are separate products connected through shared D1 and R2 contracts. Staff work entirely in the Studio browser interface. Clerk provides authentication and Organization roles, and the Worker enforces active membership for every editorial read and write. Cloudflare Workers, D1, and R2 provide the application runtime and storage.
 
 ## Current implementation
 

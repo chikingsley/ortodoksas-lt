@@ -1,5 +1,12 @@
 import { UserButton, useUser } from "@clerk/tanstack-react-start";
-import { BookOpenText, Building2, Home, Users } from "lucide-react";
+import { useRouteContext } from "@tanstack/react-router";
+import {
+  BookOpenText,
+  Building2,
+  Home,
+  ShieldCheck,
+  Users,
+} from "lucide-react";
 import { type MouseEvent, useCallback } from "react";
 
 import {
@@ -27,13 +34,24 @@ const titleCaseIdentifier = (value: string) =>
     .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
     .join(" ");
 
-export type StudioView = "communities" | "content" | "homepage" | "people";
+export type StudioView =
+  | "communities"
+  | "content"
+  | "homepage"
+  | "people"
+  | "team";
 
 const navItems = [
-  { icon: BookOpenText, label: "Content", value: "content" },
-  { icon: Home, label: "Homepage", value: "homepage" },
-  { icon: Users, label: "People", value: "people" },
-  { icon: Building2, label: "Communities", value: "communities" },
+  { adminOnly: false, icon: BookOpenText, label: "Content", value: "content" },
+  { adminOnly: false, icon: Home, label: "Homepage", value: "homepage" },
+  { adminOnly: false, icon: Users, label: "People", value: "people" },
+  {
+    adminOnly: false,
+    icon: Building2,
+    label: "Communities",
+    value: "communities",
+  },
+  { adminOnly: true, icon: ShieldCheck, label: "Team", value: "team" },
 ] as const;
 
 interface Props {
@@ -63,6 +81,7 @@ export const StudioBrand = ({ className, logoClassName }: StudioBrandProps) => (
 
 export const StudioSidebar = ({ activeView, onNavigate }: Props) => {
   const { user } = useUser();
+  const { studioRole } = useRouteContext({ from: "/_studio" });
   const emailAddress = user?.primaryEmailAddress?.emailAddress;
   const emailName = emailAddress?.split("@")[0];
   const displayName =
@@ -91,6 +110,9 @@ export const StudioSidebar = ({ activeView, onNavigate }: Props) => {
           <SidebarGroupContent>
             <SidebarMenu>
               {navItems.map((item) => {
+                if (item.adminOnly && studioRole !== "admin") {
+                  return null;
+                }
                 const Icon = item.icon;
                 return (
                   <SidebarMenuItem key={item.value}>

@@ -20,8 +20,8 @@ function AccessDenied() {
           Studio access requires an invitation
         </h1>
         <p className="mt-3 mb-7 text-muted-foreground text-sm leading-6">
-          This account has a valid sign-in session. An administrator can add its
-          Clerk user ID to the Studio allowlist.
+          This account has a valid sign-in session. A Studio administrator can
+          invite this email address from the Team screen.
         </p>
         <SignOutButton>
           <Button className="w-full" size="lg" variant="outline">

@@ -10,7 +10,6 @@ import {
 } from "@ortodoksas-lt/content/directory";
 import type { SiteLocale } from "@ortodoksas-lt/content/site";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
@@ -29,6 +28,7 @@ import { CommunityEditor } from "@/editorial/directories/community-editor";
 import { PersonEditor } from "@/editorial/directories/person-editor";
 import { StudioShell } from "@/editorial/shell/studio-shell";
 import type { StudioView } from "@/editorial/shell/studio-sidebar";
+import { useStudioNavigation } from "@/editorial/shell/use-studio-navigation";
 import {
   communityDirectoryQueryOptions,
   peopleDirectoryQueryOptions,
@@ -41,16 +41,6 @@ const emptyDocument: PersonEditorInput["localizations"][number]["biography"] = {
 };
 
 type DirectoryKind = "communities" | "people";
-
-const studioPaths: Record<
-  StudioView,
-  "/articles" | "/communities" | "/homepage" | "/people"
-> = {
-  communities: "/communities",
-  content: "/articles",
-  homepage: "/homepage",
-  people: "/people",
-};
 
 interface WorkspaceProps {
   kind: DirectoryKind;
@@ -487,22 +477,7 @@ export const DirectoryRouteWorkspace = ({
   onRecordChange: (record: string, replace?: boolean) => void;
   recordKey?: string;
 }) => {
-  const navigate = useNavigate();
-  const onNavigate = useCallback(
-    (view: StudioView) => {
-      if (view === kind) {
-        return;
-      }
-      if (view === "people" || view === "communities") {
-        return navigate({
-          search: { language: locale },
-          to: studioPaths[view],
-        });
-      }
-      return navigate({ to: studioPaths[view] });
-    },
-    [kind, locale, navigate]
-  );
+  const onNavigate = useStudioNavigation({ activeView: kind, locale });
   return (
     <DirectoryWorkspace
       kind={kind}

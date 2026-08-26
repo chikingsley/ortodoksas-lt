@@ -9,7 +9,7 @@ Ortodoksas Studio is the independent editorial application for the publication. 
 - TanStack Query for server-state ownership
 - TanStack Form with Zod validation for editorial metadata
 - TanStack Table for inventory pagination and row identity
-- Clerk authentication with a server-enforced editor allowlist
+- Clerk authentication with server-enforced Organization roles
 - D1 schema managed with Drizzle and SQL migrations
 - R2 media binding
 - Tiptap JSON as the canonical article-body format
@@ -33,9 +33,9 @@ pnpm cf-typegen
 
 `pnpm dev` uses local Cloudflare binding storage. The tracked `wrangler.jsonc` is the source of truth for development and production. Its ID-free D1 and R2 bindings use Wrangler's automatic provisioning contract, which preserves their link to the existing production Worker during deployment. `pnpm deploy` builds and deploys that configuration directly.
 
-Local Clerk configuration belongs in `.dev.vars`. Production uses Wrangler secrets for `CLERK_SECRET_KEY` and `CLERK_ALLOWED_USER_IDS`; `VITE_CLERK_PUBLISHABLE_KEY` remains the public browser key.
+Local Clerk configuration belongs in `.dev.vars`. Production declares `CLERK_SECRET_KEY`, `CLERK_ORGANIZATION_ID`, and `VITE_CLERK_PUBLISHABLE_KEY` as required Wrangler bindings; the publishable key remains public browser configuration.
 
-Studio exposes a staff sign-in flow. Production Clerk configuration uses Restricted sign-up mode, and administrators create or invite accounts through Clerk before adding their user IDs to the Worker allowlist. This keeps identity enrollment with Clerk and editorial authorization with Studio.
+Studio exposes a staff sign-in flow backed by one Clerk Organization. Administrators invite staff and manage roles from the Team screen. Clerk's `org:admin` role maps to Studio administrator access, and `org:member` maps to Studio editor access. Every protected route verifies the active Organization and role on the server.
 
 ## Project boundaries
 
@@ -45,6 +45,7 @@ Studio exposes a staff sign-in flow. Production Clerk configuration uses Restric
 - `src/editorial/articles/inventory` contains article and page catalog tables, grouping, filters, and creation actions.
 - `src/editorial/homepage` contains homepage placement queries and composition.
 - `src/editorial/shell` contains Studio navigation and route-level workspace coordination.
+- `src/editorial/team` embeds Clerk's supported Organization management screen.
 - `src/editorial/auth` and `src/editorial/shared` contain the sign-in screen and cross-feature editorial controls.
 - `src/components/tiptap-*` contains the copied official Tiptap Simple Editor kit. Its component-scoped SCSS styles define editor nodes, toolbars, menus, theme tokens, and editor animations; Vite compiles them into the lazy editor bundle while `src/styles/globals.css` owns the surrounding Studio application.
 - `worker/services` contains framework-neutral article, homepage, translation, and media operations.
@@ -57,7 +58,7 @@ Studio exposes a staff sign-in flow. Production Clerk configuration uses Restric
 
 The current implementation provides automatic article-quality checks, semantic Tiptap figures, D1 article persistence, optimistic revision conflicts, restore-as-new-version history, R2 media uploads, translation state, homepage placement, and publication verification. Each Tiptap extension corresponds to content present in the publication corpus.
 
-All editorial mutations pass through Clerk authentication, the server-side allowlist, and TanStack Start CSRF middleware. Raw media delivery stays under `/api/media/:id`; the remaining application reads and writes use typed server functions.
+All editorial mutations pass through Clerk authentication, active-Organization authorization, and TanStack Start CSRF middleware. Raw media delivery stays under `/api/media/:id`; the remaining application reads and writes use typed server functions.
 
 ## Media and editorial history
 

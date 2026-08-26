@@ -1,49 +1,24 @@
 import { auth } from "@clerk/tanstack-react-start/server";
 import { createServerFn } from "@tanstack/react-start";
 
-export interface StudioEditor {
-  id: string;
-}
+import { getAuthorizedEditor, type StudioEditor } from "./auth-policy";
 
-const parseUserIds = (value: string | undefined) =>
-  new Set(
-    value
-      ?.split(",")
-      .map((userId) => userId.trim())
-      .filter(Boolean) ?? []
-  );
-
-const getAuthorizedEditor = (
-  authentication: {
-    isAuthenticated: boolean;
-    userId: string | null;
-  },
-  environment: Pick<Cloudflare.Env, "CLERK_ALLOWED_USER_IDS">
-): StudioEditor | null => {
-  if (!(authentication.isAuthenticated && authentication.userId)) {
-    return null;
-  }
-  if (
-    !parseUserIds(environment.CLERK_ALLOWED_USER_IDS).has(authentication.userId)
-  ) {
-    return null;
-  }
-  return {
-    id: authentication.userId,
-  };
-};
+export type { StudioEditor, StudioRole } from "./auth-policy";
 
 export const requireStudioEditor = async (
-  environment: Pick<Cloudflare.Env, "CLERK_ALLOWED_USER_IDS">
+  environment: Pick<Cloudflare.Env, "CLERK_ORGANIZATION_ID">
 ): Promise<StudioEditor> => {
   const authentication = await auth();
   if (!(authentication.isAuthenticated && authentication.userId)) {
     throw Response.json({ error: "Authentication required" }, { status: 401 });
   }
-  const editor = getAuthorizedEditor(authentication, environment);
+  const editor = getAuthorizedEditor(
+    authentication,
+    environment.CLERK_ORGANIZATION_ID
+  );
   if (!editor) {
     throw Response.json(
-      { error: "Studio access requires an allowlisted account" },
+      { error: "Studio access requires organization membership" },
       { status: 403 }
     );
   }
@@ -54,10 +29,14 @@ export const getStudioAuthState = createServerFn({ method: "GET" }).handler(
   async () => {
     const { env } = await import("cloudflare:workers");
     const authentication = await auth();
-    const editor = getAuthorizedEditor(authentication, env);
+    const editor = getAuthorizedEditor(
+      authentication,
+      env.CLERK_ORGANIZATION_ID
+    );
     return {
       isAuthenticated: authentication.isAuthenticated,
       isAuthorized: editor !== null,
+      role: editor?.role ?? null,
       userId: authentication.userId,
     };
   }

@@ -1,4 +1,3 @@
-import { siteLocaleSchema } from "@ortodoksas-lt/content/site";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { lazy, Suspense, useCallback, useMemo, useState } from "react";
@@ -11,7 +10,7 @@ import {
   createTranslationDraftMutation,
 } from "@/server/article-functions";
 import { StudioShell } from "./studio-shell";
-import type { StudioView } from "./studio-sidebar";
+import { useStudioNavigation } from "./use-studio-navigation";
 
 const ArticleEditor = lazy(() =>
   import("@/editorial/articles/editor/article-editor").then((module) => ({
@@ -26,19 +25,6 @@ type WorkspaceRoute =
 
 const contentPath = (kind: CatalogArticle["kind"]) =>
   kind === "page" ? "/pages" : "/articles";
-
-const sidebarPath = (view: StudioView, kind: CatalogArticle["kind"]) => {
-  if (view === "homepage") {
-    return "/homepage" as const;
-  }
-  if (view === "people") {
-    return "/people" as const;
-  }
-  if (view === "communities") {
-    return "/communities" as const;
-  }
-  return contentPath(kind);
-};
 
 export const StudioWorkspace = (route: WorkspaceRoute) => {
   const navigate = useNavigate();
@@ -72,19 +58,10 @@ export const StudioWorkspace = (route: WorkspaceRoute) => {
     await refreshCatalog();
     await navigate({ to: contentPath(route.kind ?? "article") });
   }, [navigate, refreshCatalog, route.kind]);
-  const navigateSidebar = useCallback(
-    (view: StudioView) => {
-      const path = sidebarPath(view, route.kind ?? "article");
-      if (view === "people" || view === "communities") {
-        const language = siteLocaleSchema
-          .catch("lt")
-          .parse(localStorage.getItem("ortodoksas-studio-directory-language"));
-        return navigate({ search: { language }, to: path });
-      }
-      return navigate({ to: path });
-    },
-    [navigate, route.kind]
-  );
+  const navigateSidebar = useStudioNavigation({
+    activeView: route.view === "homepage" ? "homepage" : "content",
+    contentKind: route.kind ?? "article",
+  });
   const selectContentKind = useCallback(
     (kind: CatalogArticle["kind"]) => navigate({ to: contentPath(kind) }),
     [navigate]

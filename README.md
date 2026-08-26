@@ -20,7 +20,7 @@ use Wrangler's automatic resource provisioning contract, which keeps resources
 linked to an existing Worker across deployments while local development uses
 local binding storage. Studio releases receive `VITE_CLERK_PUBLISHABLE_KEY` as
 the public Vite build input. Wrangler secrets hold server credentials and the
-editor allowlist.
+configured Clerk Organization identifier.
 
 The historical crawl and migration evidence lives in the public
 [`chikingsley/ortodoksas-lt-source-archive`](https://huggingface.co/datasets/chikingsley/ortodoksas-lt-source-archive)

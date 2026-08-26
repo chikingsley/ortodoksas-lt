@@ -11,7 +11,10 @@ export const Route = createFileRoute("/_studio")({
     if (!authentication.isAuthorized) {
       throw redirect({ to: "/access-denied" });
     }
-    return { userId: authentication.userId };
+    return {
+      studioRole: authentication.role,
+      userId: authentication.userId,
+    };
   },
   component: Outlet,
 });
