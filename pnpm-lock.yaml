@@ -488,9 +488,6 @@ importers:
       astro:
         specifier: ^7.1.6
         version: 7.1.6(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(@types/node@26.1.2)(jiti@2.7.0)(rollup@4.62.4)(sass-embedded@1.100.0)(sass@1.100.0)(terser@5.50.0)(tsx@4.23.8)(yaml@2.9.0)
-      sharp:
-        specifier: ^0.35.3
-        version: 0.35.3(@types/node@26.1.2)
       tailwindcss:
         specifier: ^4.3.3
         version: 4.3.3
@@ -14656,6 +14653,7 @@ snapshots:
       '@img/sharp-win32-ia32': 0.35.3
       '@img/sharp-win32-x64': 0.35.3
       '@types/node': 26.1.2
+    optional: true
 
   shebang-command@2.0.0:
     dependencies:
