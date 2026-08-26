@@ -34,7 +34,7 @@ export function ArticleEditorDocument({
   title,
 }: Props) {
   return (
-    <main className="min-w-0 px-[clamp(28px,5vw,72px)] pt-12 pb-24 max-md:px-4 max-md:pt-7 max-md:pb-12">
+    <div className="min-w-0 px-[clamp(28px,5vw,72px)] pt-12 pb-24 max-md:px-4 max-md:pt-7 max-md:pb-12">
       <div className="relative mx-auto grid max-w-[860px] gap-2 [&_label]:font-semibold [&_label]:text-secondary-foreground [&_label]:text-xs [&_textarea:first-of-type]:mb-6 [&_textarea:first-of-type]:h-auto [&_textarea:first-of-type]:min-h-[1.2em] [&_textarea:first-of-type]:resize-none [&_textarea:first-of-type]:overflow-hidden [&_textarea:first-of-type]:font-bold [&_textarea:first-of-type]:text-[clamp(34px,4.3vw,56px)] [&_textarea:first-of-type]:leading-none [&_textarea:first-of-type]:tracking-[-0.035em] [&_textarea:last-of-type:focus]:border-primary [&_textarea:last-of-type:focus]:shadow-[0_1px_0_var(--primary)] [&_textarea:last-of-type]:min-h-[88px] [&_textarea:last-of-type]:resize-y [&_textarea:last-of-type]:border-b [&_textarea:last-of-type]:py-3 [&_textarea:last-of-type]:text-lg [&_textarea:last-of-type]:leading-relaxed [&_textarea]:w-full [&_textarea]:rounded-none [&_textarea]:border-0 [&_textarea]:bg-transparent [&_textarea]:p-0 [&_textarea]:text-foreground [&_textarea]:outline-none">
         <label htmlFor="review-title">Title</label>
         <AutoResizeTextarea
@@ -81,6 +81,6 @@ export function ArticleEditorDocument({
         </div>
         <SimpleEditor content={body} onUpdate={onBodyChange} />
       </section>
-    </main>
+    </div>
   );
 }

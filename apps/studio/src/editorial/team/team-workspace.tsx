@@ -17,9 +17,9 @@ export function TeamWorkspace() {
             </p>
           </div>
         </header>
-        <main className="flex justify-center px-[42px] py-8 max-inventory-compact:px-6 max-inventory-mobile:px-4">
+        <div className="flex justify-center px-[42px] py-8 max-inventory-compact:px-6 max-inventory-mobile:px-4">
           <OrganizationProfile afterLeaveOrganizationUrl="/access-denied" />
-        </main>
+        </div>
       </div>
     </StudioShell>
   );
