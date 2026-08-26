@@ -86,7 +86,7 @@ export function ArticleEditorHeader({
 
   return (
     <>
-      <header className="sticky top-0 z-[70] flex min-h-16 items-center justify-between border-b bg-card/95 px-5 py-2.5 shadow-sm max-md:grid max-md:min-h-[92px] max-md:grid-cols-1 max-md:gap-2 max-md:px-3 max-md:py-2">
+      <header className="sticky top-0 z-[70] flex min-h-16 items-center justify-between border-b bg-card/95 px-5 py-2.5 shadow-sm max-md:grid max-md:h-[var(--studio-article-header-height)] max-md:min-h-0 max-md:grid-cols-1 max-md:gap-2 max-md:px-3 max-md:py-2">
         <div className="flex min-w-0 items-center gap-3">
           <Button
             aria-label="Back to articles"

@@ -73,7 +73,7 @@ export function ArticleEditorDocument({
         </section>
       )}
 
-      <section className="mx-auto mt-10 max-w-[860px] [&_.simple-editor-wrapper]:overflow-clip [&_.simple-editor-wrapper]:rounded-xl [&_.simple-editor-wrapper]:border [&_.simple-editor-wrapper]:bg-card [&_.tiptap-toolbar[data-variant=fixed]]:top-16 max-md:[&_.tiptap-toolbar[data-variant=fixed]]:sticky max-md:[&_.tiptap-toolbar[data-variant=fixed]]:top-[92px] max-md:[&_.tiptap-toolbar[data-variant=fixed]]:h-[var(--tt-toolbar-height)] max-md:[&_.tiptap-toolbar[data-variant=fixed]]:border-t-0 max-md:[&_.tiptap-toolbar[data-variant=fixed]]:border-b max-md:[&_.tiptap-toolbar[data-variant=fixed]]:border-b-[var(--tt-toolbar-border-color)] max-md:[&_.tiptap-toolbar[data-variant=fixed]]:pb-0 [&_[data-youtube-video]]:my-6 [&_[data-youtube-video]]:aspect-video [&_[data-youtube-video]]:w-full [&_[data-youtube-video]_iframe]:size-full [&_[data-youtube-video]_iframe]:border-0">
+      <section className="mx-auto mt-10 max-w-[860px] [&_.simple-editor-wrapper]:overflow-clip [&_.simple-editor-wrapper]:rounded-xl [&_.simple-editor-wrapper]:border [&_.simple-editor-wrapper]:bg-card [&_[data-youtube-video]]:my-6 [&_[data-youtube-video]]:aspect-video [&_[data-youtube-video]]:w-full [&_[data-youtube-video]_iframe]:size-full [&_[data-youtube-video]_iframe]:border-0">
         <div className="mb-3 flex items-baseline justify-between">
           <strong className="font-semibold text-secondary-foreground text-xs">
             Article body

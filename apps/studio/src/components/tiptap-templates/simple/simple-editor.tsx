@@ -347,11 +347,23 @@ export function SimpleEditor({
         <Toolbar
           ref={toolbarRef}
           style={{
-            ...(isMobile
+            ...(variant === "article"
               ? {
-                  bottom: `calc(100% - ${height - rect.y}px)`,
+                  borderBottom: "1px solid var(--tt-toolbar-border-color)",
+                  borderTop: 0,
+                  bottom: "auto",
+                  height: "var(--tt-toolbar-height)",
+                  paddingBottom: 0,
+                  position: "sticky",
+                  top: isMobile
+                    ? "var(--studio-article-header-height)"
+                    : "var(--studio-shell-header-height)",
                 }
-              : {}),
+              : isMobile
+                ? {
+                    bottom: `calc(100% - ${height - rect.y}px)`,
+                  }
+                : {}),
           }}
         >
           {mobileView === "main" ? (
