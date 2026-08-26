@@ -1,5 +1,4 @@
 import type { JSONContent } from "@tiptap/core";
-import { ImageIcon } from "lucide-react";
 import type { ChangeEvent } from "react";
 
 import { SimpleEditor } from "@/components/tiptap-templates/simple/simple-editor";
@@ -56,27 +55,21 @@ export function ArticleEditorDocument({
         </span>
       </div>
 
-      {bodyHasLeadFigure ? null : (
+      {bodyHasLeadFigure || !(heroMediaId || heroUrl) ? null : (
         <section className="mx-auto mt-10 max-w-[860px]">
           <div className="mb-3 flex items-baseline justify-between max-sm:flex-col max-sm:items-start max-sm:gap-1">
             <strong className="font-semibold text-secondary-foreground text-xs">
               Lead image
             </strong>
           </div>
-          {heroMediaId || heroUrl ? (
-            <img
-              alt={`Lead for ${title}`}
-              className={`block h-[280px] w-full rounded-lg bg-secondary ${heroFit === "contain" ? "object-contain" : "object-cover"}`}
-              height="900"
-              src={heroMediaId ? `/api/media/${heroMediaId}` : (heroUrl ?? "")}
-              style={{ objectPosition: `${heroFocalX}% ${heroFocalY}%` }}
-              width="1600"
-            />
-          ) : (
-            <div className="grid min-h-[180px] place-items-center rounded-lg border border-dashed bg-muted text-[13px] text-muted-foreground [&_svg]:mb-2 [&_svg]:w-6">
-              <ImageIcon /> <span>This article has no lead image</span>
-            </div>
-          )}
+          <img
+            alt={`Lead for ${title}`}
+            className={`block h-[280px] w-full rounded-lg bg-secondary ${heroFit === "contain" ? "object-contain" : "object-cover"}`}
+            height="900"
+            src={heroMediaId ? `/api/media/${heroMediaId}` : (heroUrl ?? "")}
+            style={{ objectPosition: `${heroFocalX}% ${heroFocalY}%` }}
+            width="1600"
+          />
         </section>
       )}
 
