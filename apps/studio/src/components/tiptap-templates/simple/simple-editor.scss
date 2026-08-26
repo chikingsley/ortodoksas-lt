@@ -61,7 +61,7 @@
 
 @media screen and (max-width: 640px) {
   .simple-editor-wrapper {
-    min-height: 540px;
+    min-height: 360px;
   }
 
   .simple-editor-search-and-replace {
@@ -72,11 +72,11 @@
 
   .simple-editor-content,
   .simple-editor-content .tiptap.ProseMirror.simple-editor {
-    min-height: 500px;
+    min-height: 320px;
   }
 
   .simple-editor-content .tiptap.ProseMirror.simple-editor {
-    padding: 2rem 1.25rem 8rem;
+    padding: 1.5rem 1rem 5rem;
   }
 
   .simple-editor-wrapper[data-variant="compact"] {

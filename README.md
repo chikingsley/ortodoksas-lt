@@ -15,12 +15,12 @@ Both apps use the same D1 database and R2 media bucket. D1 is the canonical
 source for articles, editorial baselines, field-level changes, revision history,
 and homepage placements. R2 is the canonical source for media objects.
 
-Tracked Wrangler files define local binding placeholders. Release operators
-provide `ORTODOKSAS_D1_DATABASE_ID` and `ORTODOKSAS_MEDIA_BUCKET_NAME`; each
-app generates an ignored, mode-`0600` `wrangler.production.jsonc` for production
-builds and deployments. Studio releases also receive
-`VITE_CLERK_PUBLISHABLE_KEY` as an explicit Vite build input and
-`ORTODOKSAS_STUDIO_WRITE_MODE` as the release maintenance gate.
+Each app has one tracked `wrangler.jsonc` source of truth. D1 and R2 bindings
+use Wrangler's automatic resource provisioning contract, which keeps resources
+linked to an existing Worker across deployments while local development uses
+local binding storage. Studio releases receive `VITE_CLERK_PUBLISHABLE_KEY` as
+the public Vite build input. Wrangler secrets hold server credentials and the
+editor allowlist.
 
 The historical crawl and migration evidence lives in the public
 [`chikingsley/ortodoksas-lt-source-archive`](https://huggingface.co/datasets/chikingsley/ortodoksas-lt-source-archive)

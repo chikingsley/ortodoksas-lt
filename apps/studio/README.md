@@ -31,9 +31,7 @@ pnpm db:migrate:local
 pnpm cf-typegen
 ```
 
-`pnpm dev` uses local Cloudflare bindings. `pnpm dev:remote` generates the operator-owned configuration and connects production D1 and R2 bindings for an explicitly selected remote-development session.
-
-Tracked Wrangler configuration contains local binding placeholders. Production builds read `ORTODOKSAS_D1_DATABASE_ID`, `ORTODOKSAS_MEDIA_BUCKET_NAME`, the build-time `VITE_CLERK_PUBLISHABLE_KEY`, and the release-controlled `ORTODOKSAS_STUDIO_WRITE_MODE`, then generate an ignored `wrangler.production.jsonc` with mode `0600`. The write mode accepts `frozen` during recovery capture and migration or `open` for routine editorial work. `pnpm deploy` and `pnpm deploy:dry-run:production` use that operator-owned configuration.
+`pnpm dev` uses local Cloudflare binding storage. The tracked `wrangler.jsonc` is the source of truth for development and production. Its ID-free D1 and R2 bindings use Wrangler's automatic provisioning contract, which preserves their link to the existing production Worker during deployment. `pnpm deploy` builds and deploys that configuration directly.
 
 Local Clerk configuration belongs in `.dev.vars`. Production uses Wrangler secrets for `CLERK_SECRET_KEY` and `CLERK_ALLOWED_USER_IDS`; `VITE_CLERK_PUBLISHABLE_KEY` remains the public browser key.
 
@@ -43,7 +41,7 @@ Studio exposes a staff sign-in flow. Production Clerk configuration uses Restric
 
 - `src/routes` contains the file-based application routes and the explicit raw media routes. TanStack Router's `_studio.tsx` pathless layout owns the shared authentication and authorization guard without adding a URL segment; `__root.tsx` owns the document shell, and `$articleId` marks a dynamic parameter.
 - `src/server` contains authenticated TanStack server functions and request-boundary coordination.
-- `src/editorial/articles/editor` contains the focused article-editing workflow.
+- `src/editorial/articles/editor` contains the focused article editor and its article-details panel.
 - `src/editorial/articles/inventory` contains article and page catalog tables, grouping, filters, and creation actions.
 - `src/editorial/homepage` contains homepage placement queries and composition.
 - `src/editorial/shell` contains Studio navigation and route-level workspace coordination.
@@ -59,7 +57,7 @@ Studio exposes a staff sign-in flow. Production Clerk configuration uses Restric
 
 The current implementation provides automatic article-quality checks, semantic Tiptap figures, D1 article persistence, optimistic revision conflicts, restore-as-new-version history, R2 media uploads, translation state, homepage placement, and publication verification. Each Tiptap extension corresponds to content present in the publication corpus.
 
-All editorial mutations pass through Clerk authentication, the server-side allowlist, and TanStack Start CSRF middleware. Raw media delivery stays under `/api/media/:id`; the remaining application reads and writes use typed server functions. See [CUTOVER.md](CUTOVER.md) for the production sequence.
+All editorial mutations pass through Clerk authentication, the server-side allowlist, and TanStack Start CSRF middleware. Raw media delivery stays under `/api/media/:id`; the remaining application reads and writes use typed server functions.
 
 ## Media and editorial history
 

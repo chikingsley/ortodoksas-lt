@@ -20,15 +20,12 @@
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "ortodoksas-studio",
-      "database_id": "00000000-0000-0000-0000-000000000000",
       "migrations_dir": "../../packages/db/migrations"
     }
   ],
   "r2_buckets": [
     {
-      "binding": "MEDIA",
-      "bucket_name": "ortodoksas-media-local"
+      "binding": "MEDIA"
     }
   ],
   "images": {
@@ -41,29 +38,6 @@
     "CLERK_AUTHORIZED_PARTIES": "http://localhost:5173,http://127.0.0.1:5173,https://ortodoksas-studio.grassinside.com",
     "PUBLICATION_ORIGIN": "https://ortodoksas.grassinside.com",
     "STUDIO_WRITE_MODE": "open"
-  },
-  "env": {
-    "studio": {
-      "d1_databases": [
-        {
-          "binding": "DB",
-          "database_name": "ortodoksas-studio",
-          "database_id": "00000000-0000-0000-0000-000000000000",
-          "migrations_dir": "../../packages/db/migrations",
-          "remote": true
-        }
-      ],
-      "r2_buckets": [
-        {
-          "binding": "MEDIA",
-          "bucket_name": "ortodoksas-media-local",
-          "remote": true
-        }
-      ],
-      "images": {
-        "binding": "IMAGES"
-      }
-    }
   },
   "observability": {
     "enabled": true,

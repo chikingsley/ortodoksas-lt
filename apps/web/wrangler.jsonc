@@ -20,18 +20,13 @@
   },
   "r2_buckets": [
     {
-      "binding": "MEDIA",
-      "bucket_name": "ortodoksas-media-local",
-      "remote": false
+      "binding": "MEDIA"
     }
   ],
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "ortodoksas-studio",
-      "database_id": "00000000-0000-0000-0000-000000000000",
-      "migrations_dir": "../../packages/db/migrations",
-      "remote": false
+      "migrations_dir": "../../packages/db/migrations"
     }
   ],
   "observability": {

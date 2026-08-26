@@ -213,7 +213,7 @@ The inventory follows established newsroom CMS conventions. Desktop rows are 67p
 
 At 560px each row becomes a card with a 48px thumbnail, two-line title, one-line summary, status, and date. Selection, language, and section cells yield to the core scan path. Status tabs form a stable two-column control group and the search field spans the panel.
 
-### Official Tiptap Simple Editor
+### Article body editor
 
 The editor frame contains the official Tiptap Simple Editor capability set. Its 44px toolbar provides undo and redo; headings 1–4; bullet, ordered, and task lists; blockquotes and code blocks; bold, italic, strike, code, underline, multicolor highlight, and links; superscript and subscript; four-way alignment; image upload; search and replace; and light or dark editor themes. Toolbar groups scroll horizontally when space tightens, and mobile highlight and link tools enter focused sub-toolbars with a clear return action.
 

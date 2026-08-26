@@ -5,11 +5,10 @@
   "type": "module",
   "scripts": {
     "build": "astro build",
-    "build:production": "pnpm config:production && CLOUDFLARE_VITE_WRANGLER_CONFIG_PATH=./wrangler.production.jsonc pnpm build",
+    "build:production": "pnpm build",
     "cf:types": "wrangler types",
     "cf:types:check": "wrangler types --check",
     "check": "ultracite check && pnpm cf:types:check && astro check && pnpm typecheck && pnpm test:react && astro build && pnpm test:worker && pnpm deploy:dry-run",
-    "config:production": "node ../../production-wrangler-config.mjs",
     "deploy": "pnpm build:production && wrangler deploy --config dist/server/wrangler.json",
     "deploy:dry-run": "wrangler deploy --config dist/server/wrangler.json --dry-run",
     "deploy:dry-run:production": "pnpm build:production && wrangler deploy --config dist/server/wrangler.json --dry-run",

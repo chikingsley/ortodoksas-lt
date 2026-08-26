@@ -67,7 +67,7 @@ const sectionClass =
   "border-b p-6 max-md:p-5 [&>h2]:mt-0 [&>h2]:mb-4 [&>h2]:text-[13px] [&>h2]:font-bold";
 const keepEditionLanguage = () => undefined;
 
-export function ArticleEditorInspector({
+export function ArticleEditorDetails({
   byline,
   bylineType,
   bylineUrl,
@@ -161,9 +161,12 @@ export function ArticleEditorInspector({
   );
 
   return (
-    <aside className="min-w-0 border-l bg-muted/30 max-md:border-t max-md:border-l-0">
+    <aside
+      aria-label="Article details"
+      className="min-w-0 border-l bg-muted/30 max-md:border-t max-md:border-l-0"
+    >
       <section className={sectionClass}>
-        <h2>Workflow</h2>
+        <h2>Status and history</h2>
         <dl className="m-0 [&>div]:flex [&>div]:items-center [&>div]:justify-between [&>div]:py-2 [&>div]:text-xs [&_dd]:m-0 [&_dd]:flex [&_dd]:items-center [&_dd]:gap-1.5 [&_dd]:font-semibold [&_dd]:capitalize [&_dt]:text-muted-foreground">
           <div>
             <dt>Status</dt>

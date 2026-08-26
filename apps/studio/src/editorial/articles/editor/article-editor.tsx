@@ -30,10 +30,10 @@ import {
   restoreArticleRevision,
   verifyArticlePublication,
 } from "./article-editor-api";
+import { ArticleEditorDetails } from "./article-editor-details";
 import { ArticleEditorDialogs } from "./article-editor-dialogs";
 import { ArticleEditorDocument } from "./article-editor-document";
 import { ArticleEditorHeader } from "./article-editor-header";
-import { ArticleEditorInspector } from "./article-editor-inspector";
 import type {
   ContentChange,
   PublicationVerification,
@@ -654,7 +654,7 @@ export function ArticleEditor({
       ) : null}
 
       {loadState === "ready" ? (
-        <div className="mx-auto grid max-w-[1320px] grid-cols-[minmax(0,1fr)_304px] border-x bg-card max-editor-mobile:block max-editor-compact:grid-cols-[minmax(0,1fr)_280px] max-editor-compact:border-l-0">
+        <div className="mx-auto grid max-w-[1320px] grid-cols-[minmax(0,1fr)_304px] border-x bg-card max-editor-mobile:block max-editor-mobile:max-w-none max-editor-compact:grid-cols-[minmax(0,1fr)_280px] max-editor-mobile:border-x-0 max-editor-compact:border-l-0">
           <ArticleEditorDocument
             body={body}
             bodyHasLeadFigure={bodyHasLeadFigure}
@@ -670,7 +670,7 @@ export function ArticleEditor({
             title={title}
           />
 
-          <ArticleEditorInspector
+          <ArticleEditorDetails
             byline={byline}
             bylineType={bylineType}
             bylineUrl={bylineUrl}

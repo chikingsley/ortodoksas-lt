@@ -1,4 +1,3 @@
-import { UserButton } from "@clerk/tanstack-react-start";
 import { siteLocales } from "@ortodoksas-lt/content/site";
 import { ArrowLeft, Eye, LoaderCircle, Save, Send } from "lucide-react";
 import { type MouseEvent, useCallback, useState } from "react";
@@ -87,7 +86,7 @@ export function ArticleEditorHeader({
 
   return (
     <>
-      <header className="sticky top-0 z-[70] flex min-h-16 items-center justify-between border-b bg-card/95 px-5 py-2.5 shadow-sm max-md:grid max-md:min-h-[102px] max-md:grid-cols-1 max-md:gap-2 max-md:px-3 max-md:py-2">
+      <header className="sticky top-0 z-[70] flex min-h-16 items-center justify-between border-b bg-card/95 px-5 py-2.5 shadow-sm max-md:grid max-md:min-h-[92px] max-md:grid-cols-1 max-md:gap-2 max-md:px-3 max-md:py-2">
         <div className="flex min-w-0 items-center gap-3">
           <Button
             aria-label="Back to articles"
@@ -108,11 +107,18 @@ export function ArticleEditorHeader({
             </span>
           </div>
         </div>
-        <div className="flex items-center gap-2 max-md:grid max-md:w-full max-md:grid-cols-3 [&_svg]:size-4">
-          <Button onClick={onPreview} variant="outline">
+        <div className="flex items-center gap-2 max-md:grid max-md:w-full max-md:grid-cols-3 [&_button]:min-w-0 [&_svg]:size-4 [&_svg]:flex-none">
+          <Button
+            aria-label="Preview article"
+            className="max-md:px-2"
+            onClick={onPreview}
+            variant="outline"
+          >
             <Eye /> <span>Preview</span>
           </Button>
           <Button
+            aria-label={saveLabel}
+            className="max-md:px-2"
             disabled={saveState === "saving"}
             onClick={onSave}
             variant="outline"
@@ -122,15 +128,23 @@ export function ArticleEditorHeader({
             ) : (
               <Save />
             )}
-            <span>{saveLabel}</span>
+            <span className="max-md:hidden">{saveLabel}</span>
+            <span className="md:hidden">Save</span>
           </Button>
-          <Button disabled={saveState === "saving"} onClick={onPublish}>
+          <Button
+            aria-label={status === "published" ? "Verify live" : "Publish"}
+            className="max-md:px-2"
+            disabled={saveState === "saving"}
+            onClick={onPublish}
+          >
             <Send />
-            <span>{status === "published" ? "Verify live" : "Publish"}</span>
+            <span className="max-md:hidden">
+              {status === "published" ? "Verify live" : "Publish"}
+            </span>
+            <span className="md:hidden">
+              {status === "published" ? "Verify" : "Publish"}
+            </span>
           </Button>
-          <span className="ml-1 max-md:absolute max-md:top-3 max-md:right-3">
-            <UserButton />
-          </span>
         </div>
       </header>
 
