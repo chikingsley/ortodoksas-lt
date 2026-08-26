@@ -235,16 +235,16 @@ describe("Astro Worker runtime", () => {
     );
     expect(publication.status).toBe(200);
     await expect(publication.text()).resolves.toContain(
-      '<link rel="canonical" href="https://ortodoksas.grassinside.com/2026/fts-paieska"'
+      '<link rel="canonical" href="https://ortodoksas.lt/2026/fts-paieska"'
     );
 
     const rss = await SELF.fetch("https://ortodoksas.test/rss.xml");
     expect(await rss.text()).toContain(
-      "https://ortodoksas.grassinside.com/2026/fts-paieska"
+      "https://ortodoksas.lt/2026/fts-paieska"
     );
     const sitemap = await SELF.fetch("https://ortodoksas.test/sitemap.xml");
     expect(await sitemap.text()).toContain(
-      "https://ortodoksas.grassinside.com/2026/fts-paieska"
+      "https://ortodoksas.lt/2026/fts-paieska"
     );
 
     await env.DB.prepare(

@@ -8,6 +8,14 @@
     {
       "pattern": "ortodoksas.grassinside.com",
       "custom_domain": true
+    },
+    {
+      "pattern": "ortodoksas.lt",
+      "custom_domain": true
+    },
+    {
+      "pattern": "www.ortodoksas.lt",
+      "custom_domain": true
     }
   ],
   "vars": {

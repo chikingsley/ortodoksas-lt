@@ -155,7 +155,7 @@ export function HomepageWorkspace({ articles }: Props) {
           <a
             aria-label="View public homepage"
             className={cn(buttonVariants({ size: "lg", variant: "outline" }))}
-            href="https://ortodoksas.grassinside.com"
+            href="https://ortodoksas.lt"
             rel="noreferrer"
             target="_blank"
           >

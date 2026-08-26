@@ -36,7 +36,7 @@
   },
   "vars": {
     "CLERK_AUTHORIZED_PARTIES": "http://localhost:5173,http://127.0.0.1:5173,https://ortodoksas-studio.grassinside.com",
-    "PUBLICATION_ORIGIN": "https://ortodoksas.grassinside.com",
+    "PUBLICATION_ORIGIN": "https://ortodoksas.lt",
     "STUDIO_WRITE_MODE": "open"
   },
   "observability": {
