@@ -1,10 +1,10 @@
 import { DatabaseSync } from "node:sqlite";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import cleanupMigration from "../../../packages/db/migrations/0012_blogger_content_cleanup.sql?raw";
-import linkTextRepairMigration from "../../../packages/db/migrations/0013_repair_malformed_publication_link_text.sql?raw";
-import baselineMediaMigration from "../../../packages/db/migrations/0015_canonicalize_baseline_media.sql?raw";
-import externalReferenceRepairMigration from "../../../packages/db/migrations/0016_repair_external_reference_url.sql?raw";
+import cleanupMigration from "./0012_blogger_content_cleanup.sql?raw";
+import linkTextRepairMigration from "./0013_repair_malformed_publication_link_text.sql?raw";
+import baselineMediaMigration from "./0015_canonicalize_baseline_media.sql?raw";
+import externalReferenceRepairMigration from "./0016_repair_external_reference_url.sql?raw";
 
 const mediaId = `media_${"a".repeat(64)}`;
 const recoveredSource = "https://legacy.example/recovered.jpg";

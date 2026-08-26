@@ -1,15 +1,12 @@
 import type { UpdateArticleInput } from "@ortodoksas-lt/content/article";
 import { describe, expect, it } from "vitest";
 
-import {
-  hashText,
-  textChangeProvenance,
-} from "../worker/services/article-content";
+import { hashText, textChangeProvenance } from "./services/article-content";
 import {
   publicArticleUrl,
   publicationTimestamp,
-} from "../worker/services/article-publication";
-import { translationMetadataUpdate } from "../worker/services/article-translation";
+} from "./services/article-publication";
+import { translationMetadataUpdate } from "./services/article-translation";
 
 describe("article service contracts", () => {
   it("builds canonical public URLs for Lithuanian and localized articles", () => {

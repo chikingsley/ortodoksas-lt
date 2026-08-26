@@ -24,6 +24,27 @@ export const translationReviewActionSchema = z.enum([
   "mark_pending",
 ]);
 
+export const articleBylineTypeSchema = z.enum(["person", "organization"]);
+
+export const articleBylineUrlSchema = z
+  .string()
+  .trim()
+  .max(4096)
+  .refine(
+    (value) => {
+      if (value === "") {
+        return true;
+      }
+      try {
+        const { protocol } = new URL(value);
+        return protocol === "http:" || protocol === "https:";
+      } catch {
+        return false;
+      }
+    },
+    { error: "Author profile URL must use HTTP or HTTPS" }
+  );
+
 const tiptapMarkSchema = z.looseObject({
   attrs: z.record(z.string(), z.unknown()).optional(),
   type: z.string().min(1),
@@ -55,6 +76,9 @@ export const createArticleSchema = z.strictObject({
     })
     .optional(),
   body: tiptapDocumentSchema,
+  byline: z.string().trim().max(200).default(""),
+  bylineType: articleBylineTypeSchema.default("person"),
+  bylineUrl: articleBylineUrlSchema.default(""),
   heroFit: z.enum(["cover", "contain"]).default("cover"),
   heroFocalX: z.number().int().min(0).max(100).default(50),
   heroFocalY: z.number().int().min(0).max(100).default(50),
@@ -65,6 +89,8 @@ export const createArticleSchema = z.strictObject({
   pageTemplate: pageTemplateSchema.default("standard"),
   publishedAt: z.number().int().nonnegative().nullable().optional(),
   section: z.string().trim().max(160).default(""),
+  seoDescription: z.string().trim().max(600).default(""),
+  seoTitle: z.string().trim().max(240).default(""),
   slug: z.string().trim().min(1).max(240),
   status: articleStatusSchema.default("draft"),
   summary: z.string().trim().max(600).default(""),
@@ -99,6 +125,9 @@ export const createTranslationDraftSchema = z.object({
 export const updateArticleSchema = createArticleSchema
   .pick({
     body: true,
+    byline: true,
+    bylineType: true,
+    bylineUrl: true,
     heroFit: true,
     heroFocalX: true,
     heroFocalY: true,
@@ -107,6 +136,8 @@ export const updateArticleSchema = createArticleSchema
     language: true,
     publishedAt: true,
     section: true,
+    seoDescription: true,
+    seoTitle: true,
     slug: true,
     status: true,
     summary: true,
@@ -114,11 +145,16 @@ export const updateArticleSchema = createArticleSchema
     translationKind: true,
   })
   .extend({
+    byline: z.string().trim().max(200).optional(),
+    bylineType: articleBylineTypeSchema.optional(),
+    bylineUrl: articleBylineUrlSchema.optional(),
     expectedTranslationSourceHash: z
       .string()
       .regex(/^[0-9a-f]{64}$/u)
       .optional(),
     expectedVersion: z.number().int().nonnegative(),
+    seoDescription: z.string().trim().max(600).optional(),
+    seoTitle: z.string().trim().max(240).optional(),
     translationReviewAction: translationReviewActionSchema.optional(),
   });
 

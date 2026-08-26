@@ -11,6 +11,9 @@
     "./quality": "./quality.ts",
     "./render": "./render.ts"
   },
+  "scripts": {
+    "test": "vitest run"
+  },
   "dependencies": {
     "@ortodoksas-lt/content": "workspace:*",
     "@tiptap/core": "^3.29.2",
@@ -24,5 +27,8 @@
     "@tiptap/html": "3.29.2",
     "@tiptap/starter-kit": "^3.29.2",
     "@tiptap/static-renderer": "^3.29.2"
+  },
+  "devDependencies": {
+    "vitest": "^4.1.10"
   }
 }

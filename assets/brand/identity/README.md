@@ -9,7 +9,7 @@ The exact archive is retained as `ortodoksas-identity-original.zip`.
 This directory stays outside application `public/` trees because it contains
 the editable Illustrator master and archival exports. The deployed horizontal
 SVG remains at
-`apps/web/public/assets/brand/production/ortodoksas-logo-official.svg`.
+`apps/web/public/assets/brand/ortodoksas-logo-official.svg`.
 
 ## Naming
 

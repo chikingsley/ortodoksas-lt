@@ -54,8 +54,8 @@ Studio exposes a staff sign-in flow. Production Clerk configuration uses Restric
 - `../../packages/content` contains contracts shared by both applications.
 - `../../packages/editor` contains the shared Tiptap schema and renderer.
 - `../../packages/db` contains the Drizzle schema and D1 migration history.
-- `test/worker.spec.ts` and `test/start-runtime.spec.ts` run inside workerd with the real Wrangler configuration. The public Astro app carries its corresponding emitted-Worker checks under `../web/worker`.
-- `test/article-services.spec.ts` and `test/inventory-groups.spec.ts` exercise adapter-neutral domain behavior in the Node lane.
+- Worker specs under `worker` run inside workerd with the real Wrangler configuration. The public Astro app carries its corresponding emitted-Worker checks under `../web/worker`.
+- React and Node-domain tests live beside their source under `src`. Shared editor tests live in `../../packages/editor`; D1 migration tests live beside the SQL under `../../packages/db/migrations`.
 
 The current implementation provides automatic article-quality checks, semantic Tiptap figures, D1 article persistence, optimistic revision conflicts, restore-as-new-version history, R2 media uploads, translation state, homepage placement, and publication verification. Each Tiptap extension corresponds to content present in the publication corpus.
 
@@ -63,6 +63,6 @@ All editorial mutations pass through Clerk authentication, the server-side allow
 
 ## Media and editorial history
 
-R2 stores immutable original image bytes under content-addressed keys. D1 stores the SHA-256 digest, dimensions, MIME type, source URL, aliases, and the stable media ID used by articles. Delivery through `/api/media/:id` supports responsive widths and AVIF/WebP negotiation through Cloudflare Images while preserving the original object.
+R2 stores immutable original image bytes under content-addressed keys. D1 stores the SHA-256 digest, dimensions, MIME type, R2 key, and stable media ID used by articles. Figure provenance preserves source-derived alt text and caption evidence. Migration `0012_blogger_content_cleanup.sql` retired the temporary source-URL columns and media-alias table after every runtime figure moved to its stable media ID. Delivery through `/api/media/:id` supports responsive widths and AVIF/WebP negotiation through Cloudflare Images while preserving the original object.
 
 Each article stores an editorial baseline alongside the editable canonical document. D1 keeps the current field-level difference, and every revision created by this Studio captures the complete versioned article state. Imported legacy revisions retain their exact body, title, summary, status, slug, language, and hero-presentation history; Studio labels them as partial and uses current values for fields the legacy system never recorded. Figure attributes identify source, generated, manual, or missing alt text and captions.

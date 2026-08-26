@@ -1,4 +1,7 @@
-import { tiptapDocumentSchema } from "@ortodoksas-lt/content/article";
+import {
+  articleBylineUrlSchema,
+  tiptapDocumentSchema,
+} from "@ortodoksas-lt/content/article";
 import { getArticleQualityIssues } from "@ortodoksas-lt/editor/quality";
 import { renderArticleDocument } from "@ortodoksas-lt/editor/render";
 import { useForm, useStore } from "@tanstack/react-form";
@@ -58,8 +61,13 @@ const LEADING_SLASH_PATTERN = /^\/+/;
 const LITHUANIAN_PREFIX_PATTERN = /^lt\//;
 const TRAILING_SLASH_PATTERN = /\/$/;
 const editorialMetadataSchema = z.object({
+  byline: z.string().trim().max(200),
+  bylineType: z.enum(["person", "organization"]),
+  bylineUrl: articleBylineUrlSchema,
   language: z.string().trim().min(2).max(16),
   section: z.string().trim().max(160),
+  seoDescription: z.string().trim().max(600),
+  seoTitle: z.string().trim().max(240),
   summary: z.string().trim().max(600),
   title: z.string().trim().min(1).max(240),
 });
@@ -93,13 +101,21 @@ export function ArticleEditor({
   >(() =>
     Promise.reject(new Error("Article persistence is still initializing"))
   );
-  const metadataForm = useForm({
-    defaultValues: {
+  const [metadataDefaults, setMetadataDefaults] = useState<EditorialMetadata>(
+    () => ({
+      byline: "",
+      bylineType: "person",
+      bylineUrl: "",
       language: "lt",
       section: article.section,
+      seoDescription: "",
+      seoTitle: "",
       summary: "",
       title: article.title,
-    },
+    })
+  );
+  const metadataForm = useForm({
+    defaultValues: metadataDefaults,
     onSubmit: async ({ meta, value }) => {
       submittedArticleId.current = await persistValidatedArticle.current(
         value,
@@ -118,7 +134,17 @@ export function ArticleEditor({
     },
   });
   const metadata = useStore(metadataForm.store, (state) => state.values);
-  const { language, section, summary, title } = metadata;
+  const {
+    byline,
+    bylineType,
+    bylineUrl,
+    language,
+    section,
+    seoDescription,
+    seoTitle,
+    summary,
+    title,
+  } = metadata;
   const [articleId, setArticleId] = useState<string | null>(null);
   const [baselineBody, setBaselineBody] = useState<JSONContent>(EMPTY_DOCUMENT);
   const [body, setBody] = useState<JSONContent>(EMPTY_DOCUMENT);
@@ -206,12 +232,19 @@ export function ArticleEditor({
         setChanges(baselineChanges);
         setBody(tiptapDocumentSchema.parse(JSON.parse(canonical.bodyJson)));
         setArticleId(canonical.id);
-        metadataForm.reset({
+        const loadedMetadata = {
+          byline: canonical.byline ?? "",
+          bylineType: canonical.bylineType,
+          bylineUrl: canonical.bylineUrl ?? "",
           language: canonical.language,
           section: canonical.section,
+          seoDescription: canonical.seoDescription ?? "",
+          seoTitle: canonical.seoTitle ?? "",
           summary: canonical.summary,
           title: canonical.title,
-        });
+        } satisfies EditorialMetadata;
+        setMetadataDefaults(loadedMetadata);
+        metadataForm.reset(loadedMetadata);
         setPublishedAt(canonical.publishedAt);
         setHeroMediaId(canonical.heroMediaId);
         setHeroFit(canonical.heroFit);
@@ -287,6 +320,41 @@ export function ArticleEditor({
     },
     [metadataForm]
   );
+  const updateByline = useCallback(
+    (value: string) => {
+      metadataForm.setFieldValue("byline", value);
+      setSaveState("dirty");
+    },
+    [metadataForm]
+  );
+  const updateBylineType = useCallback(
+    (value: "organization" | "person") => {
+      metadataForm.setFieldValue("bylineType", value);
+      setSaveState("dirty");
+    },
+    [metadataForm]
+  );
+  const updateBylineUrl = useCallback(
+    (value: string) => {
+      metadataForm.setFieldValue("bylineUrl", value);
+      setSaveState("dirty");
+    },
+    [metadataForm]
+  );
+  const updateSeoDescription = useCallback(
+    (value: string) => {
+      metadataForm.setFieldValue("seoDescription", value);
+      setSaveState("dirty");
+    },
+    [metadataForm]
+  );
+  const updateSeoTitle = useCallback(
+    (value: string) => {
+      metadataForm.setFieldValue("seoTitle", value);
+      setSaveState("dirty");
+    },
+    [metadataForm]
+  );
 
   const loadRevisions = useCallback(async (id: string): Promise<void> => {
     setRevisions(await fetchArticleRevisions(id));
@@ -301,6 +369,9 @@ export function ArticleEditor({
       setSaveState("saving");
       const payload = {
         body,
+        byline: values.byline,
+        bylineType: values.bylineType,
+        bylineUrl: values.bylineUrl,
         expectedVersion: Math.max(
           0,
           ...revisions.map((revision) => revision.version)
@@ -318,6 +389,8 @@ export function ArticleEditor({
         language: values.language,
         publishedAt,
         section: values.section.trim(),
+        seoDescription: values.seoDescription,
+        seoTitle: values.seoTitle,
         slug: getSlug(article.path),
         status: submitMeta.nextStatus,
         summary: values.summary,
@@ -466,10 +539,6 @@ export function ArticleEditor({
     });
   }, [publishOrVerify]);
 
-  const toggleHistory = useCallback(() => {
-    setHistoryOpen((open) => !open);
-  }, []);
-
   const restoreRevision = useCallback(
     async (version: number): Promise<void> => {
       if (!articleId) {
@@ -488,12 +557,19 @@ export function ArticleEditor({
         setHeroFit(restoredArticle.heroFit);
         setHeroFocalX(restoredArticle.heroFocalX);
         setHeroFocalY(restoredArticle.heroFocalY);
-        metadataForm.reset({
+        const restoredMetadata = {
+          byline: restoredArticle.byline ?? "",
+          bylineType: restoredArticle.bylineType,
+          bylineUrl: restoredArticle.bylineUrl ?? "",
           language: restoredArticle.language,
           section: restoredArticle.section,
+          seoDescription: restoredArticle.seoDescription ?? "",
+          seoTitle: restoredArticle.seoTitle ?? "",
           summary: restoredArticle.summary,
           title: restoredArticle.title,
-        });
+        } satisfies EditorialMetadata;
+        setMetadataDefaults(restoredMetadata);
+        metadataForm.reset(restoredMetadata);
         setStatus(restoredArticle.status);
         setTranslationGroupId(restoredArticle.translationGroupId);
         setTranslationKind(restoredArticle.translationKind);
@@ -595,27 +671,40 @@ export function ArticleEditor({
           />
 
           <ArticleEditorInspector
+            byline={byline}
+            bylineType={bylineType}
+            bylineUrl={bylineUrl}
             changesCount={changes.length}
+            hasLeadImage={Boolean(heroMediaId || article.hero)}
             heroFit={heroFit}
             heroFocalX={heroFocalX}
             heroFocalY={heroFocalY}
             historyOpen={historyOpen}
             language={language}
+            onBylineChange={updateByline}
+            onBylineTypeChange={updateBylineType}
+            onBylineUrlChange={updateBylineUrl}
             onHeroFitChange={updateHeroFit}
             onHeroFocalXChange={updateHeroFocalX}
             onHeroFocalYChange={updateHeroFocalY}
+            onHistoryOpenChange={setHistoryOpen}
             onMarkReviewed={markEditorReviewed}
             onOpenChanges={openChanges}
             onRestoreRevision={restoreRevisionFromButton}
             onSectionChange={updateSection}
-            onToggleHistory={toggleHistory}
-            publicPath={getSlug(article.path)}
+            onSeoDescriptionChange={updateSeoDescription}
+            onSeoTitleChange={updateSeoTitle}
+            publicPath={`${language === "lt" ? "" : `${language}/`}${getSlug(article.path)}`}
             qualityIssues={qualityIssues}
             restoringVersion={restoringVersion}
             revisions={revisions}
             saveState={saveState}
             section={section}
+            seoDescription={seoDescription}
+            seoTitle={seoTitle}
             status={status}
+            summary={summary}
+            title={title}
             translationKind={translationKind}
             translationReviewStatus={translationReviewStatus}
           />

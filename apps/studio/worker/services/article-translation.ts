@@ -75,12 +75,18 @@ export const translationMetadataUpdate = (
 
 export const getTranslationSourceHash = (source: {
   bodyJson: string;
+  byline: string | null;
+  bylineType: string;
+  bylineUrl: string | null;
   summary: string;
   title: string;
 }) =>
   hashText(
     JSON.stringify({
       body: JSON.parse(source.bodyJson) as TiptapDocument,
+      byline: source.byline,
+      bylineType: source.bylineType,
+      bylineUrl: source.bylineUrl,
       summary: source.summary,
       title: source.title,
     })
@@ -124,6 +130,9 @@ export const createTranslationDraft = async (input: {
   const sourceHash = await getTranslationSourceHash(source);
   const articleRecord: typeof articles.$inferSelect = {
     bodyJson,
+    byline: source.byline,
+    bylineType: source.bylineType,
+    bylineUrl: source.bylineUrl,
     createdAt: timestamp,
     heroFit: source.heroFit,
     heroFocalX: source.heroFocalX,

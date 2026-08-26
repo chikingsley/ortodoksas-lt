@@ -7,5 +7,10 @@
     "types": ["./worker-configuration.d.ts", "vite/client"],
     "strictNullChecks": true
   },
-  "include": ["worker", "shared"]
+  "include": ["worker", "shared"],
+  "exclude": [
+    "worker/**/*.spec.ts",
+    "worker/test-env.d.ts",
+    "worker/test-setup.ts"
+  ]
 }

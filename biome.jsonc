@@ -13,6 +13,7 @@
       "!dist",
       "!apps/**/dist",
       "!docs/web",
+      "!assets/brand/**/*.svg",
       "!apps/web/index.html",
       "!apps/web/public/assets/brand/**/*.svg",
       "!apps/studio/public/assets/brand/**/*.svg",

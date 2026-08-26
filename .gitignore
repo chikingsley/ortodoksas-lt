@@ -18,7 +18,7 @@ apps/web/.canonical-content/
 .dev.vars*
 worker-configuration.d.ts.tmp
 
-# Canva ZIP extraction workspace; curated brand assets live under public/assets.
+# Canva ZIP extraction workspace; runtime and research brand assets are separated.
 Orth_inst-template-feed.zip.sb-*/
 
 # Editor directories and files

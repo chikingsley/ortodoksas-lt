@@ -135,7 +135,7 @@ export function HomepageWorkspace({ articles }: Props) {
             Homepage
           </h1>
           {state === "saved" ? (
-            <p className="mt-1 mb-0 text-primary text-xs" role="status">
+            <p className="mt-1 mb-0 text-success text-xs" role="status">
               Layout saved.
             </p>
           ) : null}

@@ -1,7 +1,7 @@
-import { canonicalizeTiptapDocument } from "@ortodoksas-lt/editor/canonicalize";
-import { getArticleQualityIssues } from "@ortodoksas-lt/editor/quality";
-import { renderArticleBody } from "@ortodoksas-lt/editor/render";
 import { describe, expect, it } from "vitest";
+import { canonicalizeTiptapDocument } from "./canonicalize";
+import { getArticleQualityIssues } from "./quality";
+import { renderArticleBody } from "./render";
 
 describe("canonical article content", () => {
   it("keeps intentional single hard breaks inside a paragraph", () => {

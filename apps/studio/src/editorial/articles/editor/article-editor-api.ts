@@ -41,6 +41,7 @@ const TRANSLATION_CREATION_FIELDS = new Set([
   "translationSourceArticleId",
   "translationSourceHash",
 ]);
+const IMMUTABLE_UPDATE_FIELDS = new Set(["kind", "translationGroupId"]);
 
 export async function fetchArticleWorkspace(
   articleId: string,
@@ -80,11 +81,19 @@ export function persistArticle({
       ([field]) => !TRANSLATION_CREATION_FIELDS.has(field)
     )
   );
-  return articleId
-    ? updateArticleMutation({ data: { articleId, payload } })
-    : createArticleMutation({
-        data: { ...interactivePayload, baseline },
-      });
+  if (articleId) {
+    const updatePayload = Object.fromEntries(
+      Object.entries(payload).filter(
+        ([field]) => !IMMUTABLE_UPDATE_FIELDS.has(field)
+      )
+    );
+    return updateArticleMutation({
+      data: { articleId, payload: updatePayload },
+    });
+  }
+  return createArticleMutation({
+    data: { ...interactivePayload, baseline },
+  });
 }
 
 export async function verifyArticlePublication(

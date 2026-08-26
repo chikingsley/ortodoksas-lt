@@ -2,6 +2,9 @@ import type { JSONContent } from "@tiptap/core";
 
 export interface StoredArticle {
   bodyJson: string;
+  byline: string | null;
+  bylineType: "organization" | "person";
+  bylineUrl: string | null;
   heroFit: "contain" | "cover";
   heroFocalX: number;
   heroFocalY: number;
@@ -12,6 +15,8 @@ export interface StoredArticle {
   language: string;
   publishedAt: number | null;
   section: string;
+  seoDescription: string | null;
+  seoTitle: string | null;
   slug: string;
   status: "draft" | "scheduled" | "published" | "archived";
   summary: string;

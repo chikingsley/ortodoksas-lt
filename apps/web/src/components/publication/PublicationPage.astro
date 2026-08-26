@@ -26,6 +26,7 @@ const {
   localized,
   original,
   page,
+  searchTitle,
   translationDisclosure,
   translationState,
   structuredTemplate,
@@ -39,7 +40,7 @@ const heroObjectPosition = `${page.heroFocalX}% ${page.heroFocalY}%`;
 ---
 
 <SiteLayout
-  title={`${displayTitle} · ${localized ? copy.edition : "ortodoksas.lt"}`}
+  title={`${searchTitle} · ortodoksas.lt`}
   description={description}
   canonicalPath={canonicalPath}
   image={page.hero}
@@ -53,7 +54,7 @@ const heroObjectPosition = `${page.heroFocalX}% ${page.heroFocalY}%`;
       <header class="text-center">
         {page.kind === "article" ? <div class="text-[10px] font-bold uppercase tracking-[0.08em] text-primary">{getSectionLabel(page.section, locale)}</div> : null}
         <h1 class:list={["mx-auto mb-5 text-balance font-serif text-[clamp(40px,6vw,68px)] font-bold leading-[0.99] tracking-[-0.03em] [overflow-wrap:anywhere] max-sm:text-[clamp(35px,11vw,50px)]", page.kind === "article" ? "mt-3" : "mt-0"]}>{displayTitle}</h1>
-        {page.published ? <div class="flex justify-center gap-[18px] text-[10px] uppercase tracking-[0.06em] text-muted-foreground max-sm:flex-col max-sm:gap-[7px]"><time datetime={page.published}>{formatDate(page.published, locale)}</time></div> : null}
+        {page.published || page.byline ? <div class="flex justify-center gap-[18px] text-[10px] tracking-[0.06em] text-muted-foreground max-sm:flex-col max-sm:gap-[7px]">{page.published ? <time class="uppercase" datetime={page.published}>{formatDate(page.published, locale)}</time> : null}{page.byline ? page.bylineUrl ? <a class="font-semibold text-foreground hover:text-primary" href={page.bylineUrl}>{page.byline}</a> : <span class="font-semibold text-foreground">{page.byline}</span> : null}</div> : null}
         {localized && original && translationState !== "original" ? (
           <p class="mb-7 mt-3 flex justify-center gap-1.5 text-xs leading-[1.4] text-muted-foreground">
             {translationDisclosure}

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { parseAuthorizedParties } from "../src/server/authorized-parties";
+import { parseAuthorizedParties } from "./authorized-parties";
 
 describe("Clerk authorized parties", () => {
   it("normalizes and deduplicates configured origins", () => {

@@ -43,6 +43,27 @@ describe("article mutation boundaries", () => {
     ).toBe(false);
   });
 
+  it("limits public author links to HTTP and HTTPS", () => {
+    for (const bylineUrl of [
+      "javascript:alert(1)",
+      "data:text/html,<script>alert(1)</script>",
+      "mailto:editor@example.com",
+      "ftp://example.com/profile",
+    ]) {
+      expect(
+        createArticleSchema.safeParse({ ...article, bylineUrl }).success
+      ).toBe(false);
+    }
+    for (const bylineUrl of [
+      "http://example.com/profile",
+      "https://example.com/profile",
+    ]) {
+      expect(
+        createArticleSchema.safeParse({ ...article, bylineUrl }).success
+      ).toBe(true);
+    }
+  });
+
   it("reserves translation creation for the dedicated workflow", () => {
     expect(
       createInteractiveArticleSchema.safeParse({

@@ -27,13 +27,7 @@ export default defineConfig({
     }),
   ],
   test: {
-    exclude: [
-      "test/article-content.spec.ts",
-      "test/blogger-content-cleanup-migration.spec.ts",
-      "test/person-directory-normalization-migration.spec.ts",
-      "test/translation-readiness-migration.spec.ts",
-    ],
-    include: ["test/**/*.spec.ts"],
-    setupFiles: ["./test/apply-migrations.ts"],
+    include: ["worker/**/*.spec.ts"],
+    setupFiles: ["./worker/test-setup.ts"],
   },
 });

@@ -33,7 +33,7 @@ describe("cleanHtml", () => {
     expect(
       cleanHtml(
         '<figure data-media-id="media_lead"><img alt="Lead" src="/api/media/media_lead"></figure><p>Body</p>',
-        { hero: "/media/files/lead.jpg", heroMediaId: "media_lead" }
+        { hero: "/api/media/media_lead", heroMediaId: "media_lead" }
       )
     ).toBe("<p>Body</p>");
   });

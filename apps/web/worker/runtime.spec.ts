@@ -21,6 +21,84 @@ describe("Astro Worker runtime", () => {
     await expect(response.text()).resolves.toContain("Ortodoksas");
   });
 
+  it("renders article SEO fallbacks, overrides, and a typed public byline", async () => {
+    const groupId = "91111111-1111-4111-8111-111111111111";
+    const articleId = "a1111111-1111-4111-8111-111111111111";
+    const body = JSON.stringify({
+      content: [
+        {
+          content: [{ text: "Visible article body", type: "text" }],
+          type: "paragraph",
+        },
+      ],
+      type: "doc",
+    });
+    await env.DB.batch([
+      env.DB.prepare(
+        "INSERT INTO publication_groups (id, kind, page_template, created_at, updated_at) VALUES (?, 'article', 'standard', 1, 1)"
+      ).bind(groupId),
+      env.DB.prepare(
+        `INSERT INTO articles (
+          id, translation_group_id, language, slug, title, summary, body_json,
+          byline, byline_type, status, translation_kind, published_at,
+          created_at, updated_at, kind, translation_review_status
+        ) VALUES (?, ?, 'lt', '2026/article-metadata', 'Visible title',
+          'Visible summary', ?, 'Vitalijus Mockus', 'person', 'published',
+          'original', 10, 1, 1, 'article', 'not_required')`
+      ).bind(articleId, groupId, body),
+    ]);
+
+    const fallbackResponse = await SELF.fetch(
+      "https://ortodoksas.test/2026/article-metadata"
+    );
+    expect(fallbackResponse.status).toBe(200);
+    const fallbackHtml = await fallbackResponse.text();
+    expect(fallbackHtml).toContain(
+      "<title>Visible title · ortodoksas.lt</title>"
+    );
+    expect(fallbackHtml).toContain(
+      '<meta name="description" content="Visible summary">'
+    );
+    expect(fallbackHtml).toContain(
+      '"author":{"@type":"Person","name":"Vitalijus Mockus"}'
+    );
+
+    await env.DB.prepare(
+      `UPDATE articles
+       SET seo_title = ?, seo_description = ?, byline = ?, byline_type = ?,
+           byline_url = ?, updated_at = 2
+       WHERE id = ?`
+    )
+      .bind(
+        "Custom search title",
+        "Custom search description",
+        "ortodoksas.lt Editorial Team",
+        "organization",
+        "https://ortodoksas.lt/p/kontaktai",
+        articleId
+      )
+      .run();
+
+    const customResponse = await SELF.fetch(
+      "https://ortodoksas.test/2026/article-metadata"
+    );
+    expect(customResponse.status).toBe(200);
+    const customHtml = await customResponse.text();
+    expect(customHtml).toContain(
+      "<title>Custom search title · ortodoksas.lt</title>"
+    );
+    expect(customHtml).toContain(
+      '<meta name="description" content="Custom search description">'
+    );
+    expect(customHtml).toContain(">Visible title</h1>");
+    expect(customHtml).toContain(
+      '"author":{"@type":"Organization","name":"ortodoksas.lt Editorial Team","url":"https://ortodoksas.lt/p/kontaktai"}'
+    );
+    expect(customHtml).toContain(
+      '<a class="font-semibold text-foreground hover:text-primary" href="https://ortodoksas.lt/p/kontaktai">ortodoksas.lt Editorial Team</a>'
+    );
+  });
+
   it("returns the publication 404 for an unknown catch-all path", async () => {
     const response = await SELF.fetch(
       "https://ortodoksas.test/unknown-publication-path"

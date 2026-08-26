@@ -14,6 +14,9 @@ import type { SiteLocale } from "../i18n/config";
 export type ArticleRow = typeof articles.$inferSelect;
 export type PublicationRow = Pick<
   ArticleRow,
+  | "byline"
+  | "bylineType"
+  | "bylineUrl"
   | "heroMediaId"
   | "heroFit"
   | "heroFocalX"
@@ -23,6 +26,8 @@ export type PublicationRow = Pick<
   | "labelsJson"
   | "publishedAt"
   | "section"
+  | "seoDescription"
+  | "seoTitle"
   | "slug"
   | "summary"
   | "title"
@@ -32,6 +37,9 @@ export type PublicationRow = Pick<
 > & { pageTemplate: string };
 
 export const catalogSelection = {
+  byline: articles.byline,
+  bylineType: articles.bylineType,
+  bylineUrl: articles.bylineUrl,
   heroFit: articles.heroFit,
   heroFocalX: articles.heroFocalX,
   heroFocalY: articles.heroFocalY,
@@ -42,6 +50,8 @@ export const catalogSelection = {
   pageTemplate: publicationGroups.pageTemplate,
   publishedAt: articles.publishedAt,
   section: articles.section,
+  seoDescription: articles.seoDescription,
+  seoTitle: articles.seoTitle,
   slug: articles.slug,
   summary: articles.summary,
   title: articles.title,
@@ -98,6 +108,9 @@ export function catalogEntry(
       ? placement.slot
       : undefined;
   return {
+    byline: row.byline,
+    bylineType: row.bylineType === "organization" ? "organization" : "person",
+    bylineUrl: row.bylineUrl,
     description: row.summary,
     hero: row.heroMediaId ? `/api/media/${row.heroMediaId}` : null,
     heroAlt: row.heroMediaId ? heroes.get(row.heroMediaId) || row.title : "",
@@ -113,6 +126,8 @@ export function catalogEntry(
     path: articlePath(row.slug),
     published: row.publishedAt ? new Date(row.publishedAt).toISOString() : null,
     section: row.section,
+    seoDescription: row.seoDescription,
+    seoTitle: row.seoTitle,
     title: row.title,
     translationGroupId: row.translationGroupId,
     translationKind: row.translationKind as TranslationKind,

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { requireStudioWritesOpen } from "../src/server/write-mode";
+import { requireStudioWritesOpen } from "./write-mode";
 
 describe("Studio write mode", () => {
   it("allows the standard editorial mode", () => {

@@ -4,6 +4,9 @@ import { z } from "zod";
 type ArticleRecord = typeof articles.$inferSelect;
 
 const articleRevisionMetadataSchema = z.looseObject({
+  byline: z.string().nullable().optional(),
+  bylineType: z.enum(["organization", "person"]).optional(),
+  bylineUrl: z.string().nullable().optional(),
   heroFit: z.enum(["contain", "cover"]).optional(),
   heroFocalX: z.number().int().optional(),
   heroFocalY: z.number().int().optional(),
@@ -17,7 +20,7 @@ const articleRevisionMetadataSchema = z.looseObject({
   slug: z.string().optional(),
   snapshotCompleteness: z.enum(["complete", "legacy_partial"]).optional(),
   snapshotVersion: z
-    .union([z.literal(2), z.literal(3), z.literal(4)])
+    .union([z.literal(2), z.literal(3), z.literal(4), z.literal(5)])
     .optional(),
   status: z.enum(["archived", "draft", "published", "scheduled"]).optional(),
   summary: z.string().optional(),
@@ -33,6 +36,9 @@ const articleRevisionMetadataSchema = z.looseObject({
 });
 
 export interface ArticleRevisionMetadata {
+  byline: string | null;
+  bylineType: "organization" | "person";
+  bylineUrl: string | null;
   heroFit: "contain" | "cover";
   heroFocalX: number;
   heroFocalY: number;
@@ -45,7 +51,7 @@ export interface ArticleRevisionMetadata {
   seoTitle: string | null;
   slug: string;
   snapshotCompleteness: "complete" | "legacy_partial";
-  snapshotVersion: 4;
+  snapshotVersion: 5;
   status: "archived" | "draft" | "published" | "scheduled";
   summary: string;
   title: string;
@@ -71,6 +77,9 @@ const parseLabels = (labelsJson: string): string[] => {
 export const articleRevisionMetadata = (
   article: ArticleRecord
 ): ArticleRevisionMetadata => ({
+  byline: article.byline,
+  bylineType: article.bylineType === "organization" ? "organization" : "person",
+  bylineUrl: article.bylineUrl,
   heroFit: article.heroFit === "contain" ? "contain" : "cover",
   heroFocalX: article.heroFocalX,
   heroFocalY: article.heroFocalY,
@@ -83,7 +92,7 @@ export const articleRevisionMetadata = (
   seoTitle: article.seoTitle,
   slug: article.slug,
   snapshotCompleteness: "complete",
-  snapshotVersion: 4,
+  snapshotVersion: 5,
   status:
     article.status === "archived" ||
     article.status === "published" ||
@@ -117,6 +126,6 @@ export const parseArticleRevisionMetadata = (
     JSON.parse(metadataJson)
   );
   return parsed.success
-    ? { ...fallback, ...parsed.data, snapshotVersion: 4 }
+    ? { ...fallback, ...parsed.data, snapshotVersion: 5 }
     : fallback;
 };

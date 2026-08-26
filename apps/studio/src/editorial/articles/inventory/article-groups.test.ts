@@ -1,13 +1,12 @@
 import { describe, expect, it } from "vitest";
-
+import type { CatalogArticle } from "../types";
 import {
   filterArticleGroups,
   getGroupPublicationSummary,
   getPageRole,
   groupArticles,
   groupPagesByRole,
-} from "../src/editorial/articles/inventory/article-groups";
-import type { CatalogArticle } from "../src/editorial/articles/types";
+} from "./article-groups";
 
 const article = (
   overrides: Partial<CatalogArticle> & Pick<CatalogArticle, "id" | "language">

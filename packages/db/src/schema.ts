@@ -66,6 +66,9 @@ export const articles = sqliteTable(
   "articles",
   {
     bodyJson: text("body_json").notNull(),
+    byline: text("byline"),
+    bylineType: text("byline_type").notNull().default("person"),
+    bylineUrl: text("byline_url"),
     createdAt: integer("created_at").notNull(),
     heroFit: text("hero_fit").notNull().default("cover"),
     heroFocalX: integer("hero_focal_x").notNull().default(50),

@@ -36,6 +36,9 @@ function catalogEntry(
   overrides: Partial<CatalogEntry> = {}
 ): CatalogEntry {
   return {
+    byline: null,
+    bylineType: "person",
+    bylineUrl: null,
     description: `${path} description`,
     hero: `/media/${path}.jpg`,
     heroAlt: `${path} image`,
@@ -49,6 +52,8 @@ function catalogEntry(
     path,
     published,
     section: "Naujienos",
+    seoDescription: null,
+    seoTitle: null,
     title: path,
     ...overrides,
   };

@@ -3,22 +3,22 @@ import { articleRevisions, mediaAssets } from "@ortodoksas-lt/db";
 import { and, eq } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
 
-import { getDatabase } from "../worker/db";
+import { getDatabase } from "./db";
 import {
   createArticle,
   getArticleWorkspace,
   restoreArticleRevision,
   updateArticle,
-} from "../worker/services/article-operations";
+} from "./services/article-operations";
 import {
   createTranslationDraft,
   getTranslationSourceHash,
-} from "../worker/services/article-translation";
+} from "./services/article-translation";
 import {
   getHomepagePlacements,
   updateHomepagePlacements,
-} from "../worker/services/homepage-operations";
-import { serveMedia, uploadMedia } from "../worker/services/media-operations";
+} from "./services/homepage-operations";
+import { serveMedia, uploadMedia } from "./services/media-operations";
 
 const IMAGE_BYTES = Uint8Array.from(
   atob(
@@ -213,10 +213,15 @@ describe("Studio Worker services", () => {
           ],
           type: "doc",
         },
+        byline: "Editorial Team",
+        bylineType: "organization",
+        bylineUrl: "https://ortodoksas.lt/p/kontaktai",
         heroSourceUrl: hero.media.url,
         labels: ["Original label"],
         language: "lt",
         section: "Original section",
+        seoDescription: "Original search description",
+        seoTitle: "Original search title",
         slug,
         summary: "Worker runtime test",
         title: "Patikros straipsnis",
@@ -230,7 +235,12 @@ describe("Studio Worker services", () => {
     const workspace = await getArticleWorkspace(database, created.data.id);
     expect(workspace).toMatchObject({
       canonical: {
+        byline: "Editorial Team",
+        bylineType: "organization",
+        bylineUrl: "https://ortodoksas.lt/p/kontaktai",
         heroMediaId: hero.media.id,
+        seoDescription: "Original search description",
+        seoTitle: "Original search title",
         status: "draft",
         title: "Patikros straipsnis",
       },
@@ -251,7 +261,54 @@ describe("Studio Worker services", () => {
           ],
           type: "doc",
         },
+        byline: "Vitalijus Mockus",
+        bylineType: "person",
+        bylineUrl: "https://ortodoksas.lt/lt/zmogus/panaretos",
         expectedVersion: 1,
+        heroSourceUrl: hero.media.url,
+        labels: ["Changed label"],
+        language: "lt",
+        section: "Changed section",
+        seoDescription: "Published search description",
+        seoTitle: "Published search title",
+        slug,
+        status: "published",
+        summary: "Complete worker runtime test.",
+        title: "Patikros straipsnis",
+        translationKind: "original",
+      },
+    });
+    expect(published).toMatchObject({
+      data: { status: "published", version: 2 },
+      ok: true,
+    });
+    await expect(
+      getArticleWorkspace(database, created.data.id)
+    ).resolves.toMatchObject({
+      canonical: {
+        byline: "Vitalijus Mockus",
+        bylineType: "person",
+        bylineUrl: "https://ortodoksas.lt/lt/zmogus/panaretos",
+        seoDescription: "Published search description",
+        seoTitle: "Published search title",
+      },
+    });
+
+    const legacyCompatibleSave = await updateArticle({
+      articleId: created.data.id,
+      database,
+      editorId: EDITOR_ID,
+      payload: {
+        body: {
+          content: [
+            {
+              content: [{ text: "Turinys", type: "text" }],
+              type: "paragraph",
+            },
+          ],
+          type: "doc",
+        },
+        expectedVersion: 2,
         heroSourceUrl: hero.media.url,
         labels: ["Changed label"],
         language: "lt",
@@ -263,9 +320,20 @@ describe("Studio Worker services", () => {
         translationKind: "original",
       },
     });
-    expect(published).toMatchObject({
-      data: { status: "published", version: 2 },
+    expect(legacyCompatibleSave).toMatchObject({
+      data: { version: 3 },
       ok: true,
+    });
+    await expect(
+      getArticleWorkspace(database, created.data.id)
+    ).resolves.toMatchObject({
+      canonical: {
+        byline: "Vitalijus Mockus",
+        bylineType: "person",
+        bylineUrl: "https://ortodoksas.lt/lt/zmogus/panaretos",
+        seoDescription: "Published search description",
+        seoTitle: "Published search title",
+      },
     });
 
     const staleSave = await updateArticle({
@@ -282,7 +350,7 @@ describe("Studio Worker services", () => {
       },
     });
     expect(staleSave).toMatchObject({
-      currentVersion: 2,
+      currentVersion: 3,
       ok: false,
       status: 409,
     });
@@ -331,7 +399,7 @@ describe("Studio Worker services", () => {
           ],
           type: "doc",
         },
-        expectedVersion: 2,
+        expectedVersion: 3,
         heroSourceUrl: hero.media.url,
         labels: ["Changed label"],
         language: "lt",
@@ -360,19 +428,24 @@ describe("Studio Worker services", () => {
       articleId: created.data.id,
       database,
       editorId: EDITOR_ID,
-      expectedVersion: 2,
+      expectedVersion: 3,
       version: 1,
     });
     expect(restored).toMatchObject({
       data: {
         article: {
+          byline: "Editorial Team",
+          bylineType: "organization",
+          bylineUrl: "https://ortodoksas.lt/p/kontaktai",
           labelsJson: '["Original label"]',
           publishedAt: null,
           section: "Original section",
+          seoDescription: "Original search description",
+          seoTitle: "Original search title",
           status: "draft",
         },
         restoredFrom: 1,
-        version: 3,
+        version: 4,
       },
       ok: true,
     });
@@ -387,6 +460,19 @@ describe("Studio Worker services", () => {
       article: { language: "en" },
       kind: "created",
     });
+    if (translation.kind === "created") {
+      await expect(
+        getArticleWorkspace(database, translation.article.id)
+      ).resolves.toMatchObject({
+        canonical: {
+          byline: "Editorial Team",
+          bylineType: "organization",
+          bylineUrl: "https://ortodoksas.lt/p/kontaktai",
+          seoDescription: null,
+          seoTitle: null,
+        },
+      });
+    }
     await expect(
       createTranslationDraft({
         database,
@@ -505,15 +591,9 @@ describe("Studio Worker services", () => {
       editorId: EDITOR_ID,
       payload: {
         ...translationPayload,
-        body: {
-          content: [
-            {
-              content: [{ text: "Edited translation", type: "text" }],
-              type: "paragraph",
-            },
-          ],
-          type: "doc",
-        },
+        byline: "Translated author",
+        bylineType: "person",
+        bylineUrl: "https://example.com/translated-author",
         expectedVersion: 3,
       },
     });
@@ -545,6 +625,9 @@ describe("Studio Worker services", () => {
           ],
           type: "doc",
         },
+        byline: "Translated author",
+        bylineType: "person",
+        bylineUrl: "https://example.com/translated-author",
         expectedTranslationSourceHash: initialSourceHash,
         expectedVersion: 4,
         translationReviewAction: "approve",
@@ -579,12 +662,15 @@ describe("Studio Worker services", () => {
         body: {
           content: [
             {
-              content: [{ text: "Edited source body", type: "text" }],
+              content: [{ text: "Source body", type: "text" }],
               type: "paragraph",
             },
           ],
           type: "doc",
         },
+        byline: "Updated source author",
+        bylineType: "person",
+        bylineUrl: "https://example.com/source-author",
         expectedVersion: 1,
         language: "lt",
         slug: sourceSlug,

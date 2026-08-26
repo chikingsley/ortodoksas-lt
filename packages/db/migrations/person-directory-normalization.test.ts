@@ -2,7 +2,7 @@ import { DatabaseSync } from "node:sqlite";
 
 import { afterEach, describe, expect, it } from "vitest";
 
-import normalizationMigration from "../../../packages/db/migrations/0014_person_directory_normalization.sql?raw";
+import normalizationMigration from "./0014_person_directory_normalization.sql?raw";
 
 describe("person directory normalization migration", () => {
   const databases: DatabaseSync[] = [];

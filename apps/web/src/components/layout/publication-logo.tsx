@@ -10,7 +10,7 @@ export default function PublicationLogo({ className }: Props) {
       alt="ortodoksas.lt"
       className={cn("block h-auto w-[210px]", className)}
       height="193"
-      src="/assets/brand/production/ortodoksas-logo-official.svg"
+      src="/assets/brand/ortodoksas-logo-official.svg"
       width="1022"
     />
   );

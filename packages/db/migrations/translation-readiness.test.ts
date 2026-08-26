@@ -1,7 +1,7 @@
 import { DatabaseSync } from "node:sqlite";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import readinessMigration from "../../../packages/db/migrations/0011_translation_readiness_backfill.sql?raw";
+import readinessMigration from "./0011_translation_readiness_backfill.sql?raw";
 
 describe("translation readiness migration", () => {
   let database: DatabaseSync;

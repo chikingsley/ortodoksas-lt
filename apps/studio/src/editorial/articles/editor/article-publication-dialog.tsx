@@ -65,7 +65,7 @@ export function ArticlePublicationDialog({
         </div>
 
         {qualityReady ? (
-          <div className="flex items-start gap-2.5 rounded-lg border border-primary/20 bg-accent p-3 text-primary text-sm">
+          <div className="flex items-start gap-2.5 rounded-lg border border-success/20 bg-success-muted p-3 text-sm text-success">
             <CheckCircle2 className="mt-0.5 size-4 flex-none" />
             <span>Every automatic quality check passes.</span>
           </div>
@@ -87,8 +87,8 @@ export function ArticlePublicationDialog({
         )}
 
         {publicationState === "verified" && verification ? (
-          <div className="rounded-lg border border-primary/20 bg-accent p-3 text-sm">
-            <div className="flex items-center gap-2 font-semibold text-primary">
+          <div className="rounded-lg border border-success/20 bg-success-muted p-3 text-sm">
+            <div className="flex items-center gap-2 font-semibold text-success">
               <CheckCircle2 className="size-4" /> Live article verified
             </div>
             <a

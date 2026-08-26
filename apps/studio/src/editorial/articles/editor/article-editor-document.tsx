@@ -63,12 +63,12 @@ export function ArticleEditorDocument({
               Lead image
             </strong>
           </div>
-          {heroUrl ? (
+          {heroMediaId || heroUrl ? (
             <img
               alt={`Lead for ${title}`}
               className={`block h-[280px] w-full rounded-lg bg-secondary ${heroFit === "contain" ? "object-contain" : "object-cover"}`}
               height="900"
-              src={heroMediaId ? `/api/media/${heroMediaId}` : heroUrl}
+              src={heroMediaId ? `/api/media/${heroMediaId}` : (heroUrl ?? "")}
               style={{ objectPosition: `${heroFocalX}% ${heroFocalY}%` }}
               width="1600"
             />

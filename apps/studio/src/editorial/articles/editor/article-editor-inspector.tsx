@@ -2,35 +2,63 @@ import { Check, ChevronDown, History, X } from "lucide-react";
 import { type ChangeEvent, type MouseEvent, useCallback } from "react";
 
 import { Button } from "@/components/ui/button";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 import { LanguageSelect } from "@/editorial/shared/language-select";
 import { SectionSelect } from "@/editorial/shared/section-select";
 import { TranslationBadge } from "@/editorial/shared/translation-badge";
 
 import { formatPublicationStatus } from "../format-publication-status";
 import type { Revision, StoredArticle } from "./article-editor-types";
+import { ArticleSearchAppearance } from "./article-search-appearance";
 
 interface Props {
+  byline: string;
+  bylineType: "organization" | "person";
+  bylineUrl: string;
   changesCount: number;
+  hasLeadImage: boolean;
   heroFit: "contain" | "cover";
   heroFocalX: number;
   heroFocalY: number;
   historyOpen: boolean;
   language: string;
+  onBylineChange: (value: string) => void;
+  onBylineTypeChange: (value: "organization" | "person") => void;
+  onBylineUrlChange: (value: string) => void;
   onHeroFitChange: (value: "contain" | "cover") => void;
   onHeroFocalXChange: (value: number) => void;
   onHeroFocalYChange: (value: number) => void;
+  onHistoryOpenChange: (open: boolean) => void;
   onMarkReviewed: () => void;
   onOpenChanges: () => void;
   onRestoreRevision: (event: MouseEvent<HTMLButtonElement>) => void;
   onSectionChange: (value: string) => void;
-  onToggleHistory: () => void;
+  onSeoDescriptionChange: (value: string) => void;
+  onSeoTitleChange: (value: string) => void;
   publicPath: string;
   qualityIssues: string[];
   restoringVersion: number | null;
   revisions: Revision[];
   saveState: "saved" | "dirty" | "saving" | "error";
   section: string;
+  seoDescription: string;
+  seoTitle: string;
   status: StoredArticle["status"];
+  summary: string;
+  title: string;
   translationKind: StoredArticle["translationKind"];
   translationReviewStatus: StoredArticle["translationReviewStatus"];
 }
@@ -40,12 +68,19 @@ const sectionClass =
 const keepEditionLanguage = () => undefined;
 
 export function ArticleEditorInspector({
+  byline,
+  bylineType,
+  bylineUrl,
   changesCount,
   historyOpen,
   heroFit,
   heroFocalX,
   heroFocalY,
+  hasLeadImage,
   language,
+  onBylineChange,
+  onBylineTypeChange,
+  onBylineUrlChange,
   onHeroFitChange,
   onHeroFocalXChange,
   onHeroFocalYChange,
@@ -53,31 +88,66 @@ export function ArticleEditorInspector({
   onOpenChanges,
   onRestoreRevision,
   onSectionChange,
-  onToggleHistory,
+  onSeoDescriptionChange,
+  onSeoTitleChange,
+  onHistoryOpenChange,
   publicPath,
   qualityIssues,
   restoringVersion,
   revisions,
   saveState,
   section,
+  seoDescription,
+  seoTitle,
   status,
+  summary,
+  title,
   translationKind,
   translationReviewStatus,
 }: Props) {
   const changeHeroFit = useCallback(
-    (event: ChangeEvent<HTMLSelectElement>) =>
-      onHeroFitChange(event.target.value as "contain" | "cover"),
+    (value: string | null) => {
+      if (value === "contain" || value === "cover") {
+        onHeroFitChange(value);
+      }
+    },
     [onHeroFitChange]
   );
   const changeHeroFocalX = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) =>
-      onHeroFocalXChange(Number(event.target.value)),
+    (value: number | readonly number[]) => {
+      const nextValue = typeof value === "number" ? value : value[0];
+      if (nextValue !== undefined) {
+        onHeroFocalXChange(nextValue);
+      }
+    },
     [onHeroFocalXChange]
   );
   const changeHeroFocalY = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) =>
-      onHeroFocalYChange(Number(event.target.value)),
+    (value: number | readonly number[]) => {
+      const nextValue = typeof value === "number" ? value : value[0];
+      if (nextValue !== undefined) {
+        onHeroFocalYChange(nextValue);
+      }
+    },
     [onHeroFocalYChange]
+  );
+  const changeByline = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) =>
+      onBylineChange(event.target.value),
+    [onBylineChange]
+  );
+  const changeBylineType = useCallback(
+    (value: string | null) => {
+      if (value === "organization" || value === "person") {
+        onBylineTypeChange(value);
+      }
+    },
+    [onBylineTypeChange]
+  );
+  const changeBylineUrl = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) =>
+      onBylineUrlChange(event.target.value),
+    [onBylineUrlChange]
   );
 
   return (
@@ -122,73 +192,85 @@ export function ArticleEditorInspector({
             <Check /> Mark editor reviewed
           </Button>
         ) : null}
-        <button
-          className="flex w-full items-center gap-2 border-0 bg-transparent px-0 py-2 font-semibold text-secondary-foreground text-xs [&_svg:last-child]:ml-auto [&_svg]:size-4"
-          onClick={onToggleHistory}
-          type="button"
+        <Collapsible
+          className="group/revision-history"
+          onOpenChange={onHistoryOpenChange}
+          open={historyOpen}
         >
-          <History /> Revision history <ChevronDown />
-        </button>
-        {historyOpen ? (
-          <ol className="mt-2 mb-0 list-none p-0">
-            {revisions.map((revision, index) => {
-              const metadata = JSON.parse(revision.metadata_json) as {
-                snapshotCompleteness?: "complete" | "legacy_partial";
-                title: string;
-              };
-              return (
-                <li
-                  className="flex items-start justify-between gap-2 border-t py-2.5"
-                  key={revision.id}
-                >
-                  <div className="[&>*]:block">
-                    <strong className="text-xs">
-                      Version {revision.version}
-                    </strong>
-                    <span className="mt-0.5 text-[10px] text-muted-foreground">
-                      {new Date(revision.created_at).toLocaleString()} ·{" "}
-                      {revision.editor_id}
-                    </span>
-                    <small className="mt-0.5 text-[10px] text-muted-foreground">
-                      {metadata.title}
-                    </small>
-                    {metadata.snapshotCompleteness === "legacy_partial" ? (
-                      <small className="mt-1 max-w-40 text-[10px] text-amber-700 leading-tight">
-                        Legacy snapshot. Current values fill fields absent from
-                        the original history.
+          <CollapsibleTrigger
+            render={
+              <Button
+                className="w-full justify-start px-0 text-secondary-foreground"
+                size="sm"
+                type="button"
+                variant="ghost"
+              />
+            }
+          >
+            <History /> Revision history
+            <ChevronDown className="ml-auto transition-transform group-data-open/revision-history:rotate-180" />
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <ol className="mt-2 mb-0 list-none p-0">
+              {revisions.map((revision, index) => {
+                const metadata = JSON.parse(revision.metadata_json) as {
+                  snapshotCompleteness?: "complete" | "legacy_partial";
+                  title: string;
+                };
+                return (
+                  <li
+                    className="flex items-start justify-between gap-2 border-t py-2.5"
+                    key={revision.id}
+                  >
+                    <div className="[&>*]:block">
+                      <strong className="text-xs">
+                        Version {revision.version}
+                      </strong>
+                      <span className="mt-0.5 text-[10px] text-muted-foreground">
+                        {new Date(revision.created_at).toLocaleString()} ·{" "}
+                        {revision.editor_id}
+                      </span>
+                      <small className="mt-0.5 text-[10px] text-muted-foreground">
+                        {metadata.title}
                       </small>
-                    ) : null}
-                  </div>
-                  {index > 0 ? (
-                    <Button
-                      className="h-auto px-1.5 py-1 text-[10px]"
-                      data-version={revision.version}
-                      disabled={restoringVersion !== null}
-                      onClick={onRestoreRevision}
-                      size="xs"
-                      type="button"
-                      variant="outline"
-                    >
-                      {restoringVersion === revision.version
-                        ? "Restoring…"
-                        : "Restore"}
-                    </Button>
-                  ) : (
-                    <em className="mt-0.5 text-[10px] text-muted-foreground">
-                      Current
-                    </em>
-                  )}
-                </li>
-              );
-            })}
-          </ol>
-        ) : null}
+                      {metadata.snapshotCompleteness === "legacy_partial" ? (
+                        <small className="mt-1 max-w-40 text-[10px] text-amber-700 leading-tight">
+                          Legacy snapshot. Current values fill fields absent
+                          from the original history.
+                        </small>
+                      ) : null}
+                    </div>
+                    {index > 0 ? (
+                      <Button
+                        className="h-auto px-1.5 py-1 text-[10px]"
+                        data-version={revision.version}
+                        disabled={restoringVersion !== null}
+                        onClick={onRestoreRevision}
+                        size="xs"
+                        type="button"
+                        variant="outline"
+                      >
+                        {restoringVersion === revision.version
+                          ? "Restoring…"
+                          : "Restore"}
+                      </Button>
+                    ) : (
+                      <em className="mt-0.5 text-[10px] text-muted-foreground">
+                        Current
+                      </em>
+                    )}
+                  </li>
+                );
+              })}
+            </ol>
+          </CollapsibleContent>
+        </Collapsible>
       </section>
 
       <section className={sectionClass}>
         <h2>Automatic quality checks</h2>
         <div
-          className={`mb-2 flex items-center gap-2 font-semibold text-xs [&_svg]:size-4 ${qualityIssues.length === 0 ? "text-primary" : "text-destructive"}`}
+          className={`mb-2 flex items-center gap-2 font-semibold text-xs [&_svg]:size-4 ${qualityIssues.length === 0 ? "text-success" : "text-destructive"}`}
         >
           {qualityIssues.length === 0 ? <Check /> : <X />}
           {qualityIssues.length === 0
@@ -237,6 +319,42 @@ export function ArticleEditorInspector({
           onChange={onSectionChange}
           value={section}
         />
+        <label htmlFor="article-byline">Author or byline</label>
+        <Input
+          id="article-byline"
+          maxLength={200}
+          onChange={changeByline}
+          placeholder="Person or institution"
+          value={byline}
+        />
+        <p className="mt-1.5 text-[11px] text-muted-foreground leading-relaxed">
+          This public byline stays separate from the signed-in editor account.
+        </p>
+        {byline.trim() ? (
+          <>
+            <label htmlFor="article-byline-type">Author type</label>
+            <Select onValueChange={changeBylineType} value={bylineType}>
+              <SelectTrigger className="w-full" id="article-byline-type">
+                <SelectValue>
+                  {bylineType === "person" ? "Person" : "Organization"}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent align="start" alignItemWithTrigger={false}>
+                <SelectItem value="person">Person</SelectItem>
+                <SelectItem value="organization">Organization</SelectItem>
+              </SelectContent>
+            </Select>
+            <label htmlFor="article-byline-url">Author profile URL</label>
+            <Input
+              id="article-byline-url"
+              maxLength={4096}
+              onChange={changeBylineUrl}
+              placeholder="https://…"
+              type="url"
+              value={bylineUrl}
+            />
+          </>
+        ) : null}
         <span className="mt-3.5 mb-1.5 block font-semibold text-xs">
           Public path
         </span>
@@ -246,59 +364,77 @@ export function ArticleEditorInspector({
       </section>
 
       <section className={sectionClass}>
-        <h2>Hero presentation</h2>
-        <label
-          className="mb-1.5 block font-semibold text-xs"
-          htmlFor="hero-fit"
-        >
-          Image treatment
-        </label>
-        <select
-          className="h-9 w-full rounded-md border bg-card px-2.5 text-xs"
-          id="hero-fit"
-          onChange={changeHeroFit}
-          value={heroFit}
-        >
-          <option value="cover">Editorial crop</option>
-          <option value="contain">Preserve complete artwork</option>
-        </select>
-        <p className="mt-2 mb-4 text-[11px] text-muted-foreground leading-relaxed">
-          Editorial crop fills homepage frames. Preserve complete artwork keeps
-          icons, seals, diagrams, and sacred art fully visible.
-        </p>
-        {heroFit === "cover" ? (
-          <div className="grid gap-4">
-            <label className="grid gap-1.5 text-xs" htmlFor="hero-focal-x">
-              <span className="flex justify-between">
-                <span>Horizontal focus</span>
-                <strong>{heroFocalX}%</strong>
-              </span>
-              <input
-                id="hero-focal-x"
-                max="100"
-                min="0"
-                onChange={changeHeroFocalX}
-                type="range"
-                value={heroFocalX}
-              />
-            </label>
-            <label className="grid gap-1.5 text-xs" htmlFor="hero-focal-y">
-              <span className="flex justify-between">
-                <span>Vertical focus</span>
-                <strong>{heroFocalY}%</strong>
-              </span>
-              <input
-                id="hero-focal-y"
-                max="100"
-                min="0"
-                onChange={changeHeroFocalY}
-                type="range"
-                value={heroFocalY}
-              />
-            </label>
-          </div>
-        ) : null}
+        <h2>Search appearance</h2>
+        <ArticleSearchAppearance
+          key={revisions[0]?.id ?? "unsaved"}
+          onSeoDescriptionChange={onSeoDescriptionChange}
+          onSeoTitleChange={onSeoTitleChange}
+          publicPath={publicPath}
+          seoDescription={seoDescription}
+          seoTitle={seoTitle}
+          summary={summary}
+          title={title}
+        />
       </section>
+
+      {hasLeadImage ? (
+        <section className={sectionClass}>
+          <h2>Lead image framing</h2>
+          <label
+            className="mb-1.5 block font-semibold text-xs"
+            htmlFor="hero-fit"
+          >
+            Frame fit
+          </label>
+          <Select onValueChange={changeHeroFit} value={heroFit}>
+            <SelectTrigger className="w-full" id="hero-fit">
+              <SelectValue>
+                {heroFit === "cover" ? "Fill frame (crop)" : "Show full image"}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent align="start" alignItemWithTrigger={false}>
+              <SelectItem value="cover">Fill frame (crop)</SelectItem>
+              <SelectItem value="contain">Show full image</SelectItem>
+            </SelectContent>
+          </Select>
+          <p className="mt-2 mb-4 text-[11px] text-muted-foreground leading-relaxed">
+            Fill frame uses the focus point for homepage cards. Show full image
+            keeps the complete artwork visible.
+          </p>
+          {heroFit === "cover" ? (
+            <div className="grid gap-4">
+              <div className="grid gap-2 text-xs">
+                <span className="flex justify-between">
+                  <span>Horizontal focus</span>
+                  <strong>{heroFocalX}%</strong>
+                </span>
+                <Slider
+                  aria-label="Horizontal focus"
+                  max={100}
+                  min={0}
+                  onValueChange={changeHeroFocalX}
+                  step={1}
+                  value={[heroFocalX]}
+                />
+              </div>
+              <div className="grid gap-2 text-xs">
+                <span className="flex justify-between">
+                  <span>Vertical focus</span>
+                  <strong>{heroFocalY}%</strong>
+                </span>
+                <Slider
+                  aria-label="Vertical focus"
+                  max={100}
+                  min={0}
+                  onValueChange={changeHeroFocalY}
+                  step={1}
+                  value={[heroFocalY]}
+                />
+              </div>
+            </div>
+          ) : null}
+        </section>
+      ) : null}
     </aside>
   );
 }

@@ -11,6 +11,7 @@ import {
   getTranslationGroupCounterpart,
 } from "../../server/publication-localization";
 import {
+  type ContentPage,
   canonicalizePublicationLinks,
   cleanHtml,
   getInternalPublicationPaths,
@@ -66,6 +67,36 @@ const getDirectoryData = (
   }
 };
 
+const getSearchMetadata = (page: ContentPage, displayTitle: string) => ({
+  description:
+    page.seoDescription?.trim() ||
+    page.description ||
+    `${displayTitle} · ortodoksas.lt`,
+  searchTitle: page.seoTitle?.trim() || displayTitle,
+});
+
+const getArticleSchema = (page: ContentPage, canonicalPath: string) => {
+  if (page.kind !== "article") {
+    return;
+  }
+  const author = page.byline
+    ? {
+        "@type": page.bylineType === "organization" ? "Organization" : "Person",
+        name: page.byline,
+        ...(page.bylineUrl ? { url: page.bylineUrl } : {}),
+      }
+    : undefined;
+  return {
+    articleSection: page.section,
+    ...(author ? { author } : {}),
+    dateModified: page.published ?? undefined,
+    datePublished: page.published ?? undefined,
+    headline: page.title,
+    keywords: page.labels.join(", "),
+    mainEntityOfPage: canonicalPath,
+  };
+};
+
 export async function resolvePublicationPage(path: string) {
   const { locale, localized, publicationPath } = resolveLocalePath(path);
   const page = await getPage(locale, publicationPath);
@@ -86,6 +117,7 @@ export async function resolvePublicationPage(path: string) {
   const bodyOwnsLeadImage = hasLeadFigure(page.html);
   const { pageTemplate } = page;
   const displayTitle = page.title.replace(CALENDAR_PREFIX_PATTERN, "");
+  const { description, searchTitle } = getSearchMetadata(page, displayTitle);
   const structuredTemplate =
     pageTemplate === "people_directory" ||
     pageTemplate === "community_directory";
@@ -98,22 +130,12 @@ export async function resolvePublicationPage(path: string) {
   });
 
   return {
-    articleSchema:
-      page.kind === "article"
-        ? {
-            articleSection: page.section,
-            dateModified: page.published ?? undefined,
-            datePublished: page.published ?? undefined,
-            headline: page.title,
-            keywords: page.labels.join(", "),
-            mainEntityOfPage: canonicalPath,
-          }
-        : undefined,
+    articleSchema: getArticleSchema(page, canonicalPath),
     bodyHtml,
     bodyOwnsLeadImage,
     canonicalPath,
     copy,
-    description: page.description || `${displayTitle} · ortodoksas.lt`,
+    description,
     directoryData,
     displayTitle,
     locale,
@@ -121,6 +143,7 @@ export async function resolvePublicationPage(path: string) {
     original,
     page,
     pageTemplate,
+    searchTitle,
     structuredTemplate,
     translationDisclosure:
       translationState === "editor_reviewed"

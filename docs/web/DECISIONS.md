@@ -13,7 +13,8 @@
 ### Hosting
 
 - Cloudflare Workers Static Assets hosts the production site.
-- The current tunnel remains the preview surface during development.
+- The `grassinside.com` custom domains remain the production-review surface
+  until the official-domain cutover.
 - Production deployment follows successful build and rendered-review gates.
 
 ### Recovery
@@ -24,7 +25,8 @@
 - Existing Russian and Ukrainian editions enter D1 as approved human
   translations. New machine translations carry their production method and
   review status as separate fields.
-- `/original.html` remains available as archival evidence.
+- Recovered source evidence remains in the recovery records outside public
+  runtime routing.
 - Article conversion follows the Studio calibration established by Antalija,
   Besarabija, and Sakartvelas: source evidence, an immutable converted baseline,
   a canonical Tiptap draft, semantic figures, and source-tracked changes.
@@ -37,8 +39,9 @@
 
 - Lithuanian keeps unprefixed canonical paths.
 - English uses `/en/`, Russian `/ru/`, Ukrainian `/uk/`, and Belarusian `/be/`.
-- New localized slugs are readable, language-appropriate slugs. Redirects keep
-  legacy Blogger URLs working where they have public value.
+- New localized slugs are readable, language-appropriate slugs. Public runtime
+  routing serves canonical clean paths; unmatched historical `.html` paths use
+  the same localized 404 response as every other unknown path.
 - Every counterpart shares one `translation_group_id`. Article language links
   resolve by that group and open the matching translated article directly.
 - Translation production method (`original`, `human`, or `machine`) and
@@ -91,8 +94,8 @@
 - Batch translation records provider, model, character count, source hash,
   completion state, and resulting article ID.
 
-## Pending Gate Decisions
+## Open Gates
 
-- First bounded translation batch, terminology glossary, and reviewer sampling.
-- Clerk production secret and allowlist provisioning.
+- Complete editorial review of the first bounded translation batch and approve
+  the terminology sample before expanding the batch.
 - Production domain cutover.

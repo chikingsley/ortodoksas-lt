@@ -62,6 +62,63 @@ const mutableArticleValues = ({
   ...values
 }: ArticleRecord) => values;
 
+const optionalText = (value: string): string | null => value || null;
+
+const resolveArticleMetadataUpdate = (
+  article: ArticleRecord,
+  update: Pick<
+    UpdateArticleInput,
+    "byline" | "bylineType" | "bylineUrl" | "seoDescription" | "seoTitle"
+  >
+): Pick<
+  ArticleRecord,
+  "byline" | "bylineType" | "bylineUrl" | "seoDescription" | "seoTitle"
+> => {
+  const {
+    byline: currentByline,
+    bylineType: currentBylineType,
+    bylineUrl: currentBylineUrl,
+  } = article;
+  const {
+    byline: requestedByline,
+    bylineType: requestedBylineType,
+    bylineUrl: requestedBylineUrl,
+  } = update;
+  const byline =
+    requestedByline === undefined
+      ? currentByline
+      : optionalText(requestedByline);
+  const bylineChanged =
+    requestedByline !== undefined && byline !== currentByline;
+  let bylineType = currentBylineType;
+  if (requestedBylineType !== undefined) {
+    bylineType = requestedBylineType;
+  } else if (bylineChanged) {
+    bylineType = "person";
+  }
+  let bylineUrl = currentBylineUrl;
+  if (!byline) {
+    bylineUrl = null;
+  } else if (requestedBylineUrl !== undefined) {
+    bylineUrl = optionalText(requestedBylineUrl);
+  } else if (bylineChanged) {
+    bylineUrl = null;
+  }
+  return {
+    byline,
+    bylineType,
+    bylineUrl,
+    seoDescription:
+      update.seoDescription === undefined
+        ? article.seoDescription
+        : optionalText(update.seoDescription),
+    seoTitle:
+      update.seoTitle === undefined
+        ? article.seoTitle
+        : optionalText(update.seoTitle),
+  };
+};
+
 export type StudioOperationResult<T> =
   | { data: T; ok: true }
   | {
@@ -117,10 +174,19 @@ const contentChanges = (input: {
 };
 
 const hasArticleContentChanged = (
-  article: Pick<ArticleRecord, "bodyJson" | "summary" | "title">,
-  next: Pick<CreateArticleInput, "summary" | "title"> & { bodyJson: string }
+  article: Pick<
+    ArticleRecord,
+    "bodyJson" | "byline" | "bylineType" | "bylineUrl" | "summary" | "title"
+  >,
+  next: Pick<
+    ArticleRecord,
+    "byline" | "bylineType" | "bylineUrl" | "summary" | "title"
+  > & { bodyJson: string }
 ) =>
   article.bodyJson !== next.bodyJson ||
+  article.byline !== next.byline ||
+  article.bylineType !== next.bylineType ||
+  article.bylineUrl !== next.bylineUrl ||
   article.summary !== next.summary ||
   article.title !== next.title;
 
@@ -316,6 +382,9 @@ const getDependentReviewInvalidationQueries = (input: {
     sourceMutationCommitted
   );
   const metadataJson = sql<string>`json_object(
+    'byline', ${invalidationArticle.byline},
+    'bylineType', ${invalidationArticle.bylineType},
+    'bylineUrl', ${invalidationArticle.bylineUrl},
     'heroFit', ${invalidationArticle.heroFit},
     'heroFocalX', ${invalidationArticle.heroFocalX},
     'heroFocalY', ${invalidationArticle.heroFocalY},
@@ -329,7 +398,7 @@ const getDependentReviewInvalidationQueries = (input: {
     'seoTitle', ${invalidationArticle.seoTitle},
     'slug', ${invalidationArticle.slug},
     'snapshotCompleteness', 'complete',
-    'snapshotVersion', 4,
+    'snapshotVersion', 5,
     'status', ${invalidationArticle.status},
     'summary', ${invalidationArticle.summary},
     'title', ${invalidationArticle.title},
@@ -751,6 +820,9 @@ export const createArticle = async (input: {
   });
   const articleRecord: typeof articles.$inferSelect = {
     bodyJson,
+    byline: optionalText(parsed.data.byline),
+    bylineType: parsed.data.bylineType,
+    bylineUrl: optionalText(parsed.data.bylineUrl),
     createdAt: timestamp,
     heroFit: parsed.data.heroFit,
     heroFocalX: parsed.data.heroFocalX,
@@ -762,8 +834,8 @@ export const createArticle = async (input: {
     language: "lt",
     publishedAt,
     section: parsed.data.section,
-    seoDescription: null,
-    seoTitle: null,
+    seoDescription: optionalText(parsed.data.seoDescription),
+    seoTitle: optionalText(parsed.data.seoTitle),
     slug: parsed.data.slug,
     status: parsed.data.status,
     summary: parsed.data.summary,
@@ -921,8 +993,18 @@ export const updateArticle = async (input: {
     summary: parsed.data.summary,
     title: parsed.data.title,
   });
+  const {
+    byline: nextByline,
+    bylineType: nextBylineType,
+    bylineUrl: nextBylineUrl,
+    seoDescription: nextSeoDescription,
+    seoTitle: nextSeoTitle,
+  } = resolveArticleMetadataUpdate(existingArticle, parsed.data);
   const contentChanged = hasArticleContentChanged(existingArticle, {
     bodyJson,
+    byline: nextByline,
+    bylineType: nextBylineType,
+    bylineUrl: nextBylineUrl,
     summary: parsed.data.summary,
     title: parsed.data.title,
   });
@@ -942,6 +1024,9 @@ export const updateArticle = async (input: {
   const nextArticle: typeof articles.$inferSelect = {
     ...existingArticle,
     bodyJson,
+    byline: nextByline,
+    bylineType: nextBylineType,
+    bylineUrl: nextBylineUrl,
     heroFit: parsed.data.heroFit,
     heroFocalX: parsed.data.heroFocalX,
     heroFocalY: parsed.data.heroFocalY,
@@ -951,6 +1036,8 @@ export const updateArticle = async (input: {
     language: parsed.data.language,
     publishedAt,
     section: parsed.data.section,
+    seoDescription: nextSeoDescription,
+    seoTitle: nextSeoTitle,
     slug: parsed.data.slug,
     status: parsed.data.status,
     summary: parsed.data.summary,
@@ -1153,6 +1240,9 @@ export const restoreArticleRevision = async (input: {
   const nextVersion = currentVersion + 1;
   const restoredContentChanged = hasArticleContentChanged(currentArticle, {
     bodyJson: restoredBodyJson,
+    byline: metadata.byline,
+    bylineType: metadata.bylineType,
+    bylineUrl: metadata.bylineUrl,
     summary: metadata.summary,
     title: metadata.title,
   });
@@ -1165,6 +1255,9 @@ export const restoreArticleRevision = async (input: {
   const restoredArticle: typeof articles.$inferSelect = {
     ...currentArticle,
     bodyJson: restoredBodyJson,
+    byline: metadata.byline,
+    bylineType: metadata.bylineType,
+    bylineUrl: metadata.bylineUrl,
     heroFit: metadata.heroFit,
     heroFocalX: metadata.heroFocalX,
     heroFocalY: metadata.heroFocalY,

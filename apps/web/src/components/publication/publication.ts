@@ -12,6 +12,9 @@ import { ui } from "../../i18n/ui";
 import { site } from "../../site";
 
 export interface CatalogEntry {
+  byline: string | null;
+  bylineType: "organization" | "person";
+  bylineUrl: string | null;
   description: string;
   hero: string | null;
   heroAlt: string;
@@ -27,6 +30,8 @@ export interface CatalogEntry {
   path: string;
   published: string | null;
   section: string;
+  seoDescription: string | null;
+  seoTitle: string | null;
   title: string;
   translationGroupId?: string;
   translationKind?: TranslationKind;
