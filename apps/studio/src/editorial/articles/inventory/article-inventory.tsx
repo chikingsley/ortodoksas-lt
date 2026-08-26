@@ -17,6 +17,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import type { ValueOption } from "@/editorial/shared/value-combobox";
+import { StudioPageHeader } from "@/editorial/shell/studio-page-header";
 import { cn } from "@/lib/utils";
 import type { CatalogArticle } from "../types";
 import {
@@ -172,7 +173,7 @@ export const ArticleInventory = ({
 
   return (
     <div className="mx-auto w-full max-w-[1500px] pb-[72px] max-inventory-mobile:pb-12">
-      <header className="flex h-[76px] items-center justify-between gap-6 border-b px-[42px] max-inventory-mobile:h-auto max-inventory-mobile:min-h-[72px] max-inventory-phone:flex-wrap max-inventory-phone:gap-2 max-inventory-compact:px-6 max-inventory-mobile:px-4 max-inventory-phone:py-3">
+      <StudioPageHeader className="max-inventory-phone:flex-wrap max-inventory-phone:gap-2 max-inventory-phone:py-3">
         <div className="flex min-w-0 items-center gap-5 max-inventory-phone:gap-3">
           <h1 className="m-0 font-[650] text-2xl tracking-[-0.03em]">
             Content
@@ -214,7 +215,7 @@ export const ArticleInventory = ({
             </p>
           ) : null}
         </div>
-      </header>
+      </StudioPageHeader>
       <div>
         <InventoryPanel
           articleGroups={articleGroups}

@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -17,6 +18,7 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
   month: "short",
   year: "numeric",
 });
+const identifierNameSeparatorPattern = /[._+-]+/u;
 
 interface ListProps {
   busyKey?: string;
@@ -44,6 +46,23 @@ const memberName = (member: TeamMemberResource) => {
   return name || member.publicUserData?.identifier || "Studio member";
 };
 
+const memberInitials = (member: TeamMemberResource) => {
+  const { publicUserData } = member;
+  const nameParts = [
+    publicUserData?.firstName,
+    publicUserData?.lastName,
+  ].filter(Boolean);
+  const identifierParts = publicUserData?.identifier
+    .split("@")[0]
+    ?.split(identifierNameSeparatorPattern)
+    .filter(Boolean);
+  return (nameParts.length > 0 ? nameParts : (identifierParts ?? ["S"]))
+    .slice(0, 2)
+    .map((part) => part?.charAt(0))
+    .join("")
+    .toUpperCase();
+};
+
 function TeamMemberRow({
   busy,
   currentUserId,
@@ -55,6 +74,7 @@ function TeamMemberRow({
   const identifier =
     member.publicUserData?.identifier ?? "Account identifier unavailable";
   const name = memberName(member);
+  const initials = memberInitials(member);
   const isCurrentUser = member.publicUserData?.userId === currentUserId;
   const role: TeamRole =
     member.role === "org:admin" ? "org:admin" : "org:member";
@@ -77,13 +97,12 @@ function TeamMemberRow({
   return (
     <li className="grid items-center gap-4 px-4 py-3 sm:grid-cols-[minmax(0,1fr)_8rem_auto]">
       <div className="flex min-w-0 items-center gap-3">
-        <img
-          alt=""
-          className="size-9 shrink-0 rounded-full bg-muted object-cover"
-          height={36}
-          src={member.publicUserData?.imageUrl}
-          width={36}
-        />
+        <Avatar size="lg">
+          {member.publicUserData?.hasImage ? (
+            <AvatarImage alt="" src={member.publicUserData.imageUrl} />
+          ) : null}
+          <AvatarFallback className="font-medium">{initials}</AvatarFallback>
+        </Avatar>
         <span className="min-w-0">
           <strong className="block truncate font-medium text-sm">
             {name}{" "}

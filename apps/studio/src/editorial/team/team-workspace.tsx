@@ -11,6 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { StudioPageHeader } from "@/editorial/shell/studio-page-header";
 import { StudioShell } from "@/editorial/shell/studio-shell";
 import { useStudioNavigation } from "@/editorial/shell/use-studio-navigation";
 
@@ -154,26 +155,17 @@ export function TeamWorkspace() {
     invitations?.isLoading === true;
   const members = memberships?.data ?? [];
   const pendingInvitations = invitations?.data ?? [];
-  const seatsUsed = organization
-    ? organization.membersCount + organization.pendingInvitationsCount
-    : 0;
-
   return (
     <StudioShell activeView="team" onNavigate={onNavigate}>
       <div className="mx-auto min-h-svh w-full max-w-[1500px] pb-12">
-        <header className="flex min-h-[76px] items-center justify-between gap-4 border-b px-[42px] py-3 max-inventory-compact:px-6 max-inventory-mobile:px-4">
-          <div>
-            <h1 className="m-0 font-[650] text-2xl tracking-[-0.03em]">Team</h1>
-            <p className="mt-1 mb-0 text-muted-foreground text-xs">
-              Invite staff and manage their Studio access.
-            </p>
-          </div>
-          <Button onClick={openInvite} type="button">
+        <StudioPageHeader>
+          <h1 className="m-0 font-[650] text-2xl tracking-[-0.03em]">Team</h1>
+          <Button onClick={openInvite} size="lg" type="button">
             <UserPlus data-icon="inline-start" /> Invite member
           </Button>
-        </header>
+        </StudioPageHeader>
 
-        <div className="mx-auto grid w-full max-w-6xl gap-6 px-[42px] py-8 max-inventory-compact:px-6 max-inventory-mobile:px-4">
+        <div className="grid w-full gap-6 px-[42px] py-6 max-inventory-compact:px-6 max-inventory-mobile:px-4">
           {feedback ? (
             <div
               aria-live="polite"
@@ -186,16 +178,6 @@ export function TeamWorkspace() {
             >
               {feedback.message}
             </div>
-          ) : null}
-
-          {organization ? (
-            <p className="m-0 text-muted-foreground text-sm">
-              <span className="font-medium text-foreground">
-                {organization.name}
-              </span>{" "}
-              · {seatsUsed} of {organization.maxAllowedMemberships} seats
-              assigned
-            </p>
           ) : null}
 
           <Card>

@@ -2,6 +2,7 @@ import type { TeamRole } from "./team-role";
 
 interface TeamPublicUserData {
   firstName: string | null;
+  hasImage: boolean;
   identifier: string;
   imageUrl: string;
   lastName: string | null;

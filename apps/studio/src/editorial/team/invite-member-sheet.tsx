@@ -68,7 +68,7 @@ export function InviteMemberSheet({
 
   return (
     <Sheet onOpenChange={onOpenChange} open={open}>
-      <SheetContent side="right">
+      <SheetContent className="w-[calc(100%-1rem)]" side="right">
         <SheetHeader>
           <SheetTitle>Invite a team member</SheetTitle>
           <SheetDescription>

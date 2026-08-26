@@ -9,6 +9,7 @@ import { useCallback, useMemo, useState } from "react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import type { CatalogArticle } from "@/editorial/articles/types";
 import type { ValueOption } from "@/editorial/shared/value-combobox";
+import { StudioPageHeader } from "@/editorial/shell/studio-page-header";
 import { cn } from "@/lib/utils";
 import {
   homepagePlacementsQueryOptions,
@@ -129,7 +130,7 @@ export function HomepageWorkspace({ articles }: Props) {
 
   return (
     <div className="mx-auto w-full max-w-[1500px] pb-[72px] max-inventory-mobile:pb-12">
-      <header className="flex min-h-[76px] items-center justify-between gap-6 border-b px-[42px] py-3 max-inventory-compact:px-6 max-inventory-mobile:px-4">
+      <StudioPageHeader>
         <div>
           <h1 className="m-0 font-[650] text-2xl tracking-[-0.03em]">
             Homepage
@@ -171,7 +172,7 @@ export function HomepageWorkspace({ articles }: Props) {
             <Save /> {state === "saving" ? "Saving…" : "Save layout"}
           </Button>
         </div>
-      </header>
+      </StudioPageHeader>
       <HomepageLayoutPanel
         articleOptions={articleOptions}
         leadId={leadId}
