@@ -100,9 +100,9 @@ export function ArticleEditorHeader({
             <ArrowLeft />
           </Button>
           <div className="flex min-w-0 flex-col items-start">
-            <strong className="max-w-[min(42vw,540px)] overflow-hidden text-ellipsis whitespace-nowrap text-sm max-md:max-w-[calc(100vw-76px)]">
+            <h1 className="max-w-[min(42vw,540px)] overflow-hidden text-ellipsis whitespace-nowrap font-semibold text-sm max-md:max-w-[calc(100vw-76px)]">
               {title || "Untitled article"}
-            </strong>
+            </h1>
             <span className="mt-0.5 text-[11px] text-muted-foreground">
               {saveMessage}
             </span>
