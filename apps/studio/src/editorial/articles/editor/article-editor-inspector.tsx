@@ -105,6 +105,16 @@ export function ArticleEditorInspector({
   translationKind,
   translationReviewStatus,
 }: Props) {
+  const revisionEntries = revisions.map((revision) => ({
+    metadata: JSON.parse(revision.metadata_json) as {
+      snapshotCompleteness?: "complete" | "legacy_partial";
+      title: string;
+    },
+    revision,
+  }));
+  const hasPartialRevision = revisionEntries.some(
+    ({ metadata }) => metadata.snapshotCompleteness === "legacy_partial"
+  );
   const changeHeroFit = useCallback(
     (value: string | null) => {
       if (value === "contain" || value === "cover") {
@@ -211,57 +221,51 @@ export function ArticleEditorInspector({
             <ChevronDown className="ml-auto transition-transform group-data-open/revision-history:rotate-180" />
           </CollapsibleTrigger>
           <CollapsibleContent>
+            {hasPartialRevision ? (
+              <p className="mt-2 mb-1 text-[10px] text-muted-foreground leading-relaxed">
+                Earlier versions preserve the fields recorded at the time. Newer
+                fields keep their current values during restore.
+              </p>
+            ) : null}
             <ol className="mt-2 mb-0 list-none p-0">
-              {revisions.map((revision, index) => {
-                const metadata = JSON.parse(revision.metadata_json) as {
-                  snapshotCompleteness?: "complete" | "legacy_partial";
-                  title: string;
-                };
-                return (
-                  <li
-                    className="flex items-start justify-between gap-2 border-t py-2.5"
-                    key={revision.id}
-                  >
-                    <div className="[&>*]:block">
-                      <strong className="text-xs">
-                        Version {revision.version}
-                      </strong>
-                      <span className="mt-0.5 text-[10px] text-muted-foreground">
-                        {new Date(revision.created_at).toLocaleString()} ·{" "}
-                        {revision.editor_id}
-                      </span>
-                      <small className="mt-0.5 text-[10px] text-muted-foreground">
-                        {metadata.title}
-                      </small>
-                      {metadata.snapshotCompleteness === "legacy_partial" ? (
-                        <small className="mt-1 max-w-40 text-[10px] text-amber-700 leading-tight">
-                          Legacy snapshot. Current values fill fields absent
-                          from the original history.
-                        </small>
-                      ) : null}
-                    </div>
-                    {index > 0 ? (
-                      <Button
-                        className="h-auto px-1.5 py-1 text-[10px]"
-                        data-version={revision.version}
-                        disabled={restoringVersion !== null}
-                        onClick={onRestoreRevision}
-                        size="xs"
-                        type="button"
-                        variant="outline"
-                      >
-                        {restoringVersion === revision.version
-                          ? "Restoring…"
-                          : "Restore"}
-                      </Button>
-                    ) : (
-                      <em className="mt-0.5 text-[10px] text-muted-foreground">
-                        Current
-                      </em>
-                    )}
-                  </li>
-                );
-              })}
+              {revisionEntries.map(({ metadata, revision }, index) => (
+                <li
+                  className="flex items-start justify-between gap-2 border-t py-2.5"
+                  key={revision.id}
+                >
+                  <div className="[&>*]:block">
+                    <strong className="text-xs">
+                      Version {revision.version}
+                    </strong>
+                    <span className="mt-0.5 text-[10px] text-muted-foreground">
+                      {new Date(revision.created_at).toLocaleString()} ·{" "}
+                      {revision.editor_id}
+                    </span>
+                    <small className="mt-0.5 text-[10px] text-muted-foreground">
+                      {metadata.title}
+                    </small>
+                  </div>
+                  {index > 0 ? (
+                    <Button
+                      className="h-auto px-1.5 py-1 text-[10px]"
+                      data-version={revision.version}
+                      disabled={restoringVersion !== null}
+                      onClick={onRestoreRevision}
+                      size="xs"
+                      type="button"
+                      variant="outline"
+                    >
+                      {restoringVersion === revision.version
+                        ? "Restoring…"
+                        : "Restore"}
+                    </Button>
+                  ) : (
+                    <em className="mt-0.5 text-[10px] text-muted-foreground">
+                      Current
+                    </em>
+                  )}
+                </li>
+              ))}
             </ol>
           </CollapsibleContent>
         </Collapsible>
