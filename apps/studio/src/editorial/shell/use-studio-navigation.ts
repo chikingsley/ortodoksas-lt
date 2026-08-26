@@ -44,7 +44,7 @@ export const useStudioNavigation = ({
         return;
       }
       if (view === "team") {
-        return navigate({ params: { _splat: "members" }, to: "/team/$" });
+        return navigate({ to: "/team" });
       }
 
       const path = getStudioPath(view, contentKind);

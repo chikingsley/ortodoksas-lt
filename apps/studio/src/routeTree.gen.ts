@@ -18,12 +18,12 @@ import { Route as StudioCommunitiesRouteImport } from './routes/_studio.communit
 import { Route as StudioHomepageRouteImport } from './routes/_studio.homepage'
 import { Route as StudioPagesRouteImport } from './routes/_studio.pages'
 import { Route as StudioPeopleRouteImport } from './routes/_studio.people'
+import { Route as StudioTeamRouteImport } from './routes/_studio.team'
 import { Route as ApiMediaRouteImport } from './routes/api/media'
 import { Route as StudioArticlesIndexRouteImport } from './routes/_studio.articles.index'
 import { Route as StudioArticlesArticleIdRouteImport } from './routes/_studio.articles.$articleId'
 import { Route as StudioPagesIndexRouteImport } from './routes/_studio.pages.index'
 import { Route as StudioPagesArticleIdRouteImport } from './routes/_studio.pages.$articleId'
-import { Route as StudioTeamSplatRouteImport } from './routes/_studio.team.$'
 import { Route as ApiMediaIdRouteImport } from './routes/api/media.$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -70,6 +70,11 @@ const StudioPeopleRoute = StudioPeopleRouteImport.update({
   path: '/people',
   getParentRoute: () => StudioRoute,
 } as any)
+const StudioTeamRoute = StudioTeamRouteImport.update({
+  id: '/team',
+  path: '/team',
+  getParentRoute: () => StudioRoute,
+} as any)
 const ApiMediaRoute = ApiMediaRouteImport.update({
   id: '/api/media',
   path: '/api/media',
@@ -95,11 +100,6 @@ const StudioPagesArticleIdRoute = StudioPagesArticleIdRouteImport.update({
   path: '/$articleId',
   getParentRoute: () => StudioPagesRoute,
 } as any)
-const StudioTeamSplatRoute = StudioTeamSplatRouteImport.update({
-  id: '/team/$',
-  path: '/team/$',
-  getParentRoute: () => StudioRoute,
-} as any)
 const ApiMediaIdRoute = ApiMediaIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -115,10 +115,10 @@ export interface FileRoutesByFullPath {
   '/homepage': typeof StudioHomepageRoute
   '/pages': typeof StudioPagesRouteWithChildren
   '/people': typeof StudioPeopleRoute
+  '/team': typeof StudioTeamRoute
   '/api/media': typeof ApiMediaRouteWithChildren
   '/articles/$articleId': typeof StudioArticlesArticleIdRoute
   '/pages/$articleId': typeof StudioPagesArticleIdRoute
-  '/team/$': typeof StudioTeamSplatRoute
   '/api/media/$id': typeof ApiMediaIdRoute
   '/articles/': typeof StudioArticlesIndexRoute
   '/pages/': typeof StudioPagesIndexRoute
@@ -130,10 +130,10 @@ export interface FileRoutesByTo {
   '/communities': typeof StudioCommunitiesRoute
   '/homepage': typeof StudioHomepageRoute
   '/people': typeof StudioPeopleRoute
+  '/team': typeof StudioTeamRoute
   '/api/media': typeof ApiMediaRouteWithChildren
   '/articles/$articleId': typeof StudioArticlesArticleIdRoute
   '/pages/$articleId': typeof StudioPagesArticleIdRoute
-  '/team/$': typeof StudioTeamSplatRoute
   '/api/media/$id': typeof ApiMediaIdRoute
   '/articles': typeof StudioArticlesIndexRoute
   '/pages': typeof StudioPagesIndexRoute
@@ -149,10 +149,10 @@ export interface FileRoutesById {
   '/_studio/homepage': typeof StudioHomepageRoute
   '/_studio/pages': typeof StudioPagesRouteWithChildren
   '/_studio/people': typeof StudioPeopleRoute
+  '/_studio/team': typeof StudioTeamRoute
   '/api/media': typeof ApiMediaRouteWithChildren
   '/_studio/articles/$articleId': typeof StudioArticlesArticleIdRoute
   '/_studio/pages/$articleId': typeof StudioPagesArticleIdRoute
-  '/_studio/team/$': typeof StudioTeamSplatRoute
   '/api/media/$id': typeof ApiMediaIdRoute
   '/_studio/articles/': typeof StudioArticlesIndexRoute
   '/_studio/pages/': typeof StudioPagesIndexRoute
@@ -168,10 +168,10 @@ export interface FileRouteTypes {
     | '/homepage'
     | '/pages'
     | '/people'
+    | '/team'
     | '/api/media'
     | '/articles/$articleId'
     | '/pages/$articleId'
-    | '/team/$'
     | '/api/media/$id'
     | '/articles/'
     | '/pages/'
@@ -183,10 +183,10 @@ export interface FileRouteTypes {
     | '/communities'
     | '/homepage'
     | '/people'
+    | '/team'
     | '/api/media'
     | '/articles/$articleId'
     | '/pages/$articleId'
-    | '/team/$'
     | '/api/media/$id'
     | '/articles'
     | '/pages'
@@ -201,10 +201,10 @@ export interface FileRouteTypes {
     | '/_studio/homepage'
     | '/_studio/pages'
     | '/_studio/people'
+    | '/_studio/team'
     | '/api/media'
     | '/_studio/articles/$articleId'
     | '/_studio/pages/$articleId'
-    | '/_studio/team/$'
     | '/api/media/$id'
     | '/_studio/articles/'
     | '/_studio/pages/'
@@ -283,6 +283,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudioPeopleRouteImport
       parentRoute: typeof StudioRoute
     }
+    '/_studio/team': {
+      id: '/_studio/team'
+      path: '/team'
+      fullPath: '/team'
+      preLoaderRoute: typeof StudioTeamRouteImport
+      parentRoute: typeof StudioRoute
+    }
     '/api/media': {
       id: '/api/media'
       path: '/api/media'
@@ -317,13 +324,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/pages/$articleId'
       preLoaderRoute: typeof StudioPagesArticleIdRouteImport
       parentRoute: typeof StudioPagesRoute
-    }
-    '/_studio/team/$': {
-      id: '/_studio/team/$'
-      path: '/team/$'
-      fullPath: '/team/$'
-      preLoaderRoute: typeof StudioTeamSplatRouteImport
-      parentRoute: typeof StudioRoute
     }
     '/api/media/$id': {
       id: '/api/media/$id'
@@ -369,7 +369,7 @@ interface StudioRouteChildren {
   StudioHomepageRoute: typeof StudioHomepageRoute
   StudioPagesRoute: typeof StudioPagesRouteWithChildren
   StudioPeopleRoute: typeof StudioPeopleRoute
-  StudioTeamSplatRoute: typeof StudioTeamSplatRoute
+  StudioTeamRoute: typeof StudioTeamRoute
 }
 
 const StudioRouteChildren: StudioRouteChildren = {
@@ -378,7 +378,7 @@ const StudioRouteChildren: StudioRouteChildren = {
   StudioHomepageRoute: StudioHomepageRoute,
   StudioPagesRoute: StudioPagesRouteWithChildren,
   StudioPeopleRoute: StudioPeopleRoute,
-  StudioTeamSplatRoute: StudioTeamSplatRoute,
+  StudioTeamRoute: StudioTeamRoute,
 }
 
 const StudioRouteWithChildren =
