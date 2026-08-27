@@ -120,6 +120,13 @@
       "when": 1787846585534,
       "tag": "0018_homepage_translation_quality",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "6",
+      "when": 1787853768490,
+      "tag": "0019_complete_translation_review",
+      "breakpoints": true
     }
   ]
 }
