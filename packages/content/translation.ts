@@ -9,6 +9,7 @@ export type TranslationReviewStatus =
 export type TranslationDisplayState =
   | "automatic"
   | "editor_reviewed"
+  | "human_draft"
   | "original";
 
 export const getTranslationDisplayState = ({
@@ -24,5 +25,5 @@ export const getTranslationDisplayState = ({
   if (reviewStatus === "approved") {
     return "editor_reviewed";
   }
-  return "automatic";
+  return kind === "machine" ? "automatic" : "human_draft";
 };

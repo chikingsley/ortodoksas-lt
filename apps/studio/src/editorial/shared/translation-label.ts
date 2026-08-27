@@ -7,6 +7,7 @@ import {
 const translationLabels = {
   automatic: "Automatic",
   editor_reviewed: "Editor reviewed",
+  human_draft: "Human draft",
   original: "Original",
 } as const;
 

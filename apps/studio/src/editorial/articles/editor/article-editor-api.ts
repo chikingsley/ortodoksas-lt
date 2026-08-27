@@ -1,5 +1,6 @@
 import {
   createArticleMutation,
+  deleteArticleDraftMutation,
   loadArticleBaseline,
   loadArticleRevisions,
   loadArticleWorkspace,
@@ -94,6 +95,10 @@ export function persistArticle({
   return createArticleMutation({
     data: { ...interactivePayload, baseline },
   });
+}
+
+export function deleteArticleDraft(articleId: string) {
+  return deleteArticleDraftMutation({ data: { articleId } });
 }
 
 export async function verifyArticlePublication(

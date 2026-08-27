@@ -6,7 +6,6 @@ interface CommunityRecord {
   addressLabel: string;
   contacts: { href: string; label: string }[];
   description: string;
-  directions: string;
   id: string;
   media: { altText: string; mediaId: string; role: string }[];
   name: string;
@@ -24,11 +23,11 @@ interface Props {
 
 const { communities = [], detail = false, locale } = Astro.props;
 const labels = {
-  be: { accessibility: "Даступнасць", address: "Адрас", contacts: "Кантакты", directions: "Як дабрацца", gallery: "Фотагалерэя", next: "Наступнае фота", previous: "Папярэдняе фота", services: "Набажэнствы" },
-  en: { accessibility: "Accessibility", address: "Address", contacts: "Contacts", directions: "Directions", gallery: "Photo gallery", next: "Next photo", previous: "Previous photo", services: "Services" },
-  lt: { accessibility: "Prieinamumas", address: "Adresas", contacts: "Kontaktai", directions: "Kaip atvykti", gallery: "Nuotraukų galerija", next: "Kita nuotrauka", previous: "Ankstesnė nuotrauka", services: "Pamaldos" },
-  ru: { accessibility: "Доступность", address: "Адрес", contacts: "Контакты", directions: "Как добраться", gallery: "Фотогалерея", next: "Следующее фото", previous: "Предыдущее фото", services: "Богослужения" },
-  uk: { accessibility: "Доступність", address: "Адреса", contacts: "Контакти", directions: "Як дістатися", gallery: "Фотогалерея", next: "Наступне фото", previous: "Попереднє фото", services: "Богослужіння" },
+  be: { accessibility: "Даступнасць", address: "Адрас", contacts: "Кантакты", gallery: "Фотагалерэя", next: "Наступнае фота", previous: "Папярэдняе фота", services: "Набажэнствы" },
+  en: { accessibility: "Accessibility", address: "Address", contacts: "Contacts", gallery: "Photo gallery", next: "Next photo", previous: "Previous photo", services: "Services" },
+  lt: { accessibility: "Prieinamumas", address: "Adresas", contacts: "Kontaktai", gallery: "Nuotraukų galerija", next: "Kita nuotrauka", previous: "Ankstesnė nuotrauka", services: "Pamaldos" },
+  ru: { accessibility: "Доступность", address: "Адрес", contacts: "Контакты", gallery: "Фотогалерея", next: "Следующее фото", previous: "Предыдущее фото", services: "Богослужения" },
+  uk: { accessibility: "Доступність", address: "Адреса", contacts: "Контакти", gallery: "Світлини", next: "Наступне фото", previous: "Попереднє фото", services: "Богослужіння" },
 }[locale];
 ---
 
@@ -70,12 +69,6 @@ const labels = {
             <dt class="text-[10px] font-bold uppercase tracking-[0.09em] text-primary">{labels.address}</dt>
             <dd class="[overflow-wrap:anywhere]">{community.addressLabel}</dd>
           </div>
-          {detail && community.directions ? (
-            <div class="grid grid-cols-[92px_minmax(0,1fr)] gap-4 border-border border-b py-3.5 max-sm:grid-cols-1 max-sm:gap-1">
-              <dt class="text-[10px] font-bold uppercase tracking-[0.09em] text-primary">{labels.directions}</dt>
-              <dd class="whitespace-pre-line [overflow-wrap:anywhere]">{community.directions}</dd>
-            </div>
-          ) : null}
           {detail && community.accessibility ? (
             <div class="grid grid-cols-[92px_minmax(0,1fr)] gap-4 border-border border-b py-3.5 max-sm:grid-cols-1 max-sm:gap-1">
               <dt class="text-[10px] font-bold uppercase tracking-[0.09em] text-primary">{labels.accessibility}</dt>

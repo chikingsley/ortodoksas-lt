@@ -142,8 +142,7 @@ export function CommunityAddressSearch({
         </ComboboxContent>
       </Combobox>
       <FieldDescription>
-        Choosing a result fills the structured address and map coordinates.
-        Search data ©{" "}
+        Choosing a result fills the address fields. Search data ©{" "}
         <a
           className="underline underline-offset-4"
           href="https://www.openstreetmap.org/copyright"

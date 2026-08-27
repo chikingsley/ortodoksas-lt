@@ -145,10 +145,12 @@ export async function resolvePublicationPage(path: string) {
     pageTemplate,
     searchTitle,
     structuredTemplate,
-    translationDisclosure:
-      translationState === "editor_reviewed"
-        ? copy.editorReviewedTranslation
-        : copy.automaticTranslation,
+    translationDisclosure: {
+      automatic: copy.automaticTranslation,
+      editor_reviewed: copy.editorReviewedTranslation,
+      human_draft: copy.humanDraftTranslation,
+      original: "",
+    }[translationState],
     translationState,
     wideBody: pageTemplate !== "standard",
   };

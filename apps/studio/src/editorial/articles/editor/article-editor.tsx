@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { StudioDialog } from "@/editorial/shared/studio-dialog";
 import type { CatalogArticle } from "../types";
 import {
+  deleteArticleDraft,
   fetchArticleBaseline,
   fetchArticleRevisions,
   fetchArticleWorkspace,
@@ -92,6 +93,11 @@ export function ArticleEditor({
   translations,
 }: Props) {
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteState, setDeleteState] = useState<
+    "idle" | "deleting" | "deleted"
+  >("idle");
   const [saveState, setSaveState] = useState<
     "saved" | "dirty" | "saving" | "error"
   >("saved");
@@ -187,7 +193,10 @@ export function ArticleEditor({
   } | null>(null);
   const [translationSourceCurrentHash, setTranslationSourceCurrentHash] =
     useState<string | null>(null);
-  const hasUnsavedChanges = saveState !== "saved";
+  const hasUnsavedChanges =
+    saveState !== "saved" &&
+    deleteState !== "deleting" &&
+    deleteState !== "deleted";
   const navigationBlocker = useBlocker({
     disabled: !hasUnsavedChanges,
     enableBeforeUnload: hasUnsavedChanges,
@@ -502,6 +511,35 @@ export function ArticleEditor({
     setPublicationOpen(true);
   }, []);
   const openChanges = useCallback(() => setChangesOpen(true), []);
+  const openDeleteDraft = useCallback(() => {
+    setDeleteError(null);
+    setDeleteState("idle");
+    setDeleteOpen(true);
+  }, []);
+  const closeDeleteDraft = useCallback(() => setDeleteOpen(false), []);
+  const confirmDeleteDraft = useCallback(async (): Promise<void> => {
+    if (!(articleId && status === "draft")) {
+      return;
+    }
+    setDeleteError(null);
+    setDeleteState("deleting");
+    const result = await deleteArticleDraft(articleId);
+    if (!result.ok) {
+      setDeleteError(result.error);
+      setDeleteState("idle");
+      return;
+    }
+    setDeleteState("deleted");
+    setDeleteOpen(false);
+    setSaveState("saved");
+    await onBack();
+  }, [articleId, onBack, status]);
+  const runDeleteDraft = useCallback(() => {
+    confirmDeleteDraft().catch(() => {
+      setDeleteError("Studio encountered a draft deletion error.");
+      setDeleteState("idle");
+    });
+  }, [confirmDeleteDraft]);
 
   const publishOrVerify = useCallback(async (): Promise<void> => {
     setPublicationError(null);
@@ -684,6 +722,7 @@ export function ArticleEditor({
             onBylineChange={updateByline}
             onBylineTypeChange={updateBylineType}
             onBylineUrlChange={updateBylineUrl}
+            onDeleteDraft={openDeleteDraft}
             onHeroFitChange={updateHeroFit}
             onHeroFocalXChange={updateHeroFocalX}
             onHeroFocalYChange={updateHeroFocalY}
@@ -730,6 +769,43 @@ export function ArticleEditor({
         title={title}
         verification={publicationVerification}
       />
+      <StudioDialog
+        description="This removes the draft and its saved revision history."
+        onOpenChange={setDeleteOpen}
+        open={deleteOpen}
+        popupClassName="h-auto w-[min(440px,100%)] grid-rows-[auto_auto]"
+        title="Delete this draft?"
+      >
+        <div className="grid gap-5 p-5">
+          <p className="m-0 text-muted-foreground text-sm leading-6">
+            The published site stays unchanged. This draft and its Studio
+            revision history will be removed permanently.
+          </p>
+          {deleteError ? (
+            <p className="m-0 text-destructive text-sm" role="alert">
+              {deleteError}
+            </p>
+          ) : null}
+          <div className="flex justify-end gap-2">
+            <Button
+              disabled={deleteState === "deleting"}
+              onClick={closeDeleteDraft}
+              type="button"
+              variant="outline"
+            >
+              Keep draft
+            </Button>
+            <Button
+              disabled={deleteState === "deleting"}
+              onClick={runDeleteDraft}
+              type="button"
+              variant="destructive"
+            >
+              {deleteState === "deleting" ? "Deleting…" : "Delete draft"}
+            </Button>
+          </div>
+        </div>
+      </StudioDialog>
       <StudioDialog
         description="This article contains changes that are waiting to be saved."
         onOpenChange={handleDiscardDialogOpenChange}

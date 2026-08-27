@@ -142,7 +142,6 @@ export async function getCommunityDirectory(locale: SiteLocale) {
       accessibility: communityLocalizations.accessibility,
       addressLabel: communityLocalizations.addressLabel,
       description: communityLocalizations.description,
-      directions: communityLocalizations.directions,
       id: communities.id,
       name: communityLocalizations.name,
       operationalNotice: communityLocalizations.operationalNotice,

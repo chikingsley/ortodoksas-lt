@@ -11,13 +11,19 @@ describe("getTranslationDisplayState", () => {
     ).toBe("original");
   });
 
-  it("labels pending machine translations as automatic", () => {
+  it("keeps translation provenance visible while review is pending", () => {
     expect(
       getTranslationDisplayState({ kind: "machine", reviewStatus: "pending" })
     ).toBe("automatic");
     expect(
       getTranslationDisplayState({ kind: "human", reviewStatus: "pending" })
-    ).toBe("automatic");
+    ).toBe("human_draft");
+    expect(
+      getTranslationDisplayState({
+        kind: "human",
+        reviewStatus: "changes_requested",
+      })
+    ).toBe("human_draft");
   });
 
   it("labels approved translations as editor reviewed", () => {

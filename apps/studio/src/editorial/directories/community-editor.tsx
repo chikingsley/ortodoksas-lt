@@ -10,12 +10,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldLabel,
-} from "@/components/ui/field";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { CommunityAddressSearch } from "@/editorial/directories/community-address-search";
@@ -392,22 +387,6 @@ export const CommunityEditor = ({
           />
         </Field>
         <Field>
-          <FieldLabel htmlFor={`community-directions-${locale}`}>
-            Directions
-          </FieldLabel>
-          <Textarea
-            id={`community-directions-${locale}`}
-            onChange={(event) =>
-              updateLocalization((value) => ({
-                ...value,
-                directions: event.target.value,
-              }))
-            }
-            rows={3}
-            value={localization?.directions ?? ""}
-          />
-        </Field>
-        <Field>
           <FieldLabel htmlFor={`community-accessibility-${locale}`}>
             Accessibility
           </FieldLabel>
@@ -423,31 +402,6 @@ export const CommunityEditor = ({
             value={localization?.accessibility ?? ""}
           />
         </Field>
-        <form.Subscribe
-          selector={(state) => [state.values.latitude, state.values.longitude]}
-        >
-          {([latitude, longitude]) =>
-            latitude !== null && longitude !== null ? (
-              <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-muted/25 px-3 py-2 text-sm">
-                <span>
-                  Map location: {latitude.toFixed(6)}, {longitude.toFixed(6)}
-                </span>
-                <a
-                  className="font-medium underline underline-offset-4"
-                  href={`https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=17/${latitude}/${longitude}`}
-                  rel="noreferrer"
-                  target="_blank"
-                >
-                  Open in OpenStreetMap
-                </a>
-              </div>
-            ) : (
-              <FieldDescription>
-                Choose a search result to add map coordinates.
-              </FieldDescription>
-            )
-          }
-        </form.Subscribe>
       </Section>
       <Section title="Service schedule">
         {services.map((service, index) => {

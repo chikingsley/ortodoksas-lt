@@ -7,6 +7,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 import { getDatabase } from "../../worker/db";
+import { deleteArticleDraft } from "../../worker/services/article-deletion";
 import {
   createArticle,
   getArticleBaseline,
@@ -75,6 +76,17 @@ export const updateArticleMutation = createServerFn({ method: "POST" })
       database: getDatabase(env.DB),
       editorId: editor.id,
       payload: data.payload,
+    });
+  });
+
+export const deleteArticleDraftMutation = createServerFn({ method: "POST" })
+  .validator((input: unknown) => articleIdSchema.parse(input))
+  .handler(async ({ data }) => {
+    await requireStudioEditor(env);
+    requireStudioWritesOpen(env);
+    return deleteArticleDraft({
+      articleId: data.articleId,
+      database: getDatabase(env.DB),
     });
   });
 

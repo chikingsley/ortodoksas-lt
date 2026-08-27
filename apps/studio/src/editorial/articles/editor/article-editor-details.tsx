@@ -1,4 +1,4 @@
-import { Check, ChevronDown, History, X } from "lucide-react";
+import { Check, ChevronDown, History, Trash2, X } from "lucide-react";
 import { type ChangeEvent, type MouseEvent, useCallback } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -38,6 +38,7 @@ interface Props {
   onBylineChange: (value: string) => void;
   onBylineTypeChange: (value: "organization" | "person") => void;
   onBylineUrlChange: (value: string) => void;
+  onDeleteDraft: () => void;
   onHeroFitChange: (value: "contain" | "cover") => void;
   onHeroFocalXChange: (value: number) => void;
   onHeroFocalYChange: (value: number) => void;
@@ -85,6 +86,7 @@ export function ArticleEditorDetails({
   onHeroFocalXChange,
   onHeroFocalYChange,
   onMarkReviewed,
+  onDeleteDraft,
   onOpenChanges,
   onRestoreRevision,
   onSectionChange,
@@ -440,6 +442,19 @@ export function ArticleEditorDetails({
               </div>
             </div>
           ) : null}
+        </section>
+      ) : null}
+
+      {status === "draft" ? (
+        <section className={sectionClass}>
+          <h2>Draft actions</h2>
+          <Button
+            className="w-full"
+            onClick={onDeleteDraft}
+            variant="destructive"
+          >
+            <Trash2 /> Delete draft
+          </Button>
         </section>
       ) : null}
     </aside>

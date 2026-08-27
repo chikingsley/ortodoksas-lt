@@ -25,6 +25,7 @@ export const ui: Record<
     editorReviewedTranslation: string;
     footerDescription: string;
     home: string;
+    humanDraftTranslation: string;
     imageUnavailable: string;
     institution: string;
     languages: string;
@@ -78,6 +79,8 @@ export const ui: Record<
     footerDescription:
       "Праваслаўная вера, традыцыя і царкоўнае жыццё ў Літве і свеце.",
     home: "Галоўная",
+    humanDraftTranslation:
+      "Перакладзена з літоўскай мовы; чакае рэдактарскай праверкі.",
     imageUnavailable: "Выява недаступная",
     institution: "Экзархат Канстанцінопальскага патрыярхату ў Літве",
     languages: "Мовы",
@@ -130,6 +133,8 @@ export const ui: Record<
     footerDescription:
       "Orthodox faith, tradition, and church life in Lithuania and beyond.",
     home: "Home",
+    humanDraftTranslation:
+      "Translated from Lithuanian; editorial review is pending.",
     imageUnavailable: "Image unavailable",
     institution: "Exarchate of the Ecumenical Patriarchate in Lithuania",
     languages: "Languages",
@@ -182,6 +187,8 @@ export const ui: Record<
     footerDescription:
       "Apie Ortodoksų Bažnyčią Lietuvoje ir pasaulyje, jos tikėjimą, tradiciją ir gyvenimą.",
     home: "Pradžia",
+    humanDraftTranslation:
+      "Išversta iš lietuvių kalbos; laukiama redaktoriaus peržiūros.",
     imageUnavailable: "Vaizdas nepasiekiamas",
     institution: "Konstantinopolio patriarchato egzarchatas Lietuvoje",
     languages: "Kalbos",
@@ -234,6 +241,8 @@ export const ui: Record<
     footerDescription:
       "Православная вера, традиция и церковная жизнь в Литве и мире.",
     home: "Главная",
+    humanDraftTranslation:
+      "Переведено с литовского языка; ожидает редакторской проверки.",
     imageUnavailable: "Изображение недоступно",
     institution: "Экзархат Вселенского патриархата в Литве",
     languages: "Языки",
@@ -286,6 +295,8 @@ export const ui: Record<
     footerDescription:
       "Православна віра, традиція і церковне життя в Литві та світі.",
     home: "Головна",
+    humanDraftTranslation:
+      "Перекладено з литовської мови; очікує редакторської перевірки.",
     imageUnavailable: "Зображення недоступне",
     institution: "Екзархат Вселенського патріархату в Литві",
     languages: "Мови",
