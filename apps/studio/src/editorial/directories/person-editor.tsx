@@ -7,30 +7,27 @@ import {
 } from "@ortodoksas-lt/content/directory";
 import type { SiteLocale } from "@ortodoksas-lt/content/site";
 import { useForm, useSelector } from "@tanstack/react-form";
-import { ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react";
 import { useCallback, useState } from "react";
 
-import { SimpleEditor } from "@/components/tiptap-templates/simple/simple-editor";
-import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { DirectoryContactMethods } from "@/editorial/directories/directory-contact-methods";
 import { DirectoryEditorHeader } from "@/editorial/directories/directory-editor-header";
 import {
   localeLabel,
   Section,
-  SelectField,
 } from "@/editorial/directories/directory-form-controls";
 import {
   directoryIssueMessage,
-  normalizedFormSchema,
   upsertLocalization,
 } from "@/editorial/directories/directory-form-data";
 import { DirectoryMediaGallery } from "@/editorial/directories/directory-media-gallery";
 import { DirectoryPublishingFields } from "@/editorial/directories/directory-publishing-fields";
 import { DirectoryUnsavedChanges } from "@/editorial/directories/directory-unsaved-changes";
-import { handleImageUpload } from "@/lib/tiptap-utils";
+import { PersonPositionsFields } from "@/editorial/directories/person-positions-fields";
+import { EditorialRichTextEditor } from "@/editorial/shared/editorial-rich-text-editor";
+import { uploadStudioMedia } from "@/editorial/shared/media-upload";
+import { normalizedFormSchema } from "@/editorial/shared/normalized-form-schema";
 import { savePersonDirectoryMutation } from "@/server/directories/directory.functions";
 
 const emptyDocument: PersonEditorInput["localizations"][number]["biography"] = {
@@ -58,12 +55,6 @@ const generatedSeoDescription = (
   const biography = documentText(localization.biography).trim();
   return [name, biography].filter(Boolean).join(". ").slice(0, 600);
 };
-
-const dateInputValue = (timestamp: number | null) =>
-  timestamp === null ? "" : new Date(timestamp).toISOString().slice(0, 10);
-
-const dateTimestamp = (value: string) =>
-  value ? Date.parse(`${value}T00:00:00.000Z`) : null;
 
 interface DirectoryOption {
   label: string;
@@ -172,7 +163,7 @@ export const PersonEditor = ({
   const upload = useCallback(
     async (file: File) => {
       setMessage("Uploading image…");
-      const uploaded = await handleImageUpload(file);
+      const uploaded = await uploadStudioMedia(file);
       form.setFieldValue("media", (current) => [
         ...current,
         {
@@ -278,7 +269,7 @@ export const PersonEditor = ({
         </div>
       </Section>
       <Section title="Biography">
-        <SimpleEditor
+        <EditorialRichTextEditor
           ariaLabel={`Biography in ${localeLabel[locale]}`}
           className="overflow-hidden rounded-lg border"
           content={localization?.biography ?? emptyDocument}
@@ -289,259 +280,17 @@ export const PersonEditor = ({
               biography: tiptapDocumentSchema.parse(biography),
             }))
           }
-          variant="compact"
+          purpose="biography"
         />
       </Section>
-      <Section title="Positions">
-        {positions.map((position, index) => {
-          const translated = position.localizations.find(
-            (item) => item.language === locale
-          );
-          const updatePositionLocalization = (
-            update: (value: { description: string; title: string }) => {
-              description: string;
-              title: string;
-            }
-          ) =>
-            form.setFieldValue("positions", (current) =>
-              current.map((item, itemIndex) =>
-                itemIndex === index
-                  ? {
-                      ...item,
-                      localizations: upsertLocalization(
-                        item.localizations,
-                        locale,
-                        () => ({
-                          description: "",
-                          language: locale,
-                          title: "",
-                        }),
-                        (value) => ({ ...value, ...update(value) })
-                      ),
-                    }
-                  : item
-              )
-            );
-          const positionId = position.id ?? String(index);
-          return (
-            <div
-              className="grid gap-4 border-t pt-4 first:border-t-0 first:pt-0"
-              key={position.id ?? index}
-            >
-              <div className="flex items-center justify-between gap-3">
-                <strong className="text-sm">Position {index + 1}</strong>
-                <div className="flex items-center gap-1">
-                  <Button
-                    aria-label="Move position up"
-                    disabled={index === 0}
-                    onClick={() =>
-                      form.setFieldValue("positions", (current) => {
-                        const next = [...current];
-                        [next[index - 1], next[index]] = [
-                          next[index],
-                          next[index - 1],
-                        ];
-                        return next.map((item, itemIndex) => ({
-                          ...item,
-                          sortOrder: itemIndex,
-                        }));
-                      })
-                    }
-                    size="icon-sm"
-                    type="button"
-                    variant="ghost"
-                  >
-                    <ChevronUp />
-                  </Button>
-                  <Button
-                    aria-label="Move position down"
-                    disabled={index === positions.length - 1}
-                    onClick={() =>
-                      form.setFieldValue("positions", (current) => {
-                        const next = [...current];
-                        [next[index], next[index + 1]] = [
-                          next[index + 1],
-                          next[index],
-                        ];
-                        return next.map((item, itemIndex) => ({
-                          ...item,
-                          sortOrder: itemIndex,
-                        }));
-                      })
-                    }
-                    size="icon-sm"
-                    type="button"
-                    variant="ghost"
-                  >
-                    <ChevronDown />
-                  </Button>
-                  <Button
-                    aria-label="Remove position"
-                    onClick={() =>
-                      form.setFieldValue("positions", (current) =>
-                        current
-                          .filter((_, itemIndex) => itemIndex !== index)
-                          .map((item, itemIndex) => ({
-                            ...item,
-                            sortOrder: itemIndex,
-                          }))
-                      )
-                    }
-                    size="icon-sm"
-                    type="button"
-                    variant="ghost"
-                  >
-                    <Trash2 />
-                  </Button>
-                </div>
-              </div>
-              <div className="grid gap-4 md:grid-cols-2">
-                <Field>
-                  <FieldLabel htmlFor={`position-${positionId}-role`}>
-                    Internal role key
-                  </FieldLabel>
-                  <Input
-                    id={`position-${positionId}-role`}
-                    onChange={(event) =>
-                      form.setFieldValue("positions", (current) =>
-                        current.map((item, itemIndex) =>
-                          itemIndex === index
-                            ? { ...item, roleKey: event.target.value }
-                            : item
-                        )
-                      )
-                    }
-                    value={position.roleKey}
-                  />
-                </Field>
-                <SelectField
-                  label="Assigned community"
-                  onChange={(communityId) =>
-                    form.setFieldValue("positions", (current) =>
-                      current.map((item, itemIndex) =>
-                        itemIndex === index
-                          ? {
-                              ...item,
-                              communityId:
-                                communityId === "unassigned"
-                                  ? null
-                                  : communityId,
-                            }
-                          : item
-                      )
-                    )
-                  }
-                  options={[
-                    { label: "Unassigned", value: "unassigned" },
-                    ...communityOptions,
-                  ]}
-                  value={position.communityId ?? "unassigned"}
-                />
-              </div>
-              <Field>
-                <FieldLabel htmlFor={`position-${positionId}-title-${locale}`}>
-                  Display title
-                </FieldLabel>
-                <Input
-                  id={`position-${positionId}-title-${locale}`}
-                  onChange={(event) =>
-                    updatePositionLocalization((value) => ({
-                      ...value,
-                      title: event.target.value,
-                    }))
-                  }
-                  value={translated?.title ?? ""}
-                />
-              </Field>
-              <Field>
-                <FieldLabel
-                  htmlFor={`position-${positionId}-description-${locale}`}
-                >
-                  Description
-                </FieldLabel>
-                <Textarea
-                  id={`position-${positionId}-description-${locale}`}
-                  onChange={(event) =>
-                    updatePositionLocalization((value) => ({
-                      ...value,
-                      description: event.target.value,
-                    }))
-                  }
-                  rows={3}
-                  value={translated?.description ?? ""}
-                />
-              </Field>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Field>
-                  <FieldLabel htmlFor={`position-${positionId}-start`}>
-                    Start date
-                  </FieldLabel>
-                  <Input
-                    id={`position-${positionId}-start`}
-                    onChange={(event) =>
-                      form.setFieldValue("positions", (current) =>
-                        current.map((item, itemIndex) =>
-                          itemIndex === index
-                            ? {
-                                ...item,
-                                startsAt: dateTimestamp(event.target.value),
-                              }
-                            : item
-                        )
-                      )
-                    }
-                    type="date"
-                    value={dateInputValue(position.startsAt)}
-                  />
-                </Field>
-                <Field>
-                  <FieldLabel htmlFor={`position-${positionId}-end`}>
-                    End date
-                  </FieldLabel>
-                  <Input
-                    id={`position-${positionId}-end`}
-                    onChange={(event) =>
-                      form.setFieldValue("positions", (current) =>
-                        current.map((item, itemIndex) =>
-                          itemIndex === index
-                            ? {
-                                ...item,
-                                endsAt: dateTimestamp(event.target.value),
-                              }
-                            : item
-                        )
-                      )
-                    }
-                    type="date"
-                    value={dateInputValue(position.endsAt)}
-                  />
-                </Field>
-              </div>
-            </div>
-          );
-        })}
-        <Button
-          onClick={() =>
-            form.setFieldValue("positions", (current) => [
-              ...current,
-              {
-                communityId: null,
-                endsAt: null,
-                localizations: [
-                  { description: "", language: locale, title: "" },
-                ],
-                roleKey: "clergy",
-                sortOrder: current.length,
-                startsAt: null,
-              },
-            ])
-          }
-          type="button"
-          variant="outline"
-        >
-          <Plus /> Add position
-        </Button>
-      </Section>
+      <PersonPositionsFields
+        communityOptions={communityOptions}
+        locale={locale}
+        onChange={(nextPositions) =>
+          form.setFieldValue("positions", nextPositions)
+        }
+        positions={positions}
+      />
       <form.Field name="contacts">
         {(field) => (
           <DirectoryContactMethods

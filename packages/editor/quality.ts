@@ -179,9 +179,8 @@ const getNodeIssues = (
   if (text && PLACEHOLDER_PATTERN.test(text)) {
     issues.push(`Replace placeholder text in block ${index + 1}.`);
   }
-  const previousText = nodes[index - 1]
-    ? getNodeText(nodes[index - 1]).trim()
-    : "";
+  const previousNode = nodes[index - 1];
+  const previousText = previousNode ? getNodeText(previousNode).trim() : "";
   if (
     node.type !== "figure" &&
     node.type === nodes[index - 1]?.type &&

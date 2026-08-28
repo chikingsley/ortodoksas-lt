@@ -1,8 +1,8 @@
 import { articles, publicationGroups } from "@ortodoksas-lt/db";
 import { and, eq, notExists } from "drizzle-orm";
 
-import type { StudioDatabase } from "../db";
-import type { StudioOperationResult } from "./article-operations";
+import type { StudioDatabase } from "../db.server";
+import type { StudioOperationResult } from "./article-operation-support.server";
 
 export const deleteArticleDraft = async (input: {
   articleId: string;

@@ -7,8 +7,8 @@ import {
 import { and, asc, eq, exists, inArray, isNotNull, ne, sql } from "drizzle-orm";
 import { z } from "zod";
 
-import type { StudioDatabase } from "../db";
-import type { StudioOperationResult } from "./article-operations";
+import type { StudioOperationResult } from "../articles/article-operation-support.server";
+import type { StudioDatabase } from "../db.server";
 
 export const homepageLayoutSchema = z.object({
   expectedRevision: z.string().min(1),

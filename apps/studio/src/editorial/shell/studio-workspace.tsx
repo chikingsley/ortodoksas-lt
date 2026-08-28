@@ -4,13 +4,11 @@ import { lazy, Suspense, useCallback, useMemo, useState } from "react";
 import { ArticleInventory } from "@/editorial/articles/inventory/article-inventory";
 import type { CatalogArticle } from "@/editorial/articles/types";
 import { HomepageWorkspace } from "@/editorial/homepage/homepage-workspace";
-import { articleCatalogQueryOptions } from "@/server/article-catalog";
 import {
   createArticleMutation,
   createTranslationDraftMutation,
-} from "@/server/article-functions";
-import { StudioShell } from "./studio-shell";
-import { useStudioNavigation } from "./use-studio-navigation";
+} from "@/server/articles/article.functions";
+import { articleCatalogQueryOptions } from "@/server/articles/article-catalog.functions";
 
 const ArticleEditor = lazy(() =>
   import("@/editorial/articles/editor/article-editor").then((module) => ({
@@ -58,10 +56,6 @@ export const StudioWorkspace = (route: WorkspaceRoute) => {
     await refreshCatalog();
     await navigate({ to: contentPath(route.kind ?? "article") });
   }, [navigate, refreshCatalog, route.kind]);
-  const navigateSidebar = useStudioNavigation({
-    activeView: route.view === "homepage" ? "homepage" : "content",
-    contentKind: route.kind ?? "article",
-  });
   const selectContentKind = useCallback(
     (kind: CatalogArticle["kind"]) => navigate({ to: contentPath(kind) }),
     [navigate]
@@ -152,7 +146,7 @@ export const StudioWorkspace = (route: WorkspaceRoute) => {
     workspace = selectedArticle ? (
       <Suspense
         fallback={
-          <div className="grid min-h-screen place-items-center text-[13px] text-muted-foreground">
+          <div className="grid min-h-[calc(100dvh-var(--studio-mobile-header-height))] place-items-center text-[13px] text-muted-foreground md:min-h-screen">
             Įkeliamas redaktorius…
           </div>
         }
@@ -167,22 +161,15 @@ export const StudioWorkspace = (route: WorkspaceRoute) => {
         />
       </Suspense>
     ) : (
-      <div className="grid min-h-screen place-items-center text-[13px] text-muted-foreground">
+      <div className="grid min-h-[calc(100dvh-var(--studio-mobile-header-height))] place-items-center text-[13px] text-muted-foreground md:min-h-screen">
         Article unavailable.
       </div>
     );
   }
 
-  if (route.view === "editor") {
-    return <div className="min-h-screen min-w-0">{workspace}</div>;
-  }
-
   return (
-    <StudioShell
-      activeView={route.view === "homepage" ? "homepage" : "content"}
-      onNavigate={navigateSidebar}
-    >
-      <div className="min-w-0">{workspace}</div>
-    </StudioShell>
+    <div className="min-h-[calc(100dvh-var(--studio-mobile-header-height))] min-w-0 md:min-h-screen">
+      {workspace}
+    </div>
   );
 };

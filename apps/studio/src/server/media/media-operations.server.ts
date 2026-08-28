@@ -1,7 +1,7 @@
 import { mediaAssets } from "@ortodoksas-lt/db";
 import { eq } from "drizzle-orm";
 
-import type { StudioDatabase } from "../db";
+import type { StudioDatabase } from "../db.server";
 
 const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
 const CACHE_CONTROL = "public, max-age=31536000, immutable";

@@ -1,14 +1,13 @@
 import { env } from "cloudflare:workers";
 import { createServerFn } from "@tanstack/react-start";
-
-import { getDatabase } from "../../worker/db";
+import { requireStudioEditor } from "../auth";
+import { getDatabase } from "../db.server";
+import { requireStudioWritesOpen } from "../write-mode";
 import {
   getHomepagePlacements,
   homepageLayoutSchema,
   updateHomepagePlacements,
-} from "../../worker/services/homepage-operations";
-import { requireStudioEditor } from "./auth";
-import { requireStudioWritesOpen } from "./write-mode";
+} from "./homepage-operations.server";
 
 export const loadHomepagePlacements = createServerFn({ method: "GET" }).handler(
   async () => {

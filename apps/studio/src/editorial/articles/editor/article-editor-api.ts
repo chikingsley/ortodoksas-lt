@@ -1,3 +1,4 @@
+import { queryOptions } from "@tanstack/react-query";
 import {
   createArticleMutation,
   deleteArticleDraftMutation,
@@ -7,8 +8,8 @@ import {
   restoreArticleRevisionMutation,
   updateArticleMutation,
   verifyArticlePublicationQuery,
-} from "@/server/article-functions";
-import type { StudioOperationResult } from "../../../../worker/services/article-operations";
+} from "@/server/articles/article.functions";
+import type { StudioOperationResult } from "@/server/articles/article-operation-support.server";
 import type {
   BaselineResponse,
   PersistArticleInput,
@@ -57,6 +58,12 @@ export async function fetchArticleWorkspace(
   }
   return workspace as ArticleWorkspaceResponse;
 }
+
+export const articleWorkspaceQueryOptions = (articleId: string) =>
+  queryOptions({
+    queryFn: ({ signal }) => fetchArticleWorkspace(articleId, signal),
+    queryKey: ["studio", "article-workspace", articleId] as const,
+  });
 
 export async function fetchArticleBaseline(
   articleId: string

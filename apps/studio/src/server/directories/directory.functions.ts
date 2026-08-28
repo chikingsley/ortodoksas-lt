@@ -6,9 +6,8 @@ import {
 import { queryOptions } from "@tanstack/react-query";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-
-import { getDatabase } from "../../../worker/db";
 import { requireStudioEditor } from "../auth";
+import { getDatabase } from "../db.server";
 import { requireStudioWritesOpen } from "../write-mode";
 import { searchCommunityAddresses } from "./community-geocoding";
 import {

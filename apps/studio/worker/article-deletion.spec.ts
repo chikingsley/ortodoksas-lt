@@ -1,4 +1,4 @@
-import { env } from "cloudflare:test";
+import { env } from "cloudflare:workers";
 import {
   articleBaselines,
   articleRevisions,
@@ -7,14 +7,11 @@ import {
 } from "@ortodoksas-lt/db";
 import { eq } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
-
-import { getDatabase } from "./db";
-import { deleteArticleDraft } from "./services/article-deletion";
-import {
-  createArticle,
-  getArticleWorkspace,
-} from "./services/article-operations";
-import { createTranslationDraft } from "./services/article-translation";
+import { createArticle } from "../src/server/articles/article-commands.server";
+import { deleteArticleDraft } from "../src/server/articles/article-deletion.server";
+import { getArticleWorkspace } from "../src/server/articles/article-queries.server";
+import { createTranslationDraft } from "../src/server/articles/article-translation.server";
+import { getDatabase } from "../src/server/db.server";
 
 const EDITOR_ID = "clerk-draft-deletion-test";
 

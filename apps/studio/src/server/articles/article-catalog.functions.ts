@@ -10,8 +10,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { desc, eq } from "drizzle-orm";
 
 import type { CatalogArticle } from "@/editorial/articles/types";
-import { getDatabase } from "../../worker/db";
-import { requireStudioEditor } from "./auth";
+import { requireStudioEditor } from "../auth";
+import { getDatabase } from "../db.server";
 
 const getArticleCatalog = createServerFn({ method: "GET" }).handler(
   async (): Promise<CatalogArticle[]> => {

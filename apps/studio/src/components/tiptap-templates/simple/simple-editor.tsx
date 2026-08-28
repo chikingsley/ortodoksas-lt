@@ -68,13 +68,15 @@ import {
 } from "@/components/tiptap-ui/search-and-replace";
 import { TextAlignButton } from "@/components/tiptap-ui/text-align-button";
 import { UndoRedoButton } from "@/components/tiptap-ui/undo-redo-button";
+// --- Lib ---
+import {
+  MAX_MEDIA_FILE_SIZE,
+  uploadStudioMedia,
+} from "@/editorial/shared/media-upload";
 import { useCursorVisibility } from "@/hooks/use-cursor-visibility";
 // --- Hooks ---
 import { useIsBreakpoint } from "@/hooks/use-is-breakpoint";
 import { useWindowSize } from "@/hooks/use-window-size";
-
-// --- Lib ---
-import { handleImageUpload, MAX_FILE_SIZE } from "@/lib/tiptap-utils";
 import { cn } from "@/lib/utils";
 
 // --- Styles ---
@@ -293,10 +295,10 @@ export function SimpleEditor({
       ImageUploadNode.configure({
         accept: "image/*",
         limit: 3,
-        maxSize: MAX_FILE_SIZE,
+        maxSize: MAX_MEDIA_FILE_SIZE,
         onError: (error) => console.error("Upload failed:", error),
         type: "figure",
-        upload: handleImageUpload,
+        upload: uploadStudioMedia,
       }),
     ],
     immediatelyRender: false,
@@ -356,7 +358,7 @@ export function SimpleEditor({
                   paddingBottom: 0,
                   position: "sticky",
                   top: isMobile
-                    ? "var(--studio-article-header-height)"
+                    ? "calc(var(--studio-mobile-header-height) + var(--studio-article-header-height))"
                     : "var(--studio-shell-header-height)",
                 }
               : isMobile

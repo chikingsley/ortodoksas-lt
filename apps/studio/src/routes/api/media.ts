@@ -1,20 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 
+import { requireStudioEditor } from "@/server/auth";
+import { getDatabase } from "@/server/db.server";
+import { uploadMedia } from "@/server/media/media-operations.server";
+import { requireStudioWritesOpen } from "@/server/write-mode";
+
 export const Route = createFileRoute("/api/media")({
   server: {
     handlers: {
       POST: async ({ context, request }) => {
-        const [
-          { getDatabase },
-          { uploadMedia },
-          { requireStudioEditor },
-          { requireStudioWritesOpen },
-        ] = await Promise.all([
-          import("../../../worker/db"),
-          import("../../../worker/services/media-operations"),
-          import("../../server/auth"),
-          import("../../server/write-mode"),
-        ]);
         const { environment } = context.cloudflare as {
           environment: Cloudflare.Env;
         };

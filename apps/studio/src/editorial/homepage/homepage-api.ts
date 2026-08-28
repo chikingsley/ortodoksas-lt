@@ -1,9 +1,9 @@
 import { queryOptions } from "@tanstack/react-query";
+import type { StudioOperationResult } from "@/server/articles/article-operation-support.server";
 import {
   loadHomepagePlacements,
   updateHomepagePlacementsMutation,
-} from "@/server/homepage-functions";
-import type { StudioOperationResult } from "../../../worker/services/article-operations";
+} from "@/server/homepage/homepage.functions";
 
 export interface HomepagePlacement {
   articleId: string;

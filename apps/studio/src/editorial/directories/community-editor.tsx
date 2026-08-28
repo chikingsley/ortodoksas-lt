@@ -6,46 +6,31 @@ import {
 } from "@ortodoksas-lt/content/directory";
 import type { SiteLocale } from "@ortodoksas-lt/content/site";
 import { useForm, useSelector } from "@tanstack/react-form";
-import { Plus, Trash2 } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
 
-import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { CommunityAddressSearch } from "@/editorial/directories/community-address-search";
+import {
+  CommunityOperationsFields,
+  CommunityOverviewFields,
+} from "@/editorial/directories/community-localized-fields";
+import { CommunityServiceFields } from "@/editorial/directories/community-service-fields";
 import { DirectoryContactMethods } from "@/editorial/directories/directory-contact-methods";
 import { DirectoryEditorHeader } from "@/editorial/directories/directory-editor-header";
-import {
-  Section,
-  SelectField,
-} from "@/editorial/directories/directory-form-controls";
+import { Section } from "@/editorial/directories/directory-form-controls";
 import {
   directoryIssueMessage,
-  normalizedFormSchema,
   upsertLocalization,
 } from "@/editorial/directories/directory-form-data";
 import { DirectoryMediaGallery } from "@/editorial/directories/directory-media-gallery";
 import { DirectoryPublishingFields } from "@/editorial/directories/directory-publishing-fields";
 import { DirectoryUnsavedChanges } from "@/editorial/directories/directory-unsaved-changes";
-import { handleImageUpload } from "@/lib/tiptap-utils";
+import { uploadStudioMedia } from "@/editorial/shared/media-upload";
+import { normalizedFormSchema } from "@/editorial/shared/normalized-form-schema";
 import type { CommunityAddressSuggestion } from "@/server/directories/community-geocoding";
 import { saveCommunityDirectoryMutation } from "@/server/directories/directory.functions";
-
-const communityOperationalStatusOptions = [
-  { label: "Active", value: "active" },
-  { label: "Forming", value: "forming" },
-  { label: "Inactive", value: "inactive" },
-] as const;
-
-const communityTypeOptions = [
-  { label: "Community", value: "community" },
-  { label: "Parish", value: "parish" },
-  { label: "Church", value: "church" },
-  { label: "Chapel", value: "chapel" },
-  { label: "Mission", value: "mission" },
-  { label: "Monastery", value: "monastery" },
-] as const;
 
 const structuredAddressFingerprint = ({
   addressLine,
@@ -129,6 +114,11 @@ export const CommunityEditor = ({
     (state) => state.values.localizations
   );
   const services = useSelector(form.store, (state) => state.values.services);
+  const operationalStatus = useSelector(
+    form.store,
+    (state) => state.values.operationalStatus
+  );
+  const communityType = useSelector(form.store, (state) => state.values.type);
   const localization = localizations.find((value) => value.language === locale);
   const updateLocalization = useCallback(
     (
@@ -220,7 +210,7 @@ export const CommunityEditor = ({
   const upload = useCallback(
     async (file: File) => {
       setMessage("Uploading image…");
-      const uploaded = await handleImageUpload(file);
+      const uploaded = await uploadStudioMedia(file);
       form.setFieldValue("media", (current) => [
         ...current,
         {
@@ -275,32 +265,14 @@ export const CommunityEditor = ({
       <form.Subscribe selector={(state) => state.isDirty}>
         {(isDirty) => <DirectoryUnsavedChanges isDirty={isDirty} />}
       </form.Subscribe>
-      <Section title="Overview">
-        <Field>
-          <FieldLabel htmlFor={`community-name-${locale}`}>Name</FieldLabel>
-          <Input
-            id={`community-name-${locale}`}
-            onChange={(event) => updateName(event.target.value)}
-            value={localization?.name ?? ""}
-          />
-        </Field>
-        <Field>
-          <FieldLabel htmlFor={`community-description-${locale}`}>
-            Description
-          </FieldLabel>
-          <Textarea
-            id={`community-description-${locale}`}
-            onChange={(event) =>
-              updateLocalization((value) => ({
-                ...value,
-                description: event.target.value,
-              }))
-            }
-            rows={5}
-            value={localization?.description ?? ""}
-          />
-        </Field>
-      </Section>
+      <CommunityOverviewFields
+        locale={locale}
+        localization={localization}
+        onDescriptionChange={(description) =>
+          updateLocalization((value) => ({ ...value, description }))
+        }
+        onNameChange={updateName}
+      />
       <Section title="Address and access">
         <CommunityAddressSearch onSelect={selectAddress} />
         <div className="grid gap-4 md:grid-cols-3">
@@ -403,80 +375,13 @@ export const CommunityEditor = ({
           />
         </Field>
       </Section>
-      <Section title="Service schedule">
-        {services.map((service, index) => {
-          const translated = service.localizations.find(
-            (item) => item.language === locale
-          );
-          const serviceId = service.id ?? String(index);
-          return (
-            <div
-              className="grid gap-3 rounded-lg border p-3 md:grid-cols-[1fr_auto]"
-              key={service.id ?? index}
-            >
-              <Field>
-                <FieldLabel htmlFor={`service-${serviceId}-${locale}`}>
-                  Schedule
-                </FieldLabel>
-                <Input
-                  id={`service-${serviceId}-${locale}`}
-                  onChange={(event) =>
-                    form.setFieldValue("services", (current) =>
-                      current.map((item, itemIndex) =>
-                        itemIndex === index
-                          ? {
-                              ...item,
-                              localizations: upsertLocalization(
-                                item.localizations,
-                                locale,
-                                () => ({ language: locale, scheduleText: "" }),
-                                (value) => ({
-                                  ...value,
-                                  scheduleText: event.target.value,
-                                })
-                              ),
-                            }
-                          : item
-                      )
-                    )
-                  }
-                  value={translated?.scheduleText ?? ""}
-                />
-              </Field>
-              <Button
-                aria-label="Remove service"
-                onClick={() =>
-                  form.setFieldValue("services", (current) =>
-                    current.filter((_, itemIndex) => itemIndex !== index)
-                  )
-                }
-                size="icon"
-                type="button"
-                variant="ghost"
-              >
-                <Trash2 />
-              </Button>
-            </div>
-          );
-        })}
-        <Button
-          onClick={() =>
-            form.setFieldValue("services", (current) => [
-              ...current,
-              {
-                endsAt: null,
-                localizations: [{ language: locale, scheduleText: "" }],
-                sortOrder: current.length,
-                startsAt: null,
-              },
-            ])
-          }
-          type="button"
-          variant="outline"
-        >
-          <Plus /> Add service time
-        </Button>
-      </Section>
+      <CommunityServiceFields
+        locale={locale}
+        onChange={(nextServices) =>
+          form.setFieldValue("services", nextServices)
+        }
+        services={services}
+      />
       <form.Field name="contacts">
         {(field) => (
           <DirectoryContactMethods
@@ -500,47 +405,19 @@ export const CommunityEditor = ({
           />
         )}
       </form.Field>
-      <Section title="Operations">
-        <div className="grid gap-4 md:grid-cols-2">
-          <form.Field name="operationalStatus">
-            {(field) => (
-              <SelectField
-                label="Operational state"
-                onChange={field.handleChange}
-                options={communityOperationalStatusOptions}
-                value={field.state.value}
-              />
-            )}
-          </form.Field>
-          <form.Field name="type">
-            {(field) => (
-              <SelectField
-                label="Community type"
-                onChange={field.handleChange}
-                options={communityTypeOptions}
-                value={field.state.value}
-              />
-            )}
-          </form.Field>
-        </div>
-        <Field>
-          <FieldLabel htmlFor={`community-notice-${locale}`}>
-            Temporary public notice
-          </FieldLabel>
-          <Textarea
-            id={`community-notice-${locale}`}
-            onChange={(event) =>
-              updateLocalization((value) => ({
-                ...value,
-                operationalNotice: event.target.value,
-              }))
-            }
-            placeholder="Use for temporary closures, relocated services, construction, or access disruptions."
-            rows={3}
-            value={localization?.operationalNotice ?? ""}
-          />
-        </Field>
-      </Section>
+      <CommunityOperationsFields
+        locale={locale}
+        localization={localization}
+        onNoticeChange={(operationalNotice) =>
+          updateLocalization((value) => ({ ...value, operationalNotice }))
+        }
+        onOperationalStatusChange={(nextOperationalStatus) =>
+          form.setFieldValue("operationalStatus", nextOperationalStatus)
+        }
+        onTypeChange={(type) => form.setFieldValue("type", type)}
+        operationalStatus={operationalStatus}
+        type={communityType}
+      />
       <form.Field name="slug">
         {(slugField) => (
           <form.Field name="status">

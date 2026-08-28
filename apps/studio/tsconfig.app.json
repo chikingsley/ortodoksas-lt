@@ -26,10 +26,5 @@
     "noFallthroughCasesInSwitch": true,
     "strictNullChecks": true
   },
-  "include": ["src", "worker", "shared"],
-  "exclude": [
-    "worker/**/*.spec.ts",
-    "worker/test-env.d.ts",
-    "worker/test-setup.ts"
-  ]
+  "include": ["src", "shared"]
 }

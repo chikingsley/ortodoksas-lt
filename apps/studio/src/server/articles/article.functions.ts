@@ -2,27 +2,32 @@ import { env } from "cloudflare:workers";
 import {
   createInteractiveArticleSchema,
   createTranslationDraftSchema,
+  updateArticleSchema,
 } from "@ortodoksas-lt/content/article";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
-import { getDatabase } from "../../worker/db";
-import { deleteArticleDraft } from "../../worker/services/article-deletion";
+import { requireStudioEditor } from "../auth";
+import { getDatabase } from "../db.server";
+import { requireStudioWritesOpen } from "../write-mode";
 import {
   createArticle,
+  restoreArticleRevision,
+  updateArticle,
+} from "./article-commands.server";
+import { deleteArticleDraft } from "./article-deletion.server";
+import {
   getArticleBaseline,
   getArticleRevisions,
   getArticleWorkspace,
-  restoreArticleRevision,
-  updateArticle,
-  verifyArticlePublication,
-} from "../../worker/services/article-operations";
-import { createTranslationDraft } from "../../worker/services/article-translation";
-import { requireStudioEditor } from "./auth";
-import { requireStudioWritesOpen } from "./write-mode";
+} from "./article-queries.server";
+import { createTranslationDraft } from "./article-translation.server";
+import { verifyArticlePublication } from "./article-verification.server";
 
 const articleIdSchema = z.object({ articleId: z.string().uuid() });
-const articleMutationSchema = articleIdSchema.extend({ payload: z.unknown() });
+const articleMutationSchema = articleIdSchema.extend({
+  payload: updateArticleSchema,
+});
 const restoreRevisionSchema = articleIdSchema.extend({
   expectedVersion: z.number().int().nonnegative(),
   version: z.number().int().positive(),

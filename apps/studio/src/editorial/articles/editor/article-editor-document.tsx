@@ -1,8 +1,8 @@
 import type { JSONContent } from "@tiptap/core";
 import type { ChangeEvent } from "react";
 
-import { SimpleEditor } from "@/components/tiptap-templates/simple/simple-editor";
 import { AutoResizeTextarea } from "@/editorial/shared/auto-resize-textarea";
+import { EditorialRichTextEditor } from "@/editorial/shared/editorial-rich-text-editor";
 
 interface Props {
   body: JSONContent;
@@ -79,7 +79,11 @@ export function ArticleEditorDocument({
             Article body
           </strong>
         </div>
-        <SimpleEditor content={body} onUpdate={onBodyChange} />
+        <EditorialRichTextEditor
+          content={body}
+          onUpdate={onBodyChange}
+          purpose="article"
+        />
       </section>
     </div>
   );

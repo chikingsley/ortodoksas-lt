@@ -12,8 +12,6 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StudioPageHeader } from "@/editorial/shell/studio-page-header";
-import { StudioShell } from "@/editorial/shell/studio-shell";
-import { useStudioNavigation } from "@/editorial/shell/use-studio-navigation";
 
 import { InviteMemberSheet } from "./invite-member-sheet";
 import { TeamInvitationList } from "./team-invitation-list";
@@ -36,7 +34,6 @@ const readError = (error: unknown) =>
     : "Clerk could not complete that team update.";
 
 export function TeamWorkspace() {
-  const onNavigate = useStudioNavigation({ activeView: "team" });
   const { user } = useUser();
   const { invitations, isLoaded, memberships, organization } = useOrganization({
     invitations: { ...collectionOptions, status: ["pending"] },
@@ -156,8 +153,8 @@ export function TeamWorkspace() {
   const members = memberships?.data ?? [];
   const pendingInvitations = invitations?.data ?? [];
   return (
-    <StudioShell activeView="team" onNavigate={onNavigate}>
-      <div className="mx-auto min-h-svh w-full max-w-[1500px] pb-12">
+    <>
+      <div className="mx-auto min-h-[calc(100dvh-var(--studio-mobile-header-height))] w-full max-w-[1500px] pb-12 md:min-h-svh">
         <StudioPageHeader>
           <h1 className="m-0 font-[650] text-2xl tracking-[-0.03em]">Team</h1>
           <Button onClick={openInvite} size="lg" type="button">
@@ -237,6 +234,6 @@ export function TeamWorkspace() {
         onOpenChange={setInviteOpen}
         open={inviteOpen}
       />
-    </StudioShell>
+    </>
   );
 }

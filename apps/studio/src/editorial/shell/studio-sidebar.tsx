@@ -1,5 +1,10 @@
 import { UserButton, useUser } from "@clerk/tanstack-react-start";
-import { useRouteContext } from "@tanstack/react-router";
+import {
+  Link,
+  useMatchRoute,
+  useRouteContext,
+  useRouterState,
+} from "@tanstack/react-router";
 import {
   BookOpenText,
   Building2,
@@ -7,7 +12,7 @@ import {
   ShieldCheck,
   Users,
 } from "lucide-react";
-import { type MouseEvent, useCallback } from "react";
+import { useCallback } from "react";
 
 import {
   Sidebar,
@@ -21,6 +26,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 
@@ -34,30 +40,43 @@ const titleCaseIdentifier = (value: string) =>
     .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
     .join(" ");
 
-export type StudioView =
-  | "communities"
-  | "content"
-  | "homepage"
-  | "people"
-  | "team";
-
 const navItems = [
-  { adminOnly: false, icon: BookOpenText, label: "Content", value: "content" },
-  { adminOnly: false, icon: Home, label: "Homepage", value: "homepage" },
-  { adminOnly: false, icon: Users, label: "People", value: "people" },
+  {
+    adminOnly: false,
+    icon: BookOpenText,
+    label: "Content",
+    matchPaths: ["/articles", "/pages"],
+    to: "/articles",
+  },
+  {
+    adminOnly: false,
+    icon: Home,
+    label: "Homepage",
+    matchPaths: ["/homepage"],
+    to: "/homepage",
+  },
+  {
+    adminOnly: false,
+    icon: Users,
+    label: "People",
+    matchPaths: ["/people"],
+    to: "/people",
+  },
   {
     adminOnly: false,
     icon: Building2,
     label: "Communities",
-    value: "communities",
+    matchPaths: ["/communities"],
+    to: "/communities",
   },
-  { adminOnly: true, icon: ShieldCheck, label: "Team", value: "team" },
+  {
+    adminOnly: true,
+    icon: ShieldCheck,
+    label: "Team",
+    matchPaths: ["/team"],
+    to: "/team",
+  },
 ] as const;
-
-interface Props {
-  activeView: StudioView;
-  onNavigate: (view: StudioView) => void;
-}
 
 interface StudioBrandProps {
   className?: string;
@@ -79,9 +98,14 @@ export const StudioBrand = ({ className, logoClassName }: StudioBrandProps) => (
   </div>
 );
 
-export const StudioSidebar = ({ activeView, onNavigate }: Props) => {
+export const StudioSidebar = () => {
+  const { isMobile, setOpenMobile } = useSidebar();
   const { user } = useUser();
   const { studioRole } = useRouteContext({ from: "/_studio" });
+  const matchRoute = useMatchRoute();
+  const pathname = useRouterState({
+    select: (state) => state.location.pathname,
+  });
   const emailAddress = user?.primaryEmailAddress?.emailAddress;
   const emailName = emailAddress?.split("@")[0];
   const displayName =
@@ -89,11 +113,11 @@ export const StudioSidebar = ({ activeView, onNavigate }: Props) => {
     user?.username ||
     (emailName ? titleCaseIdentifier(emailName) : "Studio editor");
   const accountLabel = emailAddress ?? "Editor account";
-  const navigate = useCallback(
-    (event: MouseEvent<HTMLButtonElement>) =>
-      onNavigate(event.currentTarget.value as StudioView),
-    [onNavigate]
-  );
+  const closeMobileSidebar = useCallback(() => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  }, [isMobile, setOpenMobile]);
 
   return (
     <Sidebar
@@ -114,15 +138,25 @@ export const StudioSidebar = ({ activeView, onNavigate }: Props) => {
                   return null;
                 }
                 const Icon = item.icon;
+                const isActive = item.matchPaths.some((to) =>
+                  matchRoute({ fuzzy: true, to })
+                );
+                const target =
+                  item.label === "Content" && pathname.startsWith("/pages")
+                    ? "/pages"
+                    : item.to;
+                const preserveDirectorySearch =
+                  isActive &&
+                  (item.to === "/people" || item.to === "/communities");
                 return (
-                  <SidebarMenuItem key={item.value}>
+                  <SidebarMenuItem key={item.label}>
                     <SidebarMenuButton
-                      isActive={item.value === activeView}
+                      isActive={isActive}
                       render={
-                        <button
-                          onClick={navigate}
-                          type="button"
-                          value={item.value}
+                        <Link
+                          onClick={closeMobileSidebar}
+                          search={preserveDirectorySearch ? true : undefined}
+                          to={target}
                         />
                       }
                       tooltip={item.label}

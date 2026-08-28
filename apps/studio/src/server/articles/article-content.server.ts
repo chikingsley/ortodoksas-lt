@@ -7,7 +7,7 @@ import type { ContentChange } from "@ortodoksas-lt/editor/provenance";
 import { eq, sql } from "drizzle-orm";
 import { alias, unionAll } from "drizzle-orm/sqlite-core";
 
-import type { StudioDatabase } from "../db";
+import type { StudioDatabase } from "../db.server";
 
 const CONTENT_CHANGE_INSERT_SIZE = 10;
 const MEDIA_PATH_PATTERN = /^\/api\/media\/(media_[0-9a-f]{64})$/u;
@@ -104,10 +104,14 @@ export const findMediaId = async (
   if (!mediaPath) {
     return null;
   }
+  const [, mediaId] = mediaPath;
+  if (!mediaId) {
+    return null;
+  }
   const [record] = await database
     .select({ id: mediaAssets.id })
     .from(mediaAssets)
-    .where(eq(mediaAssets.id, mediaPath[1]))
+    .where(eq(mediaAssets.id, mediaId))
     .limit(1);
   return record?.id ?? null;
 };

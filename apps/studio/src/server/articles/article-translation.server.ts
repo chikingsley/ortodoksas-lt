@@ -9,9 +9,9 @@ import {
 } from "@ortodoksas-lt/db";
 import { and, eq } from "drizzle-orm";
 
-import type { StudioDatabase } from "../db";
-import { hashText } from "./article-content";
-import { articleRevisionMetadata } from "./article-revision";
+import type { StudioDatabase } from "../db.server";
+import { hashText } from "./article-content.server";
+import { articleRevisionMetadata } from "./article-revision.server";
 
 export type TranslationDraftLanguage = "be" | "en" | "ru" | "uk";
 

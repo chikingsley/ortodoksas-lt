@@ -5,14 +5,13 @@ import {
 import { getArticleQualityIssues } from "@ortodoksas-lt/editor/quality";
 import { renderArticleDocument } from "@ortodoksas-lt/editor/render";
 import { useForm, useStore } from "@tanstack/react-form";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useBlocker } from "@tanstack/react-router";
 import type { JSONContent } from "@tiptap/core";
-import { LoaderCircle } from "lucide-react";
 import {
   type ChangeEvent,
   type MouseEvent,
   useCallback,
-  useEffect,
   useMemo,
   useRef,
   useState,
@@ -20,13 +19,13 @@ import {
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
+import { normalizedFormSchema } from "@/editorial/shared/normalized-form-schema";
 import { StudioDialog } from "@/editorial/shared/studio-dialog";
 import type { CatalogArticle } from "../types";
 import {
+  type ArticleWorkspaceResponse,
+  articleWorkspaceQueryOptions,
   deleteArticleDraft,
-  fetchArticleBaseline,
-  fetchArticleRevisions,
-  fetchArticleWorkspace,
   persistArticle,
   restoreArticleRevision,
   verifyArticlePublication,
@@ -54,10 +53,10 @@ interface Props {
   translations: CatalogArticle[];
 }
 
-const EMPTY_DOCUMENT: JSONContent = {
-  content: [{ type: "paragraph" }],
-  type: "doc",
-};
+interface EditorFormProps extends Props {
+  workspace: ArticleWorkspaceResponse;
+}
+
 const LEADING_SLASH_PATTERN = /^\/+/;
 const LITHUANIAN_PREFIX_PATTERN = /^lt\//;
 const TRAILING_SLASH_PATTERN = /\/$/;
@@ -72,7 +71,13 @@ const editorialMetadataSchema = z.object({
   summary: z.string().trim().max(600),
   title: z.string().trim().min(1).max(240),
 });
-type EditorialMetadata = z.infer<typeof editorialMetadataSchema>;
+const articleFormSchema = editorialMetadataSchema.extend({
+  body: tiptapDocumentSchema,
+  heroFit: z.enum(["contain", "cover"]),
+  heroFocalX: z.number().min(0).max(100),
+  heroFocalY: z.number().min(0).max(100),
+});
+type ArticleFormValues = z.infer<typeof articleFormSchema>;
 type TranslationReviewAction = "approve" | "mark_pending" | "request_changes";
 interface ArticleSubmitMeta {
   nextStatus: StoredArticle["status"];
@@ -85,13 +90,40 @@ const getSlug = (path: string): string =>
     .replace(LITHUANIAN_PREFIX_PATTERN, "")
     .replace(TRAILING_SLASH_PATTERN, "");
 
-export function ArticleEditor({
+export function ArticleEditor(props: Props) {
+  const { data: workspace } = useSuspenseQuery(
+    articleWorkspaceQueryOptions(props.article.id)
+  );
+  const workspaceVersion = Math.max(
+    0,
+    ...workspace.revisions.map((revision) => revision.version)
+  );
+  return (
+    <ArticleEditorForm
+      {...props}
+      key={`${workspace.canonical.id}:${workspaceVersion}`}
+      workspace={workspace}
+    />
+  );
+}
+
+function ArticleEditorForm({
   article,
   onBack,
   onCreateTranslation,
   onOpenTranslation,
   translations,
-}: Props) {
+  workspace,
+}: EditorFormProps) {
+  const queryClient = useQueryClient();
+  const {
+    baseline,
+    canonical,
+    changes: initialChanges,
+    revisions: initialRevisions,
+    translationSource,
+    translationSourceCurrentHash,
+  } = workspace;
   const [saveError, setSaveError] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -103,25 +135,27 @@ export function ArticleEditor({
   >("saved");
   const submittedArticleId = useRef<string | null>(null);
   const persistValidatedArticle = useRef<
-    (values: EditorialMetadata, meta: ArticleSubmitMeta) => Promise<string>
+    (values: ArticleFormValues, meta: ArticleSubmitMeta) => Promise<string>
   >(() =>
     Promise.reject(new Error("Article persistence is still initializing"))
   );
-  const [metadataDefaults, setMetadataDefaults] = useState<EditorialMetadata>(
-    () => ({
-      byline: "",
-      bylineType: "person",
-      bylineUrl: "",
-      language: "lt",
-      section: article.section,
-      seoDescription: "",
-      seoTitle: "",
-      summary: "",
-      title: article.title,
-    })
-  );
-  const metadataForm = useForm({
-    defaultValues: metadataDefaults,
+  const formDefaults = {
+    body: tiptapDocumentSchema.parse(JSON.parse(canonical.bodyJson)),
+    byline: canonical.byline ?? "",
+    bylineType: canonical.bylineType,
+    bylineUrl: canonical.bylineUrl ?? "",
+    heroFit: canonical.heroFit,
+    heroFocalX: canonical.heroFocalX,
+    heroFocalY: canonical.heroFocalY,
+    language: canonical.language,
+    section: canonical.section,
+    seoDescription: canonical.seoDescription ?? "",
+    seoTitle: canonical.seoTitle ?? "",
+    summary: canonical.summary,
+    title: canonical.title,
+  } satisfies ArticleFormValues;
+  const articleForm = useForm({
+    defaultValues: formDefaults,
     onSubmit: async ({ meta, value }) => {
       submittedArticleId.current = await persistValidatedArticle.current(
         value,
@@ -135,33 +169,34 @@ export function ArticleEditor({
     },
     onSubmitMeta: { nextStatus: "draft" } as ArticleSubmitMeta,
     validators: {
-      onChange: editorialMetadataSchema,
-      onSubmit: editorialMetadataSchema,
+      onChange: normalizedFormSchema(articleFormSchema),
+      onSubmit: normalizedFormSchema(articleFormSchema),
     },
   });
-  const metadata = useStore(metadataForm.store, (state) => state.values);
+  const formValues = useStore(articleForm.store, (state) => state.values);
   const {
+    body,
     byline,
     bylineType,
     bylineUrl,
+    heroFit,
+    heroFocalX,
+    heroFocalY,
     language,
     section,
     seoDescription,
     seoTitle,
     summary,
     title,
-  } = metadata;
-  const [articleId, setArticleId] = useState<string | null>(null);
-  const [baselineBody, setBaselineBody] = useState<JSONContent>(EMPTY_DOCUMENT);
-  const [body, setBody] = useState<JSONContent>(EMPTY_DOCUMENT);
-  const [changes, setChanges] = useState<ContentChange[]>([]);
+  } = formValues;
+  const articleId = canonical.id;
+  const baselineBody = tiptapDocumentSchema.parse(
+    JSON.parse(baseline.body_json)
+  );
+  const [changes, setChanges] = useState<ContentChange[]>(initialChanges);
   const [changesOpen, setChangesOpen] = useState(false);
-  const [heroMediaId, setHeroMediaId] = useState<string | null>(null);
-  const [heroFit, setHeroFit] = useState<"contain" | "cover">("cover");
-  const [heroFocalX, setHeroFocalX] = useState(50);
-  const [heroFocalY, setHeroFocalY] = useState(50);
-  const [loadState, setLoadState] = useState<"loading" | "ready" | "error">(
-    "loading"
+  const [heroMediaId, setHeroMediaId] = useState<string | null>(
+    canonical.heroMediaId
   );
   const [previewOpen, setPreviewOpen] = useState(false);
   const [publicationError, setPublicationError] = useState<string | null>(null);
@@ -171,28 +206,39 @@ export function ArticleEditor({
   >("idle");
   const [publicationVerification, setPublicationVerification] =
     useState<PublicationVerification | null>(null);
-  const [publishedAt, setPublishedAt] = useState<number | null>(null);
-  const [revisions, setRevisions] = useState<Revision[]>([]);
+  const [publishedAt, setPublishedAt] = useState<number | null>(
+    canonical.publishedAt
+  );
+  const [revisions, setRevisions] = useState<Revision[]>(initialRevisions);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [restoringVersion, setRestoringVersion] = useState<number | null>(null);
-  const [status, setStatus] = useState<StoredArticle["status"]>("draft");
+  const [status, setStatus] = useState<StoredArticle["status"]>(
+    canonical.status
+  );
   const [translationGroupId, setTranslationGroupId] = useState(
-    article.translationGroupId
+    canonical.translationGroupId
   );
   const [translationKind, setTranslationKind] = useState(
-    article.translationKind
+    canonical.translationKind
   );
   const [translationReviewStatus, setTranslationReviewStatus] = useState(
-    article.translationReviewStatus
+    canonical.translationReviewStatus
   );
-  const [translationSourceQuality, setTranslationSourceQuality] = useState<{
+  const translationSourceQuality: {
     body: JSONContent;
     language: string;
     summary: string;
     title: string;
-  } | null>(null);
-  const [translationSourceCurrentHash, setTranslationSourceCurrentHash] =
-    useState<string | null>(null);
+  } | null = translationSource
+    ? {
+        body: tiptapDocumentSchema.parse(
+          JSON.parse(translationSource.bodyJson)
+        ),
+        language: translationSource.language,
+        summary: translationSource.summary,
+        title: translationSource.title,
+      }
+    : null;
   const hasUnsavedChanges =
     saveState !== "saved" &&
     deleteState !== "deleting" &&
@@ -222,162 +268,117 @@ export function ArticleEditor({
     }
   }, [navigationBlocker]);
 
-  useEffect(() => {
-    const controller = new AbortController();
-    const loadArticle = async (): Promise<void> => {
-      setLoadState("loading");
-      try {
-        const {
-          baseline,
-          canonical,
-          changes: baselineChanges,
-          revisions: loadedRevisions,
-          translationSource,
-          translationSourceCurrentHash: loadedTranslationSourceHash,
-        } = await fetchArticleWorkspace(article.id, controller.signal);
-        setBaselineBody(
-          tiptapDocumentSchema.parse(JSON.parse(baseline.body_json))
-        );
-        setChanges(baselineChanges);
-        setBody(tiptapDocumentSchema.parse(JSON.parse(canonical.bodyJson)));
-        setArticleId(canonical.id);
-        const loadedMetadata = {
-          byline: canonical.byline ?? "",
-          bylineType: canonical.bylineType,
-          bylineUrl: canonical.bylineUrl ?? "",
-          language: canonical.language,
-          section: canonical.section,
-          seoDescription: canonical.seoDescription ?? "",
-          seoTitle: canonical.seoTitle ?? "",
-          summary: canonical.summary,
-          title: canonical.title,
-        } satisfies EditorialMetadata;
-        setMetadataDefaults(loadedMetadata);
-        metadataForm.reset(loadedMetadata);
-        setPublishedAt(canonical.publishedAt);
-        setHeroMediaId(canonical.heroMediaId);
-        setHeroFit(canonical.heroFit);
-        setHeroFocalX(canonical.heroFocalX);
-        setHeroFocalY(canonical.heroFocalY);
-        setStatus(canonical.status);
-        setTranslationGroupId(canonical.translationGroupId);
-        setTranslationKind(canonical.translationKind);
-        setTranslationReviewStatus(canonical.translationReviewStatus);
-        setTranslationSourceQuality(
-          translationSource
-            ? {
-                body: tiptapDocumentSchema.parse(
-                  JSON.parse(translationSource.bodyJson)
-                ),
-                language: translationSource.language,
-                summary: translationSource.summary,
-                title: translationSource.title,
-              }
-            : null
-        );
-        setTranslationSourceCurrentHash(loadedTranslationSourceHash);
-        setRevisions(loadedRevisions);
-        setLoadState("ready");
-        setSaveError(null);
-        setSaveState("saved");
-      } catch (error: unknown) {
-        if (error instanceof DOMException && error.name === "AbortError") {
-          return;
-        }
-        setLoadState("error");
-      }
-    };
-
-    loadArticle().catch(() => setLoadState("error"));
-    return () => controller.abort();
-  }, [article, metadataForm]);
-
-  const updateBody = useCallback((nextBody: JSONContent) => {
-    setBody(nextBody);
-    setSaveState("dirty");
-  }, []);
-  const updateTitle = useCallback(
-    (event: ChangeEvent<HTMLTextAreaElement>) => {
-      metadataForm.setFieldValue("title", event.target.value);
+  const updateBody = useCallback(
+    (nextBody: JSONContent) => {
+      articleForm.setFieldValue("body", tiptapDocumentSchema.parse(nextBody));
       setSaveState("dirty");
     },
-    [metadataForm]
+    [articleForm]
+  );
+  const updateTitle = useCallback(
+    (event: ChangeEvent<HTMLTextAreaElement>) => {
+      articleForm.setFieldValue("title", event.target.value);
+      setSaveState("dirty");
+    },
+    [articleForm]
   );
   const updateSummary = useCallback(
     (event: ChangeEvent<HTMLTextAreaElement>) => {
-      metadataForm.setFieldValue("summary", event.target.value);
+      articleForm.setFieldValue("summary", event.target.value);
       setSaveState("dirty");
     },
-    [metadataForm]
+    [articleForm]
   );
-  const updateHeroFit = useCallback((value: "contain" | "cover") => {
-    setHeroFit(value);
-    setSaveState("dirty");
-  }, []);
-  const updateHeroFocalX = useCallback((value: number) => {
-    setHeroFocalX(value);
-    setSaveState("dirty");
-  }, []);
-  const updateHeroFocalY = useCallback((value: number) => {
-    setHeroFocalY(value);
-    setSaveState("dirty");
-  }, []);
+  const updateHeroFit = useCallback(
+    (value: "contain" | "cover") => {
+      articleForm.setFieldValue("heroFit", value);
+      setSaveState("dirty");
+    },
+    [articleForm]
+  );
+  const updateHeroFocalX = useCallback(
+    (value: number) => {
+      articleForm.setFieldValue("heroFocalX", value);
+      setSaveState("dirty");
+    },
+    [articleForm]
+  );
+  const updateHeroFocalY = useCallback(
+    (value: number) => {
+      articleForm.setFieldValue("heroFocalY", value);
+      setSaveState("dirty");
+    },
+    [articleForm]
+  );
   const updateSection = useCallback(
     (value: string) => {
-      metadataForm.setFieldValue("section", value);
+      articleForm.setFieldValue("section", value);
       setSaveState("dirty");
     },
-    [metadataForm]
+    [articleForm]
   );
   const updateByline = useCallback(
     (value: string) => {
-      metadataForm.setFieldValue("byline", value);
+      articleForm.setFieldValue("byline", value);
       setSaveState("dirty");
     },
-    [metadataForm]
+    [articleForm]
   );
   const updateBylineType = useCallback(
     (value: "organization" | "person") => {
-      metadataForm.setFieldValue("bylineType", value);
+      articleForm.setFieldValue("bylineType", value);
       setSaveState("dirty");
     },
-    [metadataForm]
+    [articleForm]
   );
   const updateBylineUrl = useCallback(
     (value: string) => {
-      metadataForm.setFieldValue("bylineUrl", value);
+      articleForm.setFieldValue("bylineUrl", value);
       setSaveState("dirty");
     },
-    [metadataForm]
+    [articleForm]
   );
   const updateSeoDescription = useCallback(
     (value: string) => {
-      metadataForm.setFieldValue("seoDescription", value);
+      articleForm.setFieldValue("seoDescription", value);
       setSaveState("dirty");
     },
-    [metadataForm]
+    [articleForm]
   );
   const updateSeoTitle = useCallback(
     (value: string) => {
-      metadataForm.setFieldValue("seoTitle", value);
+      articleForm.setFieldValue("seoTitle", value);
       setSaveState("dirty");
     },
-    [metadataForm]
+    [articleForm]
   );
 
-  const loadRevisions = useCallback(async (id: string): Promise<void> => {
-    setRevisions(await fetchArticleRevisions(id));
-  }, []);
+  const refreshWorkspace = useCallback(
+    async (id: string): Promise<ArticleWorkspaceResponse | null> => {
+      const options = articleWorkspaceQueryOptions(id);
+      try {
+        return await queryClient.fetchQuery({ ...options, staleTime: 0 });
+      } catch {
+        await queryClient.invalidateQueries({
+          exact: true,
+          queryKey: options.queryKey,
+          refetchType: "none",
+        });
+        return null;
+      }
+    },
+    [queryClient]
+  );
 
   const saveValidatedArticle = useCallback(
     async (
-      values: EditorialMetadata,
+      values: ArticleFormValues,
       submitMeta: ArticleSubmitMeta
     ): Promise<string> => {
       setSaveError(null);
       setSaveState("saving");
       const payload = {
-        body,
+        body: values.body,
         byline: values.byline,
         bylineType: values.bylineType,
         bylineUrl: values.bylineUrl,
@@ -389,9 +390,9 @@ export function ArticleEditor({
         translationSourceCurrentHash
           ? { expectedTranslationSourceHash: translationSourceCurrentHash }
           : {}),
-        heroFit,
-        heroFocalX,
-        heroFocalY,
+        heroFit: values.heroFit,
+        heroFocalX: values.heroFocalX,
+        heroFocalY: values.heroFocalY,
         heroSourceUrl: article.hero ?? undefined,
         kind: article.kind,
         labels: article.labels,
@@ -426,7 +427,6 @@ export function ArticleEditor({
         throw new Error(response.error);
       }
       const result = response.data;
-      setArticleId(result.id);
       setHeroMediaId(result.heroMediaId);
       setPublishedAt(result.publishedAt);
       setStatus(submitMeta.nextStatus);
@@ -434,10 +434,10 @@ export function ArticleEditor({
         result.translationReviewStatus as StoredArticle["translationReviewStatus"]
       );
       setSaveState("saved");
-      await loadRevisions(result.id);
-      const updatedBaseline = await fetchArticleBaseline(result.id);
-      if (updatedBaseline) {
-        setChanges(updatedBaseline.changes);
+      const refreshedWorkspace = await refreshWorkspace(result.id);
+      if (refreshedWorkspace) {
+        setChanges(refreshedWorkspace.changes);
+        setRevisions(refreshedWorkspace.revisions);
       }
       return result.id;
     },
@@ -445,12 +445,8 @@ export function ArticleEditor({
       article,
       articleId,
       baselineBody,
-      body,
-      heroFit,
-      heroFocalX,
-      heroFocalY,
-      loadRevisions,
       publishedAt,
+      refreshWorkspace,
       revisions,
       translationGroupId,
       translationKind,
@@ -466,7 +462,7 @@ export function ArticleEditor({
     ): Promise<string | null> => {
       submittedArticleId.current = null;
       try {
-        await metadataForm.handleSubmit({
+        await articleForm.handleSubmit({
           nextStatus,
           ...(translationReviewAction ? { translationReviewAction } : {}),
         });
@@ -479,7 +475,7 @@ export function ArticleEditor({
       }
       return submittedArticleId.current;
     },
-    [metadataForm]
+    [articleForm]
   );
   const saveCurrentStatus = useCallback(() => {
     submitArticle(status).catch(() => setSaveState("error"));
@@ -532,8 +528,12 @@ export function ArticleEditor({
     setDeleteState("deleted");
     setDeleteOpen(false);
     setSaveState("saved");
+    queryClient.removeQueries({
+      exact: true,
+      queryKey: articleWorkspaceQueryOptions(articleId).queryKey,
+    });
     await onBack();
-  }, [articleId, onBack, status]);
+  }, [articleId, onBack, queryClient, status]);
   const runDeleteDraft = useCallback(() => {
     confirmDeleteDraft().catch(() => {
       setDeleteError("Studio encountered a draft deletion error.");
@@ -589,35 +589,38 @@ export function ArticleEditor({
         Math.max(0, ...revisions.map((revision) => revision.version))
       );
       if (restoredArticle) {
-        setBody(
-          tiptapDocumentSchema.parse(JSON.parse(restoredArticle.bodyJson))
-        );
-        setHeroFit(restoredArticle.heroFit);
-        setHeroFocalX(restoredArticle.heroFocalX);
-        setHeroFocalY(restoredArticle.heroFocalY);
         const restoredMetadata = {
+          body: tiptapDocumentSchema.parse(
+            JSON.parse(restoredArticle.bodyJson)
+          ),
           byline: restoredArticle.byline ?? "",
           bylineType: restoredArticle.bylineType,
           bylineUrl: restoredArticle.bylineUrl ?? "",
+          heroFit: restoredArticle.heroFit,
+          heroFocalX: restoredArticle.heroFocalX,
+          heroFocalY: restoredArticle.heroFocalY,
           language: restoredArticle.language,
           section: restoredArticle.section,
           seoDescription: restoredArticle.seoDescription ?? "",
           seoTitle: restoredArticle.seoTitle ?? "",
           summary: restoredArticle.summary,
           title: restoredArticle.title,
-        } satisfies EditorialMetadata;
-        setMetadataDefaults(restoredMetadata);
-        metadataForm.reset(restoredMetadata);
+        } satisfies ArticleFormValues;
+        articleForm.reset(restoredMetadata);
         setStatus(restoredArticle.status);
         setTranslationGroupId(restoredArticle.translationGroupId);
         setTranslationKind(restoredArticle.translationKind);
         setTranslationReviewStatus(restoredArticle.translationReviewStatus);
         setSaveState("saved");
-        await loadRevisions(articleId);
+        const refreshedWorkspace = await refreshWorkspace(articleId);
+        if (refreshedWorkspace) {
+          setChanges(refreshedWorkspace.changes);
+          setRevisions(refreshedWorkspace.revisions);
+        }
       }
       setRestoringVersion(null);
     },
-    [articleId, loadRevisions, metadataForm, revisions]
+    [articleForm, articleId, refreshWorkspace, revisions]
   );
   const restoreRevisionFromButton = useCallback(
     (event: MouseEvent<HTMLButtonElement>) => {
@@ -663,7 +666,7 @@ export function ArticleEditor({
   );
 
   return (
-    <div className="min-h-screen bg-muted/60">
+    <div className="min-h-[calc(100dvh-var(--studio-mobile-header-height))] bg-muted/60 md:min-h-screen">
       <ArticleEditorHeader
         articleId={articleId}
         onBack={onBack}
@@ -679,76 +682,62 @@ export function ArticleEditor({
         translations={translations}
       />
 
-      {loadState === "loading" ? (
-        <div className="flex min-h-[calc(100vh-64px)] items-center justify-center gap-2.5 text-muted-foreground text-sm [&_svg]:w-[18px]">
-          <LoaderCircle className="animate-spin" /> Loading article…
-        </div>
-      ) : null}
-      {loadState === "error" ? (
-        <div className="flex min-h-[calc(100vh-64px)] items-center justify-center gap-2.5 text-destructive text-sm">
-          The article could not be loaded. Return to the inventory and try
-          another record.
-        </div>
-      ) : null}
+      <div className="mx-auto grid max-w-[1320px] grid-cols-[minmax(0,1fr)_304px] border-x bg-card max-editor-mobile:block max-editor-mobile:max-w-none max-editor-compact:grid-cols-[minmax(0,1fr)_280px] max-editor-mobile:border-x-0 max-editor-compact:border-l-0">
+        <ArticleEditorDocument
+          body={body}
+          bodyHasLeadFigure={bodyHasLeadFigure}
+          heroFit={heroFit}
+          heroFocalX={heroFocalX}
+          heroFocalY={heroFocalY}
+          heroMediaId={heroMediaId}
+          heroUrl={article.hero}
+          onBodyChange={updateBody}
+          onSummaryChange={updateSummary}
+          onTitleChange={updateTitle}
+          summary={summary}
+          title={title}
+        />
 
-      {loadState === "ready" ? (
-        <div className="mx-auto grid max-w-[1320px] grid-cols-[minmax(0,1fr)_304px] border-x bg-card max-editor-mobile:block max-editor-mobile:max-w-none max-editor-compact:grid-cols-[minmax(0,1fr)_280px] max-editor-mobile:border-x-0 max-editor-compact:border-l-0">
-          <ArticleEditorDocument
-            body={body}
-            bodyHasLeadFigure={bodyHasLeadFigure}
-            heroFit={heroFit}
-            heroFocalX={heroFocalX}
-            heroFocalY={heroFocalY}
-            heroMediaId={heroMediaId}
-            heroUrl={article.hero}
-            onBodyChange={updateBody}
-            onSummaryChange={updateSummary}
-            onTitleChange={updateTitle}
-            summary={summary}
-            title={title}
-          />
-
-          <ArticleEditorDetails
-            byline={byline}
-            bylineType={bylineType}
-            bylineUrl={bylineUrl}
-            changesCount={changes.length}
-            hasLeadImage={Boolean(heroMediaId || article.hero)}
-            heroFit={heroFit}
-            heroFocalX={heroFocalX}
-            heroFocalY={heroFocalY}
-            historyOpen={historyOpen}
-            language={language}
-            onBylineChange={updateByline}
-            onBylineTypeChange={updateBylineType}
-            onBylineUrlChange={updateBylineUrl}
-            onDeleteDraft={openDeleteDraft}
-            onHeroFitChange={updateHeroFit}
-            onHeroFocalXChange={updateHeroFocalX}
-            onHeroFocalYChange={updateHeroFocalY}
-            onHistoryOpenChange={setHistoryOpen}
-            onMarkReviewed={markEditorReviewed}
-            onOpenChanges={openChanges}
-            onRestoreRevision={restoreRevisionFromButton}
-            onSectionChange={updateSection}
-            onSeoDescriptionChange={updateSeoDescription}
-            onSeoTitleChange={updateSeoTitle}
-            publicPath={`${language === "lt" ? "" : `${language}/`}${getSlug(article.path)}`}
-            qualityIssues={qualityIssues}
-            restoringVersion={restoringVersion}
-            revisions={revisions}
-            saveState={saveState}
-            section={section}
-            seoDescription={seoDescription}
-            seoTitle={seoTitle}
-            status={status}
-            summary={summary}
-            title={title}
-            translationKind={translationKind}
-            translationReviewStatus={translationReviewStatus}
-          />
-        </div>
-      ) : null}
+        <ArticleEditorDetails
+          byline={byline}
+          bylineType={bylineType}
+          bylineUrl={bylineUrl}
+          changesCount={changes.length}
+          hasLeadImage={Boolean(heroMediaId || article.hero)}
+          heroFit={heroFit}
+          heroFocalX={heroFocalX}
+          heroFocalY={heroFocalY}
+          historyOpen={historyOpen}
+          language={language}
+          onBylineChange={updateByline}
+          onBylineTypeChange={updateBylineType}
+          onBylineUrlChange={updateBylineUrl}
+          onDeleteDraft={openDeleteDraft}
+          onHeroFitChange={updateHeroFit}
+          onHeroFocalXChange={updateHeroFocalX}
+          onHeroFocalYChange={updateHeroFocalY}
+          onHistoryOpenChange={setHistoryOpen}
+          onMarkReviewed={markEditorReviewed}
+          onOpenChanges={openChanges}
+          onRestoreRevision={restoreRevisionFromButton}
+          onSectionChange={updateSection}
+          onSeoDescriptionChange={updateSeoDescription}
+          onSeoTitleChange={updateSeoTitle}
+          publicPath={`${language === "lt" ? "" : `${language}/`}${getSlug(article.path)}`}
+          qualityIssues={qualityIssues}
+          restoringVersion={restoringVersion}
+          revisions={revisions}
+          saveState={saveState}
+          section={section}
+          seoDescription={seoDescription}
+          seoTitle={seoTitle}
+          status={status}
+          summary={summary}
+          title={title}
+          translationKind={translationKind}
+          translationReviewStatus={translationReviewStatus}
+        />
+      </div>
 
       <ArticleEditorDialogs
         changes={changes}

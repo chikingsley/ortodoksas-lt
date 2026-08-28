@@ -1,6 +1,13 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 
+import { StudioShell } from "@/editorial/shell/studio-shell";
 import { getStudioAuthState } from "@/server/auth";
+
+const StudioLayout = () => (
+  <StudioShell>
+    <Outlet />
+  </StudioShell>
+);
 
 export const Route = createFileRoute("/_studio")({
   beforeLoad: async () => {
@@ -16,5 +23,5 @@ export const Route = createFileRoute("/_studio")({
       userId: authentication.userId,
     };
   },
-  component: Outlet,
+  component: StudioLayout,
 });

@@ -22,7 +22,7 @@ import {
 } from "@ortodoksas-lt/db";
 import { eq, inArray } from "drizzle-orm";
 
-import type { StudioDatabase } from "../../../worker/db";
+import type { StudioDatabase } from "../db.server";
 
 const personPositionIds = (database: StudioDatabase, personId: string) =>
   database

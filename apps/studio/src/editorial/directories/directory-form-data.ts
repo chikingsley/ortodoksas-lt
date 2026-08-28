@@ -1,5 +1,4 @@
 import type { SiteLocale } from "@ortodoksas-lt/content/site";
-import type { StandardSchemaV1 } from "@tanstack/react-form";
 
 export const publicationStatusOptions = [
   { label: "Draft", value: "draft" },
@@ -36,17 +35,6 @@ export const upsertLocalization = <T extends { language: SiteLocale }>(
     valueIndex === index ? update(value) : value
   );
 };
-
-/**
- * TanStack Form validates the already-normalized editor value. Zod schemas in
- * the content package also accept a wider input shape because they apply
- * defaults. Narrowing the Standard Schema input here preserves Zod's field
- * paths while matching the form's normalized value type.
- */
-export const normalizedFormSchema = <TInput, TOutput extends TInput>(
-  schema: StandardSchemaV1<TInput, TOutput>
-): StandardSchemaV1<TOutput, TOutput> =>
-  schema as StandardSchemaV1<TOutput, TOutput>;
 
 export const directoryIssueMessage = (issue?: { message: string }) => {
   if (issue?.message === "Invalid input") {
