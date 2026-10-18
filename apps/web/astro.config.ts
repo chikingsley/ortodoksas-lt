@@ -2,6 +2,7 @@ import cloudflare from "@astrojs/cloudflare";
 import react from "@astrojs/react";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "astro/config";
+
 import { defaultLocale, siteLocales } from "./src/i18n/config";
 import { site } from "./src/site";
 

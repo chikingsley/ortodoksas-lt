@@ -6,7 +6,7 @@ import { articleCatalogQueryOptions } from "@/server/articles/article-catalog.fu
 
 export const Route = createFileRoute("/_studio/homepage")({
   component: () => <StudioWorkspace view="homepage" />,
-  loader: ({ context }) =>
+  loader: async ({ context }) =>
     Promise.all([
       context.queryClient.ensureQueryData(articleCatalogQueryOptions()),
       context.queryClient.ensureQueryData(homepagePlacementsQueryOptions()),

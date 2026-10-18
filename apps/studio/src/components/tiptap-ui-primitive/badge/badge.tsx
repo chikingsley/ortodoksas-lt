@@ -1,4 +1,5 @@
 import { forwardRef } from "react";
+
 import "@/components/tiptap-ui-primitive/badge/badge-colors.scss";
 import "@/components/tiptap-ui-primitive/badge/badge-group.scss";
 import "@/components/tiptap-ui-primitive/badge/badge.scss";

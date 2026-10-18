@@ -19,6 +19,7 @@ type SearchStatus = "error" | "idle" | "loading" | "ready";
 
 const suggestionLabel = (suggestion: CommunityAddressSuggestion) =>
   suggestion.label;
+
 const suggestionsMatch = (
   item: CommunityAddressSuggestion,
   value: CommunityAddressSuggestion
@@ -30,13 +31,17 @@ export function CommunityAddressSearch({
   onSelect: (suggestion: CommunityAddressSuggestion) => void;
 }) {
   const [query, setQuery] = useState("");
+
   const [selected, setSelected] = useState<CommunityAddressSuggestion | null>(
     null
   );
+
   const [status, setStatus] = useState<SearchStatus>("idle");
+
   const [suggestions, setSuggestions] = useState<CommunityAddressSuggestion[]>(
     []
   );
+
   const latestRequest = useRef(0);
 
   useEffect(() => {
@@ -48,12 +53,15 @@ export function CommunityAddressSearch({
     const requestId = latestRequest.current + 1;
     latestRequest.current = requestId;
     setSuggestions([]);
+
     if (normalizedQuery.length < MINIMUM_QUERY_LENGTH) {
       setStatus("idle");
+
       return;
     }
 
     setStatus("loading");
+
     const timer = window.setTimeout(() => {
       searchCommunityAddressesQuery({ data: { query: normalizedQuery } })
         .then((results) => {
@@ -68,7 +76,10 @@ export function CommunityAddressSearch({
           }
         });
     }, SEARCH_DELAY_MS);
-    return () => window.clearTimeout(timer);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
   }, [query, selected?.label]);
 
   const updateQuery = useCallback((value: string) => {
@@ -81,6 +92,7 @@ export function CommunityAddressSearch({
       if (!suggestion) {
         return;
       }
+
       setQuery(suggestion.label);
       setSelected(suggestion);
       setStatus("ready");
@@ -94,12 +106,15 @@ export function CommunityAddressSearch({
     if (status === "loading") {
       return "Searching…";
     }
+
     if (status === "error") {
       return "Address search paused. Try again.";
     }
+
     if (query.trim().length < MINIMUM_QUERY_LENGTH) {
       return "Type at least 3 characters.";
     }
+
     return "Try another address or place name.";
   })();
 

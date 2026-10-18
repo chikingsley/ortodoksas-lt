@@ -1,20 +1,13 @@
-import { env } from "cloudflare:workers";
 import { getSectionOptions } from "@ortodoksas-lt/content/sections";
 import { articles, publicationGroups } from "@ortodoksas-lt/db";
-import {
-  and,
-  count,
-  desc,
-  eq,
-  gte,
-  inArray,
-  like,
-  lt,
-  or,
-  type SQL,
-} from "drizzle-orm";
+import { env } from "cloudflare:workers";
+import { and, count, desc, eq, gte, inArray, like, lt, or } from "drizzle-orm";
+import type { SQL } from "drizzle-orm";
+import { z } from "zod";
 
-import { defaultLocale, type SiteLocale } from "../i18n/config";
+import { defaultLocale } from "../i18n/config";
+import type { SiteLocale } from "../i18n/config";
+import { site } from "../site";
 import {
   catalogEntry,
   catalogSelection,
@@ -51,8 +44,9 @@ export async function getArchiveArticles(
     eq(articles.language, language),
     eq(publicationGroups.kind, "article"),
   ];
+
   if (options.query) {
-    const pattern = `%${options.query.replace(/[%_]/gu, (character) => `\\${character}`)}%`;
+    const pattern = `%${options.query.replaceAll(/[%_]/gu, (character) => `\\${character}`)}%`;
     conditions.push(
       or(
         like(articles.title, pattern),
@@ -62,49 +56,82 @@ export async function getArchiveArticles(
       ) as SQL
     );
   }
+
   if (options.section) {
     conditions.push(eq(articles.section, options.section));
   }
+
   if (options.label) {
     conditions.push(like(articles.labelsJson, `%${options.label}%`));
   }
+
   if (options.year && fourDigitYear.test(options.year)) {
     const start = Date.UTC(Number(options.year), 0, 1);
     const end = Date.UTC(Number(options.year) + 1, 0, 1);
-    conditions.push(gte(articles.publishedAt, start));
-    conditions.push(lt(articles.publishedAt, end));
+    conditions.push(
+      gte(articles.publishedAt, start),
+      lt(articles.publishedAt, end)
+    );
   }
 
   const where = and(...conditions);
-  const [rows, totals] = await Promise.all([
-    database()
-      .select(catalogSelection)
-      .from(articles)
-      .innerJoin(
-        publicationGroups,
-        eq(publicationGroups.id, articles.translationGroupId)
-      )
-      .where(where)
-      .orderBy(desc(articles.publishedAt))
-      .limit(options.limit)
-      .offset(options.offset),
-    database()
-      .select({ value: count() })
-      .from(articles)
-      .innerJoin(
-        publicationGroups,
-        eq(publicationGroups.id, articles.translationGroupId)
-      )
-      .where(where),
-  ]);
+
+  const total =
+    options.query || options.label
+      ? ((
+          await database()
+            .select({ value: count() })
+            .from(articles)
+            .innerJoin(
+              publicationGroups,
+              eq(publicationGroups.id, articles.translationGroupId)
+            )
+            .where(where)
+        )[0]?.value ?? 0)
+      : ((await env.DB.prepare(
+          "SELECT COALESCE(SUM(total),0) AS value FROM publication_counts WHERE language = ? AND (? IS NULL OR section = ?) AND (? IS NULL OR month LIKE ?)"
+        )
+          .bind(
+            language,
+            options.section || null,
+            options.section || null,
+            options.year && fourDigitYear.test(options.year)
+              ? options.year
+              : null,
+            options.year && fourDigitYear.test(options.year)
+              ? `${options.year}-%`
+              : null
+          )
+          .first<number>("value")) ?? 0);
+
+  const limit = Math.max(1, Math.min(100, Math.trunc(options.limit)));
+
+  const offset = Math.max(
+    0,
+    Math.min(Math.trunc(options.offset), Math.max(0, total - 1))
+  );
+
+  const rows = await database()
+    .select(catalogSelection)
+    .from(articles)
+    .innerJoin(
+      publicationGroups,
+      eq(publicationGroups.id, articles.translationGroupId)
+    )
+    .where(where)
+    .orderBy(desc(articles.publishedAt))
+    .limit(limit)
+    .offset(offset);
+
   const heroes = await heroMap(rows);
+
   return {
     entries: rows.map((row) => catalogEntry(row, heroes)),
-    total: totals[0]?.value ?? 0,
+    total,
   };
 }
 
-export async function getArchiveFacets(language: SiteLocale = defaultLocale) {
+async function readArchiveFacets(language: SiteLocale) {
   const rows = await database()
     .select({
       labelsJson: articles.labelsJson,
@@ -123,6 +150,7 @@ export async function getArchiveFacets(language: SiteLocale = defaultLocale) {
         eq(publicationGroups.kind, "article")
       )
     );
+
   return {
     labels: [
       ...new Set(rows.flatMap((row) => parseLabels(row.labelsJson))),
@@ -141,12 +169,48 @@ export async function getArchiveFacets(language: SiteLocale = defaultLocale) {
   };
 }
 
+const archiveFacetsSchema = z.object({
+  labels: z.array(z.string()),
+  sections: z.array(z.string()),
+  total: z.number(),
+  years: z.array(z.string()),
+});
+
+export async function getArchiveFacets(language: SiteLocale = defaultLocale) {
+  const revision = await env.DB.prepare(
+    "SELECT revision FROM publication_state WHERE id = 1"
+  ).first<number>("revision");
+
+  const key = new Request(
+    new URL(
+      `/__publication/facets/${language}?revision=${revision}`,
+      site.origin
+    )
+  );
+
+  const cache = await caches.open("public-facets-v1");
+  const cached = await cache.match(key);
+
+  if (cached) {
+    return archiveFacetsSchema.parse(await cached.json());
+  }
+
+  const result = await readArchiveFacets(language);
+  await cache.put(
+    key,
+    Response.json(result, { headers: { "Cache-Control": "max-age=300" } })
+  );
+
+  return result;
+}
+
 export async function searchArticles(
   language: SiteLocale,
   query: string,
   options: { limit: number; offset: number }
 ) {
   const ftsQuery = toFtsQuery(query);
+
   if (!ftsQuery) {
     return { entries: [], total: 0 };
   }
@@ -165,7 +229,9 @@ export async function searchArticles(
   )
     .bind(ftsQuery, language, options.limit, options.offset)
     .all<{ id: string }>();
+
   const ids = matches.results.map((match) => match.id);
+
   const total = await env.DB.prepare(
     `SELECT COUNT(*) AS value
        FROM articles_fts
@@ -191,9 +257,11 @@ export async function searchArticles(
       eq(publicationGroups.id, articles.translationGroupId)
     )
     .where(inArray(articles.id, ids));
+
   const rowsById = new Map(rows.map((row) => [row.id, row]));
   const rankedRows = ids.flatMap((id) => rowsById.get(id) ?? []);
   const heroes = await heroMap(rankedRows);
+
   return {
     entries: rankedRows.map((row) => catalogEntry(row, heroes)),
     total: total ?? 0,
@@ -215,5 +283,6 @@ export async function getSections(language: SiteLocale = defaultLocale) {
         eq(publicationGroups.kind, "article")
       )
     );
+
   return getSectionOptions(rows.map((row) => row.section));
 }

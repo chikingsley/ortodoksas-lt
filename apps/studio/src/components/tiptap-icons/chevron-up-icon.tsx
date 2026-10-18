@@ -1,4 +1,5 @@
 import { memo } from "react";
+
 import { ChevronDownIcon } from "@/components/tiptap-icons/chevron-down-icon";
 
 type SvgProps = React.ComponentPropsWithoutRef<"svg">;

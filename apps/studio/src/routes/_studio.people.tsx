@@ -10,11 +10,13 @@ import {
 
 const PeopleRoute = () => {
   const { language, record } = Route.useSearch();
+
   const { changeLanguage, changeRecord, locale } = useDirectoryRouteState({
     language,
     record,
     to: "/people",
   });
+
   return (
     <PeopleDirectoryWorkspace
       locale={locale}
@@ -27,7 +29,7 @@ const PeopleRoute = () => {
 
 export const Route = createFileRoute("/_studio/people")({
   component: PeopleRoute,
-  loader: ({ context }) =>
+  loader: async ({ context }) =>
     Promise.all([
       context.queryClient.ensureQueryData(peopleDirectoryQueryOptions()),
       context.queryClient.ensureQueryData(communityDirectoryQueryOptions()),

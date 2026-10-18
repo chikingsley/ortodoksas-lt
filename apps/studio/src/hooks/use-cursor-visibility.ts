@@ -1,5 +1,6 @@
 import type { Editor } from "@tiptap/react";
 import { useEffect } from "react";
+
 import { useBodyRect } from "@/hooks/use-element-rect";
 import { useWindowSize } from "@/hooks/use-window-size";
 
@@ -27,6 +28,7 @@ export function useCursorVisibility({
   overlayHeight = 0,
 }: CursorVisibilityOptions) {
   const { height: windowHeight } = useWindowSize();
+
   const rect = useBodyRect({
     enabled: true,
     throttleMs: 100,
@@ -40,6 +42,7 @@ export function useCursorVisibility({
       }
 
       const { state, view } = editor;
+
       if (!view.hasFocus()) {
         return;
       }

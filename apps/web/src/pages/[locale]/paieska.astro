@@ -1,8 +1,10 @@
 ---
 import SearchPage from "../../components/archive/SearchPage.astro";
-import { localeShells, type SiteLocale } from "../../i18n/config";
+import { localeShells } from '../../i18n/config';
+import type { SiteLocale } from '../../i18n/config';
 
 const locale = Astro.params.locale as SiteLocale;
+
 if (!localeShells.includes(locale as never)) {
   return Astro.redirect("/paieska");
 }

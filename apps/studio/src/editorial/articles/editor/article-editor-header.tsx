@@ -1,6 +1,7 @@
 import { siteLocales } from "@ortodoksas-lt/content/site";
 import { ArrowLeft, Eye, LoaderCircle, Save, Send } from "lucide-react";
-import { type MouseEvent, useCallback, useState } from "react";
+import { useCallback, useState } from "react";
+import type { MouseEvent } from "react";
 
 import { Button } from "@/components/ui/button";
 import { formatTranslationLabel } from "@/editorial/shared/translation-label";
@@ -35,18 +36,22 @@ const CreateTranslationButton = ({
 }: CreateTranslationButtonProps) => {
   const [state, setState] = useState<"idle" | "creating" | "error">("idle");
   const label = { creating: "Creating", error: "Retry", idle: "Create" }[state];
+
   const createTranslation = useCallback(() => {
     if (state === "creating") {
       return;
     }
+
     setState("creating");
-    onCreate(language).catch(() => setState("error"));
+    onCreate(language).catch(() => {
+      setState("error");
+    });
   }, [language, onCreate, state]);
 
   return (
     <button
       aria-label={`Create ${language.toUpperCase()} translation`}
-      className="inline-flex min-h-8 items-center gap-1.5 whitespace-nowrap rounded-md border border-dashed px-2.5 py-1.5 text-primary transition-colors hover:border-primary hover:bg-accent disabled:cursor-wait disabled:opacity-60 [&_small]:text-[10px] [&_strong]:text-[10px]"
+      className="text-primary hover:border-primary hover:bg-accent inline-flex min-h-8 items-center gap-1.5 rounded-md border border-dashed px-2.5 py-1.5 whitespace-nowrap transition-colors disabled:cursor-wait disabled:opacity-60 [&_small]:text-[10px] [&_strong]:text-[10px]"
       disabled={state === "creating"}
       onClick={createTranslation}
       type="button"
@@ -82,11 +87,12 @@ export function ArticleEditorHeader({
     saved: articleId ? "Saved to Studio" : "Source loaded",
     saving: "Saving…",
   }[saveState];
+
   const saveLabel = status === "draft" ? "Save draft" : "Save changes";
 
   return (
     <>
-      <header className="sticky top-0 z-20 flex min-h-16 items-center justify-between border-b bg-card/95 px-5 py-2.5 shadow-sm max-md:top-[var(--studio-mobile-header-height)] max-md:grid max-md:h-[var(--studio-article-header-height)] max-md:min-h-0 max-md:grid-cols-1 max-md:gap-2 max-md:px-3 max-md:py-2">
+      <header className="bg-card/95 sticky top-0 z-20 flex min-h-16 items-center justify-between border-b px-5 py-2.5 shadow-sm max-md:top-[var(--studio-mobile-header-height)] max-md:grid max-md:h-[var(--studio-article-header-height)] max-md:min-h-0 max-md:grid-cols-1 max-md:gap-2 max-md:px-3 max-md:py-2">
         <div className="flex min-w-0 items-center gap-3">
           <Button
             aria-label="Back to articles"
@@ -99,10 +105,10 @@ export function ArticleEditorHeader({
             <ArrowLeft />
           </Button>
           <div className="flex min-w-0 flex-col items-start">
-            <h1 className="max-w-[min(42vw,540px)] overflow-hidden text-ellipsis whitespace-nowrap font-semibold text-sm max-md:max-w-[calc(100vw-76px)]">
+            <h1 className="max-w-[min(42vw,540px)] overflow-hidden text-sm font-semibold text-ellipsis whitespace-nowrap max-md:max-w-[calc(100vw-76px)]">
               {title || "Untitled article"}
             </h1>
-            <span className="mt-0.5 text-[11px] text-muted-foreground">
+            <span className="text-muted-foreground mt-0.5 text-[11px]">
               {saveMessage}
             </span>
           </div>
@@ -150,9 +156,9 @@ export function ArticleEditorHeader({
 
       <nav
         aria-label="Article translations"
-        className="flex min-h-[52px] items-center gap-4 border-b bg-card px-5 py-2 max-md:block max-md:px-3"
+        className="bg-card flex min-h-[52px] items-center gap-4 border-b px-5 py-2 max-md:block max-md:px-3"
       >
-        <span className="flex-none font-bold text-[11px] text-muted-foreground max-md:mb-1.5 max-md:block">
+        <span className="text-muted-foreground flex-none text-[11px] font-bold max-md:mb-1.5 max-md:block">
           Translations
         </span>
         <div className="no-scrollbar flex min-w-0 gap-1.5 overflow-x-auto">
@@ -160,13 +166,14 @@ export function ArticleEditorHeader({
             const counterpart = translations.find(
               (candidate) => candidate.language === editionLanguage
             );
+
             if (counterpart) {
               return (
                 <button
                   aria-current={
                     counterpart.id === articleId ? "page" : undefined
                   }
-                  className="inline-flex min-h-8 items-center gap-1.5 whitespace-nowrap rounded-md border bg-muted px-2.5 py-1.5 text-muted-foreground aria-[current=page]:border-primary/30 aria-[current=page]:bg-accent aria-[current=page]:text-primary [&_small]:text-[10px] [&_strong]:text-[10px]"
+                  className="bg-muted text-muted-foreground aria-[current=page]:border-primary/30 aria-[current=page]:bg-accent aria-[current=page]:text-primary inline-flex min-h-8 items-center gap-1.5 rounded-md border px-2.5 py-1.5 whitespace-nowrap [&_small]:text-[10px] [&_strong]:text-[10px]"
                   data-article-id={counterpart.id}
                   key={editionLanguage}
                   onClick={onOpenTranslation}
@@ -182,10 +189,11 @@ export function ArticleEditorHeader({
                 </button>
               );
             }
+
             if (editionLanguage === "lt") {
               return (
                 <span
-                  className="inline-flex min-h-8 items-center gap-1.5 whitespace-nowrap rounded-md border border-dashed px-2.5 py-1.5 text-muted-foreground [&_small]:text-[10px] [&_strong]:text-[10px]"
+                  className="text-muted-foreground inline-flex min-h-8 items-center gap-1.5 rounded-md border border-dashed px-2.5 py-1.5 whitespace-nowrap [&_small]:text-[10px] [&_strong]:text-[10px]"
                   key={editionLanguage}
                 >
                   <strong>{editionLanguage.toUpperCase()}</strong>
@@ -193,6 +201,7 @@ export function ArticleEditorHeader({
                 </span>
               );
             }
+
             return (
               <CreateTranslationButton
                 key={editionLanguage}

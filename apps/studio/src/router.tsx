@@ -12,6 +12,7 @@ export const getRouter = () => {
       },
     },
   });
+
   const router = createRouter({
     context: { queryClient },
     defaultPreload: "intent",
@@ -21,6 +22,7 @@ export const getRouter = () => {
   });
 
   setupRouterSsrQueryIntegration({ queryClient, router });
+
   return router;
 };
 

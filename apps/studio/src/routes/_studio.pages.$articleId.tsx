@@ -8,7 +8,7 @@ import { articleCatalogQueryOptions } from "@/server/articles/article-catalog.fu
 export const Route = createFileRoute("/_studio/pages/$articleId")({
   component: PageEditorRoute,
   errorComponent: PageError,
-  loader: ({ context, params }) =>
+  loader: async ({ context, params }) =>
     Promise.all([
       context.queryClient.ensureQueryData(articleCatalogQueryOptions()),
       context.queryClient.fetchQuery({
@@ -25,5 +25,6 @@ function PageError() {
 
 function PageEditorRoute() {
   const { articleId } = Route.useParams();
+
   return <StudioWorkspace articleId={articleId} kind="page" view="editor" />;
 }

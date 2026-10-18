@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+
 import { useThrottledCallback } from "@/hooks/use-throttled-callback";
 
 export type RectState = Omit<DOMRect, "toJSON">;
@@ -85,8 +86,10 @@ export function useElementRect({
       }
 
       const targetElement = getTargetElement();
+
       if (!targetElement) {
         setRect(initialRect);
+
         return;
       }
 
@@ -110,10 +113,12 @@ export function useElementRect({
   useEffect(() => {
     if (!(enabled && isClientSide())) {
       setRect(initialRect);
+
       return;
     }
 
     const targetElement = getTargetElement();
+
     if (!targetElement) {
       return;
     }
@@ -126,11 +131,16 @@ export function useElementRect({
       const resizeObserver = new ResizeObserver(() => {
         window.requestAnimationFrame(updateRect);
       });
+
       resizeObserver.observe(targetElement);
-      cleanup.push(() => resizeObserver.disconnect());
+      cleanup.push(() => {
+        resizeObserver.disconnect();
+      });
     }
 
-    const handleUpdate = () => updateRect();
+    const handleUpdate = () => {
+      updateRect();
+    };
 
     window.addEventListener("scroll", handleUpdate, true);
     window.addEventListener("resize", handleUpdate, true);
@@ -141,7 +151,9 @@ export function useElementRect({
     });
 
     return () => {
-      cleanup.forEach((fn) => fn());
+      cleanup.forEach((fn) => {
+        fn();
+      });
       setRect(initialRect);
     };
   }, [enabled, getTargetElement, updateRect, useResizeObserver]);

@@ -2,14 +2,12 @@
 
 import type { Editor } from "@tiptap/react";
 import { forwardRef, useCallback, useEffect, useState } from "react";
+
 // --- Icons ---
 import { CornerDownLeftIcon } from "@/components/tiptap-icons/corner-down-left-icon";
 import { ExternalLinkIcon } from "@/components/tiptap-icons/external-link-icon";
 import { LinkIcon } from "@/components/tiptap-icons/link-icon";
 import { TrashIcon } from "@/components/tiptap-icons/trash-icon";
-// --- Tiptap UI ---
-import type { UseLinkPopoverConfig } from "@/components/tiptap-ui/link-popover";
-import { useLinkPopover } from "@/components/tiptap-ui/link-popover";
 // --- UI Primitives ---
 import type { ButtonProps } from "@/components/tiptap-ui-primitive/button";
 import { Button } from "@/components/tiptap-ui-primitive/button";
@@ -26,6 +24,9 @@ import {
   PopoverTrigger,
 } from "@/components/tiptap-ui-primitive/popover";
 import { Separator } from "@/components/tiptap-ui-primitive/separator";
+// --- Tiptap UI ---
+import type { UseLinkPopoverConfig } from "@/components/tiptap-ui/link-popover";
+import { useLinkPopover } from "@/components/tiptap-ui/link-popover";
 // --- Hooks ---
 import { useIsBreakpoint } from "@/hooks/use-is-breakpoint";
 import { useTiptapEditor } from "@/hooks/use-tiptap-editor";
@@ -60,8 +61,7 @@ export interface LinkMainProps {
 }
 
 export interface LinkPopoverProps
-  extends Omit<ButtonProps, "type">,
-    UseLinkPopoverConfig {
+  extends Omit<ButtonProps, "type">, UseLinkPopoverConfig {
   /**
    * Whether to automatically open the popover when a link is active.
    * @default true

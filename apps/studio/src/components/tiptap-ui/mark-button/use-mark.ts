@@ -1,5 +1,6 @@
 import type { Editor } from "@tiptap/react";
 import { useCallback, useEffect, useState } from "react";
+
 // --- Icons ---
 import { BoldIcon } from "@/components/tiptap-icons/bold-icon";
 import { Code2Icon } from "@/components/tiptap-icons/code2-icon";

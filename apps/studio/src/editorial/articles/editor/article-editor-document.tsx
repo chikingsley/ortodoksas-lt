@@ -35,7 +35,7 @@ export function ArticleEditorDocument({
 }: Props) {
   return (
     <div className="min-w-0 px-[clamp(28px,5vw,72px)] pt-12 pb-24 max-md:px-4 max-md:pt-7 max-md:pb-12">
-      <div className="relative mx-auto grid max-w-[860px] gap-2 [&_label]:font-semibold [&_label]:text-secondary-foreground [&_label]:text-xs [&_textarea:first-of-type]:mb-6 [&_textarea:first-of-type]:h-auto [&_textarea:first-of-type]:min-h-[1.2em] [&_textarea:first-of-type]:resize-none [&_textarea:first-of-type]:overflow-hidden [&_textarea:first-of-type]:font-bold [&_textarea:first-of-type]:text-[clamp(34px,4.3vw,56px)] [&_textarea:first-of-type]:leading-none [&_textarea:first-of-type]:tracking-[-0.035em] [&_textarea:last-of-type:focus]:border-primary [&_textarea:last-of-type:focus]:shadow-[0_1px_0_var(--primary)] [&_textarea:last-of-type]:min-h-[88px] [&_textarea:last-of-type]:resize-y [&_textarea:last-of-type]:border-b [&_textarea:last-of-type]:py-3 [&_textarea:last-of-type]:text-lg [&_textarea:last-of-type]:leading-relaxed [&_textarea]:w-full [&_textarea]:rounded-none [&_textarea]:border-0 [&_textarea]:bg-transparent [&_textarea]:p-0 [&_textarea]:text-foreground [&_textarea]:outline-none">
+      <div className="[&_label]:text-secondary-foreground [&_textarea:last-of-type:focus]:border-primary [&_textarea]:text-foreground relative mx-auto grid max-w-[860px] gap-2 [&_label]:text-xs [&_label]:font-semibold [&_textarea]:w-full [&_textarea]:rounded-none [&_textarea]:border-0 [&_textarea]:bg-transparent [&_textarea]:p-0 [&_textarea]:outline-none [&_textarea:first-of-type]:mb-6 [&_textarea:first-of-type]:h-auto [&_textarea:first-of-type]:min-h-[1.2em] [&_textarea:first-of-type]:resize-none [&_textarea:first-of-type]:overflow-hidden [&_textarea:first-of-type]:text-[clamp(34px,4.3vw,56px)] [&_textarea:first-of-type]:leading-none [&_textarea:first-of-type]:font-bold [&_textarea:first-of-type]:tracking-[-0.035em] [&_textarea:last-of-type]:min-h-[88px] [&_textarea:last-of-type]:resize-y [&_textarea:last-of-type]:border-b [&_textarea:last-of-type]:py-3 [&_textarea:last-of-type]:text-lg [&_textarea:last-of-type]:leading-relaxed [&_textarea:last-of-type:focus]:shadow-[0_1px_0_var(--primary)]">
         <label htmlFor="review-title">Title</label>
         <AutoResizeTextarea
           id="review-title"
@@ -50,7 +50,7 @@ export function ArticleEditorDocument({
           rows={3}
           value={summary}
         />
-        <span className="-mt-1 justify-self-end text-[11px] text-muted-foreground">
+        <span className="text-muted-foreground -mt-1 justify-self-end text-[11px]">
           {summary.length} / 600
         </span>
       </div>
@@ -58,13 +58,13 @@ export function ArticleEditorDocument({
       {bodyHasLeadFigure || !(heroMediaId || heroUrl) ? null : (
         <section className="mx-auto mt-10 max-w-[860px]">
           <div className="mb-3 flex items-baseline justify-between max-sm:flex-col max-sm:items-start max-sm:gap-1">
-            <strong className="font-semibold text-secondary-foreground text-xs">
+            <strong className="text-secondary-foreground text-xs font-semibold">
               Lead image
             </strong>
           </div>
           <img
             alt={`Lead for ${title}`}
-            className={`block h-[280px] w-full rounded-lg bg-secondary ${heroFit === "contain" ? "object-contain" : "object-cover"}`}
+            className={`bg-secondary block h-[280px] w-full rounded-lg ${heroFit === "contain" ? "object-contain" : "object-cover"}`}
             height="900"
             src={heroMediaId ? `/api/media/${heroMediaId}` : (heroUrl ?? "")}
             style={{ objectPosition: `${heroFocalX}% ${heroFocalY}%` }}
@@ -73,9 +73,9 @@ export function ArticleEditorDocument({
         </section>
       )}
 
-      <section className="mx-auto mt-10 max-w-[860px] [&_.simple-editor-wrapper]:overflow-clip [&_.simple-editor-wrapper]:rounded-xl [&_.simple-editor-wrapper]:border [&_.simple-editor-wrapper]:bg-card [&_[data-youtube-video]]:my-6 [&_[data-youtube-video]]:aspect-video [&_[data-youtube-video]]:w-full [&_[data-youtube-video]_iframe]:size-full [&_[data-youtube-video]_iframe]:border-0">
+      <section className="[&_.simple-editor-wrapper]:bg-card mx-auto mt-10 max-w-[860px] [&_.simple-editor-wrapper]:overflow-clip [&_.simple-editor-wrapper]:rounded-xl [&_.simple-editor-wrapper]:border [&_[data-youtube-video]]:my-6 [&_[data-youtube-video]]:aspect-video [&_[data-youtube-video]]:w-full [&_[data-youtube-video]_iframe]:size-full [&_[data-youtube-video]_iframe]:border-0">
         <div className="mb-3 flex items-baseline justify-between">
-          <strong className="font-semibold text-secondary-foreground text-xs">
+          <strong className="text-secondary-foreground text-xs font-semibold">
             Article body
           </strong>
         </div>

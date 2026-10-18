@@ -41,7 +41,9 @@ export function DirectoryContactMethods({
         const translated = contact.localizations.find(
           (item) => item.language === locale
         );
+
         const rowId = contact.id ?? String(index);
+
         return (
           <div
             className="grid gap-3 rounded-lg border p-3 md:grid-cols-[1fr_2fr_2fr_auto]"
@@ -49,13 +51,13 @@ export function DirectoryContactMethods({
           >
             <SelectField
               label="Kind"
-              onChange={(kind) =>
+              onChange={(kind) => {
                 onChange(
                   contacts.map((item, itemIndex) =>
                     itemIndex === index ? { ...item, kind } : item
                   )
-                )
-              }
+                );
+              }}
               options={contactKindOptions}
               value={contact.kind}
             />
@@ -63,15 +65,15 @@ export function DirectoryContactMethods({
               <FieldLabel htmlFor={`contact-${rowId}-url`}>URL</FieldLabel>
               <Input
                 id={`contact-${rowId}-url`}
-                onChange={(event) =>
+                onChange={(event) => {
                   onChange(
                     contacts.map((item, itemIndex) =>
                       itemIndex === index
                         ? { ...item, href: event.target.value }
                         : item
                     )
-                  )
-                }
+                  );
+                }}
                 value={contact.href}
               />
             </Field>
@@ -79,7 +81,7 @@ export function DirectoryContactMethods({
               <FieldLabel htmlFor={`contact-${rowId}-label`}>Label</FieldLabel>
               <Input
                 id={`contact-${rowId}-label`}
-                onChange={(event) =>
+                onChange={(event) => {
                   onChange(
                     contacts.map((item, itemIndex) =>
                       itemIndex === index
@@ -97,14 +99,14 @@ export function DirectoryContactMethods({
                           }
                         : item
                     )
-                  )
-                }
+                  );
+                }}
                 value={translated?.label ?? ""}
               />
             </Field>
             <Button
               aria-label="Remove contact"
-              onClick={() =>
+              onClick={() => {
                 onChange(
                   contacts
                     .filter((_, itemIndex) => itemIndex !== index)
@@ -112,8 +114,8 @@ export function DirectoryContactMethods({
                       ...item,
                       sortOrder: itemIndex,
                     }))
-                )
-              }
+                );
+              }}
               size="icon"
               type="button"
               variant="ghost"
@@ -124,7 +126,7 @@ export function DirectoryContactMethods({
         );
       })}
       <Button
-        onClick={() =>
+        onClick={() => {
           onChange([
             ...contacts,
             {
@@ -133,8 +135,8 @@ export function DirectoryContactMethods({
               localizations: [{ label: "", language: locale }],
               sortOrder: contacts.length,
             },
-          ])
-        }
+          ]);
+        }}
         type="button"
         variant="outline"
       >

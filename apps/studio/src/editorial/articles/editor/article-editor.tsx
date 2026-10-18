@@ -8,28 +8,23 @@ import { useForm, useStore } from "@tanstack/react-form";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useBlocker } from "@tanstack/react-router";
 import type { JSONContent } from "@tiptap/core";
-import {
-  type ChangeEvent,
-  type MouseEvent,
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
+import type { ChangeEvent, MouseEvent } from "react";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import { normalizedFormSchema } from "@/editorial/shared/normalized-form-schema";
 import { StudioDialog } from "@/editorial/shared/studio-dialog";
+
 import type { CatalogArticle } from "../types";
 import {
-  type ArticleWorkspaceResponse,
   articleWorkspaceQueryOptions,
   deleteArticleDraft,
   persistArticle,
   restoreArticleRevision,
   verifyArticlePublication,
 } from "./article-editor-api";
+import type { ArticleWorkspaceResponse } from "./article-editor-api";
 import { ArticleEditorDetails } from "./article-editor-details";
 import { ArticleEditorDialogs } from "./article-editor-dialogs";
 import { ArticleEditorDocument } from "./article-editor-document";
@@ -60,6 +55,7 @@ interface EditorFormProps extends Props {
 const LEADING_SLASH_PATTERN = /^\/+/;
 const LITHUANIAN_PREFIX_PATTERN = /^lt\//;
 const TRAILING_SLASH_PATTERN = /\/$/;
+
 const editorialMetadataSchema = z.object({
   byline: z.string().trim().max(200),
   bylineType: z.enum(["person", "organization"]),
@@ -71,14 +67,18 @@ const editorialMetadataSchema = z.object({
   summary: z.string().trim().max(600),
   title: z.string().trim().min(1).max(240),
 });
+
 const articleFormSchema = editorialMetadataSchema.extend({
   body: tiptapDocumentSchema,
   heroFit: z.enum(["contain", "cover"]),
   heroFocalX: z.number().min(0).max(100),
   heroFocalY: z.number().min(0).max(100),
 });
+
 type ArticleFormValues = z.infer<typeof articleFormSchema>;
+
 type TranslationReviewAction = "approve" | "mark_pending" | "request_changes";
+
 interface ArticleSubmitMeta {
   nextStatus: StoredArticle["status"];
   translationReviewAction?: TranslationReviewAction;
@@ -94,10 +94,12 @@ export function ArticleEditor(props: Props) {
   const { data: workspace } = useSuspenseQuery(
     articleWorkspaceQueryOptions(props.article.id)
   );
+
   const workspaceVersion = Math.max(
     0,
     ...workspace.revisions.map((revision) => revision.version)
   );
+
   return (
     <ArticleEditorForm
       {...props}
@@ -116,6 +118,7 @@ function ArticleEditorForm({
   workspace,
 }: EditorFormProps) {
   const queryClient = useQueryClient();
+
   const {
     baseline,
     canonical,
@@ -124,21 +127,27 @@ function ArticleEditorForm({
     translationSource,
     translationSourceCurrentHash,
   } = workspace;
+
   const [saveError, setSaveError] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
+
   const [deleteState, setDeleteState] = useState<
     "idle" | "deleting" | "deleted"
   >("idle");
+
   const [saveState, setSaveState] = useState<
     "saved" | "dirty" | "saving" | "error"
   >("saved");
+
   const submittedArticleId = useRef<string | null>(null);
+
   const persistValidatedArticle = useRef<
     (values: ArticleFormValues, meta: ArticleSubmitMeta) => Promise<string>
-  >(() =>
+  >(async () =>
     Promise.reject(new Error("Article persistence is still initializing"))
   );
+
   const formDefaults = {
     body: tiptapDocumentSchema.parse(JSON.parse(canonical.bodyJson)),
     byline: canonical.byline ?? "",
@@ -154,6 +163,9 @@ function ArticleEditorForm({
     summary: canonical.summary,
     title: canonical.title,
   } satisfies ArticleFormValues;
+
+  const articleSubmitMeta: ArticleSubmitMeta = { nextStatus: "draft" };
+
   const articleForm = useForm({
     defaultValues: formDefaults,
     onSubmit: async ({ meta, value }) => {
@@ -167,13 +179,15 @@ function ArticleEditorForm({
       setSaveError("Complete the required metadata fields before saving.");
       setSaveState("error");
     },
-    onSubmitMeta: { nextStatus: "draft" } as ArticleSubmitMeta,
+    onSubmitMeta: articleSubmitMeta,
     validators: {
       onChange: normalizedFormSchema(articleFormSchema),
       onSubmit: normalizedFormSchema(articleFormSchema),
     },
   });
+
   const formValues = useStore(articleForm.store, (state) => state.values);
+
   const {
     body,
     byline,
@@ -189,41 +203,55 @@ function ArticleEditorForm({
     summary,
     title,
   } = formValues;
+
   const articleId = canonical.id;
+
   const baselineBody = tiptapDocumentSchema.parse(
     JSON.parse(baseline.body_json)
   );
+
   const [changes, setChanges] = useState<ContentChange[]>(initialChanges);
   const [changesOpen, setChangesOpen] = useState(false);
+
   const [heroMediaId, setHeroMediaId] = useState<string | null>(
     canonical.heroMediaId
   );
+
   const [previewOpen, setPreviewOpen] = useState(false);
   const [publicationError, setPublicationError] = useState<string | null>(null);
   const [publicationOpen, setPublicationOpen] = useState(false);
+
   const [publicationState, setPublicationState] = useState<
     "error" | "idle" | "published_unverified" | "verified" | "working"
   >("idle");
+
   const [publicationVerification, setPublicationVerification] =
     useState<PublicationVerification | null>(null);
+
   const [publishedAt, setPublishedAt] = useState<number | null>(
     canonical.publishedAt
   );
+
   const [revisions, setRevisions] = useState<Revision[]>(initialRevisions);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [restoringVersion, setRestoringVersion] = useState<number | null>(null);
+
   const [status, setStatus] = useState<StoredArticle["status"]>(
     canonical.status
   );
+
   const [translationGroupId, setTranslationGroupId] = useState(
     canonical.translationGroupId
   );
+
   const [translationKind, setTranslationKind] = useState(
     canonical.translationKind
   );
+
   const [translationReviewStatus, setTranslationReviewStatus] = useState(
     canonical.translationReviewStatus
   );
+
   const translationSourceQuality: {
     body: JSONContent;
     language: string;
@@ -239,16 +267,19 @@ function ArticleEditorForm({
         title: translationSource.title,
       }
     : null;
+
   const hasUnsavedChanges =
     saveState !== "saved" &&
     deleteState !== "deleting" &&
     deleteState !== "deleted";
+
   const navigationBlocker = useBlocker({
     disabled: !hasUnsavedChanges,
     enableBeforeUnload: hasUnsavedChanges,
     shouldBlockFn: () => hasUnsavedChanges,
     withResolver: true,
   });
+
   const handleDiscardDialogOpenChange = useCallback(
     (open: boolean) => {
       if (!open && navigationBlocker.status === "blocked") {
@@ -257,11 +288,13 @@ function ArticleEditorForm({
     },
     [navigationBlocker]
   );
+
   const discardAndLeave = useCallback(() => {
     if (navigationBlocker.status === "blocked") {
       navigationBlocker.proceed();
     }
   }, [navigationBlocker]);
+
   const keepEditing = useCallback(() => {
     if (navigationBlocker.status === "blocked") {
       navigationBlocker.reset();
@@ -275,6 +308,7 @@ function ArticleEditorForm({
     },
     [articleForm]
   );
+
   const updateTitle = useCallback(
     (event: ChangeEvent<HTMLTextAreaElement>) => {
       articleForm.setFieldValue("title", event.target.value);
@@ -282,6 +316,7 @@ function ArticleEditorForm({
     },
     [articleForm]
   );
+
   const updateSummary = useCallback(
     (event: ChangeEvent<HTMLTextAreaElement>) => {
       articleForm.setFieldValue("summary", event.target.value);
@@ -289,6 +324,7 @@ function ArticleEditorForm({
     },
     [articleForm]
   );
+
   const updateHeroFit = useCallback(
     (value: "contain" | "cover") => {
       articleForm.setFieldValue("heroFit", value);
@@ -296,6 +332,7 @@ function ArticleEditorForm({
     },
     [articleForm]
   );
+
   const updateHeroFocalX = useCallback(
     (value: number) => {
       articleForm.setFieldValue("heroFocalX", value);
@@ -303,6 +340,7 @@ function ArticleEditorForm({
     },
     [articleForm]
   );
+
   const updateHeroFocalY = useCallback(
     (value: number) => {
       articleForm.setFieldValue("heroFocalY", value);
@@ -310,6 +348,7 @@ function ArticleEditorForm({
     },
     [articleForm]
   );
+
   const updateSection = useCallback(
     (value: string) => {
       articleForm.setFieldValue("section", value);
@@ -317,6 +356,7 @@ function ArticleEditorForm({
     },
     [articleForm]
   );
+
   const updateByline = useCallback(
     (value: string) => {
       articleForm.setFieldValue("byline", value);
@@ -324,6 +364,7 @@ function ArticleEditorForm({
     },
     [articleForm]
   );
+
   const updateBylineType = useCallback(
     (value: "organization" | "person") => {
       articleForm.setFieldValue("bylineType", value);
@@ -331,6 +372,7 @@ function ArticleEditorForm({
     },
     [articleForm]
   );
+
   const updateBylineUrl = useCallback(
     (value: string) => {
       articleForm.setFieldValue("bylineUrl", value);
@@ -338,6 +380,7 @@ function ArticleEditorForm({
     },
     [articleForm]
   );
+
   const updateSeoDescription = useCallback(
     (value: string) => {
       articleForm.setFieldValue("seoDescription", value);
@@ -345,6 +388,7 @@ function ArticleEditorForm({
     },
     [articleForm]
   );
+
   const updateSeoTitle = useCallback(
     (value: string) => {
       articleForm.setFieldValue("seoTitle", value);
@@ -356,6 +400,7 @@ function ArticleEditorForm({
   const refreshWorkspace = useCallback(
     async (id: string): Promise<ArticleWorkspaceResponse | null> => {
       const options = articleWorkspaceQueryOptions(id);
+
       try {
         return await queryClient.fetchQuery({ ...options, staleTime: 0 });
       } catch {
@@ -364,6 +409,7 @@ function ArticleEditorForm({
           queryKey: options.queryKey,
           refetchType: "none",
         });
+
         return null;
       }
     },
@@ -377,6 +423,7 @@ function ArticleEditorForm({
     ): Promise<string> => {
       setSaveError(null);
       setSaveState("saving");
+
       const payload = {
         body: values.body,
         byline: values.byline,
@@ -411,6 +458,7 @@ function ArticleEditorForm({
           ? { translationReviewAction: submitMeta.translationReviewAction }
           : {}),
       };
+
       const response = await persistArticle({
         articleId,
         baseline: {
@@ -421,11 +469,13 @@ function ArticleEditorForm({
         },
         payload,
       });
+
       if (!response.ok) {
         setSaveError(response.issues?.[0] ?? response.error);
         setSaveState("error");
         throw new Error(response.error);
       }
+
       const result = response.data;
       setHeroMediaId(result.heroMediaId);
       setPublishedAt(result.publishedAt);
@@ -435,10 +485,12 @@ function ArticleEditorForm({
       );
       setSaveState("saved");
       const refreshedWorkspace = await refreshWorkspace(result.id);
+
       if (refreshedWorkspace) {
         setChanges(refreshedWorkspace.changes);
         setRevisions(refreshedWorkspace.revisions);
       }
+
       return result.id;
     },
     [
@@ -453,6 +505,7 @@ function ArticleEditorForm({
       translationSourceCurrentHash,
     ]
   );
+
   persistValidatedArticle.current = saveValidatedArticle;
 
   const submitArticle = useCallback(
@@ -461,6 +514,7 @@ function ArticleEditorForm({
       translationReviewAction?: TranslationReviewAction
     ): Promise<string | null> => {
       submittedArticleId.current = null;
+
       try {
         await articleForm.handleSubmit({
           nextStatus,
@@ -473,58 +527,84 @@ function ArticleEditorForm({
         );
         setSaveState("error");
       }
+
       return submittedArticleId.current;
     },
     [articleForm]
   );
+
   const saveCurrentStatus = useCallback(() => {
-    submitArticle(status).catch(() => setSaveState("error"));
+    submitArticle(status).catch(() => {
+      setSaveState("error");
+    });
   }, [status, submitArticle]);
+
   const markEditorReviewed = useCallback(() => {
-    submitArticle(status, "approve").catch(() => setSaveState("error"));
+    submitArticle(status, "approve").catch(() => {
+      setSaveState("error");
+    });
   }, [status, submitArticle]);
+
   const openTranslation = useCallback(
     (event: MouseEvent<HTMLButtonElement>) => {
       const counterpart = translations.find(
         (candidate) => candidate.id === event.currentTarget.dataset.articleId
       );
+
       if (counterpart) {
         onOpenTranslation(counterpart);
       }
     },
     [onOpenTranslation, translations]
   );
+
   const createTranslation = useCallback(
-    (targetLanguage: "en" | "ru" | "uk" | "be") =>
+    async (targetLanguage: "en" | "ru" | "uk" | "be") =>
       onCreateTranslation(article, targetLanguage),
     [article, onCreateTranslation]
   );
-  const openPreview = useCallback(() => setPreviewOpen(true), []);
+
+  const openPreview = useCallback(() => {
+    setPreviewOpen(true);
+  }, []);
+
   const openPublication = useCallback(() => {
     setPublicationError(null);
     setPublicationState("idle");
     setPublicationVerification(null);
     setPublicationOpen(true);
   }, []);
-  const openChanges = useCallback(() => setChangesOpen(true), []);
+
+  const openChanges = useCallback(() => {
+    setChangesOpen(true);
+  }, []);
+
   const openDeleteDraft = useCallback(() => {
     setDeleteError(null);
     setDeleteState("idle");
     setDeleteOpen(true);
   }, []);
-  const closeDeleteDraft = useCallback(() => setDeleteOpen(false), []);
+
+  const closeDeleteDraft = useCallback(() => {
+    setDeleteOpen(false);
+  }, []);
+
   const confirmDeleteDraft = useCallback(async (): Promise<void> => {
     if (!(articleId && status === "draft")) {
       return;
     }
+
     setDeleteError(null);
     setDeleteState("deleting");
     const result = await deleteArticleDraft(articleId);
+
     if (!result.ok) {
       setDeleteError(result.error);
       setDeleteState("idle");
+
       return;
     }
+
     setDeleteState("deleted");
     setDeleteOpen(false);
     setSaveState("saved");
@@ -534,6 +614,7 @@ function ArticleEditorForm({
     });
     await onBack();
   }, [articleId, onBack, queryClient, status]);
+
   const runDeleteDraft = useCallback(() => {
     confirmDeleteDraft().catch(() => {
       setDeleteError("Studio encountered a draft deletion error.");
@@ -545,29 +626,37 @@ function ArticleEditorForm({
     setPublicationError(null);
     setPublicationState("working");
     const publishingChanges = status !== "published" || saveState === "dirty";
+
     const publishedId = publishingChanges
       ? await submitArticle("published")
       : articleId;
+
     if (!publishedId) {
       setPublicationError(
         "Publication stopped at the server quality gate. Resolve the listed findings and try again."
       );
       setPublicationState("error");
+
       return;
     }
+
     const verification = await verifyArticlePublication(publishedId);
+
     if (!verification) {
       setPublicationError(
         "The article is published. Live verification is ready for another check."
       );
       setPublicationState("error");
+
       return;
     }
+
     setPublicationVerification(verification);
     setPublicationState(
       verification.reachable ? "verified" : "published_unverified"
     );
   }, [articleId, saveState, status, submitArticle]);
+
   const runPublication = useCallback(() => {
     publishOrVerify().catch(() => {
       setPublicationError(
@@ -582,12 +671,15 @@ function ArticleEditorForm({
       if (!articleId) {
         return;
       }
+
       setRestoringVersion(version);
+
       const restoredArticle = await restoreArticleRevision(
         articleId,
         version,
         Math.max(0, ...revisions.map((revision) => revision.version))
       );
+
       if (restoredArticle) {
         const restoredMetadata = {
           body: tiptapDocumentSchema.parse(
@@ -606,6 +698,7 @@ function ArticleEditorForm({
           summary: restoredArticle.summary,
           title: restoredArticle.title,
         } satisfies ArticleFormValues;
+
         articleForm.reset(restoredMetadata);
         setStatus(restoredArticle.status);
         setTranslationGroupId(restoredArticle.translationGroupId);
@@ -613,22 +706,26 @@ function ArticleEditorForm({
         setTranslationReviewStatus(restoredArticle.translationReviewStatus);
         setSaveState("saved");
         const refreshedWorkspace = await refreshWorkspace(articleId);
+
         if (refreshedWorkspace) {
           setChanges(refreshedWorkspace.changes);
           setRevisions(refreshedWorkspace.revisions);
         }
       }
+
       setRestoringVersion(null);
     },
     [articleForm, articleId, refreshWorkspace, revisions]
   );
+
   const restoreRevisionFromButton = useCallback(
     (event: MouseEvent<HTMLButtonElement>) => {
       const { version } = event.currentTarget.dataset;
+
       if (version) {
-        restoreRevision(Number.parseInt(version, 10)).catch(() =>
-          setRestoringVersion(null)
-        );
+        restoreRevision(Number.parseInt(version, 10)).catch(() => {
+          setRestoringVersion(null);
+        });
       }
     },
     [restoreRevision]
@@ -636,6 +733,7 @@ function ArticleEditorForm({
 
   const previewDocument = useMemo(() => {
     const parsedBody = tiptapDocumentSchema.safeParse(body);
+
     return parsedBody.success
       ? renderArticleDocument({
           body: parsedBody.data,
@@ -646,6 +744,7 @@ function ArticleEditorForm({
         })
       : "";
   }, [article.hero, body, language, summary, title]);
+
   const qualityIssues = useMemo(
     () =>
       getArticleQualityIssues({
@@ -657,6 +756,7 @@ function ArticleEditorForm({
       }),
     [body, language, summary, title, translationSourceQuality]
   );
+
   const bodyHasLeadFigure = useMemo(
     () =>
       body.content?.some(
@@ -666,7 +766,7 @@ function ArticleEditorForm({
   );
 
   return (
-    <div className="min-h-[calc(100dvh-var(--studio-mobile-header-height))] bg-muted/60 md:min-h-screen">
+    <div className="bg-muted/60 min-h-[calc(100dvh-var(--studio-mobile-header-height))] md:min-h-screen">
       <ArticleEditorHeader
         articleId={articleId}
         onBack={onBack}
@@ -682,7 +782,7 @@ function ArticleEditorForm({
         translations={translations}
       />
 
-      <div className="mx-auto grid max-w-[1320px] grid-cols-[minmax(0,1fr)_304px] border-x bg-card max-editor-mobile:block max-editor-mobile:max-w-none max-editor-compact:grid-cols-[minmax(0,1fr)_280px] max-editor-mobile:border-x-0 max-editor-compact:border-l-0">
+      <div className="bg-card max-editor-mobile:block max-editor-mobile:max-w-none max-editor-compact:grid-cols-[minmax(0,1fr)_280px] max-editor-mobile:border-x-0 max-editor-compact:border-l-0 mx-auto grid max-w-[1320px] grid-cols-[minmax(0,1fr)_304px] border-x">
         <ArticleEditorDocument
           body={body}
           bodyHasLeadFigure={bodyHasLeadFigure}
@@ -766,12 +866,12 @@ function ArticleEditorForm({
         title="Delete this draft?"
       >
         <div className="grid gap-5 p-5">
-          <p className="m-0 text-muted-foreground text-sm leading-6">
+          <p className="text-muted-foreground m-0 text-sm leading-6">
             The published site stays unchanged. This draft and its Studio
             revision history will be removed permanently.
           </p>
           {deleteError ? (
-            <p className="m-0 text-destructive text-sm" role="alert">
+            <p className="text-destructive m-0 text-sm" role="alert">
               {deleteError}
             </p>
           ) : null}
@@ -803,7 +903,7 @@ function ArticleEditorForm({
         title="Leave this article?"
       >
         <div className="grid gap-5 p-5">
-          <p className="m-0 text-muted-foreground text-sm leading-6">
+          <p className="text-muted-foreground m-0 text-sm leading-6">
             Leaving now discards the current editing session. The latest saved
             revision stays available in Studio.
           </p>

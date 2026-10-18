@@ -37,7 +37,9 @@ export const getHomepagePlacements = async (database: StudioDatabase) => {
     )
     .where(eq(homepageLayoutState.id, "primary"))
     .orderBy(asc(homepagePlacements.slot), asc(homepagePlacements.position));
+
   const revision = rows[0]?.revision ?? "initial";
+
   const placements = rows.flatMap((row) =>
     row.id
       ? [
@@ -55,6 +57,7 @@ export const getHomepagePlacements = async (database: StudioDatabase) => {
         ]
       : []
   );
+
   return { placements, revision };
 };
 
@@ -69,6 +72,7 @@ export const updateHomepagePlacements = async (input: {
   }>
 > => {
   const parsed = homepageLayoutSchema.safeParse(input.payload);
+
   if (!parsed.success) {
     return {
       error: "Homepage validation failed",
@@ -77,12 +81,15 @@ export const updateHomepagePlacements = async (input: {
       status: 422,
     };
   }
+
   const { expectedRevision, leadId, secondaryIds } = parsed.data;
+
   const currentState = await input.database.query.homepageLayoutState.findFirst(
     {
       where: eq(homepageLayoutState.id, "primary"),
     }
   );
+
   if (!currentState) {
     return {
       error: "Homepage layout state is unavailable",
@@ -90,6 +97,7 @@ export const updateHomepagePlacements = async (input: {
       status: 503,
     };
   }
+
   if (currentState.revision !== expectedRevision) {
     return {
       error: "Homepage layout changed since this editor loaded it",
@@ -97,7 +105,9 @@ export const updateHomepagePlacements = async (input: {
       status: 409,
     };
   }
+
   const uniqueIds = new Set(secondaryIds);
+
   if (uniqueIds.size !== secondaryIds.length || uniqueIds.has(leadId ?? "")) {
     return {
       error: "Homepage stories must use distinct placements",
@@ -107,6 +117,7 @@ export const updateHomepagePlacements = async (input: {
   }
 
   const requestedIds = [...(leadId ? [leadId] : []), ...secondaryIds];
+
   if (requestedIds.length > 0) {
     const eligible = await input.database
       .select({ id: articles.id })
@@ -124,6 +135,7 @@ export const updateHomepagePlacements = async (input: {
           isNotNull(articles.heroMediaId)
         )
       );
+
     if (eligible.length !== requestedIds.length) {
       return {
         error: "Homepage stories must be eligible published stories",
@@ -135,6 +147,7 @@ export const updateHomepagePlacements = async (input: {
 
   const timestamp = Date.now();
   const revision = crypto.randomUUID();
+
   const transactionEligibility = requestedIds.map((articleId) =>
     exists(
       input.database
@@ -155,6 +168,7 @@ export const updateHomepagePlacements = async (input: {
         )
     )
   );
+
   const values = [
     ...(leadId
       ? [
@@ -179,6 +193,7 @@ export const updateHomepagePlacements = async (input: {
       updatedAt: timestamp,
     })),
   ];
+
   const claimRevision = input.database
     .update(homepageLayoutState)
     .set({ revision, updatedAt: timestamp })
@@ -189,6 +204,7 @@ export const updateHomepagePlacements = async (input: {
         ...transactionEligibility
       )
     );
+
   const deleteStalePlacements = input.database.delete(homepagePlacements).where(
     and(
       ne(homepagePlacements.layoutRevision, revision),
@@ -205,6 +221,7 @@ export const updateHomepagePlacements = async (input: {
       )
     )
   );
+
   const guardedPlacementInserts = values.map((value) =>
     input.database.insert(homepagePlacements).select(
       input.database
@@ -230,15 +247,18 @@ export const updateHomepagePlacements = async (input: {
         )
     )
   );
+
   await input.database.batch([
     claimRevision,
     ...guardedPlacementInserts,
     deleteStalePlacements,
   ]);
+
   const committedState =
     await input.database.query.homepageLayoutState.findFirst({
       where: eq(homepageLayoutState.id, "primary"),
     });
+
   if (committedState?.revision !== revision) {
     return {
       error: "Homepage layout changed since this editor loaded it",
@@ -246,5 +266,6 @@ export const updateHomepagePlacements = async (input: {
       status: 409,
     };
   }
+
   return { data: { leadId, revision, secondaryIds }, ok: true };
 };

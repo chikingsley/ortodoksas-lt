@@ -16,9 +16,12 @@ export const publicArticleUrl = (
   slug: string
 ): string => {
   const normalizedOrigin = origin.endsWith("/") ? origin : `${origin}/`;
+
   const normalizedSlug = slug
     .replace(LEADING_SLASHES_PATTERN, "")
     .replace(HTML_SUFFIX_PATTERN, "");
+
   const localePrefix = language === "lt" ? "" : `${language}/`;
+
   return new URL(`${localePrefix}${normalizedSlug}`, normalizedOrigin).href;
 };

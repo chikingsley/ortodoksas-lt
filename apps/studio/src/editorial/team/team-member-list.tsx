@@ -10,7 +10,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { type TeamRole, teamRoleLabel, teamRoles } from "./team-role";
+import { teamRoleLabel, teamRoles } from "./team-role";
+import type { TeamRole } from "./team-role";
 import type { TeamMemberResource } from "./team-types";
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
@@ -18,6 +19,7 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
   month: "short",
   year: "numeric",
 });
+
 const identifierNameSeparatorPattern = /[._+-]+/u;
 
 interface ListProps {
@@ -43,19 +45,23 @@ const memberName = (member: TeamMemberResource) => {
   ]
     .filter(Boolean)
     .join(" ");
+
   return name || member.publicUserData?.identifier || "Studio member";
 };
 
 const memberInitials = (member: TeamMemberResource) => {
   const { publicUserData } = member;
+
   const nameParts = [
     publicUserData?.firstName,
     publicUserData?.lastName,
   ].filter(Boolean);
+
   const identifierParts = publicUserData?.identifier
     .split("@")[0]
     ?.split(identifierNameSeparatorPattern)
     .filter(Boolean);
+
   return (nameParts.length > 0 ? nameParts : (identifierParts ?? ["S"]))
     .slice(0, 2)
     .map((part) => part?.charAt(0))
@@ -71,11 +77,14 @@ function TeamMemberRow({
   onRoleChange,
 }: RowProps) {
   const [confirming, setConfirming] = useState(false);
+
   const identifier =
     member.publicUserData?.identifier ?? "Account identifier unavailable";
+
   const name = memberName(member);
   const initials = memberInitials(member);
   const isCurrentUser = member.publicUserData?.userId === currentUserId;
+
   const role: TeamRole =
     member.role === "org:admin" ? "org:admin" : "org:member";
 
@@ -87,10 +96,16 @@ function TeamMemberRow({
     },
     [member.id, onRoleChange]
   );
-  const requestRemoval = useCallback(() => setConfirming(true), []);
-  const cancelRemoval = useCallback(() => setConfirming(false), []);
+
+  const requestRemoval = useCallback(() => {
+    setConfirming(true);
+  }, []);
+  const cancelRemoval = useCallback(() => {
+    setConfirming(false);
+  }, []);
+
   const remove = useCallback(
-    async () => onRemove(member.id),
+    async () => await onRemove(member.id),
     [member.id, onRemove]
   );
 
@@ -104,18 +119,18 @@ function TeamMemberRow({
           <AvatarFallback className="font-medium">{initials}</AvatarFallback>
         </Avatar>
         <span className="min-w-0">
-          <strong className="block truncate font-medium text-sm">
+          <strong className="block truncate text-sm font-medium">
             {name}{" "}
             {isCurrentUser ? (
               <span className="text-muted-foreground">(you)</span>
             ) : null}
           </strong>
           {name === identifier ? null : (
-            <small className="block truncate text-muted-foreground text-xs">
+            <small className="text-muted-foreground block truncate text-xs">
               {identifier}
             </small>
           )}
-          <small className="block text-muted-foreground text-xs sm:hidden">
+          <small className="text-muted-foreground block text-xs sm:hidden">
             Joined {dateFormatter.format(member.createdAt)}
           </small>
         </span>
@@ -184,7 +199,7 @@ export function TeamMemberList({
   onRoleChange,
 }: ListProps) {
   if (members.length === 0) {
-    return <p className="m-0 p-4 text-muted-foreground">The team is empty.</p>;
+    return <p className="text-muted-foreground m-0 p-4">The team is empty.</p>;
   }
 
   return (

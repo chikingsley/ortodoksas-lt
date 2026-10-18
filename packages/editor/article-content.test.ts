@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { canonicalizeTiptapDocument } from "./canonicalize";
 import { getArticleQualityIssues } from "./quality";
 import { renderArticleBody } from "./render";
@@ -48,6 +49,7 @@ describe("canonical article content", () => {
       content: [{ text: "This entire paragraph appears twice.", type: "text" }],
       type: "paragraph",
     };
+
     const issues = getArticleQualityIssues({
       body: {
         content: [
@@ -278,7 +280,9 @@ describe("canonical article content", () => {
       ],
       type: "doc",
     };
+
     const html = renderArticleBody(body);
+
     const issues = getArticleQualityIssues({
       body,
       summary: "Velyknakčio vaizdo įrašas.",

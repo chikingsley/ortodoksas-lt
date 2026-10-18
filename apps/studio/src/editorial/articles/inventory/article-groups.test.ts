@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import type { CatalogArticle } from "../types";
 import {
   filterArticleGroups,
@@ -119,6 +120,7 @@ describe("article inventory groups", () => {
       ],
       "profile-redirect": ["/p/apie-mane"],
     } as const;
+
     const pages = Object.values(routesByRole)
       .flat()
       .map((path, index) =>

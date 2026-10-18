@@ -1,5 +1,6 @@
-import { env } from "cloudflare:workers";
 import { createServerFn } from "@tanstack/react-start";
+import { env } from "cloudflare:workers";
+
 import { requireStudioEditor } from "../auth";
 import { getDatabase } from "../db.server";
 import { requireStudioWritesOpen } from "../write-mode";
@@ -12,7 +13,8 @@ import {
 export const loadHomepagePlacements = createServerFn({ method: "GET" }).handler(
   async () => {
     await requireStudioEditor(env);
-    return getHomepagePlacements(getDatabase(env.DB));
+
+    return await getHomepagePlacements(getDatabase(env.DB));
   }
 );
 
@@ -23,7 +25,8 @@ export const updateHomepagePlacementsMutation = createServerFn({
   .handler(async ({ data }) => {
     await requireStudioEditor(env);
     requireStudioWritesOpen(env);
-    return updateHomepagePlacements({
+
+    return await updateHomepagePlacements({
       database: getDatabase(env.DB),
       payload: data,
     });

@@ -40,6 +40,7 @@ export const getArticleBaseline = async (
       .where(eq(articleContentChanges.articleId, articleId))
       .orderBy(asc(articleContentChanges.fieldPath)),
   ]);
+
   return baseline ? { baseline, changes } : null;
 };
 
@@ -66,9 +67,11 @@ export const getArticleWorkspace = async (
   const canonical = await database.query.articles.findFirst({
     where: eq(articles.id, articleId),
   });
+
   if (!canonical) {
     return null;
   }
+
   const [baselineRecord, revisions, translationSource] = await Promise.all([
     getArticleBaseline(database, articleId),
     getArticleRevisions(database, articleId),
@@ -78,6 +81,7 @@ export const getArticleWorkspace = async (
         })
       : null,
   ]);
+
   return {
     baseline: baselineRecord?.baseline ?? { body_json: canonical.bodyJson },
     canonical,

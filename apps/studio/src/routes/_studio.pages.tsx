@@ -4,6 +4,6 @@ import { articleCatalogQueryOptions } from "@/server/articles/article-catalog.fu
 
 export const Route = createFileRoute("/_studio/pages")({
   component: Outlet,
-  loader: ({ context }) =>
+  loader: async ({ context }) =>
     context.queryClient.ensureQueryData(articleCatalogQueryOptions()),
 });

@@ -1,5 +1,6 @@
 import { Check, ChevronDown, History, Trash2, X } from "lucide-react";
-import { type ChangeEvent, type MouseEvent, useCallback } from "react";
+import { useCallback } from "react";
+import type { ChangeEvent, MouseEvent } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -66,7 +67,8 @@ interface Props {
 
 const sectionClass =
   "border-b p-6 max-md:p-5 [&>h2]:mt-0 [&>h2]:mb-4 [&>h2]:text-[13px] [&>h2]:font-bold";
-const keepEditionLanguage = () => undefined;
+
+const keepEditionLanguage = () => {};
 
 export function ArticleEditorDetails({
   byline,
@@ -114,9 +116,11 @@ export function ArticleEditorDetails({
     },
     revision,
   }));
+
   const hasPartialRevision = revisionEntries.some(
     ({ metadata }) => metadata.snapshotCompleteness === "legacy_partial"
   );
+
   const changeHeroFit = useCallback(
     (value: string | null) => {
       if (value === "contain" || value === "cover") {
@@ -125,29 +129,36 @@ export function ArticleEditorDetails({
     },
     [onHeroFitChange]
   );
+
   const changeHeroFocalX = useCallback(
     (value: number | readonly number[]) => {
       const nextValue = typeof value === "number" ? value : value[0];
+
       if (nextValue !== undefined) {
         onHeroFocalXChange(nextValue);
       }
     },
     [onHeroFocalXChange]
   );
+
   const changeHeroFocalY = useCallback(
     (value: number | readonly number[]) => {
       const nextValue = typeof value === "number" ? value : value[0];
+
       if (nextValue !== undefined) {
         onHeroFocalYChange(nextValue);
       }
     },
     [onHeroFocalYChange]
   );
+
   const changeByline = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) =>
-      onBylineChange(event.target.value),
+    (event: ChangeEvent<HTMLInputElement>) => {
+      onBylineChange(event.target.value);
+    },
     [onBylineChange]
   );
+
   const changeBylineType = useCallback(
     (value: string | null) => {
       if (value === "organization" || value === "person") {
@@ -156,24 +167,26 @@ export function ArticleEditorDetails({
     },
     [onBylineTypeChange]
   );
+
   const changeBylineUrl = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) =>
-      onBylineUrlChange(event.target.value),
+    (event: ChangeEvent<HTMLInputElement>) => {
+      onBylineUrlChange(event.target.value);
+    },
     [onBylineUrlChange]
   );
 
   return (
     <aside
       aria-label="Article details"
-      className="min-w-0 border-l bg-muted/30 max-md:border-t max-md:border-l-0"
+      className="bg-muted/30 min-w-0 border-l max-md:border-t max-md:border-l-0"
     >
       <section className={sectionClass}>
         <h2>Status and history</h2>
-        <dl className="m-0 [&>div]:flex [&>div]:items-center [&>div]:justify-between [&>div]:py-2 [&>div]:text-xs [&_dd]:m-0 [&_dd]:flex [&_dd]:items-center [&_dd]:gap-1.5 [&_dd]:font-semibold [&_dd]:capitalize [&_dt]:text-muted-foreground">
+        <dl className="[&_dt]:text-muted-foreground m-0 [&_dd]:m-0 [&_dd]:flex [&_dd]:items-center [&_dd]:gap-1.5 [&_dd]:font-semibold [&_dd]:capitalize [&>div]:flex [&>div]:items-center [&>div]:justify-between [&>div]:py-2 [&>div]:text-xs">
           <div>
             <dt>Status</dt>
             <dd>
-              <i className="size-2 rounded-full bg-primary" />
+              <i className="bg-primary size-2 rounded-full" />
               {formatPublicationStatus(status)}
             </dd>
           </div>
@@ -192,7 +205,7 @@ export function ArticleEditorDetails({
           </div>
         </dl>
         {revisions[0] ? (
-          <p className="mt-2.5 mb-3.5 text-[11px] text-muted-foreground leading-relaxed">
+          <p className="text-muted-foreground mt-2.5 mb-3.5 text-[11px] leading-relaxed">
             Saved {new Date(revisions[0].created_at).toLocaleString()} by{" "}
             {revisions[0].editor_id}
           </p>
@@ -215,7 +228,7 @@ export function ArticleEditorDetails({
           <CollapsibleTrigger
             render={
               <Button
-                className="w-full justify-start px-0 text-secondary-foreground"
+                className="text-secondary-foreground w-full justify-start px-0"
                 size="sm"
                 type="button"
                 variant="ghost"
@@ -227,7 +240,7 @@ export function ArticleEditorDetails({
           </CollapsibleTrigger>
           <CollapsibleContent>
             {hasPartialRevision ? (
-              <p className="mt-2 mb-1 text-[10px] text-muted-foreground leading-relaxed">
+              <p className="text-muted-foreground mt-2 mb-1 text-[10px] leading-relaxed">
                 Earlier versions preserve the fields recorded at the time. Newer
                 fields keep their current values during restore.
               </p>
@@ -242,11 +255,11 @@ export function ArticleEditorDetails({
                     <strong className="text-xs">
                       Version {revision.version}
                     </strong>
-                    <span className="mt-0.5 text-[10px] text-muted-foreground">
+                    <span className="text-muted-foreground mt-0.5 text-[10px]">
                       {new Date(revision.created_at).toLocaleString()} ·{" "}
                       {revision.editor_id}
                     </span>
-                    <small className="mt-0.5 text-[10px] text-muted-foreground">
+                    <small className="text-muted-foreground mt-0.5 text-[10px]">
                       {metadata.title}
                     </small>
                   </div>
@@ -265,7 +278,7 @@ export function ArticleEditorDetails({
                         : "Restore"}
                     </Button>
                   ) : (
-                    <em className="mt-0.5 text-[10px] text-muted-foreground">
+                    <em className="text-muted-foreground mt-0.5 text-[10px]">
                       Current
                     </em>
                   )}
@@ -279,7 +292,7 @@ export function ArticleEditorDetails({
       <section className={sectionClass}>
         <h2>Automatic quality checks</h2>
         <div
-          className={`mb-2 flex items-center gap-2 font-semibold text-xs [&_svg]:size-4 ${qualityIssues.length === 0 ? "text-success" : "text-destructive"}`}
+          className={`mb-2 flex items-center gap-2 text-xs font-semibold [&_svg]:size-4 ${qualityIssues.length === 0 ? "text-success" : "text-destructive"}`}
         >
           {qualityIssues.length === 0 ? <Check /> : <X />}
           {qualityIssues.length === 0
@@ -287,7 +300,7 @@ export function ArticleEditorDetails({
             : `${qualityIssues.length} issues found`}
         </div>
         {qualityIssues.length > 0 ? (
-          <ul className="mt-0 mb-3.5 rounded-md border border-destructive/20 bg-destructive/5 py-2.5 pr-2.5 pl-7 text-[11px] text-destructive leading-relaxed">
+          <ul className="border-destructive/20 bg-destructive/5 text-destructive mt-0 mb-3.5 rounded-md border py-2.5 pr-2.5 pl-7 text-[11px] leading-relaxed">
             {qualityIssues.map((issue) => (
               <li key={issue}>{issue}</li>
             ))}
@@ -307,7 +320,7 @@ export function ArticleEditorDetails({
       </section>
 
       <section
-        className={`${sectionClass} [&>label]:mt-3.5 [&>label]:mb-1.5 [&>label]:block [&>label]:font-semibold [&>label]:text-xs [&_[data-slot=select-trigger]]:w-full`}
+        className={`${sectionClass} [&_[data-slot=select-trigger]]:w-full [&>label]:mt-3.5 [&>label]:mb-1.5 [&>label]:block [&>label]:text-xs [&>label]:font-semibold`}
       >
         <h2>Publication</h2>
         <label htmlFor="review-language">Language</label>
@@ -317,7 +330,7 @@ export function ArticleEditorDetails({
           onChange={keepEditionLanguage}
           value={language}
         />
-        <p className="mt-1.5 text-[11px] text-muted-foreground leading-relaxed">
+        <p className="text-muted-foreground mt-1.5 text-[11px] leading-relaxed">
           Language is fixed for this edition. Create another language from the
           translation workflow.
         </p>
@@ -336,7 +349,7 @@ export function ArticleEditorDetails({
           placeholder="Person or institution"
           value={byline}
         />
-        <p className="mt-1.5 text-[11px] text-muted-foreground leading-relaxed">
+        <p className="text-muted-foreground mt-1.5 text-[11px] leading-relaxed">
           This public byline stays separate from the signed-in editor account.
         </p>
         {byline.trim() ? (
@@ -364,10 +377,10 @@ export function ArticleEditorDetails({
             />
           </>
         ) : null}
-        <span className="mt-3.5 mb-1.5 block font-semibold text-xs">
+        <span className="mt-3.5 mb-1.5 block text-xs font-semibold">
           Public path
         </span>
-        <code className="block w-full overflow-hidden text-ellipsis whitespace-nowrap rounded-md border bg-card px-2.5 py-2 text-xs">
+        <code className="bg-card block w-full overflow-hidden rounded-md border px-2.5 py-2 text-xs text-ellipsis whitespace-nowrap">
           /{publicPath}
         </code>
       </section>
@@ -390,7 +403,7 @@ export function ArticleEditorDetails({
         <section className={sectionClass}>
           <h2>Lead image framing</h2>
           <label
-            className="mb-1.5 block font-semibold text-xs"
+            className="mb-1.5 block text-xs font-semibold"
             htmlFor="hero-fit"
           >
             Frame fit
@@ -406,7 +419,7 @@ export function ArticleEditorDetails({
               <SelectItem value="contain">Show full image</SelectItem>
             </SelectContent>
           </Select>
-          <p className="mt-2 mb-4 text-[11px] text-muted-foreground leading-relaxed">
+          <p className="text-muted-foreground mt-2 mb-4 text-[11px] leading-relaxed">
             Fill frame uses the focus point for homepage cards. Show full image
             keeps the complete artwork visible.
           </p>

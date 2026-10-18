@@ -1,7 +1,7 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import type * as React from "react";
-import { Button } from "@/components/tiptap-ui-primitive/button";
 
+import { Button } from "@/components/tiptap-ui-primitive/button";
 import { Input } from "@/components/tiptap-ui-primitive/input";
 import { Textarea } from "@/components/tiptap-ui-primitive/textarea";
 import { cn } from "@/lib/tiptap-utils";

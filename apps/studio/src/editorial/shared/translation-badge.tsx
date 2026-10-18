@@ -6,7 +6,7 @@ interface Props {
 }
 
 export const TranslationBadge = ({ kind, reviewStatus }: Props) => (
-  <span className="inline-flex min-h-[22px] items-center whitespace-nowrap rounded-full border bg-muted px-2 font-semibold text-[9px] text-muted-foreground">
+  <span className="bg-muted text-muted-foreground inline-flex min-h-[22px] items-center rounded-full border px-2 text-[9px] font-semibold whitespace-nowrap">
     {formatTranslationLabel(kind, reviewStatus)}
   </span>
 );

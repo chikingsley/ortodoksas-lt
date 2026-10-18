@@ -1,4 +1,5 @@
-import { defaultLocale, type SiteLocale } from "../../i18n/config";
+import { defaultLocale } from "../../i18n/config";
+import type { SiteLocale } from "../../i18n/config";
 import { ui } from "../../i18n/ui";
 
 type UiCopy = (typeof ui)[SiteLocale];
@@ -76,7 +77,7 @@ function localizedHome(locale: SiteLocale) {
  */
 export function getPrimaryNavigation(
   locale: SiteLocale,
-  resolveLocalizedPath: (path: string) => string | undefined = () => undefined
+  resolveLocalizedPath: (path: string) => string | undefined = () => {}
 ): NavigationItem[] {
   return primaryNavigation.flatMap((item) => {
     if (item.id === "home") {
@@ -87,6 +88,7 @@ export function getPrimaryNavigation(
         targetLocale: locale,
       };
     }
+
     if (item.id === "archive" && locale !== defaultLocale) {
       return {
         href: `/${locale}#articles`,
@@ -95,11 +97,14 @@ export function getPrimaryNavigation(
         targetLocale: locale,
       };
     }
+
     const localizedPath =
       locale === defaultLocale ? undefined : resolveLocalizedPath(item.path);
+
     if (locale !== defaultLocale && !localizedPath) {
       return [];
     }
+
     return {
       href: localizedPath ? `/${locale}${localizedPath}` : item.path,
       id: item.id,
@@ -111,14 +116,16 @@ export function getPrimaryNavigation(
 
 export function getContactNavigation(
   locale: SiteLocale,
-  resolveLocalizedPath: (path: string) => string | undefined = () => undefined
+  resolveLocalizedPath: (path: string) => string | undefined = () => {}
 ): ContactNavigationItem[] {
   return contactNavigation.flatMap((item) => {
     const localizedPath =
       locale === defaultLocale ? undefined : resolveLocalizedPath(item.path);
+
     if (locale !== defaultLocale && !localizedPath) {
       return [];
     }
+
     return {
       href: localizedPath ? `/${locale}${localizedPath}` : item.path,
       id: item.id,
@@ -135,10 +142,12 @@ export function isNavigationItemActive(
   if (item.id === "home") {
     return currentPath === item.href;
   }
+
   if (item.id === "archive") {
     return item.href.includes("#")
       ? currentPath === item.href
       : currentPath === item.href || currentPath === "/archyvas";
   }
+
   return currentPath === item.href;
 }

@@ -7,6 +7,7 @@ const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
 const CACHE_CONTROL = "public, max-age=31536000, immutable";
 const IMAGE_BINDING_LIMIT = 20 * 1024 * 1024;
 const RESPONSIVE_WIDTHS = new Set([320, 640, 960, 1280, 1600]);
+
 const ALLOWED_IMAGE_TYPES = new Map([
   ["image/avif", "avif"],
   ["image/gif", "gif"],
@@ -54,6 +55,7 @@ const decodeFileName = (value: string | null): string => {
   if (!value) {
     return "upload";
   }
+
   try {
     return decodeURIComponent(value).slice(0, 255);
   } catch {
@@ -67,9 +69,11 @@ const preferredOutputFormat = (
   if (acceptHeader.includes("image/avif")) {
     return "image/avif";
   }
+
   if (acceptHeader.includes("image/webp")) {
     return "image/webp";
   }
+
   return null;
 };
 
@@ -97,6 +101,7 @@ export const uploadMedia = async (input: {
     input.request.headers.get("content-length") ?? "0",
     10
   );
+
   if (contentLength > MAX_UPLOAD_BYTES) {
     return Response.json(
       { error: "Image exceeds the 5 MB upload limit" },
@@ -106,7 +111,9 @@ export const uploadMedia = async (input: {
 
   const mimeType =
     input.request.headers.get("content-type")?.split(";", 1)[0] ?? "";
+
   const extension = ALLOWED_IMAGE_TYPES.get(mimeType);
+
   if (!extension) {
     return Response.json(
       { error: "Use a JPEG, PNG, WebP, AVIF, or GIF image" },
@@ -115,9 +122,11 @@ export const uploadMedia = async (input: {
   }
 
   const bytes = await input.request.arrayBuffer();
+
   if (bytes.byteLength === 0) {
     return Response.json({ error: "Image data is required" }, { status: 400 });
   }
+
   if (bytes.byteLength > MAX_UPLOAD_BYTES) {
     return Response.json(
       { error: "Image exceeds the 5 MB upload limit" },
@@ -128,6 +137,7 @@ export const uploadMedia = async (input: {
   const imageInfo = await input.images
     .info(new Blob([bytes]).stream())
     .catch(() => null);
+
   if (!(imageInfo && "width" in imageInfo)) {
     return Response.json(
       { error: "Image data could not be decoded" },
@@ -137,11 +147,13 @@ export const uploadMedia = async (input: {
 
   const digest = await crypto.subtle.digest("SHA-256", bytes);
   const sha256 = toHex(digest);
+
   const [existing] = await input.database
     .select(mediaSelection)
     .from(mediaAssets)
     .where(eq(mediaAssets.sha256, sha256))
     .limit(1);
+
   if (existing) {
     return Response.json({ media: mediaResponse(existing), reused: true });
   }
@@ -175,9 +187,11 @@ export const uploadMedia = async (input: {
       .from(mediaAssets)
       .where(eq(mediaAssets.sha256, sha256))
       .limit(1);
+
     if (concurrent) {
       return Response.json({ media: mediaResponse(concurrent), reused: true });
     }
+
     // The key is content-addressed and every writer stores identical bytes.
     // Retaining an orphan lets a later retry repair D1 while protecting a
     // concurrent winner from losing its shared object.
@@ -198,6 +212,7 @@ export const uploadMedia = async (input: {
     sha256,
     width: imageInfo.width,
   };
+
   return Response.json(
     { media: mediaResponse(record), reused: false },
     { status: 201 }
@@ -220,6 +235,7 @@ export const serveMedia = async (input: {
     .from(mediaAssets)
     .where(eq(mediaAssets.id, input.id))
     .limit(1);
+
   if (!record) {
     return Response.json({ error: "Media unavailable" }, { status: 404 });
   }
@@ -227,29 +243,35 @@ export const serveMedia = async (input: {
   const object = await input.media.get(record.r2Key, {
     onlyIf: input.request.headers,
   });
+
   if (!object) {
     return Response.json(
       { error: "Media object unavailable" },
       { status: 404 }
     );
   }
+
   if (!("body" in object)) {
     return new Response(null, { status: 304 });
   }
 
   const url = new URL(input.request.url);
+
   const requestedWidth = Number.parseInt(
     url.searchParams.get("width") ?? "",
     10
   );
+
   const outputFormat = preferredOutputFormat(
     input.request.headers.get("accept") ?? ""
   );
+
   const canTransform =
     RESPONSIVE_WIDTHS.has(requestedWidth) &&
     outputFormat !== null &&
     record.byteSize <= IMAGE_BINDING_LIMIT &&
     record.mimeType !== "image/gif";
+
   if (canTransform) {
     const transformed = (
       await input.images
@@ -257,10 +279,12 @@ export const serveMedia = async (input: {
         .transform({ width: requestedWidth })
         .output({ format: outputFormat, quality: 82 })
     ).response();
+
     const headers = new Headers(transformed.headers);
     headers.set("cache-control", CACHE_CONTROL);
     headers.set("vary", "accept");
     headers.set("x-content-type-options", "nosniff");
+
     return new Response(transformed.body, { headers });
   }
 
@@ -269,5 +293,6 @@ export const serveMedia = async (input: {
   headers.set("cache-control", CACHE_CONTROL);
   headers.set("etag", object.httpEtag);
   headers.set("x-content-type-options", "nosniff");
+
   return new Response(object.body, { headers });
 };

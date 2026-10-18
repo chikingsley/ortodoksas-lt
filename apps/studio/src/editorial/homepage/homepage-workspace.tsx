@@ -11,6 +11,7 @@ import type { CatalogArticle } from "@/editorial/articles/types";
 import type { ValueOption } from "@/editorial/shared/value-combobox";
 import { StudioPageHeader } from "@/editorial/shell/studio-page-header";
 import { cn } from "@/lib/utils";
+
 import {
   homepagePlacementsQueryOptions,
   persistHomepagePlacements,
@@ -26,50 +27,67 @@ interface Props {
 
 export function HomepageWorkspace({ articles }: Props) {
   const queryClient = useQueryClient();
+
   const { data: initialLayout } = useSuspenseQuery(
     homepagePlacementsQueryOptions()
   );
+
   const { placements } = initialLayout;
   const initialLead = placements.find((placement) => placement.slot === "lead");
+
   const initialSupporting = placements
     .filter((placement) => placement.slot === "secondary")
     .toSorted((left, right) => left.position - right.position);
+
   const [leadId, setLeadId] = useState(initialLead?.articleId ?? "");
+
   const [secondaryIds, setSecondaryIds] = useState(() =>
     [0, 1, 2, 3].map((index) => initialSupporting[index]?.articleId ?? "")
   );
+
   const [layoutRevision, setLayoutRevision] = useState(initialLayout.revision);
+
   const [state, setState] = useState<
     "conflict" | "error" | "idle" | "saved" | "saving"
   >("idle");
+
   const saveMutation = useMutation({
     mutationFn: persistHomepagePlacements,
-    onError: () => setState("error"),
+    onError: () => {
+      setState("error");
+    },
     onSuccess: async (result) => {
       if (result.ok) {
         setLayoutRevision(result.data.revision);
         await queryClient.invalidateQueries(homepagePlacementsQueryOptions());
         setState("saved");
+
         return;
       }
+
       if (result.status === 409) {
         const latest = await queryClient.fetchQuery(
           homepagePlacementsQueryOptions()
         );
+
         const latestLead = latest.placements.find(
           (placement) => placement.slot === "lead"
         );
+
         const latestSupporting = latest.placements
           .filter((placement) => placement.slot === "secondary")
           .toSorted((left, right) => left.position - right.position);
+
         setLeadId(latestLead?.articleId ?? "");
         setSecondaryIds(
           [0, 1, 2, 3].map((index) => latestSupporting[index]?.articleId ?? "")
         );
         setLayoutRevision(latest.revision);
         setState("conflict");
+
         return;
       }
+
       setState("error");
     },
   });
@@ -89,6 +107,7 @@ export function HomepageWorkspace({ articles }: Props) {
         ),
     [articles]
   );
+
   const articleOptions = useMemo<ValueOption[]>(
     () => [
       { label: "Automatic", value: AUTOMATIC_PLACEMENT },
@@ -99,6 +118,7 @@ export function HomepageWorkspace({ articles }: Props) {
     ],
     [eligibleArticles]
   );
+
   const leadOptions = useMemo<ValueOption[]>(
     () => [
       { label: "Automatic latest story", value: AUTOMATIC_PLACEMENT },
@@ -106,10 +126,12 @@ export function HomepageWorkspace({ articles }: Props) {
     ],
     [articleOptions]
   );
+
   const updateLead = useCallback((value: string) => {
     setLeadId(value === AUTOMATIC_PLACEMENT ? "" : value);
     setState("idle");
   }, []);
+
   const updateSupporting = useCallback((position: number, value: string) => {
     const nextValue = value === AUTOMATIC_PLACEMENT ? "" : value;
     setSecondaryIds((current) =>
@@ -119,6 +141,7 @@ export function HomepageWorkspace({ articles }: Props) {
     );
     setState("idle");
   }, []);
+
   const save = useCallback(() => {
     setState("saving");
     saveMutation.mutate({
@@ -129,24 +152,24 @@ export function HomepageWorkspace({ articles }: Props) {
   }, [layoutRevision, leadId, saveMutation, secondaryIds]);
 
   return (
-    <div className="mx-auto w-full max-w-[1500px] pb-[72px] max-inventory-mobile:pb-12">
+    <div className="max-inventory-mobile:pb-12 mx-auto w-full max-w-[1500px] pb-[72px]">
       <StudioPageHeader>
         <div>
-          <h1 className="m-0 font-[650] text-2xl tracking-[-0.03em]">
+          <h1 className="m-0 text-2xl font-[650] tracking-[-0.03em]">
             Homepage
           </h1>
           {state === "saved" ? (
-            <p className="mt-1 mb-0 text-success text-xs" role="status">
+            <p className="text-success mt-1 mb-0 text-xs" role="status">
               Layout saved.
             </p>
           ) : null}
           {state === "error" ? (
-            <p className="mt-1 mb-0 text-destructive text-xs" role="alert">
+            <p className="text-destructive mt-1 mb-0 text-xs" role="alert">
               The layout needs another save attempt.
             </p>
           ) : null}
           {state === "conflict" ? (
-            <p className="mt-1 mb-0 text-destructive text-xs" role="alert">
+            <p className="text-destructive mt-1 mb-0 text-xs" role="alert">
               Another editor saved a newer layout. Their version is loaded for
               review.
             </p>
@@ -181,7 +204,7 @@ export function HomepageWorkspace({ articles }: Props) {
         onSecondaryChange={updateSupporting}
         secondaryIds={secondaryIds}
       />
-      <div className="mx-[42px] border bg-muted/35 px-4 py-3 text-muted-foreground text-xs leading-5 max-inventory-compact:mx-6 max-inventory-mobile:mx-4">
+      <div className="bg-muted/35 text-muted-foreground max-inventory-compact:mx-6 max-inventory-mobile:mx-4 mx-[42px] border px-4 py-3 text-xs leading-5">
         Automatic placement uses the newest eligible Lithuanian story with a
         valid image. Localized homepages use the matching translation from the
         same story group when that edition exists.

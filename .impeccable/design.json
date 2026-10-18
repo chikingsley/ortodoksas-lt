@@ -8,76 +8,193 @@
         "role": "primary",
         "displayName": "Patriarchal Green",
         "canonical": "#015c4b",
-        "tonalRamp": ["oklch(15% 0.055 171)", "oklch(26% 0.072 171)", "oklch(37% 0.087 171)", "#015c4b", "oklch(58% 0.088 171)", "oklch(70% 0.07 171)", "oklch(83% 0.043 171)", "oklch(95% 0.014 171)"]
+        "tonalRamp": [
+          "oklch(15% 0.055 171)",
+          "oklch(26% 0.072 171)",
+          "oklch(37% 0.087 171)",
+          "#015c4b",
+          "oklch(58% 0.088 171)",
+          "oklch(70% 0.07 171)",
+          "oklch(83% 0.043 171)",
+          "oklch(95% 0.014 171)"
+        ]
       },
       "patriarchal-green-deep": {
         "role": "primary",
         "displayName": "Deep Patriarchal Green",
         "canonical": "#004438",
-        "tonalRamp": ["oklch(15% 0.048 171)", "#004438", "oklch(36% 0.078 171)", "oklch(47% 0.081 171)", "oklch(58% 0.073 171)", "oklch(70% 0.058 171)", "oklch(83% 0.036 171)", "oklch(95% 0.012 171)"]
+        "tonalRamp": [
+          "oklch(15% 0.048 171)",
+          "#004438",
+          "oklch(36% 0.078 171)",
+          "oklch(47% 0.081 171)",
+          "oklch(58% 0.073 171)",
+          "oklch(70% 0.058 171)",
+          "oklch(83% 0.036 171)",
+          "oklch(95% 0.012 171)"
+        ]
       },
       "ceremonial-gold": {
         "role": "secondary",
         "displayName": "Ceremonial Gold",
         "canonical": "#face6b",
-        "tonalRamp": ["oklch(15% 0.04 86)", "oklch(27% 0.065 86)", "oklch(39% 0.09 86)", "oklch(51% 0.115 86)", "oklch(63% 0.13 86)", "oklch(75% 0.135 86)", "#face6b", "oklch(95% 0.04 86)"]
+        "tonalRamp": [
+          "oklch(15% 0.04 86)",
+          "oklch(27% 0.065 86)",
+          "oklch(39% 0.09 86)",
+          "oklch(51% 0.115 86)",
+          "oklch(63% 0.13 86)",
+          "oklch(75% 0.135 86)",
+          "#face6b",
+          "oklch(95% 0.04 86)"
+        ]
       },
       "library-blue": {
         "role": "tertiary",
         "displayName": "Library Blue",
         "canonical": "#2a4782",
-        "tonalRamp": ["oklch(15% 0.045 263)", "oklch(25% 0.07 263)", "#2a4782", "oklch(45% 0.115 263)", "oklch(57% 0.11 263)", "oklch(69% 0.085 263)", "oklch(82% 0.05 263)", "oklch(95% 0.015 263)"]
+        "tonalRamp": [
+          "oklch(15% 0.045 263)",
+          "oklch(25% 0.07 263)",
+          "#2a4782",
+          "oklch(45% 0.115 263)",
+          "oklch(57% 0.11 263)",
+          "oklch(69% 0.085 263)",
+          "oklch(82% 0.05 263)",
+          "oklch(95% 0.015 263)"
+        ]
       },
       "cool-bone": {
         "role": "neutral",
         "displayName": "Cool Bone",
         "canonical": "#f0eee4",
-        "tonalRamp": ["oklch(15% 0.012 95)", "oklch(27% 0.013 95)", "oklch(39% 0.014 95)", "oklch(51% 0.015 95)", "oklch(63% 0.016 95)", "oklch(75% 0.017 95)", "oklch(86% 0.018 95)", "#f0eee4"]
+        "tonalRamp": [
+          "oklch(15% 0.012 95)",
+          "oklch(27% 0.013 95)",
+          "oklch(39% 0.014 95)",
+          "oklch(51% 0.015 95)",
+          "oklch(63% 0.016 95)",
+          "oklch(75% 0.017 95)",
+          "oklch(86% 0.018 95)",
+          "#f0eee4"
+        ]
       },
       "cool-bone-deep": {
         "role": "neutral",
         "displayName": "Deep Cool Bone",
         "canonical": "#e4e1d4",
-        "tonalRamp": ["oklch(15% 0.014 95)", "oklch(27% 0.015 95)", "oklch(39% 0.016 95)", "oklch(51% 0.017 95)", "oklch(63% 0.018 95)", "oklch(75% 0.019 95)", "#e4e1d4", "oklch(95% 0.012 95)"]
+        "tonalRamp": [
+          "oklch(15% 0.014 95)",
+          "oklch(27% 0.015 95)",
+          "oklch(39% 0.016 95)",
+          "oklch(51% 0.017 95)",
+          "oklch(63% 0.018 95)",
+          "oklch(75% 0.019 95)",
+          "#e4e1d4",
+          "oklch(95% 0.012 95)"
+        ]
       },
       "living-ink": {
         "role": "neutral",
         "displayName": "Living Ink",
         "canonical": "#171916",
-        "tonalRamp": ["#171916", "oklch(26% 0.008 135)", "oklch(38% 0.007 135)", "oklch(50% 0.006 135)", "oklch(62% 0.005 135)", "oklch(74% 0.004 135)", "oklch(86% 0.003 135)", "oklch(95% 0.002 135)"]
+        "tonalRamp": [
+          "#171916",
+          "oklch(26% 0.008 135)",
+          "oklch(38% 0.007 135)",
+          "oklch(50% 0.006 135)",
+          "oklch(62% 0.005 135)",
+          "oklch(74% 0.004 135)",
+          "oklch(86% 0.003 135)",
+          "oklch(95% 0.002 135)"
+        ]
       },
       "quiet-ink": {
         "role": "neutral",
         "displayName": "Quiet Ink",
         "canonical": "#555b57",
-        "tonalRamp": ["oklch(15% 0.01 155)", "oklch(27% 0.012 155)", "#555b57", "oklch(50% 0.011 155)", "oklch(62% 0.009 155)", "oklch(74% 0.007 155)", "oklch(86% 0.004 155)", "oklch(95% 0.002 155)"]
+        "tonalRamp": [
+          "oklch(15% 0.01 155)",
+          "oklch(27% 0.012 155)",
+          "#555b57",
+          "oklch(50% 0.011 155)",
+          "oklch(62% 0.009 155)",
+          "oklch(74% 0.007 155)",
+          "oklch(86% 0.004 155)",
+          "oklch(95% 0.002 155)"
+        ]
       },
       "hairline": {
         "role": "neutral",
         "displayName": "Institutional Hairline",
         "canonical": "#c9c7bd",
-        "tonalRamp": ["oklch(15% 0.008 92)", "oklch(27% 0.009 92)", "oklch(39% 0.01 92)", "oklch(51% 0.011 92)", "oklch(63% 0.012 92)", "#c9c7bd", "oklch(86% 0.008 92)", "oklch(95% 0.003 92)"]
+        "tonalRamp": [
+          "oklch(15% 0.008 92)",
+          "oklch(27% 0.009 92)",
+          "oklch(39% 0.01 92)",
+          "oklch(51% 0.011 92)",
+          "oklch(63% 0.012 92)",
+          "#c9c7bd",
+          "oklch(86% 0.008 92)",
+          "oklch(95% 0.003 92)"
+        ]
       },
       "white": {
         "role": "neutral",
         "displayName": "Publication White",
         "canonical": "#ffffff",
-        "tonalRamp": ["oklch(15% 0 0)", "oklch(27% 0 0)", "oklch(39% 0 0)", "oklch(51% 0 0)", "oklch(63% 0 0)", "oklch(75% 0 0)", "oklch(87% 0 0)", "#ffffff"]
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(27% 0 0)",
+          "oklch(39% 0 0)",
+          "oklch(51% 0 0)",
+          "oklch(63% 0 0)",
+          "oklch(75% 0 0)",
+          "oklch(87% 0 0)",
+          "#ffffff"
+        ]
       }
     },
     "typographyMeta": {
-      "display": { "displayName": "Article Display", "purpose": "Centered article titles and major page introductions." },
-      "headline": { "displayName": "Lead Headline", "purpose": "Lead-story titles in image-led editorial compositions." },
-      "title": { "displayName": "Section Title", "purpose": "Section headings and prominent editorial modules." },
-      "body": { "displayName": "Reading Body", "purpose": "Long-form article prose and spacious editorial reading." },
-      "label": { "displayName": "Institutional Label", "purpose": "Navigation support, metadata, languages, actions, and status." }
+      "display": {
+        "displayName": "Article Display",
+        "purpose": "Centered article titles and major page introductions."
+      },
+      "headline": {
+        "displayName": "Lead Headline",
+        "purpose": "Lead-story titles in image-led editorial compositions."
+      },
+      "title": {
+        "displayName": "Section Title",
+        "purpose": "Section headings and prominent editorial modules."
+      },
+      "body": {
+        "displayName": "Reading Body",
+        "purpose": "Long-form article prose and spacious editorial reading."
+      },
+      "label": {
+        "displayName": "Institutional Label",
+        "purpose": "Navigation support, metadata, languages, actions, and status."
+      }
     },
     "shadows": [
-      { "name": "mobile-menu-float", "value": "0 12px 28px rgba(0, 39, 31, 0.15)", "purpose": "Structural depth for the expanded small-screen navigation overlay." }
+      {
+        "name": "mobile-menu-float",
+        "value": "0 12px 28px rgba(0, 39, 31, 0.15)",
+        "purpose": "Structural depth for the expanded small-screen navigation overlay."
+      }
     ],
     "motion": [
-      { "name": "editorial-image-ease", "value": "0.55s cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Quiet 2% image scale on interactive editorial cards." },
-      { "name": "reduced-motion-collapse", "value": "0.01ms", "purpose": "Immediate state changes under the reduced-motion preference." }
+      {
+        "name": "editorial-image-ease",
+        "value": "0.55s cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Quiet 2% image scale on interactive editorial cards."
+      },
+      {
+        "name": "reduced-motion-collapse",
+        "value": "0.01ms",
+        "purpose": "Immediate state changes under the reduced-motion preference."
+      }
     ],
     "foundation": {
       "name": "U.S. Web Design System 3",
@@ -185,13 +302,41 @@
       "Image-led reporting with quiet scale motion and highly legible responsive density."
     ],
     "rules": [
-      { "name": "The Ceremonial Accent Rule", "body": "Gold identifies ceremony, selection, or an institutional motif; it remains an accent rather than a broad reading surface.", "section": "colors" },
-      { "name": "The Blue Room Rule", "body": "Blue belongs to the library destination and focus visibility, giving that content one distinct chamber inside the green-led world.", "section": "colors" },
-      { "name": "The Two-Voice Rule", "body": "Playfair speaks for publication content; Arimo speaks for wayfinding, metadata, controls, and status.", "section": "typography" },
-      { "name": "The Compact Headline Rule", "body": "Editorial headings use bold weight, tight leading, and restrained negative tracking, gaining hierarchy through scale rather than ornamental treatment.", "section": "typography" },
-      { "name": "The Surface-Specific Story Rule", "body": "Preserve the homepage journey from institutional identity through lead and briefs, services, recent stories, and archive; carry the shared system to other pages without turning that journey into a universal template.", "section": "layout" },
-      { "name": "The Flat Institution Rule", "body": "Resting publication surfaces gain authority from alignment, tone, and hairlines; floating depth belongs to a true overlay.", "section": "elevation" },
-      { "name": "The Reserved Curve Rule", "body": "Curves signal a compact token, circular action, or emblem container; editorial surfaces retain square corners.", "section": "shapes" }
+      {
+        "name": "The Ceremonial Accent Rule",
+        "body": "Gold identifies ceremony, selection, or an institutional motif; it remains an accent rather than a broad reading surface.",
+        "section": "colors"
+      },
+      {
+        "name": "The Blue Room Rule",
+        "body": "Blue belongs to the library destination and focus visibility, giving that content one distinct chamber inside the green-led world.",
+        "section": "colors"
+      },
+      {
+        "name": "The Two-Voice Rule",
+        "body": "Playfair speaks for publication content; Arimo speaks for wayfinding, metadata, controls, and status.",
+        "section": "typography"
+      },
+      {
+        "name": "The Compact Headline Rule",
+        "body": "Editorial headings use bold weight, tight leading, and restrained negative tracking, gaining hierarchy through scale rather than ornamental treatment.",
+        "section": "typography"
+      },
+      {
+        "name": "The Surface-Specific Story Rule",
+        "body": "Preserve the homepage journey from institutional identity through lead and briefs, services, recent stories, and archive; carry the shared system to other pages without turning that journey into a universal template.",
+        "section": "layout"
+      },
+      {
+        "name": "The Flat Institution Rule",
+        "body": "Resting publication surfaces gain authority from alignment, tone, and hairlines; floating depth belongs to a true overlay.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Reserved Curve Rule",
+        "body": "Curves signal a compact token, circular action, or emblem container; editorial surfaces retain square corners.",
+        "section": "shapes"
+      }
     ],
     "dos": [
       "Do preserve the exact dual-mark order and keep `ortodoksas.lt` visible as the publication identity.",

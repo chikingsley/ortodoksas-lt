@@ -35,14 +35,18 @@ const readError = (error: unknown) =>
 
 export function TeamWorkspace() {
   const { user } = useUser();
+
   const { invitations, isLoaded, memberships, organization } = useOrganization({
     invitations: { ...collectionOptions, status: ["pending"] },
     memberships: collectionOptions,
   });
+
   const [inviteOpen, setInviteOpen] = useState(false);
   const [busyKey, setBusyKey] = useState<string>();
   const [feedback, setFeedback] = useState<Feedback>();
-  const openInvite = useCallback(() => setInviteOpen(true), []);
+  const openInvite = useCallback(() => {
+    setInviteOpen(true);
+  }, []);
 
   const refreshTeam = useCallback(async () => {
     await Promise.all([
@@ -57,8 +61,10 @@ export function TeamWorkspace() {
       if (!organization) {
         return false;
       }
+
       setBusyKey("invite");
       setFeedback(undefined);
+
       try {
         await organization.inviteMember({ emailAddress, role });
         await refreshTeam();
@@ -66,9 +72,11 @@ export function TeamWorkspace() {
           kind: "success",
           message: `Invitation sent to ${emailAddress}.`,
         });
+
         return true;
       } catch (error) {
         setFeedback({ kind: "error", message: readError(error) });
+
         return false;
       } finally {
         setBusyKey(undefined);
@@ -82,11 +90,14 @@ export function TeamWorkspace() {
       const target = memberships?.data?.find(
         (membership) => membership.id === membershipId
       );
+
       if (!target) {
         return;
       }
+
       setBusyKey(membershipId);
       setFeedback(undefined);
+
       try {
         await target.update({ role });
         await memberships?.revalidate?.();
@@ -105,11 +116,14 @@ export function TeamWorkspace() {
       const target = memberships?.data?.find(
         (membership) => membership.id === membershipId
       );
+
       if (!target) {
         return;
       }
+
       setBusyKey(membershipId);
       setFeedback(undefined);
+
       try {
         await target.destroy();
         await refreshTeam();
@@ -128,11 +142,14 @@ export function TeamWorkspace() {
       const target = invitations?.data?.find(
         (invitation) => invitation.id === invitationId
       );
+
       if (!target) {
         return;
       }
+
       setBusyKey(invitationId);
       setFeedback(undefined);
+
       try {
         await target.revoke();
         await refreshTeam();
@@ -150,26 +167,28 @@ export function TeamWorkspace() {
     !isLoaded ||
     memberships?.isLoading === true ||
     invitations?.isLoading === true;
+
   const members = memberships?.data ?? [];
   const pendingInvitations = invitations?.data ?? [];
+
   return (
     <>
       <div className="mx-auto min-h-[calc(100dvh-var(--studio-mobile-header-height))] w-full max-w-[1500px] pb-12 md:min-h-svh">
         <StudioPageHeader>
-          <h1 className="m-0 font-[650] text-2xl tracking-[-0.03em]">Team</h1>
+          <h1 className="m-0 text-2xl font-[650] tracking-[-0.03em]">Team</h1>
           <Button onClick={openInvite} size="lg" type="button">
             <UserPlus data-icon="inline-start" /> Invite member
           </Button>
         </StudioPageHeader>
 
-        <div className="grid w-full gap-6 px-[42px] py-6 max-inventory-compact:px-6 max-inventory-mobile:px-4">
+        <div className="max-inventory-compact:px-6 max-inventory-mobile:px-4 grid w-full gap-6 px-[42px] py-6">
           {feedback ? (
             <div
               aria-live="polite"
               className={
                 feedback.kind === "error"
-                  ? "rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-destructive text-sm"
-                  : "rounded-lg border border-success/30 bg-success-muted px-3 py-2 text-sm text-success"
+                  ? "border-destructive/30 bg-destructive/10 text-destructive rounded-lg border px-3 py-2 text-sm"
+                  : "border-success/30 bg-success-muted text-success rounded-lg border px-3 py-2 text-sm"
               }
               role={feedback.kind === "error" ? "alert" : "status"}
             >

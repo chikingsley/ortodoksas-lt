@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { siteLocales } from "../../i18n/config";
 import {
   getContactNavigation,
@@ -23,9 +24,11 @@ describe("publication navigation contract", () => {
     const archive = items.find((item) => item.id === "archive");
     expect(home).toBeDefined();
     expect(archive).toBeDefined();
+
     if (!(home && archive)) {
       return;
     }
+
     expect(isNavigationItemActive("/en", home)).toBe(true);
     expect(isNavigationItemActive("/en", archive)).toBe(false);
     expect(isNavigationItemActive("/en/2022/article", home)).toBe(false);
@@ -35,6 +38,7 @@ describe("publication navigation contract", () => {
     const items = getPrimaryNavigation("en", (path) =>
       path.endsWith("dvasininkai") ? "/p/clergy" : undefined
     );
+
     expect(items.find((item) => item.id === "clergy")).toMatchObject({
       href: "/en/p/clergy",
       targetLocale: "en",

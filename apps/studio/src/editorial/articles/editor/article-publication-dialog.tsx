@@ -42,7 +42,9 @@ export function ArticlePublicationDialog({
   const qualityReady = qualityIssues.length === 0;
   const working = publicationState === "working";
   const actionLabel = publishingChanges ? "Publish now" : "Verify live article";
-  const close = useCallback(() => onOpenChange(false), [onOpenChange]);
+  const close = useCallback(() => {
+    onOpenChange(false);
+  }, [onOpenChange]);
 
   return (
     <StudioDialog
@@ -57,7 +59,7 @@ export function ArticlePublicationDialog({
           <p className="m-0 text-sm leading-6">
             <strong>{title || "Untitled article"}</strong>
           </p>
-          <p className="mt-1 mb-0 text-muted-foreground text-xs leading-5">
+          <p className="text-muted-foreground mt-1 mb-0 text-xs leading-5">
             {publishingChanges
               ? "Publication writes the approved article to the live catalog and records a new revision."
               : "Verify that the current public URL resolves successfully."}
@@ -65,12 +67,12 @@ export function ArticlePublicationDialog({
         </div>
 
         {qualityReady ? (
-          <div className="flex items-start gap-2.5 rounded-lg border border-success/20 bg-success-muted p-3 text-sm text-success">
+          <div className="border-success/20 bg-success-muted text-success flex items-start gap-2.5 rounded-lg border p-3 text-sm">
             <CheckCircle2 className="mt-0.5 size-4 flex-none" />
             <span>Every automatic quality check passes.</span>
           </div>
         ) : (
-          <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-3 text-destructive">
+          <div className="border-destructive/20 bg-destructive/5 text-destructive rounded-lg border p-3">
             <div className="flex items-start gap-2.5 text-sm">
               <TriangleAlert className="mt-0.5 size-4 flex-none" />
               <strong>
@@ -87,12 +89,12 @@ export function ArticlePublicationDialog({
         )}
 
         {publicationState === "verified" && verification ? (
-          <div className="rounded-lg border border-success/20 bg-success-muted p-3 text-sm">
-            <div className="flex items-center gap-2 font-semibold text-success">
+          <div className="border-success/20 bg-success-muted rounded-lg border p-3 text-sm">
+            <div className="text-success flex items-center gap-2 font-semibold">
               <CheckCircle2 className="size-4" /> Live article verified
             </div>
             <a
-              className="mt-2 inline-flex items-center gap-1.5 break-all text-xs underline"
+              className="mt-2 inline-flex items-center gap-1.5 text-xs break-all underline"
               href={verification.url}
               rel="noopener"
               target="_blank"
@@ -108,7 +110,7 @@ export function ArticlePublicationDialog({
               Publication saved; live verification is still settling.
             </strong>
             <a
-              className="mt-2 block break-all text-xs underline"
+              className="mt-2 block text-xs break-all underline"
               href={verification.url}
               rel="noopener"
               target="_blank"
@@ -119,7 +121,7 @@ export function ArticlePublicationDialog({
         ) : null}
 
         {publicationState === "error" && errorMessage ? (
-          <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-3 text-destructive text-sm">
+          <div className="border-destructive/20 bg-destructive/5 text-destructive rounded-lg border p-3 text-sm">
             {errorMessage}
           </div>
         ) : null}

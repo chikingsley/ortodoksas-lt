@@ -4,5 +4,8 @@
     { "path": "./apps/web" },
     { "path": "./apps/studio" },
     { "path": "./packages/db" }
-  ]
+  ],
+  "compilerOptions": {
+    "strictNullChecks": true
+  }
 }

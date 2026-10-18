@@ -51,7 +51,7 @@ export function DirectoryMediaGallery({
 }: DirectoryMediaGalleryProps) {
   return (
     <Section title={title}>
-      <p className="m-0 text-muted-foreground text-sm">{requirement}</p>
+      <p className="text-muted-foreground m-0 text-sm">{requirement}</p>
       <label className="inline-flex w-fit cursor-pointer items-center gap-2 text-sm">
         <ImagePlus className="size-4" /> Upload image
         <input
@@ -59,12 +59,13 @@ export function DirectoryMediaGallery({
           className="sr-only"
           onChange={(event) => {
             const file = event.target.files?.[0];
+
             if (file) {
-              onUpload(file).catch((error) =>
+              onUpload(file).catch((error) => {
                 onUploadError(
                   error instanceof Error ? error.message : "Upload failed"
-                )
-              );
+                );
+              });
             }
           }}
           type="file"
@@ -75,6 +76,7 @@ export function DirectoryMediaGallery({
           const translated = item.localizations.find(
             (value) => value.language === locale
           );
+
           return (
             <article
               className="grid gap-4 border-t pt-4 first:border-t-0 first:pt-0 sm:grid-cols-[minmax(160px,220px)_minmax(0,1fr)]"
@@ -82,7 +84,7 @@ export function DirectoryMediaGallery({
             >
               <img
                 alt={translated?.altText ?? ""}
-                className={cn("w-full rounded-lg bg-muted/35", imageClassName)}
+                className={cn("bg-muted/35 w-full rounded-lg", imageClassName)}
                 height="640"
                 src={`/api/media/${item.mediaId}`}
                 width="640"
@@ -90,13 +92,13 @@ export function DirectoryMediaGallery({
               <div className="grid content-start gap-3">
                 <SelectField
                   label="Image role"
-                  onChange={(role) =>
+                  onChange={(role) => {
                     onChange(
                       media.map((value, valueIndex) =>
                         valueIndex === index ? { ...value, role } : value
                       )
-                    )
-                  }
+                    );
+                  }}
                   options={mediaRoleOptions}
                   value={item.role}
                 />
@@ -106,7 +108,7 @@ export function DirectoryMediaGallery({
                   </FieldLabel>
                   <Input
                     id={`media-${item.mediaId}-alt`}
-                    onChange={(event) =>
+                    onChange={(event) => {
                       onChange(
                         media.map((value, valueIndex) =>
                           valueIndex === index
@@ -128,8 +130,8 @@ export function DirectoryMediaGallery({
                               }
                             : value
                         )
-                      )
-                    }
+                      );
+                    }}
                     value={translated?.altText ?? ""}
                   />
                 </Field>
@@ -139,7 +141,7 @@ export function DirectoryMediaGallery({
                   </FieldLabel>
                   <Textarea
                     id={`media-${item.mediaId}-caption`}
-                    onChange={(event) =>
+                    onChange={(event) => {
                       onChange(
                         media.map((value, valueIndex) =>
                           valueIndex === index
@@ -161,15 +163,15 @@ export function DirectoryMediaGallery({
                               }
                             : value
                         )
-                      )
-                    }
+                      );
+                    }}
                     rows={2}
                     value={translated?.caption ?? ""}
                   />
                 </Field>
                 <Button
                   className="justify-self-start"
-                  onClick={() =>
+                  onClick={() => {
                     onChange(
                       media
                         .filter((_, valueIndex) => valueIndex !== index)
@@ -177,8 +179,8 @@ export function DirectoryMediaGallery({
                           ...value,
                           sortOrder: valueIndex,
                         }))
-                    )
-                  }
+                    );
+                  }}
                   type="button"
                   variant="ghost"
                 >

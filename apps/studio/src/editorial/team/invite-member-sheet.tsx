@@ -19,7 +19,8 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 
-import { type TeamRole, teamRoleLabel, teamRoles } from "./team-role";
+import { teamRoleLabel, teamRoles } from "./team-role";
+import type { TeamRole } from "./team-role";
 
 interface Props {
   busy: boolean;
@@ -46,17 +47,21 @@ export function InviteMemberSheet({
   }, []);
 
   const changeEmail = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) =>
-      setEmailAddress(event.target.value),
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setEmailAddress(event.target.value);
+    },
     []
   );
 
-  const close = useCallback(() => onOpenChange(false), [onOpenChange]);
+  const close = useCallback(() => {
+    onOpenChange(false);
+  }, [onOpenChange]);
 
   const submit = useCallback(
     async (event: React.FormEvent<HTMLFormElement>) => {
       event.preventDefault();
       const sent = await onInvite(emailAddress.trim(), role);
+
       if (sent) {
         setEmailAddress("");
         setRole("org:member");
@@ -107,7 +112,7 @@ export function InviteMemberSheet({
                 ))}
               </SelectContent>
             </Select>
-            <p className="m-0 text-muted-foreground text-xs">
+            <p className="text-muted-foreground m-0 text-xs">
               Admins manage membership and access. Members edit publication
               content.
             </p>

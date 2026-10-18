@@ -1,5 +1,5 @@
-import { env } from "cloudflare:workers";
 import { articleRevisions } from "@ortodoksas-lt/db";
+import { env } from "cloudflare:workers";
 import { eq } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
 
@@ -24,12 +24,14 @@ describe("Studio Worker services", () => {
         title: "Quality gate",
       },
     });
+
     expect(result).toMatchObject({ ok: false, status: 422 });
   });
 
   it("accepts version zero for an imported article without revision history", async () => {
     const database = getDatabase(env.DB);
     const slug = `revisionless-${crypto.randomUUID()}`;
+
     const created = await createArticle({
       database,
       editorId: EDITOR_ID,
@@ -41,10 +43,13 @@ describe("Studio Worker services", () => {
         title: "Imported article",
       },
     });
+
     expect(created.ok).toBe(true);
+
     if (!created.ok) {
       return;
     }
+
     await database
       .delete(articleRevisions)
       .where(eq(articleRevisions.articleId, created.data.id));
@@ -62,6 +67,7 @@ describe("Studio Worker services", () => {
         title: "Imported article",
       },
     });
+
     expect(saved).toMatchObject({ data: { version: 1 }, ok: true });
   });
 });

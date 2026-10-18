@@ -16,6 +16,7 @@ interface Props {
 
 const { currentPath, locale = "lt", localeLinks: suppliedLocaleLinks } = Astro.props;
 const localeLinks = suppliedLocaleLinks ?? await getLocaleLinks(currentPath);
+
 const headerPaths = [
   "/p/bendruomenes_21",
   "/p/dvasininkai",
@@ -23,15 +24,19 @@ const headerPaths = [
   "/p/kalendorius",
   "/p/kontaktai_30",
 ];
+
 const localizedEntries =
   locale === "lt" ? new Map() : await getLocalizedCounterparts(locale, headerPaths);
+
 const localizedPaths = new Map(
   [...localizedEntries].map(([path, entry]) => [path, entry.path])
 );
+
 const navigationItems = getPrimaryNavigation(
   locale,
   locale === "lt" ? undefined : (path) => localizedPaths.get(path)
 );
+
 const contactHref = locale === "lt"
   ? "/p/kontaktai_30"
   : `/${locale}${localizedPaths.get("/p/kontaktai_30") ?? "/p/kontaktai_30"}`;

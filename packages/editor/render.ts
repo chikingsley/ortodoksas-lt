@@ -1,5 +1,6 @@
 import type { TiptapDocument } from "@ortodoksas-lt/content/article";
 import { renderToHTMLString } from "@tiptap/static-renderer/pm/html-string";
+
 import { articleEditorExtensions } from "./extensions";
 
 export const renderArticleBody = (document: TiptapDocument): string =>

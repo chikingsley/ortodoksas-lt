@@ -26,11 +26,13 @@ const comparableNode = (node: JSONContent | undefined): JSONContent | null => {
   if (!node) {
     return null;
   }
+
   const attrs = Object.fromEntries(
     Object.entries(node.attrs ?? {}).filter(
       ([name]) => !provenanceAttributeNames.has(name)
     )
   );
+
   return {
     ...node,
     ...(Object.keys(attrs).length > 0 ? { attrs } : { attrs: undefined }),
@@ -44,7 +46,9 @@ const nodeValue = (node: JSONContent | undefined): string => {
   if (!node) {
     return "";
   }
+
   const text = textContent(node).trim();
+
   return text || JSON.stringify(comparableNode(node));
 };
 
@@ -55,6 +59,7 @@ export const getChangeKind = (
   if (!beforeValue) {
     return "added";
   }
+
   return afterValue ? "changed" : "removed";
 };
 
@@ -67,6 +72,7 @@ const valueChange = (
   if (beforeValue === afterValue) {
     return null;
   }
+
   return {
     afterValue: afterValue || null,
     beforeValue: beforeValue || null,
@@ -84,9 +90,11 @@ const getFieldProvenance = (
   if (explicit === "generated") {
     return "generated";
   }
+
   if (change) {
     return "manual";
   }
+
   return value ? "source" : "missing";
 };
 
@@ -100,35 +108,43 @@ const annotateFigure = (
   const caption = textContent(node);
   const sourceAlt = String(sourceFigure?.attrs?.alt ?? "");
   const alt = String(node.attrs?.alt ?? "");
+
   const captionChange = valueChange(
     sourceCaption,
     caption,
     `body.figure[${figureIndex}].caption`,
     "manual"
   );
+
   const altChange = valueChange(
     sourceAlt,
     alt,
     `body.figure[${figureIndex}].alt`,
     "manual"
   );
+
   if (captionChange) {
     changes.push(captionChange);
   }
+
   if (altChange) {
     changes.push(altChange);
   }
+
   const sourceSrc = String(sourceFigure?.attrs?.src ?? "");
   const src = String(node.attrs?.src ?? "");
+
   const sourceChange = valueChange(
     sourceSrc,
     src,
     `body.figure[${figureIndex}].source`,
     "manual"
   );
+
   if (sourceChange) {
     changes.push(sourceChange);
   }
+
   return {
     ...node,
     attrs: {
@@ -155,36 +171,46 @@ export const annotateArticleBody = (
 ): { body: TiptapDocument; changes: ContentChange[] } => {
   const baselineFigures =
     baseline.content?.filter((node) => node.type === "figure") ?? [];
+
   let figureIndex = 0;
   const changes: ContentChange[] = [];
+
   const content = body.content?.map((node) => {
     if (node.type !== "figure") {
       return node;
     }
+
     const annotated = annotateFigure(
       node,
       baselineFigures[figureIndex],
       figureIndex,
       changes
     );
+
     figureIndex += 1;
+
     return annotated;
   });
 
   const currentBlocks = content ?? [];
   const baselineBlocks = baseline.content ?? [];
   const blockCount = Math.max(currentBlocks.length, baselineBlocks.length);
+
   for (let index = 0; index < blockCount; index += 1) {
     const current = currentBlocks[index];
     const source = baselineBlocks[index];
+
     if (current?.type === "figure" && source?.type === "figure") {
       continue;
     }
+
     const beforeValue = nodeValue(source);
     const afterValue = nodeValue(current);
+
     const structurallyEqual =
       JSON.stringify(comparableNode(source)) ===
       JSON.stringify(comparableNode(current));
+
     if (!structurallyEqual) {
       changes.push({
         afterValue: afterValue || null,

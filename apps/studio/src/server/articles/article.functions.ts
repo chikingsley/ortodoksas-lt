@@ -1,10 +1,10 @@
-import { env } from "cloudflare:workers";
 import {
   createInteractiveArticleSchema,
   createTranslationDraftSchema,
   updateArticleSchema,
 } from "@ortodoksas-lt/content/article";
 import { createServerFn } from "@tanstack/react-start";
+import { env } from "cloudflare:workers";
 import { z } from "zod";
 
 import { requireStudioEditor } from "../auth";
@@ -25,13 +25,16 @@ import { createTranslationDraft } from "./article-translation.server";
 import { verifyArticlePublication } from "./article-verification.server";
 
 const articleIdSchema = z.object({ articleId: z.string().uuid() });
+
 const articleMutationSchema = articleIdSchema.extend({
   payload: updateArticleSchema,
 });
+
 const restoreRevisionSchema = articleIdSchema.extend({
   expectedVersion: z.number().int().nonnegative(),
   version: z.number().int().positive(),
 });
+
 const translationDraftSchema = articleIdSchema.extend({
   language: createTranslationDraftSchema.shape.language,
 });
@@ -40,21 +43,24 @@ export const loadArticleWorkspace = createServerFn({ method: "GET" })
   .validator((input: unknown) => articleIdSchema.parse(input))
   .handler(async ({ data }) => {
     await requireStudioEditor(env);
-    return getArticleWorkspace(getDatabase(env.DB), data.articleId);
+
+    return await getArticleWorkspace(getDatabase(env.DB), data.articleId);
   });
 
 export const loadArticleBaseline = createServerFn({ method: "GET" })
   .validator((input: unknown) => articleIdSchema.parse(input))
   .handler(async ({ data }) => {
     await requireStudioEditor(env);
-    return getArticleBaseline(getDatabase(env.DB), data.articleId);
+
+    return await getArticleBaseline(getDatabase(env.DB), data.articleId);
   });
 
 export const loadArticleRevisions = createServerFn({ method: "GET" })
   .validator((input: unknown) => articleIdSchema.parse(input))
   .handler(async ({ data }) => {
     await requireStudioEditor(env);
-    return getArticleRevisions(getDatabase(env.DB), data.articleId);
+
+    return await getArticleRevisions(getDatabase(env.DB), data.articleId);
   });
 
 export const createArticleMutation = createServerFn({ method: "POST" })
@@ -64,7 +70,8 @@ export const createArticleMutation = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const editor = await requireStudioEditor(env);
     requireStudioWritesOpen(env);
-    return createArticle({
+
+    return await createArticle({
       database: getDatabase(env.DB),
       editorId: editor.id,
       payload: data,
@@ -76,7 +83,8 @@ export const updateArticleMutation = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const editor = await requireStudioEditor(env);
     requireStudioWritesOpen(env);
-    return updateArticle({
+
+    return await updateArticle({
       articleId: data.articleId,
       database: getDatabase(env.DB),
       editorId: editor.id,
@@ -89,7 +97,8 @@ export const deleteArticleDraftMutation = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     await requireStudioEditor(env);
     requireStudioWritesOpen(env);
-    return deleteArticleDraft({
+
+    return await deleteArticleDraft({
       articleId: data.articleId,
       database: getDatabase(env.DB),
     });
@@ -100,7 +109,8 @@ export const restoreArticleRevisionMutation = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const editor = await requireStudioEditor(env);
     requireStudioWritesOpen(env);
-    return restoreArticleRevision({
+
+    return await restoreArticleRevision({
       articleId: data.articleId,
       database: getDatabase(env.DB),
       editorId: editor.id,
@@ -114,7 +124,8 @@ export const createTranslationDraftMutation = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const editor = await requireStudioEditor(env);
     requireStudioWritesOpen(env);
-    return createTranslationDraft({
+
+    return await createTranslationDraft({
       database: getDatabase(env.DB),
       editorId: editor.id,
       language: data.language,
@@ -126,7 +137,8 @@ export const verifyArticlePublicationQuery = createServerFn({ method: "GET" })
   .validator((input: unknown) => articleIdSchema.parse(input))
   .handler(async ({ data }) => {
     await requireStudioEditor(env);
-    return verifyArticlePublication({
+
+    return await verifyArticlePublication({
       articleId: data.articleId,
       database: getDatabase(env.DB),
       publicationOrigin: env.PUBLICATION_ORIGIN,

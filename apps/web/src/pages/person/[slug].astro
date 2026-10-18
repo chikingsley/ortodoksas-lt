@@ -3,6 +3,7 @@ import PersonDetailPage from "../../components/information/PersonDetailPage.astr
 import { getPersonDirectoryEntry } from "../../server/directory-data";
 
 const person = await getPersonDirectoryEntry("lt", Astro.params.slug ?? "");
+
 if (!person) {
   Astro.response.status = 404;
 }

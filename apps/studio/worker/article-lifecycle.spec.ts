@@ -20,6 +20,7 @@ describe("Studio Worker services", () => {
     const database = getDatabase(env.DB);
     const hero = await uploadHero("article-hero.png");
     const slug = `worker-${crypto.randomUUID()}`;
+
     const created = await createArticle({
       database,
       editorId: EDITOR_ID,
@@ -61,7 +62,9 @@ describe("Studio Worker services", () => {
         title: "Patikros straipsnis",
       },
     });
+
     expect(created.ok).toBe(true);
+
     if (!created.ok) {
       return;
     }
@@ -112,6 +115,7 @@ describe("Studio Worker services", () => {
         translationKind: "original",
       },
     });
+
     expect(published).toMatchObject({
       data: { status: "published", version: 2 },
       ok: true,
@@ -154,6 +158,7 @@ describe("Studio Worker services", () => {
         translationKind: "original",
       },
     });
+
     expect(legacyCompatibleSave).toMatchObject({
       data: { version: 3 },
       ok: true,
@@ -183,6 +188,7 @@ describe("Studio Worker services", () => {
         title: "Stale title",
       },
     });
+
     expect(staleSave).toMatchObject({
       currentVersion: 3,
       ok: false,
@@ -190,6 +196,7 @@ describe("Studio Worker services", () => {
     });
 
     const initialHomepage = await getHomepagePlacements(database);
+
     const homepage = await updateHomepagePlacements({
       database,
       payload: {
@@ -198,7 +205,9 @@ describe("Studio Worker services", () => {
         secondaryIds: [],
       },
     });
+
     expect(homepage.ok).toBe(true);
+
     const staleHomepage = await updateHomepagePlacements({
       database,
       payload: {
@@ -207,6 +216,7 @@ describe("Studio Worker services", () => {
         secondaryIds: [],
       },
     });
+
     expect(staleHomepage).toMatchObject({ ok: false, status: 409 });
     await expect(getHomepagePlacements(database)).resolves.toMatchObject({
       placements: [
@@ -245,9 +255,11 @@ describe("Studio Worker services", () => {
         translationKind: "original",
       },
     });
+
     expect(blockedUnpublish).toMatchObject({ ok: false, status: 409 });
 
     const activeHomepage = await getHomepagePlacements(database);
+
     const clearedHomepage = await updateHomepagePlacements({
       database,
       payload: {
@@ -256,6 +268,7 @@ describe("Studio Worker services", () => {
         secondaryIds: [],
       },
     });
+
     expect(clearedHomepage.ok).toBe(true);
 
     const restored = await restoreArticleRevision({
@@ -265,6 +278,7 @@ describe("Studio Worker services", () => {
       expectedVersion: 3,
       version: 1,
     });
+
     expect(restored).toMatchObject({
       data: {
         article: {
@@ -290,10 +304,12 @@ describe("Studio Worker services", () => {
       language: "en",
       sourceArticleId: created.data.id,
     });
+
     expect(translation).toMatchObject({
       article: { language: "en" },
       kind: "created",
     });
+
     if (translation.kind === "created") {
       await expect(
         getArticleWorkspace(database, translation.article.id)
@@ -307,6 +323,7 @@ describe("Studio Worker services", () => {
         },
       });
     }
+
     await expect(
       createTranslationDraft({
         database,

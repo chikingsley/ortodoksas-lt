@@ -7,52 +7,49 @@
   "name": "ortodoksas-studio",
   "main": "./src/server-entry.ts",
   "compatibility_date": "2026-08-08",
-  "routes": [
-    {
-      "pattern": "ortodoksas-studio.grassinside.com",
-      "custom_domain": true
-    }
-  ],
+  "routes": [],
   "assets": {
     "binding": "ASSETS",
-    "run_worker_first": ["/api/*"]
+    "run_worker_first": ["/api/*"],
   },
   "d1_databases": [
     {
       "binding": "DB",
-      "migrations_dir": "../../packages/db/migrations"
-    }
+      "migrations_dir": "../../packages/db/migrations",
+    },
   ],
   "r2_buckets": [
     {
-      "binding": "MEDIA"
-    }
+      "binding": "MEDIA",
+    },
   ],
   "images": {
-    "binding": "IMAGES"
+    "binding": "IMAGES",
   },
   "cache": {
-    "enabled": false
+    "enabled": false,
   },
   "secrets": {
     "required": [
       "CLERK_SECRET_KEY",
       "CLERK_ORGANIZATION_ID",
-      "VITE_CLERK_PUBLISHABLE_KEY"
-    ]
+      "VITE_CLERK_PUBLISHABLE_KEY",
+    ],
   },
   "vars": {
     "CLERK_AUTHORIZED_PARTIES": "http://localhost:5173,http://127.0.0.1:5173,https://ortodoksas-studio.grassinside.com",
     "PUBLICATION_ORIGIN": "https://ortodoksas.grassinside.com",
-    "STUDIO_WRITE_MODE": "open"
+    "STUDIO_WRITE_MODE": "open",
   },
   "observability": {
     "enabled": true,
     "logs": { "head_sampling_rate": 1 },
-    "traces": { "enabled": true, "head_sampling_rate": 0.01 }
+    "traces": { "enabled": true, "head_sampling_rate": 0.01 },
   },
   "upload_source_maps": true,
-  "compatibility_flags": ["nodejs_compat"]
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": false,
+  "preview_urls": false,
   /**
    * Smart Placement
    * https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement

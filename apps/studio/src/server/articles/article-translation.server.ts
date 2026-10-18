@@ -54,6 +54,7 @@ export const translationMetadataUpdate = (
     translationReviewedAt?: number | null;
     translationReviewedBy?: string | null;
   } = {};
+
   if (input.action === "approve") {
     update.translationReviewStatus = "approved";
     update.translationReviewedAt = reviewer.timestamp;
@@ -70,10 +71,11 @@ export const translationMetadataUpdate = (
     update.translationReviewedAt = null;
     update.translationReviewedBy = null;
   }
+
   return update;
 };
 
-export const getTranslationSourceHash = (source: {
+export const getTranslationSourceHash = async (source: {
   bodyJson: string;
   byline: string | null;
   bylineType: string;
@@ -101,6 +103,7 @@ export const createTranslationDraft = async (input: {
   const requestedSource = await input.database.query.articles.findFirst({
     where: eq(articles.id, input.sourceArticleId),
   });
+
   if (!requestedSource) {
     return { kind: "source_unavailable" };
   }
@@ -112,12 +115,14 @@ export const createTranslationDraft = async (input: {
         eq(articles.language, "lt")
       ),
     })) ?? requestedSource;
+
   const existing = await input.database.query.articles.findFirst({
     where: and(
       eq(articles.translationGroupId, source.translationGroupId),
       eq(articles.language, input.language)
     ),
   });
+
   if (existing) {
     return { articleId: existing.id, kind: "edition_exists" };
   }
@@ -128,6 +133,7 @@ export const createTranslationDraft = async (input: {
   const title = `Untitled ${input.language.toUpperCase()} translation`;
   const slug = `${source.kind === "page" ? "p/" : ""}draft-${id}`;
   const sourceHash = await getTranslationSourceHash(source);
+
   const articleRecord: typeof articles.$inferSelect = {
     bodyJson,
     byline: source.byline,
@@ -191,9 +197,11 @@ export const createTranslationDraft = async (input: {
         eq(articles.language, input.language)
       ),
     });
+
     if (conflictingEdition) {
       return { articleId: conflictingEdition.id, kind: "edition_exists" };
     }
+
     throw error;
   }
 

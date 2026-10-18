@@ -22,8 +22,10 @@ export const getTranslationDisplayState = ({
   if (kind === "original") {
     return "original";
   }
+
   if (reviewStatus === "approved") {
     return "editor_reviewed";
   }
+
   return kind === "machine" ? "automatic" : "human_draft";
 };

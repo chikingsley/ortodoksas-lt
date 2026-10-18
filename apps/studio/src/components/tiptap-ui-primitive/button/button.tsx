@@ -1,4 +1,5 @@
 import { Fragment, forwardRef, useMemo } from "react";
+
 // --- Icons ---
 import { CheckIcon } from "@/components/tiptap-icons/check-icon";
 // --- Tiptap UI Primitive ---
@@ -7,7 +8,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/tiptap-ui-primitive/tooltip";
-
 // --- Lib ---
 import { cn, parseShortcutKeys } from "@/lib/tiptap-utils";
 
@@ -18,8 +18,7 @@ export type ButtonStyle = "ghost" | "primary";
 export type ButtonVariant = ButtonStyle | "check";
 export type ButtonSize = "small" | "default" | "large";
 
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   shortcutKeys?: string;
   showTooltip?: boolean;
   size?: ButtonSize;

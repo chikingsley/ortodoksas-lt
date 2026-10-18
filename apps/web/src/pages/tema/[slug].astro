@@ -8,9 +8,11 @@ import { getArticles } from "../../server/publication-catalog";
 
 const [articles, sections] = await Promise.all([getArticles(), getSections()]);
 const section = sections.find((candidate) => sectionSlug(candidate) === Astro.params.slug);
+
 if (!section) {
   return Astro.rewrite("/404");
 }
+
 const entries = articles.filter((entry) => entry.section === section);
 ---
 

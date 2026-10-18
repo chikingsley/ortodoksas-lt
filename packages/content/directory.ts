@@ -8,6 +8,7 @@ import {
 } from "./site";
 
 const entityIdSchema = z.string().trim().min(1).max(128);
+
 const slugSchema = z
   .string()
   .trim()
@@ -18,11 +19,12 @@ const slugSchema = z
 export const slugifyDirectoryName = (value: string) =>
   value
     .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/gu, "")
+    .replaceAll(/[\u0300-\u036F]/gu, "")
     .toLocaleLowerCase("en-US")
-    .replace(/[^a-z0-9]+/gu, "-")
-    .replace(/^-+|-+$/gu, "")
+    .replaceAll(/[^a-z0-9]+/gu, "-")
+    .replaceAll(/^-+|-+$/gu, "")
     .slice(0, 160);
+
 const optionalText = (maximum: number) =>
   z.string().trim().max(maximum).default("");
 
@@ -251,6 +253,7 @@ const validateLocalizedCollection = (input: {
   const { collection, context, path, requireComplete } = input;
   const locales = collection.map(({ language }) => language);
   const uniqueLocales = new Set(locales);
+
   if (uniqueLocales.size !== locales.length) {
     context.addIssue({
       code: "custom",
@@ -258,6 +261,7 @@ const validateLocalizedCollection = (input: {
       path,
     });
   }
+
   if (
     requireComplete &&
     siteLocales.some((locale) => !uniqueLocales.has(locale))
@@ -289,6 +293,7 @@ export const personEditorSchema = personSchema
       path: ["localizations"],
       requireComplete,
     });
+
     for (const [index, item] of value.contacts.entries()) {
       validateLocalizedCollection({
         collection: item.localizations,
@@ -297,6 +302,7 @@ export const personEditorSchema = personSchema
         requireComplete,
       });
     }
+
     for (const [index, item] of value.positions.entries()) {
       validateLocalizedCollection({
         collection: item.localizations,
@@ -305,6 +311,7 @@ export const personEditorSchema = personSchema
         requireComplete,
       });
     }
+
     for (const [index, item] of value.media.entries()) {
       validateLocalizedCollection({
         collection: item.localizations,
@@ -313,9 +320,11 @@ export const personEditorSchema = personSchema
         requireComplete,
       });
     }
+
     const primaryImageCount = value.media.filter(
       ({ role }) => role === "primary"
     ).length;
+
     if (primaryImageCount > 1) {
       context.addIssue({
         code: "custom",
@@ -323,6 +332,7 @@ export const personEditorSchema = personSchema
         path: ["media"],
       });
     }
+
     if (requireComplete && primaryImageCount !== 1) {
       context.addIssue({
         code: "custom",
@@ -387,6 +397,7 @@ export const communityEditorSchema = communityBaseSchema
       path: ["localizations"],
       requireComplete,
     });
+
     for (const key of ["contacts", "services", "media"] as const) {
       for (const [index, item] of value[key].entries()) {
         validateLocalizedCollection({
@@ -397,9 +408,11 @@ export const communityEditorSchema = communityBaseSchema
         });
       }
     }
+
     const primaryImageCount = value.media.filter(
       ({ role }) => role === "primary"
     ).length;
+
     if (primaryImageCount > 1) {
       context.addIssue({
         code: "custom",
@@ -407,6 +420,7 @@ export const communityEditorSchema = communityBaseSchema
         path: ["media"],
       });
     }
+
     if (requireComplete && primaryImageCount !== 1) {
       context.addIssue({
         code: "custom",
@@ -417,8 +431,13 @@ export const communityEditorSchema = communityBaseSchema
   });
 
 export type Community = z.infer<typeof communitySchema>;
+
 export type CommunityLocalization = z.infer<typeof communityLocalizationSchema>;
+
 export type Person = z.infer<typeof personSchema>;
+
 export type PersonLocalization = z.infer<typeof personLocalizationSchema>;
+
 export type CommunityEditorInput = z.infer<typeof communityEditorSchema>;
+
 export type PersonEditorInput = z.infer<typeof personEditorSchema>;

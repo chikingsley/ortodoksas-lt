@@ -92,7 +92,7 @@ export const StudioBrand = ({ className, logoClassName }: StudioBrandProps) => (
       src={publicationLogoUrl}
       width="1022"
     />
-    <span className="font-semibold text-[10px] text-brand-dark uppercase tracking-[0.14em]">
+    <span className="text-brand-dark text-[10px] font-semibold tracking-[0.14em] uppercase">
       Studio
     </span>
   </div>
@@ -103,16 +103,21 @@ export const StudioSidebar = () => {
   const { user } = useUser();
   const { studioRole } = useRouteContext({ from: "/_studio" });
   const matchRoute = useMatchRoute();
+
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   });
+
   const emailAddress = user?.primaryEmailAddress?.emailAddress;
   const emailName = emailAddress?.split("@")[0];
+
   const displayName =
     user?.fullName ||
     user?.username ||
     (emailName ? titleCaseIdentifier(emailName) : "Studio editor");
+
   const accountLabel = emailAddress ?? "Editor account";
+
   const closeMobileSidebar = useCallback(() => {
     if (isMobile) {
       setOpenMobile(false);
@@ -125,7 +130,7 @@ export const StudioSidebar = () => {
       collapsible="icon"
       role="navigation"
     >
-      <SidebarHeader className="h-[var(--studio-shell-header-height)] justify-center border-sidebar-border border-b px-3">
+      <SidebarHeader className="border-sidebar-border h-[var(--studio-shell-header-height)] justify-center border-b px-3">
         <StudioBrand className="group-data-[collapsible=icon]:hidden" />
       </SidebarHeader>
       <SidebarContent>
@@ -137,17 +142,22 @@ export const StudioSidebar = () => {
                 if (item.adminOnly && studioRole !== "admin") {
                   return null;
                 }
+
                 const Icon = item.icon;
+
                 const isActive = item.matchPaths.some((to) =>
                   matchRoute({ fuzzy: true, to })
                 );
+
                 const target =
                   item.label === "Content" && pathname.startsWith("/pages")
                     ? "/pages"
                     : item.to;
+
                 const preserveDirectorySearch =
                   isActive &&
                   (item.to === "/people" || item.to === "/communities");
+
                 return (
                   <SidebarMenuItem key={item.label}>
                     <SidebarMenuButton
@@ -182,7 +192,7 @@ export const StudioSidebar = () => {
                 <strong className="block truncate text-xs">
                   {displayName}
                 </strong>
-                <small className="mt-0.5 block truncate text-[10px] text-muted-foreground">
+                <small className="text-muted-foreground mt-0.5 block truncate text-[10px]">
                   {accountLabel}
                 </small>
               </span>

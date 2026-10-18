@@ -31,6 +31,7 @@ describe("publication link canonicalization", () => {
   it("preserves external HTML resources", () => {
     const external =
       "https://example.com/reference/index.html?download=source.html";
+
     expect(canonicalizePublicationHref(external)).toBe(external);
   });
 

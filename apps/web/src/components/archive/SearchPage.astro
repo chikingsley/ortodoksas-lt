@@ -19,20 +19,24 @@ const query = Astro.url.searchParams.get("q")?.trim() ?? "";
 const page = Math.max(1, Number.parseInt(Astro.url.searchParams.get("page") ?? "1", 10) || 1);
 const pageSize = 20;
 const copy = ui[locale];
+
 const result = query
   ? await searchArticles(locale, query, {
       limit: pageSize,
       offset: (page - 1) * pageSize,
     })
   : { entries: [], total: 0 };
+
 const pageCount = Math.max(1, Math.ceil(result.total / pageSize));
 const currentPage = Math.min(page, pageCount);
+
 const visibleMatches = currentPage === page
   ? result.entries
   : (await searchArticles(locale, query, {
       limit: pageSize,
       offset: (currentPage - 1) * pageSize,
     })).entries;
+
 const recentArticles = query ? [] : await getRecentArticles(locale, 6);
 const pageHref = (target: number) => `${searchPath}?q=${encodeURIComponent(query)}&page=${target}`;
 ---

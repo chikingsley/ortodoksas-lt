@@ -45,9 +45,11 @@ export const contentChangeInsertQueries = (
   guardRevisionId?: string
 ) => {
   const batchCount = Math.ceil(changes.length / CONTENT_CHANGE_INSERT_SIZE);
+
   return Array.from({ length: batchCount }, (_, batchIndex) => {
     const start = batchIndex * CONTENT_CHANGE_INSERT_SIZE;
     const batch = changes.slice(start, start + CONTENT_CHANGE_INSERT_SIZE);
+
     const values = batch.map((change) => ({
       afterValue: change.afterValue,
       articleId,
@@ -58,13 +60,16 @@ export const contentChangeInsertQueries = (
       id: crypto.randomUUID(),
       provenance: change.provenance,
     }));
+
     if (!guardRevisionId) {
       return database.insert(articleContentChanges).values(values);
     }
+
     const guardRevision = alias(
       articleRevisions,
       `content_change_guard_${batchIndex}`
     );
+
     const guardedSelects = values.map((value) =>
       database
         .select({
@@ -82,13 +87,17 @@ export const contentChangeInsertQueries = (
         .from(guardRevision)
         .where(eq(guardRevision.id, guardRevisionId))
     );
+
     const [first, second, ...remaining] = guardedSelects;
+
     if (!first) {
       return database.insert(articleContentChanges).values(values);
     }
+
     const guardedChanges = second
       ? unionAll(first, second, ...remaining)
       : first;
+
     return database.insert(articleContentChanges).select(guardedChanges);
   });
 };
@@ -100,18 +109,24 @@ export const findMediaId = async (
   if (!source) {
     return null;
   }
+
   const mediaPath = MEDIA_PATH_PATTERN.exec(source);
+
   if (!mediaPath) {
     return null;
   }
+
   const [, mediaId] = mediaPath;
+
   if (!mediaId) {
     return null;
   }
+
   const [record] = await database
     .select({ id: mediaAssets.id })
     .from(mediaAssets)
     .where(eq(mediaAssets.id, mediaId))
     .limit(1);
+
   return record?.id ?? null;
 };

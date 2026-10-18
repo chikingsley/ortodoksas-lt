@@ -1,5 +1,5 @@
-import { env } from "cloudflare:workers";
 import { mediaAssets } from "@ortodoksas-lt/db";
+import { env } from "cloudflare:workers";
 import { eq } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
 
@@ -17,12 +17,15 @@ describe("Studio Worker services", () => {
     expect(second.reused).toBe(true);
 
     const database = getDatabase(env.DB);
+
     const [stored] = await database
       .select({ r2Key: mediaAssets.r2Key })
       .from(mediaAssets)
       .where(eq(mediaAssets.id, first.media.id))
       .limit(1);
+
     expect(stored?.r2Key).toMatch(ORIGINAL_MEDIA_KEY_PATTERN);
+
     const response = await serveMedia({
       database,
       id: first.media.id,
@@ -30,6 +33,7 @@ describe("Studio Worker services", () => {
       media: env.MEDIA,
       request: new Request(`https://studio.test${first.media.url}`),
     });
+
     expect(response.status).toBe(200);
     expect(response.headers.get("content-type")).toBe("image/png");
     expect(new Uint8Array(await response.arrayBuffer())).toEqual(IMAGE_BYTES);

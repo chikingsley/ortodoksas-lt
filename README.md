@@ -1,16 +1,13 @@
 # ortodoksas.lt
 
-Source code for the `ortodoksas.lt` public publication and its staff Editorial
-Studio.
+Source code for the `ortodoksas.lt` public publication and its staff Editorial Studio.
 
 - Public Worker: <https://ortodoksas.grassinside.com>
 - Editorial Studio: <https://ortodoksas-studio.grassinside.com>
 - Source repository: <https://github.com/chikingsley/ortodoksas-lt>
 - Target canonical domain: <https://ortodoksas.lt>
 
-The canonical domain becomes active when its DNS records move to the Cloudflare
-Worker. The two `grassinside.com` addresses provide the current deployed
-application during that cutover.
+The canonical domain becomes active when its DNS records move to the Cloudflare Worker. The two `grassinside.com` addresses provide the current deployed application during that cutover.
 
 ## Architecture
 
@@ -20,20 +17,15 @@ Editors -> Clerk -> Studio Worker -> shared D1 + R2
 Visitors -> Public Astro Worker ------+
 ```
 
-The public site and Studio are separate Cloudflare Workers. They share one D1
-database and one R2 media bucket:
+The public site and Studio are separate Cloudflare Workers. They share one D1 database and one R2 media bucket:
 
-- D1 stores articles, translations, people, communities, homepage placements,
-  editorial baselines, and revision history.
+- D1 stores articles, translations, people, communities, homepage placements, editorial baselines, and revision history.
 - R2 stores immutable original media objects.
 - The public Worker reads published D1 records and delivers R2-backed media.
-- The Studio Worker authenticates staff with Clerk and writes editorial changes
-  to the same D1 and R2 resources.
-- Cloudflare Images provides responsive image transformations in Studio media
-  delivery.
+- The Studio Worker authenticates staff with Clerk and writes editorial changes to the same D1 and R2 resources.
+- Cloudflare Images provides responsive image transformations in Studio media delivery.
 
-API routes stay under `/api` and run through each Worker before the static-asset
-fallback.
+API routes stay under `/api` and run through each Worker before the static-asset fallback.
 
 ## Workspace organization
 
@@ -63,11 +55,7 @@ Studio request
   -> D1 / R2
 ```
 
-Copied shadcn components backed by Base UI live in each app's
-`src/components/ui` directory. Studio feature composition lives under
-`apps/studio/src/editorial`. The official Tiptap editor kit lives under
-`apps/studio/src/components/tiptap-*`; the shared document contract and static
-renderer live in `packages/editor`.
+Copied shadcn components backed by Base UI live in each app's `src/components/ui` directory. Studio feature composition lives under `apps/studio/src/editorial`. The official Tiptap editor kit lives under `apps/studio/src/components/tiptap-*`; the shared document contract and static renderer live in `packages/editor`.
 
 ## Prerequisites
 
@@ -77,8 +65,7 @@ renderer live in `packages/editor`.
 - A Cloudflare account with Workers, D1, R2, and Images access
 - A Clerk production application with Organizations enabled
 - A Cloudflare-managed zone for custom production domains
-- A private D1 export and R2 object copy when reproducing the current production
-  corpus in another account
+- A private D1 export and R2 object copy when reproducing the current production corpus in another account
 
 ## Install
 
@@ -99,8 +86,7 @@ CLERK_SECRET_KEY=replace-with-development-secret-key
 CLERK_ORGANIZATION_ID=replace-with-organization-id
 ```
 
-These files are ignored by Git. Keep every secret in local environment files or
-Wrangler's encrypted secret store.
+These files are ignored by Git. Keep every secret in local environment files or Wrangler's encrypted secret store.
 
 Apply the D1 migrations to Studio's local binding store:
 
@@ -115,8 +101,7 @@ pnpm dev:web
 pnpm dev:studio
 ```
 
-Local Cloudflare development uses local D1 and R2 binding storage. The deployed
-Workers provide the shared production database and media bucket.
+Local Cloudflare development uses local D1 and R2 binding storage. The deployed Workers provide the shared production database and media bucket.
 
 ## Quality and release gate
 
@@ -126,9 +111,7 @@ Run the complete repository gate from the workspace root:
 pnpm check
 ```
 
-This command runs Ultracite/Biome formatting and linting, TypeScript checks,
-React and shared-package Vitest suites, Worker-runtime tests through
-Cloudflare's Vitest pool, production builds, and Wrangler dry runs.
+This command runs Ultracite/Oxlint/Oxfmt formatting and linting, TypeScript checks, React and shared-package Vitest suites, Worker-runtime tests through Cloudflare's Vitest plugin, production builds, and Wrangler dry runs.
 
 Useful focused commands:
 
@@ -144,8 +127,7 @@ Regenerate Wrangler binding types after every binding or configuration change.
 
 ## Deploy the existing production installation
 
-This path uses the existing Cloudflare account, Workers, shared D1 database, R2
-bucket, routes, and Clerk application.
+This path uses the existing Cloudflare account, Workers, shared D1 database, R2 bucket, routes, and Clerk application.
 
 Authenticate Wrangler and verify the selected account:
 
@@ -173,8 +155,7 @@ pnpm exec wrangler secret put VITE_CLERK_PUBLISHABLE_KEY
 cd ../..
 ```
 
-Apply pending migrations once through the Studio binding, then deploy both
-Workers:
+Apply pending migrations once through the Studio binding, then deploy both Workers:
 
 ```sh
 pnpm --dir apps/studio exec wrangler d1 migrations apply DB --remote
@@ -183,28 +164,22 @@ pnpm --filter @ortodoksas-lt/studio run deploy
 pnpm --filter @ortodoksas-lt/web run deploy
 ```
 
-The tracked Wrangler configurations use ID-free bindings. Cloudflare preserves
-the D1 and R2 resources already linked to each existing Worker across subsequent
-deployments.
+The tracked Wrangler configurations use ID-free bindings. Cloudflare preserves the D1 and R2 resources already linked to each existing Worker across subsequent deployments.
 
 ## Deploy into a clean Cloudflare account
 
-A clean installation needs one shared D1 database and one shared R2 bucket.
-Both Workers must receive the same resource bindings.
+A clean installation needs one shared D1 database and one shared R2 bucket. Both Workers must receive the same resource bindings.
 
 ### 1. Configure domains and application origins
 
 Update these deployment-specific values:
 
 - `apps/web/wrangler.jsonc`: Worker name and public custom-domain routes
-- `apps/studio/wrangler.jsonc`: Worker name, Studio custom domain,
-  `CLERK_AUTHORIZED_PARTIES`, and `PUBLICATION_ORIGIN`
+- `apps/studio/wrangler.jsonc`: Worker name, Studio custom domain, `CLERK_AUTHORIZED_PARTIES`, and `PUBLICATION_ORIGIN`
 - `apps/web/src/site.ts`: canonical public origin and publication metadata
-- `apps/web/vite.config.ts` and `apps/studio/vite.config.ts`: development host
-  allowlists when the deployment uses different preview hosts
+- `apps/web/vite.config.ts` and `apps/studio/vite.config.ts`: development host allowlists when the deployment uses different preview hosts
 
-The repository is product-specific to `ortodoksas.lt`. A separately branded
-publication also needs updated copy, metadata, social links, and brand assets.
+The repository is product-specific to `ortodoksas.lt`. A separately branded publication also needs updated copy, metadata, social links, and brand assets.
 
 ### 2. Create the shared storage resources
 
@@ -217,9 +192,7 @@ pnpm exec wrangler d1 create <database-name>
 pnpm exec wrangler r2 bucket create <bucket-name>
 ```
 
-Wrangler prints the D1 database name and ID. Add the same D1 binding details and
-the same R2 bucket name to both `apps/studio/wrangler.jsonc` and
-`apps/web/wrangler.jsonc`:
+Wrangler prints the D1 database name and ID. Add the same D1 binding details and the same R2 bucket name to both `apps/studio/wrangler.jsonc` and `apps/web/wrangler.jsonc`:
 
 ```jsonc
 {
@@ -228,26 +201,21 @@ the same R2 bucket name to both `apps/studio/wrangler.jsonc` and
       "binding": "DB",
       "database_name": "<database-name>",
       "database_id": "<database-id>",
-      "migrations_dir": "../../packages/db/migrations"
-    }
+      "migrations_dir": "../../packages/db/migrations",
+    },
   ],
   "r2_buckets": [
     {
       "binding": "MEDIA",
-      "bucket_name": "<bucket-name>"
-    }
-  ]
+      "bucket_name": "<bucket-name>",
+    },
+  ],
 }
 ```
 
-Cloudflare's automatic provisioning is Worker-specific. Explicit shared
-bindings ensure that Studio writes become visible to the public Worker in a new
-account. Binding IDs identify Cloudflare resources; Clerk keys and R2 API
-credentials remain encrypted secrets.
+Cloudflare's automatic provisioning is Worker-specific. Explicit shared bindings ensure that Studio writes become visible to the public Worker in a new account. Binding IDs identify Cloudflare resources; Clerk keys and R2 API credentials remain encrypted secrets.
 
-The public template keeps account-specific IDs out of source. A client-owned
-deployment fork or private deployment configuration can retain its own binding
-identifiers.
+The public template keeps account-specific IDs out of source. A client-owned deployment fork or private deployment configuration can retain its own binding identifiers.
 
 ### 3. Configure Clerk
 
@@ -257,8 +225,7 @@ In Clerk:
 2. Enable Organizations.
 3. Create one Organization for the editorial team.
 4. Add the first operator with the `org:admin` role.
-5. Copy the production publishable key, secret key, and Organization ID into
-   the local build environment and Wrangler secret store described above.
+5. Copy the production publishable key, secret key, and Organization ID into the local build environment and Wrangler secret store described above.
 6. Add the Studio origin to Clerk's production domain and redirect settings.
 
 Studio maps Clerk's default roles as follows:
@@ -266,8 +233,7 @@ Studio maps Clerk's default roles as follows:
 - `org:admin` — full Studio access plus invitations and role management
 - `org:member` — editorial access
 
-After the first administrator signs in, the Studio **Team** screen manages
-invitations, membership, and roles.
+After the first administrator signs in, the Studio **Team** screen manages invitations, membership, and roles.
 
 ### 4. Initialize or restore D1
 
@@ -277,22 +243,16 @@ For an empty publication, apply the full ordered migration history:
 pnpm --dir apps/studio exec wrangler d1 migrations apply DB --remote
 ```
 
-For an exact production copy, import the privately transferred D1 SQL export
-into the new blank database, then apply migrations created after that export:
+For an exact production copy, import the privately transferred D1 SQL export into the new blank database, then apply migrations created after that export:
 
 ```sh
 pnpm --dir apps/studio exec wrangler d1 execute DB --remote --file=/secure/path/database.sql
 pnpm --dir apps/studio exec wrangler d1 migrations apply DB --remote
 ```
 
-Restore the matching R2 objects through Cloudflare's S3-compatible API with a
-tool such as `rclone`. Preserve every object key because D1 media records point
-to those stable keys.
+Restore the matching R2 objects through Cloudflare's S3-compatible API with a tool such as `rclone`. Preserve every object key because D1 media records point to those stable keys.
 
-The source repository contains application code, migrations, tests, and brand
-assets. The current article corpus and editorial history live in D1, media
-objects live in R2, and team membership lives in Clerk. Transfer production
-backups and account ownership privately.
+The source repository contains application code, migrations, tests, and brand assets. The current article corpus and editorial history live in D1, media objects live in R2, and team membership lives in Clerk. Transfer production backups and account ownership privately.
 
 ### 5. Deploy and verify
 
@@ -308,20 +268,16 @@ Complete the browser verification checklist below before moving canonical DNS.
 
 Verify the rendered applications rather than relying only on build output:
 
-1. Open the public homepage and confirm that published stories and images
-   render.
-2. Click each language option and confirm that the URL and visible title/body
-   remain in the chosen locale.
+1. Open the public homepage and confirm that published stories and images render.
+2. Click each language option and confirm that the URL and visible title/body remain in the chosen locale.
 3. Open one article, one person page, and one community page.
 4. Open `/api/health` on the public Worker.
-5. Open the Studio `/articles` route and confirm that a signed-out visitor
-   reaches Clerk sign-in.
+5. Open the Studio `/articles` route and confirm that a signed-out visitor reaches Clerk sign-in.
 6. Sign in as `org:admin`, open **Team**, and confirm invitation controls.
 7. Save a draft, upload media, preview the article, and publish it.
 8. Confirm that the public Worker renders the newly published record and media.
 
-A successful build proves compilation. The checklist proves routing,
-authentication, shared storage, publication, locale state, and rendered output.
+A successful build proves compilation. The checklist proves routing, authentication, shared storage, publication, locale state, and rendered output.
 
 ## Backup and handoff
 
@@ -331,10 +287,7 @@ Create a D1 export before a platform transfer or major migration:
 pnpm --dir apps/studio exec wrangler d1 export DB --remote --output=/secure/path/database.sql
 ```
 
-Copy the R2 bucket through its S3-compatible API and compare the source and
-destination object counts. Store D1 exports, R2 credentials, Clerk keys, and
-Cloudflare API tokens in the receiving organization's secure credential and
-backup systems.
+Copy the R2 bucket through its S3-compatible API and compare the source and destination object counts. Store D1 exports, R2 credentials, Clerk keys, and Cloudflare API tokens in the receiving organization's secure credential and backup systems.
 
 A complete operational handoff includes:
 
@@ -349,23 +302,16 @@ A complete operational handoff includes:
 
 ## Security boundaries
 
-- `.dev.vars`, `.env*`, local Wrangler state, and build output are ignored by
-  Git.
+- `.dev.vars`, `.env*`, local Wrangler state, and build output are ignored by Git.
 - Production Clerk values live in Wrangler's encrypted secret store.
-- The Clerk publishable key is public browser configuration; the Clerk secret
-  key remains server-side.
+- The Clerk publishable key is public browser configuration; the Clerk secret key remains server-side.
 - D1 exports and R2 mirrors stay outside the public repository.
-- Enable GitHub Secret Protection and push protection as an additional
-  repository gate for future pushes.
-- Review `git status`, `git diff --check`, and the complete `pnpm check` result
-  before every release.
+- Enable GitHub Secret Protection and push protection as an additional repository gate for future pushes.
+- Review `git status`, `git diff --check`, and the complete `pnpm check` result before every release.
 
 ## Historical source archive
 
-The historical crawl and migration evidence lives in the public
-[`chikingsley/ortodoksas-lt-source-archive`](https://huggingface.co/datasets/chikingsley/ortodoksas-lt-source-archive)
-dataset. It preserves source provenance and migration evidence. Operational D1
-exports and R2 backups provide the exact current production state.
+The historical crawl and migration evidence lives in the public [`chikingsley/ortodoksas-lt-source-archive`](https://huggingface.co/datasets/chikingsley/ortodoksas-lt-source-archive) dataset. It preserves source provenance and migration evidence. Operational D1 exports and R2 backups provide the exact current production state.
 
 ## Further documentation
 
@@ -387,3 +333,5 @@ exports and R2 backups provide the exact current production state.
 - [Clerk production deployment](https://clerk.com/docs/guides/development/deployment/production)
 - [Clerk Organizations](https://clerk.com/docs/guides/organizations/overview)
 - [Clerk Organization invitations](https://clerk.com/docs/guides/organizations/add-members/invitations)
+
+See [the October 2026 maintenance record](docs/MAINTENANCE-2026-10-18.md) for D1 read budgets, tooling upgrades, lint migration and current deployment defaults.

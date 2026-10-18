@@ -22,11 +22,13 @@ export const getAuthorizedEditor = (
   ) {
     return null;
   }
+
   if (authentication.orgId !== organizationId) {
     return null;
   }
 
   let role: StudioRole | null = null;
+
   if (authentication.orgRole === "org:admin") {
     role = "admin";
   } else if (authentication.orgRole === "org:member") {

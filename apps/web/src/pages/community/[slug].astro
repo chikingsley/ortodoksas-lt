@@ -4,6 +4,7 @@ import { getCommunityDirectory } from "../../server/directory-data";
 
 const communities = await getCommunityDirectory("lt");
 const community = communities.find(({ slug }) => slug === Astro.params.slug);
+
 if (!community) {
   Astro.response.status = 404;
 }

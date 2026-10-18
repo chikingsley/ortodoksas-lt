@@ -15,12 +15,12 @@ interface Props {
   title: string;
   description?: string;
   canonicalPath?: string;
-  image?: string | null;
+  image?: string | null | undefined;
   lang?: string;
   locale?: SiteLocale;
   type?: "website" | "article";
   alternates?: AlternateLink[];
-  jsonLd?: Record<string, unknown>;
+  jsonLd?: Record<string, unknown> | undefined;
 }
 
 const {
@@ -34,14 +34,18 @@ const {
   alternates = [],
   jsonLd,
 } = Astro.props;
+
 const siteUrl = Astro.site ?? new URL(site.origin);
 const canonical = new URL(canonicalPath, siteUrl).toString();
 const socialImage = image?.startsWith("/") ? new URL(image, siteUrl).toString() : image;
+
 const resolvedJsonLd =
   typeof jsonLd?.image === "string" && jsonLd.image.startsWith("/")
     ? { ...jsonLd, image: new URL(jsonLd.image, siteUrl).toString() }
     : jsonLd;
+
 const localeLinks = await getLocaleLinks(canonicalPath);
+
 const resolvedAlternates = alternates.length
   ? alternates
   : Object.entries(localeLinks)
@@ -50,14 +54,15 @@ const resolvedAlternates = alternates.length
         href: new URL(destination.href, siteUrl).toString(),
         hreflang: alternateLocale,
       }));
+
 const baseSchema = {
   "@context": "https://schema.org",
   "@type": type === "article" ? "Article" : "WebSite",
-  name: title,
   description,
-  url: canonical,
   inLanguage: lang,
-  ...(type === "article" ? { publisher: { "@type": "Organization", name: site.name, logo: { "@type": "ImageObject", url: new URL(site.logoPath, siteUrl).toString() } } } : {}),
+  name: title,
+  url: canonical,
+  ...(type === "article" ? { publisher: { "@type": "Organization", logo: { "@type": "ImageObject", url: new URL(site.logoPath, siteUrl).toString() }, name: site.name } } : {}),
   ...resolvedJsonLd,
 };
 ---

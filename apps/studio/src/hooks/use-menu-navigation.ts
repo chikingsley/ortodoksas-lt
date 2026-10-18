@@ -76,29 +76,35 @@ export function useMenuNavigation<T>({
         return false;
       }
 
-      const moveNext = () =>
+      const moveNext = () => {
         setSelectedIndex((currentIndex) => {
           if (currentIndex === -1) {
             return 0;
           }
+
           return (currentIndex + 1) % items.length;
         });
+      };
 
-      const movePrev = () =>
+      const movePrev = () => {
         setSelectedIndex((currentIndex) => {
           if (currentIndex === -1) {
             return items.length - 1;
           }
+
           return (currentIndex - 1 + items.length) % items.length;
         });
+      };
 
       switch (event.key) {
         case "ArrowUp": {
           if (orientation === "horizontal") {
             return false;
           }
+
           event.preventDefault();
           movePrev();
+
           return true;
         }
 
@@ -106,8 +112,10 @@ export function useMenuNavigation<T>({
           if (orientation === "horizontal") {
             return false;
           }
+
           event.preventDefault();
           moveNext();
+
           return true;
         }
 
@@ -115,8 +123,10 @@ export function useMenuNavigation<T>({
           if (orientation === "vertical") {
             return false;
           }
+
           event.preventDefault();
           movePrev();
+
           return true;
         }
 
@@ -124,8 +134,10 @@ export function useMenuNavigation<T>({
           if (orientation === "vertical") {
             return false;
           }
+
           event.preventDefault();
           moveNext();
+
           return true;
         }
 
@@ -133,24 +145,29 @@ export function useMenuNavigation<T>({
           if (!loopOnTab) {
             return false;
           }
+
           event.preventDefault();
+
           if (event.shiftKey) {
             movePrev();
           } else {
             moveNext();
           }
+
           return true;
         }
 
         case "Home": {
           event.preventDefault();
           setSelectedIndex(0);
+
           return true;
         }
 
         case "End": {
           event.preventDefault();
           setSelectedIndex(items.length - 1);
+
           return true;
         }
 
@@ -158,10 +175,13 @@ export function useMenuNavigation<T>({
           if (event.isComposing) {
             return false;
           }
+
           event.preventDefault();
+
           if (selectedIndex !== -1 && items[selectedIndex]) {
             onSelect?.(items[selectedIndex]);
           }
+
           return true;
         }
 
@@ -169,13 +189,16 @@ export function useMenuNavigation<T>({
           if (!onClose) {
             return false;
           }
+
           event.preventDefault();
           onClose?.();
+
           return true;
         }
 
-        default:
+        default: {
           return false;
+        }
       }
     };
 

@@ -1,5 +1,5 @@
-import { env } from "cloudflare:workers";
 import { articleRevisions } from "@ortodoksas-lt/db";
+import { env } from "cloudflare:workers";
 import { and, eq } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
 
@@ -22,6 +22,7 @@ describe("Studio Worker services", () => {
   it("preserves explicit translation approval and invalidates stale reviews", async () => {
     const database = getDatabase(env.DB);
     const sourceSlug = `translation-source-${crypto.randomUUID()}`;
+
     const source = await createArticle({
       database,
       editorId: EDITOR_ID,
@@ -41,28 +42,38 @@ describe("Studio Worker services", () => {
         title: "Source title",
       },
     });
+
     expect(source.ok).toBe(true);
+
     if (!source.ok) {
       return;
     }
+
     const translationDraft = await createTranslationDraft({
       database,
       editorId: EDITOR_ID,
       language: "en",
       sourceArticleId: source.data.id,
     });
+
     expect(translationDraft.kind).toBe("created");
+
     if (translationDraft.kind !== "created") {
       return;
     }
+
     const translationId = translationDraft.article.id;
+
     const initialTranslationWorkspace = await getArticleWorkspace(
       database,
       translationId
     );
+
     const initialSourceHash =
       initialTranslationWorkspace?.translationSourceCurrentHash;
+
     expect(initialSourceHash).toMatch(SHA256_PATTERN);
+
     const translationPayload = {
       body: {
         content: [
@@ -91,14 +102,17 @@ describe("Studio Worker services", () => {
         translationReviewAction: "approve",
       },
     });
+
     expect(approved).toMatchObject({
       data: { translationReviewStatus: "approved", version: 2 },
       ok: true,
     });
+
     const approvedWorkspace = await getArticleWorkspace(
       database,
       translationId
     );
+
     const approvedAt = approvedWorkspace?.canonical.translationReviewedAt;
     expect(approvedAt).toEqual(expect.any(Number));
 
@@ -108,6 +122,7 @@ describe("Studio Worker services", () => {
       editorId: EDITOR_ID,
       payload: { ...translationPayload, expectedVersion: 2 },
     });
+
     expect(ordinarySave).toMatchObject({
       data: { translationReviewStatus: "approved", version: 3 },
       ok: true,
@@ -133,6 +148,7 @@ describe("Studio Worker services", () => {
         expectedVersion: 3,
       },
     });
+
     expect(editedTranslation).toMatchObject({
       data: { translationReviewStatus: "pending", version: 4 },
       ok: true,
@@ -169,6 +185,7 @@ describe("Studio Worker services", () => {
         translationReviewAction: "approve",
       },
     });
+
     expect(reapproved).toMatchObject({
       data: { translationReviewStatus: "approved", version: 5 },
       ok: true,
@@ -215,11 +232,14 @@ describe("Studio Worker services", () => {
         translationKind: "original",
       },
     });
+
     expect(editedSource.ok).toBe(true);
+
     const sourceInvalidatedWorkspace = await getArticleWorkspace(
       database,
       translationId
     );
+
     expect(sourceInvalidatedWorkspace).toMatchObject({
       canonical: {
         translationReviewedAt: null,
@@ -260,6 +280,7 @@ describe("Studio Worker services", () => {
         translationReviewAction: "approve",
       },
     });
+
     expect(staleApproval).toEqual({
       error: "Translation source changed since this editor loaded it",
       ok: false,
@@ -287,6 +308,7 @@ describe("Studio Worker services", () => {
         translationReviewAction: "approve",
       },
     });
+
     expect(approvedAfterSourceEdit).toMatchObject({
       data: { translationReviewStatus: "approved", version: 7 },
       ok: true,
@@ -299,11 +321,14 @@ describe("Studio Worker services", () => {
       expectedVersion: 2,
       version: 1,
     });
+
     expect(restoredSource.ok).toBe(true);
+
     const restoreInvalidatedWorkspace = await getArticleWorkspace(
       database,
       translationId
     );
+
     expect(restoreInvalidatedWorkspace).toMatchObject({
       canonical: { translationReviewStatus: "pending" },
     });
@@ -354,15 +379,19 @@ describe("Studio Worker services", () => {
         },
       }),
     ]);
+
     const [concurrentSource, concurrentTranslation] = await Promise.all([
       getArticleWorkspace(database, source.data.id),
       getArticleWorkspace(database, translationId),
     ]);
+
     expect(concurrentSource).toBeDefined();
     expect(concurrentTranslation).toBeDefined();
+
     if (!(concurrentSource && concurrentTranslation)) {
       return;
     }
+
     if (
       concurrentTranslation.canonical.translationReviewStatus === "approved"
     ) {
@@ -394,6 +423,7 @@ describe("Studio Worker services", () => {
         translationReviewAction: "request_changes",
       },
     });
+
     expect(changesRequested).toMatchObject({
       data: { translationReviewStatus: "changes_requested" },
       ok: true,
@@ -403,11 +433,14 @@ describe("Studio Worker services", () => {
       getArticleWorkspace(database, source.data.id),
       getArticleWorkspace(database, translationId),
     ]);
+
     expect(preRestoreSource).toBeDefined();
     expect(preRestoreTranslation).toBeDefined();
+
     if (!(preRestoreSource && preRestoreTranslation)) {
       return;
     }
+
     const restoreRaceApproval = await updateArticle({
       articleId: translationId,
       database,
@@ -429,10 +462,13 @@ describe("Studio Worker services", () => {
         translationReviewAction: "approve",
       },
     });
+
     expect(restoreRaceApproval.ok).toBe(true);
+
     if (!restoreRaceApproval.ok) {
       return;
     }
+
     const approvedVersion = restoreRaceApproval.data.version;
     await Promise.all([
       restoreArticleRevision({
@@ -467,15 +503,19 @@ describe("Studio Worker services", () => {
         },
       }),
     ]);
+
     const [postRestoreSource, postRestoreTranslation] = await Promise.all([
       getArticleWorkspace(database, source.data.id),
       getArticleWorkspace(database, translationId),
     ]);
+
     expect(postRestoreSource).toBeDefined();
     expect(postRestoreTranslation).toBeDefined();
+
     if (!(postRestoreSource && postRestoreTranslation)) {
       return;
     }
+
     if (
       postRestoreTranslation.canonical.translationReviewStatus === "approved"
     ) {

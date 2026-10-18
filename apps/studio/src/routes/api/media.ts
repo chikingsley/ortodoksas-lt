@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { env as environment } from "cloudflare:workers";
 
 import { requireStudioEditor } from "@/server/auth";
 import { getDatabase } from "@/server/db.server";
@@ -8,13 +9,11 @@ import { requireStudioWritesOpen } from "@/server/write-mode";
 export const Route = createFileRoute("/api/media")({
   server: {
     handlers: {
-      POST: async ({ context, request }) => {
-        const { environment } = context.cloudflare as {
-          environment: Cloudflare.Env;
-        };
+      POST: async ({ request }) => {
         await requireStudioEditor(environment);
         requireStudioWritesOpen(environment);
-        return uploadMedia({
+
+        return await uploadMedia({
           database: getDatabase(environment.DB),
           images: environment.IMAGES,
           media: environment.MEDIA,

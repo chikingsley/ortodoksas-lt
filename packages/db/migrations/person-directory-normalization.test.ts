@@ -11,6 +11,7 @@ describe("person directory normalization migration", () => {
     for (const database of databases) {
       database.close();
     }
+
     databases.length = 0;
   });
 
@@ -71,6 +72,7 @@ describe("person directory normalization migration", () => {
          WHERE person_id = 'person-panaretos' AND language = 'lt'`
       )
       .get() as Record<string, string>;
+
     expect(person.honorific).toBe("Jo Ekselencija");
     expect(person.display_name).toBe("Panaretas");
     expect(person.alternate_name).toBe("");

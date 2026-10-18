@@ -1,7 +1,7 @@
-import {
-  getTranslationDisplayState,
-  type TranslationKind,
-  type TranslationReviewStatus,
+import { getTranslationDisplayState } from "@ortodoksas-lt/content/translation";
+import type {
+  TranslationKind,
+  TranslationReviewStatus,
 } from "@ortodoksas-lt/content/translation";
 
 const translationLabels = {

@@ -11,6 +11,7 @@ import { EDITOR_ID } from "./fixtures";
 describe("Studio Worker services", () => {
   it("routes translation creation through the guarded draft workflow", async () => {
     const database = getDatabase(env.DB);
+
     const result = await createArticle({
       database,
       editorId: EDITOR_ID,
@@ -26,6 +27,7 @@ describe("Studio Worker services", () => {
         translationSourceHash: "a".repeat(64),
       },
     });
+
     expect(result).toMatchObject({ ok: false, status: 422 });
 
     const original = await createArticle({
@@ -39,10 +41,13 @@ describe("Studio Worker services", () => {
         title: "Original article",
       },
     });
+
     expect(original.ok).toBe(true);
+
     if (!original.ok) {
       return;
     }
+
     const conversion = await updateArticle({
       articleId: original.data.id,
       database,
@@ -57,6 +62,7 @@ describe("Studio Worker services", () => {
         translationKind: "human",
       },
     });
+
     expect(conversion).toMatchObject({ ok: false, status: 422 });
   });
 });

@@ -1,16 +1,17 @@
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { lazy, Suspense, useCallback, useMemo, useState } from "react";
+
 import { ArticleInventory } from "@/editorial/articles/inventory/article-inventory";
 import type { CatalogArticle } from "@/editorial/articles/types";
 import { HomepageWorkspace } from "@/editorial/homepage/homepage-workspace";
+import { articleCatalogQueryOptions } from "@/server/articles/article-catalog.functions";
 import {
   createArticleMutation,
   createTranslationDraftMutation,
 } from "@/server/articles/article.functions";
-import { articleCatalogQueryOptions } from "@/server/articles/article-catalog.functions";
 
-const ArticleEditor = lazy(() =>
+const ArticleEditor = lazy(async () =>
   import("@/editorial/articles/editor/article-editor").then((module) => ({
     default: module.ArticleEditor,
   }))
@@ -30,6 +31,7 @@ export const StudioWorkspace = (route: WorkspaceRoute) => {
   const { data: articles } = useSuspenseQuery(articleCatalogQueryOptions());
   const [createError, setCreateError] = useState(false);
   const [creating, setCreating] = useState(false);
+
   const selectedArticle = useMemo(
     () =>
       route.view === "editor"
@@ -37,12 +39,14 @@ export const StudioWorkspace = (route: WorkspaceRoute) => {
         : null,
     [articles, route]
   );
+
   const refreshCatalog = useCallback(
-    () => queryClient.invalidateQueries(articleCatalogQueryOptions()),
+    async () => queryClient.invalidateQueries(articleCatalogQueryOptions()),
     [queryClient]
   );
+
   const openArticle = useCallback(
-    (article: CatalogArticle) =>
+    async (article: CatalogArticle) =>
       navigate({
         params: { articleId: article.id },
         to:
@@ -52,14 +56,17 @@ export const StudioWorkspace = (route: WorkspaceRoute) => {
       }),
     [navigate]
   );
+
   const closeArticle = useCallback(async () => {
     await refreshCatalog();
     await navigate({ to: contentPath(route.kind ?? "article") });
   }, [navigate, refreshCatalog, route.kind]);
+
   const selectContentKind = useCallback(
-    (kind: CatalogArticle["kind"]) => navigate({ to: contentPath(kind) }),
+    async (kind: CatalogArticle["kind"]) => navigate({ to: contentPath(kind) }),
     [navigate]
   );
+
   const createContent = useCallback(
     async (kind: CatalogArticle["kind"]) => {
       setCreateError(false);
@@ -68,6 +75,7 @@ export const StudioWorkspace = (route: WorkspaceRoute) => {
       const slug = `${kind === "page" ? "p/" : ""}draft-${contentId}`;
       const title = kind === "page" ? "Untitled page" : "Untitled story";
       const section = kind === "page" ? "Tikėjimas ir kultūra" : "Naujienos";
+
       try {
         const result = await createArticleMutation({
           data: {
@@ -82,9 +90,11 @@ export const StudioWorkspace = (route: WorkspaceRoute) => {
             translationGroupId: contentId,
           },
         });
+
         if (!result.ok) {
           throw new Error("Draft creation failed");
         }
+
         await refreshCatalog();
         await navigate({
           params: { articleId: result.data.id },
@@ -98,14 +108,17 @@ export const StudioWorkspace = (route: WorkspaceRoute) => {
     },
     [navigate, refreshCatalog]
   );
+
   const createTranslation = useCallback(
     async (source: CatalogArticle, language: "en" | "ru" | "uk" | "be") => {
       const result = await createTranslationDraftMutation({
         data: { articleId: source.id, language },
       });
+
       if (result.kind !== "created") {
         throw new Error("Translation draft creation failed");
       }
+
       await refreshCatalog();
       await navigate({
         params: { articleId: result.article.id },
@@ -115,6 +128,7 @@ export const StudioWorkspace = (route: WorkspaceRoute) => {
     },
     [navigate, refreshCatalog]
   );
+
   const translations = useMemo(
     () =>
       selectedArticle
@@ -142,11 +156,12 @@ export const StudioWorkspace = (route: WorkspaceRoute) => {
         onOpen={openArticle}
       />
     );
+
   if (route.view === "editor") {
     workspace = selectedArticle ? (
       <Suspense
         fallback={
-          <div className="grid min-h-[calc(100dvh-var(--studio-mobile-header-height))] place-items-center text-[13px] text-muted-foreground md:min-h-screen">
+          <div className="text-muted-foreground grid min-h-[calc(100dvh-var(--studio-mobile-header-height))] place-items-center text-[13px] md:min-h-screen">
             Įkeliamas redaktorius…
           </div>
         }
@@ -161,7 +176,7 @@ export const StudioWorkspace = (route: WorkspaceRoute) => {
         />
       </Suspense>
     ) : (
-      <div className="grid min-h-[calc(100dvh-var(--studio-mobile-header-height))] place-items-center text-[13px] text-muted-foreground md:min-h-screen">
+      <div className="text-muted-foreground grid min-h-[calc(100dvh-var(--studio-mobile-header-height))] place-items-center text-[13px] md:min-h-screen">
         Article unavailable.
       </div>
     );

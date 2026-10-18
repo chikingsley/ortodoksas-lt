@@ -1,11 +1,13 @@
-import { env, SELF } from "cloudflare:test";
+import { env, exports } from "cloudflare:workers";
 import { describe, expect, it } from "vitest";
 
 const disabledRussianLocale = /<button[^>]+disabled[^>]+lang="ru"/u;
 
 describe("Astro Worker runtime", () => {
   it("serves the health route from the emitted Worker", async () => {
-    const response = await SELF.fetch("https://ortodoksas.test/api/health");
+    const response = await exports.default.fetch(
+      "https://ortodoksas.test/api/health"
+    );
 
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({
@@ -15,7 +17,7 @@ describe("Astro Worker runtime", () => {
   });
 
   it("renders the publication homepage against migrated D1", async () => {
-    const response = await SELF.fetch("https://ortodoksas.test/");
+    const response = await exports.default.fetch("https://ortodoksas.test/");
 
     expect(response.status).toBe(200);
     await expect(response.text()).resolves.toContain("Ortodoksas");
@@ -24,6 +26,7 @@ describe("Astro Worker runtime", () => {
   it("renders article SEO fallbacks, overrides, and a typed public byline", async () => {
     const groupId = "91111111-1111-4111-8111-111111111111";
     const articleId = "a1111111-1111-4111-8111-111111111111";
+
     const body = JSON.stringify({
       content: [
         {
@@ -33,6 +36,7 @@ describe("Astro Worker runtime", () => {
       ],
       type: "doc",
     });
+
     await env.DB.batch([
       env.DB.prepare(
         "INSERT INTO publication_groups (id, kind, page_template, created_at, updated_at) VALUES (?, 'article', 'standard', 1, 1)"
@@ -48,9 +52,10 @@ describe("Astro Worker runtime", () => {
       ).bind(articleId, groupId, body),
     ]);
 
-    const fallbackResponse = await SELF.fetch(
+    const fallbackResponse = await exports.default.fetch(
       "https://ortodoksas.test/2026/article-metadata"
     );
+
     expect(fallbackResponse.status).toBe(200);
     const fallbackHtml = await fallbackResponse.text();
     expect(fallbackHtml).toContain(
@@ -79,9 +84,10 @@ describe("Astro Worker runtime", () => {
       )
       .run();
 
-    const customResponse = await SELF.fetch(
+    const customResponse = await exports.default.fetch(
       "https://ortodoksas.test/2026/article-metadata"
     );
+
     expect(customResponse.status).toBe(200);
     const customHtml = await customResponse.text();
     expect(customHtml).toContain(
@@ -100,7 +106,7 @@ describe("Astro Worker runtime", () => {
   });
 
   it("returns the publication 404 for an unknown catch-all path", async () => {
-    const response = await SELF.fetch(
+    const response = await exports.default.fetch(
       "https://ortodoksas.test/unknown-publication-path"
     );
 
@@ -123,7 +129,7 @@ describe("Astro Worker runtime", () => {
       .run();
 
     const url = `https://ortodoksas.test/api/media/${mediaId}`;
-    const complete = await SELF.fetch(url);
+    const complete = await exports.default.fetch(url);
     expect(complete.status).toBe(200);
     expect(complete.headers.get("content-length")).toBe("10");
     expect(complete.headers.get("content-range")).toBeNull();
@@ -131,15 +137,16 @@ describe("Astro Worker runtime", () => {
       "0123456789"
     );
 
-    const partial = await SELF.fetch(url, {
+    const partial = await exports.default.fetch(url, {
       headers: { Range: "bytes=2-5" },
     });
+
     expect(partial.status).toBe(206);
     expect(partial.headers.get("content-length")).toBe("4");
     expect(partial.headers.get("content-range")).toBe("bytes 2-5/10");
     expect(new TextDecoder().decode(await partial.arrayBuffer())).toBe("2345");
 
-    const head = await SELF.fetch(url, { method: "HEAD" });
+    const head = await exports.default.fetch(url, { method: "HEAD" });
     expect(head.status).toBe(200);
     expect(head.headers.get("content-length")).toBe("10");
     expect(head.headers.get("content-range")).toBeNull();
@@ -147,10 +154,12 @@ describe("Astro Worker runtime", () => {
 
   it("keeps the publication group while switching a directory locale", async () => {
     const groupId = "11111111-1111-4111-8111-111111111111";
+
     const body = JSON.stringify({
       content: [{ type: "paragraph" }],
       type: "doc",
     });
+
     await env.DB.batch([
       env.DB.prepare(
         "INSERT INTO publication_groups (id, kind, page_template, created_at, updated_at) VALUES (?, 'page', 'community_directory', 1, 1)"
@@ -163,18 +172,20 @@ describe("Astro Worker runtime", () => {
       ).bind("31111111-1111-4111-8111-111111111111", groupId, body),
     ]);
 
-    const lithuanian = await SELF.fetch(
+    const lithuanian = await exports.default.fetch(
       "https://ortodoksas.test/p/bendruomenes-test"
     );
+
     expect(lithuanian.status).toBe(200);
     const lithuanianHtml = await lithuanian.text();
     expect(lithuanianHtml).toContain('href="/en/p/communities-test"');
     expect(lithuanianHtml).toMatch(disabledRussianLocale);
     expect(lithuanianHtml).not.toContain('href="/ru"');
 
-    const english = await SELF.fetch(
+    const english = await exports.default.fetch(
       "https://ortodoksas.test/en/p/communities-test"
     );
+
     expect(english.status).toBe(200);
     await expect(english.text()).resolves.toContain(
       "Vilnius Holy Trinity Community"
@@ -184,11 +195,13 @@ describe("Astro Worker runtime", () => {
   it("searches published articles through the localized FTS5 index", async () => {
     const articleGroupId = "41111111-1111-4111-8111-111111111111";
     const pageGroupId = "51111111-1111-4111-8111-111111111111";
+
     const body = (text: string) =>
       JSON.stringify({
         content: [{ content: [{ text, type: "text" }], type: "paragraph" }],
         type: "doc",
       });
+
     await env.DB.batch([
       env.DB.prepare(
         "INSERT INTO publication_groups (id, kind, page_template, created_at, updated_at) VALUES (?, 'article', 'standard', 1, 1)"
@@ -219,9 +232,10 @@ describe("Astro Worker runtime", () => {
       ),
     ]);
 
-    const lithuanian = await SELF.fetch(
+    const lithuanian = await exports.default.fetch(
       "https://ortodoksas.test/paieska?q=sviesak"
     );
+
     expect(lithuanian.status).toBe(200);
     const lithuanianHtml = await lithuanian.text();
     expect(lithuanianHtml).toContain("Paieškos straipsnis");
@@ -230,20 +244,23 @@ describe("Astro Worker runtime", () => {
     expect(lithuanianHtml).not.toContain("Paieškos puslapis");
     expect(lithuanianHtml).not.toContain("English search article");
 
-    const publication = await SELF.fetch(
+    const publication = await exports.default.fetch(
       "https://ortodoksas.test/2026/fts-paieska"
     );
+
     expect(publication.status).toBe(200);
     await expect(publication.text()).resolves.toContain(
       '<link rel="canonical" href="https://ortodoksas.lt/2026/fts-paieska"'
     );
 
-    const rss = await SELF.fetch("https://ortodoksas.test/rss.xml");
-    expect(await rss.text()).toContain(
+    const rss = await exports.default.fetch("https://ortodoksas.test/rss.xml");
+    await expect(rss.text()).resolves.toContain(
       "https://ortodoksas.lt/2026/fts-paieska"
     );
-    const sitemap = await SELF.fetch("https://ortodoksas.test/sitemap.xml");
-    expect(await sitemap.text()).toContain(
+    const sitemap = await exports.default.fetch(
+      "https://ortodoksas.test/sitemap.xml"
+    );
+    await expect(sitemap.text()).resolves.toContain(
       "https://ortodoksas.lt/2026/fts-paieska"
     );
 
@@ -256,9 +273,10 @@ describe("Astro Worker runtime", () => {
       )
       .run();
 
-    const updated = await SELF.fetch(
+    const updated = await exports.default.fetch(
       "https://ortodoksas.test/paieska?q=naujaszod"
     );
+
     expect(updated.status).toBe(200);
     await expect(updated.text()).resolves.toContain("Paieškos straipsnis");
 
@@ -278,6 +296,7 @@ describe("Astro Worker runtime", () => {
       ftsRowsMissingFromArticles: number;
       indexedRows: number;
     }>();
+
     expect(parity?.articleRows).toBe(parity?.indexedRows);
     expect(parity?.articlesMissingFromFts).toBe(0);
     expect(parity?.ftsRowsMissingFromArticles).toBe(0);

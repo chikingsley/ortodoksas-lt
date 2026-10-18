@@ -17,9 +17,11 @@ export const deleteArticleDraft = async (input: {
     },
     where: eq(articles.id, input.articleId),
   });
+
   if (!draft) {
     return { error: "Article unavailable", ok: false, status: 404 };
   }
+
   if (draft.status !== "draft") {
     return {
       error: "Only drafts can be deleted",
@@ -35,6 +37,7 @@ export const deleteArticleDraft = async (input: {
           where: eq(articles.translationSourceArticleId, draft.id),
         })
       : undefined;
+
   if (draft.translationKind === "original" && linkedTranslation) {
     return {
       error: "Delete the linked translation drafts first",
@@ -70,5 +73,6 @@ export const deleteArticleDraft = async (input: {
       status: 409,
     };
   }
+
   return { data: { id: draft.id }, ok: true };
 };

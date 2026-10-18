@@ -1,7 +1,8 @@
 ---
 import { getSectionLabel } from "@ortodoksas-lt/content/sections";
 import type { SiteLocale } from "../../i18n/config";
-import { formatDate, normalizeText, type CatalogEntry } from "../publication/publication";
+import { formatDate, normalizeText } from '../publication/publication';
+import type { CatalogEntry } from '../publication/publication';
 
 interface Props {
   entries: CatalogEntry[];
@@ -20,6 +21,7 @@ const {
   rule = true,
   searchable = false,
 } = Astro.props;
+
 const localized = locale !== "lt";
 ---
 

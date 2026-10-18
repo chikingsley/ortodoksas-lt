@@ -11,6 +11,7 @@ export interface InternalPublicationHref {
 }
 
 const CURRENT_ORIGIN = "https://ortodoksas.lt";
+
 const INTERNAL_PUBLICATION_HOSTS = new Set([
   "be.ortodoksas.lt",
   "en.ortodoksas.lt",
@@ -24,6 +25,7 @@ const INTERNAL_PUBLICATION_HOSTS = new Set([
   "uk.ortodoksas.lt",
   "www.ortodoksas.lt",
 ]);
+
 const HOST_LOCALES = new Map<string, LocalizedPublicationLocale>([
   ["be.ortodoksas.lt", "be"],
   ["en.ortodoksas.lt", "en"],
@@ -34,9 +36,12 @@ const HOST_LOCALES = new Map<string, LocalizedPublicationLocale>([
   ["ru.ortodoksas.lt", "ru"],
   ["uk.ortodoksas.lt", "uk"],
 ]);
+
 const LOCALIZED_PUBLICATION_PATH_PATTERN = /^\/(be|en|ru|uk)(\/.*)$/u;
+
 const PUBLICATION_PATH_PATTERN =
   /^\/(?:p\/[^/?#]+|\d{4}\/\d{2}\/[^/?#]+)(?:\.html)?$/u;
+
 const HISTORICAL_HTML_SUFFIX_PATTERN = /\.html$/u;
 const ABSOLUTE_URL_PATTERN = /^https?:\/\//u;
 
@@ -50,19 +55,25 @@ export const parseInternalPublicationHref = (
 ): InternalPublicationHref | undefined => {
   try {
     const url = new URL(href, CURRENT_ORIGIN);
+
     if (!INTERNAL_PUBLICATION_HOSTS.has(url.hostname)) {
       return;
     }
-    const localizedMatch = url.pathname.match(
-      LOCALIZED_PUBLICATION_PATH_PATTERN
+
+    const localizedMatch = LOCALIZED_PUBLICATION_PATH_PATTERN.exec(
+      url.pathname
     );
+
     const path = canonicalPublicationPath(localizedMatch?.[2] ?? url.pathname);
+
     if (!path) {
       return;
     }
+
     const locale =
       (localizedMatch?.[1] as LocalizedPublicationLocale | undefined) ??
       HOST_LOCALES.get(url.hostname);
+
     return {
       ...(locale ? { locale } : {}),
       path,
@@ -72,27 +83,33 @@ export const parseInternalPublicationHref = (
     if (error instanceof TypeError) {
       return;
     }
+
     throw error;
   }
 };
 
 export const canonicalizePublicationHref = (href: string): string => {
   const parsed = parseInternalPublicationHref(href);
+
   if (!parsed) {
     return href;
   }
+
   return `${parsed.locale ? `/${parsed.locale}` : ""}${parsed.path}${parsed.suffix}`;
 };
 
 const canonicalizeVisibleUrl = (value: string): string => {
   const trimmed = value.trim();
   const canonical = canonicalizePublicationHref(trimmed);
+
   if (canonical === trimmed) {
     return value;
   }
+
   const replacement = ABSOLUTE_URL_PATTERN.test(trimmed)
     ? `${CURRENT_ORIGIN}${canonical}`
     : canonical;
+
   return value.replace(trimmed, replacement);
 };
 
@@ -102,6 +119,7 @@ const canonicalizeNode = (node: JSONContent): JSONContent => ({
     ? {
         marks: node.marks.map((mark) => {
           const href = mark.attrs?.href;
+
           return typeof href === "string"
             ? {
                 ...mark,

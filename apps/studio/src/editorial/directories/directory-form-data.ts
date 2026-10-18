@@ -28,9 +28,11 @@ export const upsertLocalization = <T extends { language: SiteLocale }>(
   update: (value: T) => T
 ) => {
   const index = values.findIndex((value) => value.language === locale);
-  if (index < 0) {
+
+  if (index === -1) {
     return [...values, update(create())];
   }
+
   return values.map((value, valueIndex) =>
     valueIndex === index ? update(value) : value
   );
@@ -40,5 +42,6 @@ export const directoryIssueMessage = (issue?: { message: string }) => {
   if (issue?.message === "Invalid input") {
     return "Review the highlighted fields before saving.";
   }
+
   return issue?.message ?? "Complete the required fields before saving.";
 };

@@ -1,4 +1,5 @@
-import { type SiteLocale, siteLocaleSchema } from "@ortodoksas-lt/content/site";
+import { siteLocaleSchema } from "@ortodoksas-lt/content/site";
+import type { SiteLocale } from "@ortodoksas-lt/content/site";
 import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect } from "react";
 
@@ -21,11 +22,14 @@ export const useDirectoryRouteState = ({
   useEffect(() => {
     if (language) {
       localStorage.setItem(DIRECTORY_LANGUAGE_KEY, language);
+
       return;
     }
+
     const storedLanguage = siteLocaleSchema
       .catch("lt")
       .parse(localStorage.getItem(DIRECTORY_LANGUAGE_KEY));
+
     navigate({
       replace: true,
       search: { language: storedLanguage, record },
@@ -34,8 +38,9 @@ export const useDirectoryRouteState = ({
   }, [language, navigate, record, to]);
 
   const changeLanguage = useCallback(
-    (nextLanguage: SiteLocale) => {
+    async (nextLanguage: SiteLocale) => {
       localStorage.setItem(DIRECTORY_LANGUAGE_KEY, nextLanguage);
+
       return navigate({
         replace: true,
         search: { language: nextLanguage, record },
@@ -46,7 +51,7 @@ export const useDirectoryRouteState = ({
   );
 
   const changeRecord = useCallback(
-    (nextRecord: string, replace = false) =>
+    async (nextRecord: string, replace = false) =>
       navigate({
         replace,
         search: { language: locale, record: nextRecord },

@@ -69,6 +69,7 @@ export interface ArticleRevisionMetadata {
 
 const parseLabels = (labelsJson: string): string[] => {
   const labels: unknown = JSON.parse(labelsJson);
+
   return Array.isArray(labels)
     ? labels.filter((label): label is string => typeof label === "string")
     : [];
@@ -122,9 +123,11 @@ export const parseArticleRevisionMetadata = (
   currentArticle: ArticleRecord
 ): ArticleRevisionMetadata => {
   const fallback = articleRevisionMetadata(currentArticle);
+
   const parsed = articleRevisionMetadataSchema.safeParse(
     JSON.parse(metadataJson)
   );
+
   return parsed.success
     ? { ...fallback, ...parsed.data, snapshotVersion: 5 }
     : fallback;
