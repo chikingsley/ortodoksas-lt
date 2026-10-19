@@ -6,16 +6,19 @@
   "scripts": {
     "build": "pnpm --filter @ortodoksas-lt/web build && pnpm --filter @ortodoksas-lt/studio build",
     "build:canonical": "pnpm --filter @ortodoksas-lt/web build",
-    "check": "pnpm lint && pnpm --filter @ortodoksas-lt/content test && pnpm --filter @ortodoksas-lt/editor test && pnpm --filter @ortodoksas-lt/db check && pnpm --filter @ortodoksas-lt/web check && pnpm --filter @ortodoksas-lt/studio check",
+    "check": "pnpm lint && pnpm test:security && pnpm --filter @ortodoksas-lt/content test && pnpm --filter @ortodoksas-lt/editor test && pnpm --filter @ortodoksas-lt/db check && pnpm --filter @ortodoksas-lt/web check && pnpm --filter @ortodoksas-lt/studio check",
     "dev:studio": "pnpm --filter @ortodoksas-lt/studio dev",
     "dev:web": "pnpm --filter @ortodoksas-lt/web dev",
     "fix": "ultracite fix",
     "lint": "oxfmt --check && node scripts/check-lint.mjs",
-    "lint:strict": "ultracite check"
+    "lint:strict": "ultracite check",
+    "test:security": "node --test scripts/braces-security.test.mts"
   },
   "devDependencies": {
     "@shadcn/lint": "^0.2.1",
+    "@types/braces": "3.0.5",
     "@types/node": "^26.6.5",
+    "braces": "3.0.3",
     "oxfmt": "^0.73.0",
     "oxlint": "^1.88.0",
     "oxlint-tsgolint": "^7.0.2004",

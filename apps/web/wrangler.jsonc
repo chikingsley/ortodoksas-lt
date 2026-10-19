@@ -4,7 +4,9 @@
   "main": "@astrojs/cloudflare/entrypoints/server",
   "compatibility_date": "2026-08-05",
   "compatibility_flags": ["nodejs_compat"],
-  "routes": [],
+  "routes": [
+    { "pattern": "ortodoksas.grassinside.com", "custom_domain": true },
+  ],
   "vars": {
     "ENVIRONMENT": "production",
   },

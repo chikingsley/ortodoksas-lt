@@ -29,9 +29,9 @@ The release gate is pnpm check, including package tests, generated binding check
 
 Before live migration, ordinary D1 tables were exported privately, restored locally, checked for integrity and foreign-key consistency, and exercised with the additive migration. The FTS5 schema and seed SELECT were preserved separately and the index was rebuilt in the restored copies. Cloudflare's full-database export rejects virtual tables. Temporary recovery copies are removed after live verification.
 
-Source route defaults preserve the current availability: the OBL review site is public; Ortodoksas and both editorial Workers have public routes and workers.dev access disabled. Official domain cutover remains a separate release step. Use an ignored account-specific deployment config with the existing resource bindings. Review the resulting routes before deploying.
+Both publication review sites use their existing grassinside.com Worker Custom Domains. The editorial Workers keep public routes and workers.dev access disabled. Official domain cutover remains a separate release step. Use an ignored account-specific deployment config with the existing resource bindings. Review the resulting routes before deploying.
 
-The old esbuild transitive development dependency is overridden to 0.28.2. The upstream braces 3.0.3 advisory GHSA-vfj7-8cjw-p6xm remains in development tooling; the registry's latest published braces version is 3.0.3 and the advisory lists zero patched releases as of this review.
+The old esbuild transitive development dependency is overridden to 0.28.2. braces 3.0.3 now has a pinned pnpm patch for GHSA-vfj7-8cjw-p6xm. The patch bounds parser nesting and each recursive AST walker at 256 levels. Regression tests cover 3,000 nested braces, parentheses, direct syntax trees, ordinary alternatives, ranges, and nested groups. The advisory-specific audit exception accounts for this local fix; the lockfile pins the patch hash. Replace the patch and exception when a verified upstream release incorporates the fix.
 
 ## Official references
 

@@ -10,5 +10,5 @@
     "strict": true,
     "skipLibCheck": true
   },
-  "include": ["*.mjs"]
+  "include": ["*.mjs", "braces-security.test.mts"]
 }
