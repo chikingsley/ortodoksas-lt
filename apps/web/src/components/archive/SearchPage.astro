@@ -1,4 +1,5 @@
 ---
+import { parsePageNumber } from "@ortodoksas-lt/content/value";
 import type { SiteLocale } from "../../i18n/config";
 import { ui } from "../../i18n/ui";
 import { searchArticles } from "../../server/publication-archive";
@@ -16,7 +17,7 @@ const { locale = "lt" } = Astro.props;
 const localized = locale !== "lt";
 const searchPath = localized ? `/${locale}/paieska` : "/paieska";
 const query = Astro.url.searchParams.get("q")?.trim() ?? "";
-const page = Math.max(1, Math.trunc(Number(Astro.url.searchParams.get("page") ?? "1")) || 1);
+const page = parsePageNumber(Astro.url.searchParams.get("page"));
 const pageSize = 20;
 const copy = ui[locale];
 

@@ -304,3 +304,17 @@ describe("Astro Worker runtime", () => {
     expect(parity?.ftsRowsMissingFromArticles).toBe(0);
   });
 });
+
+describe("search pagination", () => {
+  it.each(["Infinity", "NaN", "9007199254740993"])(
+    "keeps search usable for an invalid page %s",
+    async (page) => {
+      const response = await exports.default.fetch(
+        `https://publication.test/paieska?q=verification&page=${page}`
+      );
+
+      expect(response.status).toBe(200);
+      await expect(response.text()).resolves.toContain('id="search-query"');
+    }
+  );
+});

@@ -1,4 +1,5 @@
 ---
+import { parsePageNumber } from "@ortodoksas-lt/content/value";
 import ArchiveList from "../components/archive/ArchiveList.astro";
 import { ArchiveControls } from "../components/archive/archive-controls";
 import PageIntro from "../components/publication/PageIntro.astro";
@@ -14,7 +15,7 @@ const section = sectionValue === "__all__" ? "" : sectionValue;
 const label = Astro.url.searchParams.get("zyma")?.trim() ?? "";
 const yearValue = Astro.url.searchParams.get("metai")?.trim() ?? "";
 const year = yearValue === "__all__" ? "" : yearValue;
-const requestedPage = Math.trunc(Number(Astro.url.searchParams.get("page") ?? "1")) || 1;
+const requestedPage = parsePageNumber(Astro.url.searchParams.get("page"));
 const pageSize = 20;
 const facets = await getArchiveFacets();
 
