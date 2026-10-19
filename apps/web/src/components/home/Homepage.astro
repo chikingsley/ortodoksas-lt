@@ -24,7 +24,7 @@ const archiveHref = locale === "lt" ? "/archyvas" : `/${locale}#articles`;
   {model.lead ? (
     <section class="relative mx-auto grid w-[min(1200px,calc(100%-64px))] grid-cols-[minmax(0,1.34fr)_minmax(390px,1fr)] gap-8 py-6 max-lg:grid-cols-1 max-sm:w-full max-sm:gap-6 max-sm:py-2">
       <LeadStory entry={model.lead} locale={locale} />
-      <div class="grid grid-rows-4 max-lg:grid-cols-2 max-lg:grid-rows-2 max-lg:gap-x-5 max-lg:gap-y-1 max-sm:hidden">
+      <div class="grid content-start max-lg:grid-cols-2 max-lg:gap-x-5 max-lg:gap-y-1 max-sm:hidden">
         {model.secondary.map((entry) => <StoryRow entry={entry} loading="eager" locale={locale} />)}
       </div>
     </section>

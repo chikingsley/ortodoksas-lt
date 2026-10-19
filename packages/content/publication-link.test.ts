@@ -7,6 +7,39 @@ import {
 } from "./publication-link";
 
 describe("publication link canonicalization", () => {
+  it("preserves ordinary article text through an editorial save", () => {
+    const body = {
+      content: [
+        {
+          content: [
+            {
+              text: "In his homily, “What Do I Still Lack?”, the Bishop reflected on the rich young man’s question.",
+              type: "text",
+            },
+          ],
+          type: "paragraph",
+        },
+        {
+          content: [
+            { text: "We present the full text of the homily:", type: "text" },
+          ],
+          type: "paragraph",
+        },
+        {
+          attrs: { level: 2 },
+          content: [{ text: "“What Do I Still Lack?”", type: "text" }],
+          type: "heading",
+        },
+      ],
+      type: "doc" as const,
+    };
+
+    expect(canonicalizePublicationDocument(body)).toStrictEqual(body);
+    expect(
+      canonicalizePublicationDocument(canonicalizePublicationDocument(body))
+    ).toStrictEqual(body);
+  });
+
   it("canonicalizes historical Ortodoksas hosts and localized paths", () => {
     expect(
       canonicalizePublicationHref(
@@ -59,7 +92,7 @@ describe("publication link canonicalization", () => {
         ],
         type: "doc",
       })
-    ).toEqual({
+    ).toStrictEqual({
       content: [
         {
           content: [

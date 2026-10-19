@@ -44,6 +44,7 @@ const PUBLICATION_PATH_PATTERN =
 
 const HISTORICAL_HTML_SUFFIX_PATTERN = /\.html$/u;
 const ABSOLUTE_URL_PATTERN = /^https?:\/\//u;
+const VISIBLE_URL_PATTERN = /^(?:https?:\/\/|\/)[^\s]+$/u;
 
 const canonicalPublicationPath = (pathname: string): string | undefined =>
   PUBLICATION_PATH_PATTERN.test(pathname)
@@ -100,6 +101,11 @@ export const canonicalizePublicationHref = (href: string): string => {
 
 const canonicalizeVisibleUrl = (value: string): string => {
   const trimmed = value.trim();
+
+  if (!VISIBLE_URL_PATTERN.test(trimmed)) {
+    return value;
+  }
+
   const canonical = canonicalizePublicationHref(trimmed);
 
   if (canonical === trimmed) {
