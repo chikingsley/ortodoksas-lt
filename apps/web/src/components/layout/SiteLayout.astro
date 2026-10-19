@@ -1,7 +1,7 @@
 ---
 import "../../styles/globals.css";
 import type { SiteLocale } from "../../i18n/config";
-import { getLocaleLinks } from "../../server/publication-localization";
+import { getLocaleLinks, getLocalizedCounterparts } from "../../server/publication-localization";
 import { site } from "../../site";
 import SiteFooter from "./SiteFooter.astro";
 import SiteHeader from "./SiteHeader.astro";
@@ -44,7 +44,14 @@ const resolvedJsonLd =
     ? { ...jsonLd, image: new URL(jsonLd.image, siteUrl).toString() }
     : jsonLd;
 
-const localeLinks = await getLocaleLinks(canonicalPath);
+const [localeLinks, localizedEntries] = await Promise.all([
+  getLocaleLinks(canonicalPath),
+  locale === "lt" ? Promise.resolve(new Map()) : getLocalizedCounterparts(locale, [
+    "/p/bendruomenes_21", "/p/dvasininkai", "/p/biblioteka", "/p/kalendorius", "/p/kontaktai_30", "/p/paremti"
+  ])
+]);
+
+const localizedPaths = new Map<string, string>([...localizedEntries].map(([path, entry]) => [path, entry.path]));
 
 const resolvedAlternates = alternates.length
   ? alternates
@@ -89,9 +96,9 @@ const baseSchema = {
   </head>
   <body class="m-0 min-w-80 bg-white font-sans text-foreground antialiased [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
     <div class="min-h-svh overflow-x-clip">
-      <SiteHeader currentPath={canonicalPath} locale={locale} localeLinks={localeLinks} />
+      <SiteHeader localizedPaths={localizedPaths} currentPath={canonicalPath} locale={locale} localeLinks={localeLinks} />
       <slot />
-      <SiteFooter locale={locale} />
+      <SiteFooter localizedPaths={localizedPaths} locale={locale} />
     </div>
   </body>
 </html>

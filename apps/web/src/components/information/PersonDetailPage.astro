@@ -1,5 +1,6 @@
 ---
 import type { SiteLocale } from "../../i18n/config";
+import { formatPublicationDate } from "../../i18n/dates";
 import type { getPersonDirectoryEntry } from "../../server/directory-data";
 import SiteLayout from "../layout/SiteLayout.astro";
 import ArticleBody from "../publication/ArticleBody.astro";
@@ -34,15 +35,9 @@ const labels = {
   uk: { contacts: "Контакти", gallery: "Світлини", positions: "Служіння" },
 } as const;
 
-const dateFormatter = new Intl.DateTimeFormat(locale, {
-  day: "numeric",
-  month: "long",
-  year: "numeric",
-});
-
 const positionDates = (startsAt: number | null, endsAt: number | null) => {
-  const start = startsAt ? dateFormatter.format(new Date(startsAt)) : "";
-  const end = endsAt ? dateFormatter.format(new Date(endsAt)) : "";
+  const start = startsAt ? formatPublicationDate(new Date(startsAt), locale) : "";
+  const end = endsAt ? formatPublicationDate(new Date(endsAt), locale) : "";
 
   return [start, end].filter(Boolean).join(" – ");
 };

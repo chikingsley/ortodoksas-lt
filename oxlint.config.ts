@@ -10,7 +10,12 @@ const tests = {
   ...vitest,
   overrides: vitest.overrides?.map((override) => ({
     ...override,
-    excludeFiles: ["scripts/**/*.test.mts"],
+    excludeFiles: [
+      "tests/**/*.test.mts",
+      "tests/**/*.test.mjs",
+      "migration/tests/**/*.test.mts",
+      "apps/studio/tests/**/*.test.mjs",
+    ],
     rules: {
       ...override.rules,
       "vitest/consistent-test-filename": [
@@ -29,7 +34,8 @@ export default defineConfig({
   extends: [core, react, tests, shadcn, antiSlop],
   ignorePatterns: [
     ...core.ignorePatterns,
-    "**/migration/**",
+    "migration/*.json",
+    "migration/source/**",
     "**/assets/**",
     "**/public/**",
     "**/dist/**",

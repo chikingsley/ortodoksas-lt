@@ -1,0 +1,36 @@
+---
+import { siFacebook, siInstagram, siYoutube } from 'simple-icons';
+import type { SiteLocale } from '../../i18n/config';
+import { ui } from '../../i18n/ui';
+
+interface Props { class?: string; contactHref: string; locale: SiteLocale }
+
+
+const {contactHref, locale} = Astro.props;
+const copy = ui[locale];
+
+const socialLinks = [
+  {
+    href: "https://www.facebook.com/ortodoksas",
+    icon: siFacebook,
+    label: "Facebook",
+  },
+  {
+    href: "https://www.instagram.com/ortodoksas.lt",
+    icon: siInstagram,
+    label: "Instagram",
+  },
+  {
+    href: "https://www.youtube.com/@OrtodoksasLt",
+    icon: siYoutube,
+    label: "YouTube",
+  },
+] as const;
+
+
+---
+<nav aria-label={copy.contacts} class:list={['flex items-center',Astro.props.class]}>
+{socialLinks.map(({href,icon,label}) => <a aria-label={label} class="grid size-11 place-items-center text-foreground transition-colors hover:text-primary focus-visible:text-primary [&_svg]:size-3.5" href={href} rel="noreferrer noopener" target="_blank"><svg aria-hidden="true" fill="currentColor" viewBox="0 0 24 24"><path d={icon.path}/></svg><span class="sr-only">{label}</span></a>)}
+<a aria-label={copy.contact} class="grid size-11 place-items-center hover:text-primary" href={contactHref}><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg></a>
+<a aria-label="RSS" class="grid size-11 place-items-center hover:text-primary" href="/rss.xml"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 11a9 9 0 0 1 9 9M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg></a>
+</nav>

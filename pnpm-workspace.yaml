@@ -43,7 +43,7 @@ peerDependencyRules:
     vite: "*"
 
 # The pinned local braces patch bounds parsing and all recursive AST walkers.
-# scripts/braces-security.test.mts exercises this advisory; remove with the upstream release.
+# tests/braces-security.test.mts exercises this advisory; remove with the upstream release.
 audit:
   ignore:
     - GHSA-vfj7-8cjw-p6xm

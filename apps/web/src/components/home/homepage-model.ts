@@ -1,6 +1,7 @@
 import { getSectionLabel } from "@ortodoksas-lt/content/sections";
 
 import type { SiteLocale } from "../../i18n/config";
+import { formatPublicationMonth } from "../../i18n/dates";
 import { ui } from "../../i18n/ui";
 import { sectionSlug } from "../publication/publication";
 import type { CatalogEntry } from "../publication/publication";
@@ -146,11 +147,7 @@ export function buildHomepageModel({
 
     const date = new Date(`${article.published.slice(0, 10)}T00:00:00Z`);
 
-    const key = new Intl.DateTimeFormat(locale, {
-      month: "long",
-      timeZone: "UTC",
-      year: "numeric",
-    }).format(date);
+    const key = formatPublicationMonth(date, locale);
 
     archiveMonths.set(key, (archiveMonths.get(key) ?? 0) + 1);
   }

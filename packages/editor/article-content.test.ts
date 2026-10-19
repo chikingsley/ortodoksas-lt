@@ -1,10 +1,81 @@
+import { renderToHTMLString } from "@tiptap/static-renderer/pm/html-string";
 import { describe, expect, it } from "vitest";
 
 import { canonicalizeTiptapDocument } from "./canonicalize";
+import { articleEditorExtensions } from "./extensions";
 import { getArticleQualityIssues } from "./quality";
 import { renderArticleBody } from "./render";
 
 describe("canonical article content", () => {
+  it("preserves upstream escaping, mark order and media attributes with the prepared renderer", () => {
+    const body = canonicalizeTiptapDocument({
+      content: [
+        {
+          attrs: {
+            level: 2,
+          },
+          content: [
+            {
+              text: "Title <&>",
+              type: "text",
+            },
+          ],
+          type: "heading",
+        },
+        {
+          attrs: {
+            textAlign: "center",
+          },
+          content: [
+            {
+              marks: [
+                {
+                  type: "bold",
+                },
+                {
+                  type: "italic",
+                },
+                {
+                  attrs: {
+                    href: "https://example.com/?a=1&b=2",
+                  },
+                  type: "link",
+                },
+              ],
+              text: 'Quoted "text" & <tags>',
+              type: "text",
+            },
+          ],
+          type: "paragraph",
+        },
+        {
+          attrs: {
+            alt: 'An "image"',
+            caption: "Caption & credit",
+            role: "content",
+            src: "/api/media/example",
+          },
+          type: "figure",
+        },
+        {
+          attrs: {
+            src: "https://www.youtube.com/watch?v=urfnIUXAddM",
+          },
+          type: "youtube",
+        },
+      ],
+      type: "doc",
+    });
+
+    const expected = renderToHTMLString({
+      content: body,
+      extensions: articleEditorExtensions,
+    });
+
+    expect(renderArticleBody(body)).toBe(expected);
+    expect(renderArticleBody(body)).toBe(expected);
+  });
+
   it("keeps intentional single hard breaks inside a paragraph", () => {
     const body = canonicalizeTiptapDocument({
       content: [

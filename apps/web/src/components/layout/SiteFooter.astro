@@ -1,35 +1,19 @@
 ---
 import { ui } from "../../i18n/ui";
 import type { SiteLocale } from "../../i18n/config";
-import { getLocalizedCounterparts } from "../../server/publication-localization";
 import {
   getContactNavigation,
   getPrimaryNavigation,
 } from "./publication-navigation";
-import PublicationLogo from "./publication-logo";
+import PublicationLogo from "./publication-logo.astro";
 
 interface Props {
+  localizedPaths: Map<string, string>;
   locale?: SiteLocale;
 }
 
-const { locale = "lt" } = Astro.props;
+const { locale = "lt", localizedPaths } = Astro.props;
 const copy = ui[locale];
-
-const paths = [
-  "/p/bendruomenes_21",
-  "/p/dvasininkai",
-  "/p/biblioteka",
-  "/p/kalendorius",
-  "/p/kontaktai_30",
-  "/p/paremti",
-];
-
-const localizedEntries =
-  locale === "lt" ? new Map() : await getLocalizedCounterparts(locale, paths);
-
-const localizedPaths = new Map(
-  [...localizedEntries].map(([path, entry]) => [path, entry.path])
-);
 
 const navigationItems = getPrimaryNavigation(locale, (path) => localizedPaths.get(path));
 const contactItems = getContactNavigation(locale, (path) => localizedPaths.get(path));
@@ -38,7 +22,7 @@ const contactItems = getContactNavigation(locale, (path) => localizedPaths.get(p
 <footer class="border-primary border-t bg-paper pt-12 text-foreground">
   <div class="mx-auto grid w-[min(1200px,calc(100%-64px))] grid-cols-[2fr_1fr_1fr] gap-16 pb-12 max-md:grid-cols-2 max-md:gap-x-6 max-md:gap-y-8 max-sm:w-[min(1200px,calc(100%-32px))]">
     <div class="max-md:col-span-full">
-      <PublicationLogo className="mb-5 w-[230px]" />
+      <PublicationLogo class="mb-5 w-[230px]" />
       <p class="max-w-[34ch] font-serif text-[17px] leading-normal text-muted-foreground">{copy.footerDescription}</p>
     </div>
     <div>

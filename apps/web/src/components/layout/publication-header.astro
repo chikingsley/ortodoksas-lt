@@ -1,0 +1,72 @@
+---
+import { localeMetadata, siteLocales } from '../../i18n/config';
+import type { SiteLocale } from '../../i18n/config';
+import { ui } from '../../i18n/ui';
+import type { LocaleDestination } from '../publication/publication';
+import { isNavigationItemActive } from './publication-navigation';
+import type { NavigationItem } from './publication-navigation';
+import PublicationLogo from './publication-logo.astro';
+import SocialLinks from './social-links.astro';
+
+interface Props {
+  contactHref: string;
+  currentPath: string;
+  locale: SiteLocale;
+  localeLinks: Record<SiteLocale, LocaleDestination>;
+  navigationItems: NavigationItem[];
+}
+
+const {contactHref, currentPath, locale, localeLinks, navigationItems} = Astro.props;
+const copy = ui[locale];
+const homeHref = locale === 'lt' ? '/' : `/${locale}`;
+const searchHref = locale === 'lt' ? '/paieska' : `/${locale}/paieska`;
+const searchActive = currentPath === searchHref;
+const languages = siteLocales.map(code => ({code, ...localeMetadata[code], ...localeLinks[code]}));
+---
+<header class="relative z-20 bg-white text-foreground">
+  <div class="mx-auto w-[min(1200px,calc(100%-64px))] max-md:w-full">
+    <div class="grid min-h-20 grid-cols-[1fr_auto_1fr] items-center max-md:min-h-16 max-md:grid-cols-[48px_minmax(0,1fr)_48px] max-md:px-3">
+      <SocialLinks class="justify-self-start max-md:hidden" contactHref={contactHref} locale={locale} />
+      <button type="button" class="inline-grid size-11 place-items-center justify-self-start border-0 bg-transparent hover:text-primary md:hidden" aria-label={copy.navigation} aria-controls="publication-navigation" aria-expanded="false" data-navigation-open>
+        <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
+      </button>
+      <a aria-label={`${copy.home} · ortodoksas.lt`} class="justify-self-center" href={homeHref} translate="no"><PublicationLogo class="w-[210px] max-md:w-[174px]" /></a>
+      <div class="flex items-center justify-self-end max-md:hidden">
+        <nav aria-label={copy.languages} class="flex items-center gap-1">
+          {languages.map(language => language.hasCounterpart ? <a href={language.href} lang={language.code} translate="no" title={language.languageName} aria-label={language.languageName} aria-current={language.code === locale ? 'page' : undefined} class:list={['inline-flex min-h-9 min-w-8 items-center justify-center text-[10px] font-bold hover:text-primary',language.code === locale ? 'text-primary' : 'text-muted-foreground']}>{language.displayCode}</a> : <button type="button" disabled lang={language.code} translate="no" aria-disabled="true" aria-label={`${language.languageName}. ${copy.pageUnavailable}`} title={`${language.languageName} — ${copy.pageUnavailable}`} class="inline-flex min-h-9 min-w-8 cursor-not-allowed items-center justify-center text-[10px] font-bold text-muted-foreground opacity-55">{language.displayCode}</button>)}
+        </nav>
+        <a href={searchHref} aria-label={copy.search} aria-current={searchActive ? 'page' : undefined} class:list={['ml-2 grid size-9 place-items-center hover:text-primary',{'text-primary':searchActive}]}><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg></a>
+      </div>
+      <a href={searchHref} aria-label={copy.search} aria-current={searchActive ? 'page' : undefined} class:list={['grid size-11 place-items-center justify-self-end hover:text-primary md:hidden',{'text-primary':searchActive}]}><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg></a>
+    </div>
+    <nav aria-label={copy.languages} class="hidden min-h-11 items-center justify-center border-y border-primary max-md:flex">
+      {languages.map(language => language.hasCounterpart ? <a href={language.href} lang={language.code} translate="no" title={language.languageName} aria-label={language.languageName} aria-current={language.code === locale ? 'page' : undefined} class:list={['inline-flex min-h-11 min-w-11 items-center justify-center text-[10px] font-bold hover:text-primary',language.code === locale ? 'text-primary' : 'text-muted-foreground']}>{language.displayCode}</a> : <button type="button" disabled lang={language.code} translate="no" aria-disabled="true" aria-label={`${language.languageName}. ${copy.pageUnavailable}`} title={`${language.languageName} — ${copy.pageUnavailable}`} class="inline-flex min-h-11 min-w-11 cursor-not-allowed items-center justify-center text-[10px] font-bold text-muted-foreground opacity-55">{language.displayCode}</button>)}
+    </nav>
+  </div>
+  <nav aria-label={copy.edition} class="border-y border-primary max-md:hidden"><div class="mx-auto flex min-h-12 w-[min(1200px,calc(100%-64px))] items-center justify-center">{navigationItems.map(item => <a href={item.href} aria-current={isNavigationItemActive(currentPath,item) ? 'page' : undefined} class:list={['inline-flex min-h-12 items-center px-[27px] pb-3.5 pt-4 font-serif text-sm font-semibold leading-none hover:text-primary',isNavigationItemActive(currentPath,item) ? 'font-bold text-primary' : 'text-foreground']}>{item.label}</a>)}</div></nav>
+</header>
+<dialog id="publication-navigation" aria-label={copy.navigation} class="fixed inset-y-0 left-auto right-0 m-0 h-dvh max-h-dvh w-[min(340px,88vw)] max-w-full border-y-0 border-l border-r-0 border-primary bg-white p-0 text-foreground shadow-[-12px_0_28px_rgb(46_16_18/18%)] backdrop:bg-black/35">
+  <div class="flex min-h-full flex-col">
+    <div class="flex items-center justify-between border-b border-primary p-6"><PublicationLogo class="w-[178px]" /><button type="button" aria-label={copy.close} class="grid size-11 place-items-center hover:text-primary" data-navigation-close><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m18 6-12 12M6 6l12 12" /></svg></button></div>
+    <nav aria-label={copy.edition} class="grid px-6 pt-7">{navigationItems.map(item => <a href={item.href} aria-current={isNavigationItemActive(currentPath,item) ? 'page' : undefined} class:list={['flex min-h-12 items-center border-b border-border py-3 font-serif text-[17px] font-semibold leading-none hover:text-primary',{'text-primary':isNavigationItemActive(currentPath,item)}]}>{item.label}</a>)}</nav>
+    <div class="mt-auto border-t border-border px-6 py-5"><SocialLinks contactHref={contactHref} locale={locale} /></div>
+  </div>
+</dialog>
+<style is:global>html:has(#publication-navigation[open]) {overflow: hidden;}</style>
+<script>
+  const menu = document.querySelector<HTMLDialogElement>('#publication-navigation');
+  const trigger = document.querySelector<HTMLButtonElement>('[data-navigation-open]');
+
+  trigger?.addEventListener('click', () => {
+    menu?.showModal();
+    trigger.setAttribute('aria-expanded', 'true');
+  });
+
+  menu?.querySelector('[data-navigation-close]')?.addEventListener('click', () => menu.close());
+
+  menu?.addEventListener('close', () => trigger?.setAttribute('aria-expanded', 'false'));
+
+  menu?.addEventListener('click', event => { if (event.target === menu) {menu.close();} });
+
+  matchMedia('(min-width: 768px)').addEventListener('change', event => { if (event.matches) {menu?.close();} });
+</script>

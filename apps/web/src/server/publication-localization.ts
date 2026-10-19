@@ -6,12 +6,10 @@ import {
   personLocalizations,
   publicationGroups,
 } from "@ortodoksas-lt/db";
-import { and, eq, inArray } from "drizzle-orm";
+import { env } from "cloudflare:workers";
+import { and, eq } from "drizzle-orm";
 
-import type {
-  CatalogEntry,
-  LocaleDestination,
-} from "../components/publication/publication";
+import type { LocaleDestination } from "../components/publication/publication";
 import { defaultLocale, localeShells, siteLocales } from "../i18n/config";
 import type { SiteLocale } from "../i18n/config";
 import {
@@ -151,65 +149,47 @@ export async function getTranslationGroupCounterpart(
   return catalogEntry(row, heroes);
 }
 
+// D1 accepts at most 100 bound values; reserve space for language and status.
+function localizationBatches(values: string[]) {
+  return Array.from({ length: Math.ceil(values.length / 90) }, (_, index) =>
+    values.slice(index * 90, (index + 1) * 90)
+  );
+}
+
 export async function getLocalizedCounterparts(
   locale: Exclude<SiteLocale, "lt">,
   sourcePaths: string[]
 ) {
-  const sourceSlugs = sourcePaths.map((path) => path.replace(leadingSlash, ""));
+  const sourceSlugs = [
+    ...new Set(sourcePaths.map((path) => path.replace(leadingSlash, ""))),
+  ];
 
-  if (sourceSlugs.length === 0) {
-    return new Map<string, CatalogEntry>();
+  const batches = localizationBatches(sourceSlugs);
+
+  if (batches.length === 0) {
+    return new Map<string, { path: string }>();
   }
 
-  const sourceRows = await database()
-    .select({
-      slug: articles.slug,
-      translationGroupId: articles.translationGroupId,
-    })
-    .from(articles)
-    .where(
-      and(
-        eq(articles.language, defaultLocale),
-        inArray(articles.slug, sourceSlugs)
-      )
-    );
-
-  const groups = sourceRows.map((row) => row.translationGroupId);
-
-  if (groups.length === 0) {
-    return new Map<string, CatalogEntry>();
-  }
-
-  const localizedRows = await database()
-    .select(catalogSelection)
-    .from(articles)
-    .innerJoin(
-      publicationGroups,
-      eq(publicationGroups.id, articles.translationGroupId)
+  // CROSS JOIN preserves the indexed source-slug lookup as the outer loop.
+  const results = await env.DB.batch<{ source_slug: string; slug: string }>(
+    batches.map((batch) =>
+      env.DB.prepare(
+        `SELECT source.slug AS source_slug, translated.slug
+       FROM articles source
+       CROSS JOIN articles translated ON translated.translation_group_id = source.translation_group_id
+       WHERE source.language = ? AND source.slug IN (${batch.map(() => "?").join(",")})
+         AND translated.language = ? AND translated.status = 'published'`
+      ).bind(defaultLocale, ...batch, locale)
     )
-    .where(
-      and(
-        eq(articles.status, "published"),
-        eq(articles.language, locale),
-        inArray(articles.translationGroupId, groups)
-      )
-    );
-
-  const heroes = await heroMap(localizedRows);
-
-  const localizedByGroup = new Map(
-    localizedRows.map((row) => [
-      row.translationGroupId,
-      catalogEntry(row, heroes),
-    ])
   );
 
-  return new Map(
-    sourceRows.flatMap((source) => {
-      const localized = localizedByGroup.get(source.translationGroupId);
+  const rows = results.flatMap((result) => result.results);
 
-      return localized ? [[articlePath(source.slug), localized] as const] : [];
-    })
+  return new Map(
+    rows.map((row) => [
+      articlePath(row.source_slug),
+      { path: articlePath(row.slug) },
+    ])
   );
 }
 

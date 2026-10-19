@@ -3,92 +3,92 @@
   "entries": [
     {
       "count": 1,
-      "file": "apps/studio/scripts/verify-client-bundle.mjs",
-      "fingerprint": "759652df36532a11c82738ffa95716959b81f53151bcf1b6325e797bc370a7fb",
+      "file": "apps/studio/tests/client-bundle.test.mjs",
+      "fingerprint": "987a0948416b35bea8ce3138732507505ffc156d61fbaac6de644241c900c3b0",
       "rule": "eslint(prefer-named-capture-group)"
     },
     {
       "count": 1,
-      "file": "apps/studio/scripts/verify-client-bundle.mjs",
-      "fingerprint": "aa3a0deb86dad8820f294c284f7eace0bae0b32dd8c63ed71b6ca428b47d0425",
+      "file": "apps/studio/tests/client-bundle.test.mjs",
+      "fingerprint": "d23628648fc65d77005d654684814745167c94c75f4402845dc7e5dc45a4b1aa",
       "rule": "eslint(prefer-named-capture-group)"
     },
     {
       "count": 1,
-      "file": "apps/studio/scripts/verify-client-bundle.mjs",
-      "fingerprint": "5d425528182e8cd00a4d52709c37ff166ad2cecb943cb851d91a6839a3e8ec14",
+      "file": "apps/studio/tests/client-bundle.test.mjs",
+      "fingerprint": "087d2a8f6df760753c420aba7b38252987f5da357f2528f45bf95b668adf0eb5",
       "rule": "typescript(no-unsafe-argument)"
     },
     {
       "count": 1,
-      "file": "apps/studio/scripts/verify-client-bundle.mjs",
-      "fingerprint": "88904c1ed0fd092e2ed37cd7210af21a1275d7a7190430b3ddc2685c23656c11",
+      "file": "apps/studio/tests/client-bundle.test.mjs",
+      "fingerprint": "612f06e579917b07171517de608bb0d595ef1cc507dfc98fe1137248fda52485",
       "rule": "typescript(no-unsafe-argument)"
     },
     {
       "count": 1,
-      "file": "apps/studio/scripts/verify-client-bundle.mjs",
-      "fingerprint": "f9ee7f7fbf30f62ea0c8446bf9de922ecde6df10339cfbd532b48a146e1aa7b1",
+      "file": "apps/studio/tests/client-bundle.test.mjs",
+      "fingerprint": "19d95abc862b21e7a05eb176ecd0db3d817776f0df857f4792257b5f42248d43",
       "rule": "typescript(no-unsafe-argument)"
     },
     {
       "count": 1,
-      "file": "apps/studio/scripts/verify-client-bundle.mjs",
-      "fingerprint": "17a9c7856f49464bc91c3e610fe246f7d2e1455717486c143325857ce45e737f",
+      "file": "apps/studio/tests/client-bundle.test.mjs",
+      "fingerprint": "d43fdb5ae6b9cbf908b744052b4bf3a7a7b0e1ad972ada933785aece0bfbb531",
       "rule": "typescript(no-unsafe-assignment)"
     },
     {
       "count": 1,
-      "file": "apps/studio/scripts/verify-client-bundle.mjs",
-      "fingerprint": "44404c6e52f4cd95446b687cc2e7d85a01b52f233f7a245517f328f23b1ade54",
+      "file": "apps/studio/tests/client-bundle.test.mjs",
+      "fingerprint": "39c822e95c25a4145f676150e130aade90f8fc2625ad3d895d89f09192c7fa00",
       "rule": "typescript(no-unsafe-assignment)"
     },
     {
       "count": 1,
-      "file": "apps/studio/scripts/verify-client-bundle.mjs",
-      "fingerprint": "79fe2ec7b8bb0cdf10291281510741d98491b602210c3726e865578c06ad460f",
+      "file": "apps/studio/tests/client-bundle.test.mjs",
+      "fingerprint": "93d9c33747fe1ce3699ae72cf069543b4f8e076aead1907069fcbf72ab7d7c3f",
       "rule": "typescript(no-unsafe-call)"
     },
     {
       "count": 1,
-      "file": "apps/studio/scripts/verify-client-bundle.mjs",
-      "fingerprint": "ad21125e86ada8c22612bff86d2bd2bdc91fd1b20f29c007a68f466e143be7fa",
+      "file": "apps/studio/tests/client-bundle.test.mjs",
+      "fingerprint": "c82ca1322b0b9a5ef970f16d4ffb5db6c4fee428364064fc106bd50e9ecafb66",
       "rule": "typescript(no-unsafe-call)"
     },
     {
       "count": 1,
-      "file": "apps/studio/scripts/verify-client-bundle.mjs",
-      "fingerprint": "6d3de2efe0cdbf72a407ff27d7c7d29eb8a854f028ae6ff8e6436ff1f5ed5683",
+      "file": "apps/studio/tests/client-bundle.test.mjs",
+      "fingerprint": "d6c4381db27a57f7a44c4cffbcc22e89847bcb10a90369dad58126dda85d9969",
       "rule": "typescript(no-unsafe-member-access)"
     },
     {
       "count": 1,
-      "file": "apps/studio/scripts/verify-client-bundle.mjs",
-      "fingerprint": "8969a3ea93aafffb1cd120ac124005608345bfd0dd9c690a3289fc97f6c689b1",
+      "file": "apps/studio/tests/client-bundle.test.mjs",
+      "fingerprint": "e16ea7a81b8b7274f81a81adca560b59fef1ca393dc1b88a51498467ca9b5f6b",
       "rule": "typescript(no-unsafe-member-access)"
     },
     {
       "count": 1,
-      "file": "apps/studio/scripts/verify-client-bundle.mjs",
-      "fingerprint": "d588ff779ff2fe1821c7b4368d4fb9e0ad2a995eafe29ae115db7f8fbf45960b",
+      "file": "apps/studio/tests/client-bundle.test.mjs",
+      "fingerprint": "6b0556286f1650ab4304a4dc53f493d51da14aed94be3ad203e7d351373832c4",
       "rule": "typescript(no-unsafe-member-access)"
     },
     {
       "count": 1,
-      "file": "apps/studio/scripts/verify-client-bundle.mjs",
-      "fingerprint": "67ee212ec62c4e16c9955f7fe96910e06f5beaa33010fc183d27f4ef5ec975c4",
+      "file": "apps/studio/tests/client-bundle.test.mjs",
+      "fingerprint": "050087d91ddfdc49a6b475094b1cf0b229b8fa6fa4c531ab667da362526ee5c6",
       "rule": "typescript(no-unsafe-return)"
     },
     {
       "count": 1,
-      "file": "apps/studio/scripts/verify-client-bundle.mjs",
-      "fingerprint": "a0de0b1a8417aa87fb9788a70b5968b687f4c7726894d45c15eef89730f591e0",
+      "file": "apps/studio/tests/client-bundle.test.mjs",
+      "fingerprint": "0c08b280ad7aa686c7fb62c2e5df099b17331c3afb50ff19e28e65164fb80a8b",
       "rule": "typescript(no-unsafe-return)"
     },
     {
       "count": 1,
-      "file": "apps/studio/scripts/verify-client-bundle.mjs",
-      "fingerprint": "1ba40e237b21f02861e67fa2fbbde7c4cd9043bdc2f4acc111b03754fe3b65f1",
+      "file": "apps/studio/tests/client-bundle.test.mjs",
+      "fingerprint": "98415a6aa488fe3dc2ddd2a773cc3ca72dcb1c2bb466a839e1ce4dd186b94636",
       "rule": "unicorn(no-await-expression-member)"
     },
     {
@@ -3690,240 +3690,6 @@
       "file": "apps/web/src/components/information/PersonDetailPage.astro",
       "fingerprint": "f177a48e0517efc52d51f7870d1cd7adc98fbb6b91886998def7688780cef09b",
       "rule": "unicorn(filename-case)"
-    },
-    {
-      "count": 1,
-      "file": "apps/web/src/components/layout/publication-header.tsx",
-      "fingerprint": "67782fb317ac7d582ecab8be4a4c3f542616fc48ad95d12e09e29a09be44899b",
-      "rule": "shadcn(no-arbitrary-values)"
-    },
-    {
-      "count": 1,
-      "file": "apps/web/src/components/layout/publication-header.tsx",
-      "fingerprint": "d6af16c5986eaf6650157460475e748570afc47ece95306e079c1b2f7aabdb79",
-      "rule": "shadcn(no-arbitrary-values)"
-    },
-    {
-      "count": 1,
-      "file": "apps/web/src/components/layout/publication-header.tsx",
-      "fingerprint": "ec31e8a6f4f7aaf01809686cc7b240a48605c87b57dd749244ea77281e683d82",
-      "rule": "shadcn(no-arbitrary-values)"
-    },
-    {
-      "count": 1,
-      "file": "apps/web/src/components/layout/publication-header.tsx",
-      "fingerprint": "f2f995f55a02824be6a99f7393d3426c78d0738c7208f7f66f5f64de6fb8d371",
-      "rule": "shadcn(no-arbitrary-values)"
-    },
-    {
-      "count": 1,
-      "file": "apps/web/src/components/layout/publication-header.tsx",
-      "fingerprint": "120704ac720841cd2ffae9a03b39dd243938a90bc975fc31e9bdb02835a40db5",
-      "rule": "shadcn(no-restyle)"
-    },
-    {
-      "count": 1,
-      "file": "apps/web/src/components/layout/publication-header.tsx",
-      "fingerprint": "19c3d747cfc047c612e4314a465d69984fdad2786718157d14f35dace5d43196",
-      "rule": "shadcn(no-restyle)"
-    },
-    {
-      "count": 1,
-      "file": "apps/web/src/components/layout/publication-header.tsx",
-      "fingerprint": "1b81063f7f690737134842807b2916011a88aa81f5a3612cda816c8898d0254b",
-      "rule": "shadcn(no-restyle)"
-    },
-    {
-      "count": 1,
-      "file": "apps/web/src/components/layout/publication-header.tsx",
-      "fingerprint": "1c219045d1fdab77abc96f70385e98863b576cf16929cad0f843b188588c1a8a",
-      "rule": "shadcn(no-restyle)"
-    },
-    {
-      "count": 1,
-      "file": "apps/web/src/components/layout/publication-header.tsx",
-      "fingerprint": "31e1bfbdc6fffbf83cab374274c47d15046c938d39178d097b3e0f3d426a848b",
-      "rule": "shadcn(no-restyle)"
-    },
-    {
-      "count": 1,
-      "file": "apps/web/src/components/layout/publication-header.tsx",
-      "fingerprint": "34acbee1a524bc6c52e6a3f785330bb1804500f23db404c4cf5503e74ffa132e",
-      "rule": "shadcn(no-restyle)"
-    },
-    {
-      "count": 1,
-      "file": "apps/web/src/components/layout/publication-header.tsx",
-      "fingerprint": "489388888e6e38cdac2f2d953db42a20e5aef0c79d7877b2342773a583d12647",
-      "rule": "shadcn(no-restyle)"
-    },
-    {
-      "count": 1,
-      "file": "apps/web/src/components/layout/publication-header.tsx",
-      "fingerprint": "547166a153725563e788def828532f1ae150f06c43d778d301ff989bc06084d2",
-      "rule": "shadcn(no-restyle)"
-    },
-    {
-      "count": 1,
-      "file": "apps/web/src/components/layout/publication-header.tsx",
-      "fingerprint": "57507ac2fa72d021b573c690680aabf2ce12308c4b623f0abc164bb92d158868",
-      "rule": "shadcn(no-restyle)"
-    },
-    {
-      "count": 1,
-      "file": "apps/web/src/components/layout/publication-header.tsx",
-      "fingerprint": "78ff1b300a08e830bf5260b9416014ad4d9b5142ec04c7dc8d9ff3338a1bdba8",
-      "rule": "shadcn(no-restyle)"
-    },
-    {
-      "count": 1,
-      "file": "apps/web/src/components/layout/publication-header.tsx",
-      "fingerprint": "7ad9fb20924e833c59a986a8277a0802376c6b7415e024cfbfc672abc256c738",
-      "rule": "shadcn(no-restyle)"
-    },
-    {
-      "count": 1,
-      "file": "apps/web/src/components/layout/publication-header.tsx",
-      "fingerprint": "808a129c24b6db7f1f1829a315dd51274afc3e0a8e6065f2fbc685f0e67dceb2",
-      "rule": "shadcn(no-restyle)"
-    },
-    {
-      "count": 1,
-      "file": "apps/web/src/components/layout/publication-header.tsx",
-      "fingerprint": "83ed03e241373c39b075ed8291c068dd9073e4fe79eb7b2e9a69808e28dbd0ba",
-      "rule": "shadcn(no-restyle)"
-    },
-    {
-      "count": 1,
-      "file": "apps/web/src/components/layout/publication-header.tsx",
-      "fingerprint": "861f83227fdda8d958cf7ce0a89fb246b9e509ddb689ad19c3062b34ffd05b8e",
-      "rule": "shadcn(no-restyle)"
-    },
-    {
-      "count": 1,
-      "file": "apps/web/src/components/layout/publication-header.tsx",
-      "fingerprint": "88c56d4a3df30a9c394da7f362aba4817bf3874c08dc382eac923ccfa6a1a3e5",
-      "rule": "shadcn(no-restyle)"
-    },
-    {
-      "count": 1,
-      "file": "apps/web/src/components/layout/publication-header.tsx",
-      "fingerprint": "8f7ea4e271cb4c09db1348b138275c8d247a51cd938119dc772e22afbbb82497",
-      "rule": "shadcn(no-restyle)"
-    },
-    {
-      "count": 1,
-      "file": "apps/web/src/components/layout/publication-header.tsx",
-      "fingerprint": "94d3fbccaff020998de9eb786de022cec087cefa2bb296b4e70e15319c31eddd",
-      "rule": "shadcn(no-restyle)"
-    },
-    {
-      "count": 1,
-      "file": "apps/web/src/components/layout/publication-header.tsx",
-      "fingerprint": "a300eeb64167ee37920a895fb036dcc77da491a3e422ab62fe18c7fd91081caa",
-      "rule": "shadcn(no-restyle)"
-    },
-    {
-      "count": 1,
-      "file": "apps/web/src/components/layout/publication-header.tsx",
-      "fingerprint": "a5d6827708aa4d8d7672efb999c92644da0f8024fc58cfbbf6c0463f7e66d31e",
-      "rule": "shadcn(no-restyle)"
-    },
-    {
-      "count": 1,
-      "file": "apps/web/src/components/layout/publication-header.tsx",
-      "fingerprint": "a7238763e41cdcb5b24a2adf4fc8a49a1d682bb104f6ce6cf06766d434b05ce8",
-      "rule": "shadcn(no-restyle)"
-    },
-    {
-      "count": 1,
-      "file": "apps/web/src/components/layout/publication-header.tsx",
-      "fingerprint": "ac6830e003fc4f19bdca07d99f1762e76e0bf4bb7c79181340a364c05975d2af",
-      "rule": "shadcn(no-restyle)"
-    },
-    {
-      "count": 1,
-      "file": "apps/web/src/components/layout/publication-header.tsx",
-      "fingerprint": "ada9f281137cc303a717c3df21d0747eb8e53ac38e7509b4e6416809105b5149",
-      "rule": "shadcn(no-restyle)"
-    },
-    {
-      "count": 1,
-      "file": "apps/web/src/components/layout/publication-header.tsx",
-      "fingerprint": "b477ea5a5f7bfde66e5caca3b954e81b3dc3cc626df69c7ee74103215c9bf7ea",
-      "rule": "shadcn(no-restyle)"
-    },
-    {
-      "count": 1,
-      "file": "apps/web/src/components/layout/publication-header.tsx",
-      "fingerprint": "b501c707aa7726a3fe82fbc16abb6d10cd5430ecd089ddb38154d4562f08d721",
-      "rule": "shadcn(no-restyle)"
-    },
-    {
-      "count": 1,
-      "file": "apps/web/src/components/layout/publication-header.tsx",
-      "fingerprint": "b6991634cdc4a552562af0c1c14780099238e9fd7bb9db7ace0a0e770ec8e3a1",
-      "rule": "shadcn(no-restyle)"
-    },
-    {
-      "count": 1,
-      "file": "apps/web/src/components/layout/publication-header.tsx",
-      "fingerprint": "c6a1806bb85abcea7ffd128b09acb513bda3e9ed8c8fd035c47dfa5b47375892",
-      "rule": "shadcn(no-restyle)"
-    },
-    {
-      "count": 1,
-      "file": "apps/web/src/components/layout/publication-header.tsx",
-      "fingerprint": "d7ac1c70af208acc861442c4c421d6870ec1e2be714d5e62aabd4c58ed816ae5",
-      "rule": "shadcn(no-restyle)"
-    },
-    {
-      "count": 1,
-      "file": "apps/web/src/components/layout/publication-header.tsx",
-      "fingerprint": "df0feb9aae2d46f4fada87bc13c5d8e04425954183cad1caa604fa1257e98bde",
-      "rule": "shadcn(no-restyle)"
-    },
-    {
-      "count": 1,
-      "file": "apps/web/src/components/layout/publication-header.tsx",
-      "fingerprint": "e5249e3daf4a44efb0855865eb2c724f1bb806acba9556cf39f7825c56ba62bf",
-      "rule": "shadcn(no-restyle)"
-    },
-    {
-      "count": 1,
-      "file": "apps/web/src/components/layout/publication-header.tsx",
-      "fingerprint": "e5849e9869d61b8fd893130ab4317af4403e53ce8e27b9c04f089ae623edc6e7",
-      "rule": "shadcn(no-restyle)"
-    },
-    {
-      "count": 1,
-      "file": "apps/web/src/components/layout/publication-header.tsx",
-      "fingerprint": "e699cb8f1f9b692bc4d2ff0aaeb9bbc9f1b38df35ac3f36ebb655285da178e77",
-      "rule": "shadcn(no-restyle)"
-    },
-    {
-      "count": 1,
-      "file": "apps/web/src/components/layout/publication-header.tsx",
-      "fingerprint": "ed6f7d437ef3acb01331ff2e40dad300d88443dd0e4defe6afe076783e359254",
-      "rule": "shadcn(no-restyle)"
-    },
-    {
-      "count": 1,
-      "file": "apps/web/src/components/layout/publication-header.tsx",
-      "fingerprint": "fa29c0be3ea5a7314bf17fe7283433e3ea5ddbb4d91c358aabdf2eb1c07e9fda",
-      "rule": "shadcn(no-restyle)"
-    },
-    {
-      "count": 1,
-      "file": "apps/web/src/components/layout/publication-header.tsx",
-      "fingerprint": "fbadcce26825f91f3f30211fdd37d6c105af4b7934b47d2fb40543e1bd2e1f70",
-      "rule": "shadcn(no-restyle)"
-    },
-    {
-      "count": 1,
-      "file": "apps/web/src/components/layout/publication-header.tsx",
-      "fingerprint": "fd4fd52bb456b42d854caf0c52585592cbc97b181cdd80a040687f7bd513126f",
-      "rule": "shadcn(no-restyle)"
     },
     {
       "count": 1,

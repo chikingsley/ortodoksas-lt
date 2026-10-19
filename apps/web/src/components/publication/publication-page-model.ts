@@ -1,5 +1,3 @@
-import { getTranslationDisplayState } from "@ortodoksas-lt/content/translation";
-
 import { localeShells } from "../../i18n/config";
 import type { SiteLocale } from "../../i18n/config";
 import { ui } from "../../i18n/ui";
@@ -8,10 +6,7 @@ import {
   getPeopleDirectory,
 } from "../../server/directory-data";
 import { getPage } from "../../server/publication-catalog";
-import {
-  getLocalizedCounterparts,
-  getTranslationGroupCounterpart,
-} from "../../server/publication-localization";
+import { getLocalizedCounterparts } from "../../server/publication-localization";
 import {
   canonicalizePublicationLinks,
   cleanHtml,
@@ -127,16 +122,6 @@ export async function resolvePublicationPage(path: string) {
   const copy = ui[locale];
   const canonicalPath = localized ? `/${locale}${page.path}` : page.path;
 
-  const original =
-    localized && page.translationGroupId
-      ? await getTranslationGroupCounterpart("lt", page.translationGroupId)
-      : undefined;
-
-  const translationState = getTranslationDisplayState({
-    kind: page.translationKind ?? "original",
-    reviewStatus: page.translationReviewStatus ?? "not_required",
-  });
-
   const bodyOwnsLeadImage = hasLeadFigure(page.html);
   const { pageTemplate } = page;
   const displayTitle = page.title.replace(CALENDAR_PREFIX_PATTERN, "");
@@ -166,18 +151,10 @@ export async function resolvePublicationPage(path: string) {
     displayTitle,
     locale,
     localized,
-    original,
     page,
     pageTemplate,
     searchTitle,
     structuredTemplate,
-    translationDisclosure: {
-      automatic: copy.automaticTranslation,
-      editor_reviewed: copy.editorReviewedTranslation,
-      human_draft: copy.humanDraftTranslation,
-      original: "",
-    }[translationState],
-    translationState,
     wideBody: pageTemplate !== "standard",
   };
 }

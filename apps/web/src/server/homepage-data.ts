@@ -10,6 +10,7 @@ import { and, desc, eq, inArray, isNotNull } from "drizzle-orm";
 import type { CatalogEntry } from "../components/publication/publication";
 import { defaultLocale } from "../i18n/config";
 import type { SiteLocale } from "../i18n/config";
+import { formatPublicationMonth } from "../i18n/dates";
 import {
   catalogEntry,
   catalogSelection,
@@ -27,11 +28,7 @@ export async function homepageMonths(
     .all<{ month: string; total: number }>();
 
   return result.results.map((row) => [
-    new Intl.DateTimeFormat(language, {
-      month: "long",
-      timeZone: "UTC",
-      year: "numeric",
-    }).format(new Date(`${row.month}-01T00:00:00Z`)),
+    formatPublicationMonth(new Date(`${row.month}-01T00:00:00Z`), language),
     row.total,
   ]);
 }

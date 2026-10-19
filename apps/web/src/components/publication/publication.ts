@@ -8,9 +8,8 @@ import type {
   TranslationReviewStatus,
 } from "@ortodoksas-lt/content/translation";
 
-import { localeMetadata } from "../../i18n/config";
 import type { SiteLocale } from "../../i18n/config";
-import { ui } from "../../i18n/ui";
+import { formatPublicationDate } from "../../i18n/dates";
 import { site } from "../../site";
 
 export interface CatalogEntry {
@@ -71,19 +70,46 @@ const figureMediaIdPattern = /\bdata-media-id=(?:"([^"]+)"|'([^']+)')/i;
 const hrefPattern = /\bhref\s*=\s*(["'])([^"']+)\1/giu;
 const localizedPathPattern = /^\/(?:be|en|ru|uk)(?:\/|$)/u;
 
+const sourceTranslationLabels = new Set([
+  "neoficialus vertimas",
+  "neoficialus vertimas / unofficial translation",
+  "unofficial translation",
+  "ανεπίσημη μετάφραση",
+  "ανεπίσημη μετάφραση / unofficial translation",
+  "неофіційний переклад",
+  "неофициальный перевод",
+  "неафіцыйны пераклад",
+  "traducere neoficială",
+]);
+
+// Keep source annotations in the archived source and editable CMS body.
+function omitSourceTranslationLabels(html: string) {
+  return html.replaceAll(
+    /<(?<tag>p|h[2-6])\b[^>]*>(?<inner>[\s\S]*?)<\/\1>/giu,
+    (block, _tag: string, inner: string) => {
+      const label = inner
+        .replaceAll(/<[^>]*>/gu, "")
+        .replaceAll(/&nbsp;|&#160;/giu, " ")
+        .replaceAll(/\s+/gu, " ")
+        .trim()
+        .replaceAll(/^\(|\)$/gu, "")
+        .trim()
+        .toLowerCase();
+
+      return sourceTranslationLabels.has(label) ? "" : block;
+    }
+  );
+}
+
 export function formatDate(
   value: string | null | undefined,
   locale: SiteLocale = "lt"
 ) {
   if (!value) {
-    return ui[locale].undated;
+    return "";
   }
 
-  return new Intl.DateTimeFormat(localeMetadata[locale].dateLocale, {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  }).format(new Date(value));
+  return formatPublicationDate(new Date(value), locale);
 }
 
 export function normalizeText(value: string) {
@@ -120,7 +146,11 @@ export function cleanHtml(value: string, options: CleanHtmlOptions = {}) {
   const { hero, heroMediaId, removeFirstMedia = false } = options;
   const trustedYoutubeFrames: string[] = [];
 
-  const cleaned = value
+  const cleaned = omitSourceTranslationLabels(value)
+    .replaceAll(
+      /<(?<closing>\/?)h1(?<attributes>\b[^>]*)>/giu,
+      "<$<closing>h2$<attributes>>"
+    )
     .replaceAll(/<script[\s\S]*?<\/script>/gi, "")
     .replaceAll(/<style[\s\S]*?<\/style>/gi, "")
     .replaceAll(/\s+on[a-z]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, "")

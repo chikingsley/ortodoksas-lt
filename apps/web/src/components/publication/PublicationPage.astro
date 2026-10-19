@@ -22,12 +22,8 @@ const {
   description,
   displayTitle,
   locale,
-  localized,
-  original,
   page,
   searchTitle,
-  translationDisclosure,
-  translationState,
   structuredTemplate,
   wideBody,
 } = Astro.props.model;
@@ -62,11 +58,6 @@ const heroObjectPosition = `${page.heroFocalX}% ${page.heroFocalY}%`;
       {directoryData?.kind === "communities" ? <CommunitiesPage communities={directoryData.communities} locale={locale} /> : null}
       {directoryData?.kind === "people" ? <ClergyPage hero={page.hero} heroAlt={page.heroAlt || page.title} locale={locale} people={directoryData.people} /> : null}
       {structuredTemplate ? null : <ArticleBody html={bodyHtml} />}
-      {localized && original && translationState === "automatic" ? (
-        <p class="mt-8 border-t border-border pt-5 text-sm text-muted-foreground" data-translation-disclosure>
-          {translationDisclosure}{" "}<a class="font-bold text-primary" href={original.path}>{copy.viewOriginal}</a>
-        </p>
-      ) : null}
       {page.labels.length > 0 ? <footer class="mt-11 flex flex-wrap gap-2 border-t border-border pt-6">{page.labels.map((label) => <span class="rounded-full border border-border px-[11px] py-[7px] text-[10px] text-muted-foreground">{label}</span>)}</footer> : null}
     </article>
   </main>

@@ -14,7 +14,6 @@ export const ui: Record<
     archiveSearchPlaceholder: string;
     archiveSection: string;
     archiveYear: string;
-    automaticTranslation: string;
     backToLithuanian: string;
     calendar: string;
     clergy: string;
@@ -22,16 +21,15 @@ export const ui: Record<
     contacts: string;
     edition: string;
     editionUnavailable: string;
-    editorReviewedTranslation: string;
     footerDescription: string;
     home: string;
-    humanDraftTranslation: string;
     imageUnavailable: string;
     institution: string;
     languages: string;
     library: string;
     more: string;
     navigation: string;
+    close: string;
     pageUnavailable: string;
     recentPublications: string;
     read: string;
@@ -48,8 +46,6 @@ export const ui: Record<
     serviceSupportDescription: string;
     serviceWorshipDescription: string;
     openLibrary: string;
-    undated: string;
-    viewOriginal: string;
     worship: string;
   }
 > = {
@@ -65,22 +61,18 @@ export const ui: Record<
     archiveSection: "Тэма",
     archiveYear: "Год",
     articles: "Публікацыі",
-    automaticTranslation: "Аўтаматычна перакладзена з літоўскай мовы.",
     backToLithuanian: "Літоўскае выданне",
     calendar: "Каляндар",
     clergy: "Духавенства",
+    close: "Закрыць",
     contact: "Сувязь",
     contacts: "Кантакты",
     edition: "Беларускае выданне",
     editionUnavailable:
       "Публікацыі на беларускай мове рыхтуюцца. Літоўскае выданне даступнае як зыходнае.",
-    editorReviewedTranslation:
-      "Перакладзена з літоўскай мовы і праверана рэдактарам.",
     footerDescription:
       "Праваслаўная вера, традыцыя і царкоўнае жыццё ў Літве і свеце.",
     home: "Галоўная",
-    humanDraftTranslation:
-      "Перакладзена з літоўскай мовы; чакае рэдактарскай праверкі.",
     imageUnavailable: "Выява недаступная",
     institution: "Экзархат Канстанцінопальскага патрыярхату ў Літве",
     languages: "Мовы",
@@ -103,8 +95,6 @@ export const ui: Record<
     serviceSupportDescription: "Далучыцеся да місіі",
     serviceWorshipDescription: "Расклад і супольнасці",
     support: "Падтрымаць",
-    undated: "Дата не пазначана",
-    viewOriginal: "Глядзець арыгінал",
     worship: "Богаслужэнні",
   },
   en: {
@@ -119,22 +109,18 @@ export const ui: Record<
     archiveSection: "Section",
     archiveYear: "Year",
     articles: "Publications",
-    automaticTranslation: "Automatically translated from Lithuanian.",
     backToLithuanian: "Lithuanian edition",
     calendar: "Calendar",
     clergy: "Clergy",
+    close: "Close",
     contact: "Contact",
     contacts: "Contacts",
     edition: "English edition",
     editionUnavailable:
       "English publications are being prepared. Browse the Lithuanian source edition in the meantime.",
-    editorReviewedTranslation:
-      "Translated from Lithuanian and reviewed by an editor.",
     footerDescription:
       "Orthodox faith, tradition, and church life in Lithuania and beyond.",
     home: "Home",
-    humanDraftTranslation:
-      "Translated from Lithuanian; editorial review is pending.",
     imageUnavailable: "Image unavailable",
     institution: "Exarchate of the Ecumenical Patriarchate in Lithuania",
     languages: "Languages",
@@ -157,8 +143,6 @@ export const ui: Record<
     serviceSupportDescription: "Join the mission",
     serviceWorshipDescription: "Schedules and communities",
     support: "Support",
-    undated: "Date unavailable",
-    viewOriginal: "View original",
     worship: "Services",
   },
   lt: {
@@ -173,22 +157,18 @@ export const ui: Record<
     archiveSection: "Tema",
     archiveYear: "Metai",
     articles: "Įrašai",
-    automaticTranslation: "Automatiškai išversta iš lietuvių kalbos.",
     backToLithuanian: "Lietuviškas leidimas",
     calendar: "Kalendorius",
     clergy: "Dvasininkai",
+    close: "Uždaryti",
     contact: "Susisiekti",
     contacts: "Kontaktai",
     edition: "Lietuviškas leidimas",
     editionUnavailable:
       "Kitų kalbų publikacijos rengiamos iš šio lietuviško leidimo.",
-    editorReviewedTranslation:
-      "Išversta iš lietuvių kalbos ir peržiūrėta redaktoriaus.",
     footerDescription:
       "Apie Ortodoksų Bažnyčią Lietuvoje ir pasaulyje, jos tikėjimą, tradiciją ir gyvenimą.",
     home: "Pradžia",
-    humanDraftTranslation:
-      "Išversta iš lietuvių kalbos; laukiama redaktoriaus peržiūros.",
     imageUnavailable: "Vaizdas nepasiekiamas",
     institution: "Konstantinopolio patriarchato egzarchatas Lietuvoje",
     languages: "Kalbos",
@@ -211,8 +191,6 @@ export const ui: Record<
     serviceSupportDescription: "Prisidėkite prie misijos",
     serviceWorshipDescription: "Tvarkaraščiai ir bendruomenės",
     support: "Paremti",
-    undated: "Data nenurodyta",
-    viewOriginal: "Žiūrėti originalą",
     worship: "Pamaldos",
   },
   ru: {
@@ -227,22 +205,18 @@ export const ui: Record<
     archiveSection: "Тема",
     archiveYear: "Год",
     articles: "Публикации",
-    automaticTranslation: "Автоматически переведено с литовского языка.",
     backToLithuanian: "Литовское издание",
     calendar: "Календарь",
     clergy: "Духовенство",
+    close: "Закрыть",
     contact: "Связаться",
     contacts: "Контакты",
     edition: "Русское издание",
     editionUnavailable:
       "Публикации на русском языке готовятся. Литовское издание доступно как исходное.",
-    editorReviewedTranslation:
-      "Переведено с литовского языка и проверено редактором.",
     footerDescription:
       "Православная вера, традиция и церковная жизнь в Литве и мире.",
     home: "Главная",
-    humanDraftTranslation:
-      "Переведено с литовского языка; ожидает редакторской проверки.",
     imageUnavailable: "Изображение недоступно",
     institution: "Экзархат Вселенского патриархата в Литве",
     languages: "Языки",
@@ -265,8 +239,6 @@ export const ui: Record<
     serviceSupportDescription: "Присоединитесь к миссии",
     serviceWorshipDescription: "Расписания и общины",
     support: "Поддержать",
-    undated: "Дата не указана",
-    viewOriginal: "Посмотреть оригинал",
     worship: "Богослужения",
   },
   uk: {
@@ -281,22 +253,18 @@ export const ui: Record<
     archiveSection: "Тема",
     archiveYear: "Рік",
     articles: "Публікації",
-    automaticTranslation: "Автоматично перекладено з литовської мови.",
     backToLithuanian: "Литовське видання",
     calendar: "Календар",
     clergy: "Духовенство",
+    close: "Закрити",
     contact: "Зв’язок",
     contacts: "Контакти",
     edition: "Українське видання",
     editionUnavailable:
       "Публікації українською мовою готуються. Литовське видання доступне як вихідне.",
-    editorReviewedTranslation:
-      "Перекладено з литовської мови та перевірено редактором.",
     footerDescription:
       "Православна віра, традиція і церковне життя в Литві та світі.",
     home: "Головна",
-    humanDraftTranslation:
-      "Перекладено з литовської мови; очікує редакторської перевірки.",
     imageUnavailable: "Зображення недоступне",
     institution: "Екзархат Вселенського патріархату в Литві",
     languages: "Мови",
@@ -319,8 +287,6 @@ export const ui: Record<
     serviceSupportDescription: "Долучіться до місії",
     serviceWorshipDescription: "Розклади та громади",
     support: "Підтримати",
-    undated: "Дату не вказано",
-    viewOriginal: "Переглянути оригінал",
     worship: "Богослужіння",
   },
 };

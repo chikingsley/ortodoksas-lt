@@ -1,13 +1,64 @@
 import type { TiptapDocument } from "@ortodoksas-lt/content/article";
-import { renderToHTMLString } from "@tiptap/static-renderer/pm/html-string";
+import {
+  getAttributesFromExtensions,
+  getSchemaByResolvedExtensions,
+  resolveExtensions,
+  splitExtensions,
+} from "@tiptap/core";
+import {
+  escapeHTML,
+  renderJSONContentToString,
+} from "@tiptap/static-renderer/json/html-string";
+import {
+  domOutputSpecToHTMLString,
+  mapMarkExtensionToReactNode,
+  mapNodeExtensionToReactNode,
+  serializeChildrenToHTMLString,
+} from "@tiptap/static-renderer/pm/html-string";
 
 import { articleEditorExtensions } from "./extensions";
 
+// Extension schemas and mappings are immutable. Prepare them once per Worker isolate.
+const resolvedExtensions = resolveExtensions(articleEditorExtensions);
+const articleSchema = getSchemaByResolvedExtensions(resolvedExtensions);
+const extensionAttributes = getAttributesFromExtensions(resolvedExtensions);
+const { nodeExtensions, markExtensions } = splitExtensions(resolvedExtensions);
+
+type RenderNode = ReturnType<typeof articleSchema.nodeFromJSON>;
+
+type RenderMark = RenderNode["marks"][number];
+
+const renderBody = renderJSONContentToString<RenderMark, RenderNode>({
+  markMapping: Object.fromEntries(
+    markExtensions.map((extension) =>
+      mapMarkExtensionToReactNode(
+        domOutputSpecToHTMLString,
+        extension,
+        extensionAttributes
+      )
+    )
+  ),
+  nodeMapping: {
+    ...Object.fromEntries(
+      nodeExtensions
+        .filter(
+          (extension) => extension.name !== "doc" && extension.name !== "text"
+        )
+        .map((extension) =>
+          mapNodeExtensionToReactNode(
+            domOutputSpecToHTMLString,
+            extension,
+            extensionAttributes
+          )
+        )
+    ),
+    doc: ({ children }) => serializeChildrenToHTMLString(children),
+    text: ({ node }) => escapeHTML(node.text ?? ""),
+  },
+});
+
 export const renderArticleBody = (document: TiptapDocument): string =>
-  renderToHTMLString({
-    content: document,
-    extensions: articleEditorExtensions,
-  });
+  renderBody({ content: articleSchema.nodeFromJSON(document) });
 
 const hasLeadFigure = (body: TiptapDocument): boolean =>
   body.content?.some(

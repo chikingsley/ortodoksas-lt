@@ -33,7 +33,7 @@ The approved batch candidate uses Luna for direct translation followed by an ind
 
 A clean four-language benchmark selected Luna-direct plus independent review for English, Russian, Ukrainian, and Belarusian. The first production batch remains bounded and audited before the complete backfill.
 
-Published automatic translations carry a visible source-language disclosure. Editorial review records the reviewer and upgrades that disclosure.
+The CMS retains production method, editorial review status and reviewer records. Public pages present the published text and available language editions. Per Simon's October 19, 2026 instruction, translation-status footers stay inside the editorial workflow.
 
 ## URL policy
 

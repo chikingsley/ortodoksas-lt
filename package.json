@@ -10,9 +10,9 @@
     "dev:studio": "pnpm --filter @ortodoksas-lt/studio dev",
     "dev:web": "pnpm --filter @ortodoksas-lt/web dev",
     "fix": "ultracite fix",
-    "lint": "oxfmt --check && node scripts/check-lint.mjs",
+    "lint": "oxfmt --check && node --test tests/lint-baseline.test.mjs",
     "lint:strict": "ultracite check",
-    "test:security": "node --test scripts/braces-security.test.mts"
+    "test:security": "node --test tests/braces-security.test.mts"
   },
   "devDependencies": {
     "@shadcn/lint": "^0.2.1",

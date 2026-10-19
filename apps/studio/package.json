@@ -17,7 +17,7 @@
     "generate-routes": "tsr generate",
     "lint": "pnpm -w lint",
     "preview": "pnpm run build && vite preview",
-    "test": "pnpm build && node scripts/verify-client-bundle.mjs && vitest run",
+    "test": "pnpm build && node --test tests/client-bundle.test.mjs && vitest run",
     "test:watch": "vitest"
   },
   "dependencies": {

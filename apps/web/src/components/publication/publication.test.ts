@@ -9,6 +9,32 @@ import {
 } from "./publication";
 
 describe(cleanHtml, () => {
+  it("keeps the article title as the only first-level heading", () => {
+    expect(cleanHtml('<h1 id="session">Session title</h1><p>Body</p>')).toBe(
+      '<h2 id="session">Session title</h2><p>Body</p>'
+    );
+  });
+
+  it.each([
+    "Neoficialus vertimas / Unofficial translation",
+    "(neoficialus vertimas)",
+    "Unofficial translation",
+    "Ανεπίσημη μετάφραση",
+    "Ανεπίσημη μετάφραση / Unofficial translation",
+    "Неофіційний переклад",
+    "Неофициальный перевод",
+    "Неафіцыйны пераклад",
+    "Traducere neoficială",
+  ])("omits the standalone source annotation %s", (label) => {
+    expect(
+      cleanHtml(
+        `<p><em>${label}</em></p><h2>${label}</h2><p>Article 1</p><p>This unofficial translation is discussed in the agreement.</p>`
+      )
+    ).toBe(
+      "<p>Article 1</p><p>This unofficial translation is discussed in the agreement.</p>"
+    );
+  });
+
   it("promotes a standalone bold subheading to a semantic heading", () => {
     expect(
       cleanHtml("<p><strong>Article section</strong></p><p>Body</p>")
