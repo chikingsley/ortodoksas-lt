@@ -1,7 +1,7 @@
 const TRAILING_SLASH_PATTERN = /\/$/u;
 
 export const parseAuthorizedParties = (
-  configuredOrigins: string | undefined
+  configuredOrigins?: string
 ): string[] => {
   const configured =
     configuredOrigins

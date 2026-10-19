@@ -3,14 +3,16 @@ import type {
   TiptapDocument,
   UpdateArticleInput,
 } from "@ortodoksas-lt/content/article";
+import { tiptapDocumentSchema } from "@ortodoksas-lt/content/article";
+import { hasText } from "@ortodoksas-lt/content/value";
 import {
   articleRevisions,
   articles,
   homepageLayoutState,
   homepagePlacements,
 } from "@ortodoksas-lt/db";
-import { getChangeKind } from "@ortodoksas-lt/editor/provenance";
 import type { annotateArticleBody } from "@ortodoksas-lt/editor/provenance";
+import { getChangeKind } from "@ortodoksas-lt/editor/provenance";
 import { getArticleQualityIssues } from "@ortodoksas-lt/editor/quality";
 import { and, desc, eq, exists, notExists, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/sqlite-core";
@@ -88,7 +90,7 @@ export const resolveArticleMetadataUpdate = (
 
   let bylineUrl = currentBylineUrl;
 
-  if (!byline) {
+  if (!hasText(byline)) {
     bylineUrl = null;
   } else if (requestedBylineUrl !== undefined) {
     bylineUrl = optionalText(requestedBylineUrl);
@@ -231,7 +233,7 @@ export const getPublicationQualityIssues = async (
     "body" | "language" | "summary" | "title" | "translationSourceArticleId"
   >
 ) => {
-  const translationSource = article.translationSourceArticleId
+  const translationSource = hasText(article.translationSourceArticleId)
     ? await database.query.articles.findFirst({
         where: eq(articles.id, article.translationSourceArticleId),
       })
@@ -244,7 +246,9 @@ export const getPublicationQualityIssues = async (
     title: article.title,
     translationSource: translationSource
       ? {
-          body: JSON.parse(translationSource.bodyJson) as TiptapDocument,
+          body: tiptapDocumentSchema.parse(
+            JSON.parse(translationSource.bodyJson)
+          ),
           language: translationSource.language,
           summary: translationSource.summary,
           title: translationSource.title,
@@ -297,7 +301,7 @@ export const resolveTranslationReviewUpdate = async (input: {
 
   const { translationSourceArticleId } = input.article;
 
-  const translationSource = translationSourceArticleId
+  const translationSource = hasText(translationSourceArticleId)
     ? await input.database.query.articles.findFirst({
         where: eq(articles.id, translationSourceArticleId),
       })
@@ -308,9 +312,9 @@ export const resolveTranslationReviewUpdate = async (input: {
       return {
         metadata: {
           ...metadata,
+          translationReviewStatus: "pending" as const,
           translationReviewedAt: null,
           translationReviewedBy: null,
-          translationReviewStatus: "pending" as const,
         },
         ok: true as const,
         translationSourceHash: input.article.translationSourceHash,
@@ -345,9 +349,9 @@ export const resolveTranslationReviewUpdate = async (input: {
     return {
       metadata: {
         ...metadata,
+        translationReviewStatus: "pending" as const,
         translationReviewedAt: null,
         translationReviewedBy: null,
-        translationReviewStatus: "pending" as const,
       },
       ok: true as const,
       translationSourceHash: input.article.translationSourceHash,
@@ -450,9 +454,9 @@ export const getDependentReviewInvalidationQueries = (input: {
     input.database
       .update(articles)
       .set({
+        translationReviewStatus: "pending",
         translationReviewedAt: null,
         translationReviewedBy: null,
-        translationReviewStatus: "pending",
         updatedAt: input.timestamp,
       })
       .where(
@@ -471,23 +475,23 @@ export const resolveRestoredTranslationReview = async (
   contentChanged: boolean
 ) => {
   const restoredReview = {
+    translationReviewStatus: metadata.translationReviewStatus,
     translationReviewedAt: metadata.translationReviewedAt,
     translationReviewedBy: metadata.translationReviewedBy,
-    translationReviewStatus: metadata.translationReviewStatus,
   };
 
   if (
     (metadata.snapshotCompleteness === "legacy_partial" && contentChanged) ||
     metadata.translationReviewStatus !== "approved" ||
-    !metadata.translationSourceArticleId
+    !hasText(metadata.translationSourceArticleId)
   ) {
     return {
       restoredReview:
         metadata.translationReviewStatus === "approved" && contentChanged
           ? {
+              translationReviewStatus: "pending" as const,
               translationReviewedAt: null,
               translationReviewedBy: null,
-              translationReviewStatus: "pending" as const,
             }
           : restoredReview,
       sourceSnapshot: undefined,
@@ -505,9 +509,9 @@ export const resolveRestoredTranslationReview = async (
   if (currentSourceHash !== metadata.translationSourceHash) {
     return {
       restoredReview: {
+        translationReviewStatus: "pending" as const,
         translationReviewedAt: null,
         translationReviewedBy: null,
-        translationReviewStatus: "pending" as const,
       },
       sourceSnapshot: undefined,
     };
@@ -553,7 +557,7 @@ export const articlePersistenceQueries = (input: {
   const approvalSource = alias(articles, "approval_source");
 
   const sourceSnapshotMatches =
-    input.sourceArticleId && input.sourceSnapshot
+    hasText(input.sourceArticleId) && input.sourceSnapshot
       ? exists(
           input.database
             .select({ id: approvalSource.id })

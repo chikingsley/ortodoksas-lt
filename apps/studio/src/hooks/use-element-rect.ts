@@ -1,28 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-
-import { useThrottledCallback } from "@/hooks/use-throttled-callback";
+import { useMemo, useSyncExternalStore } from "react";
 
 export type RectState = Omit<DOMRect, "toJSON">;
 
 export interface ElementRectOptions {
-  /**
-   * The element to track. Can be an Element, ref, or selector string.
-   * Defaults to document.body if not provided.
-   */
-  element?: Element | React.RefObject<Element> | string | null;
-  /**
-   * Whether to enable rect tracking
-   */
+  element?: Element | null;
   enabled?: boolean;
-  /**
-   * Throttle delay in milliseconds for rect updates
-   */
   throttleMs?: number;
-  /**
-   * Whether to use ResizeObserver for more accurate tracking
-   */
   useResizeObserver?: boolean;
 }
 
@@ -37,148 +22,87 @@ const initialRect: RectState = {
   y: 0,
 };
 
-const isSSR = typeof window === "undefined";
-const hasResizeObserver = !isSSR && typeof ResizeObserver !== "undefined";
+function serverSnapshot() {
+  return initialRect;
+}
 
-/**
- * Helper function to check if code is running on client side
- */
-const isClientSide = (): boolean => !isSSR;
-
-/**
- * Custom hook that tracks an element's bounding rectangle and updates on resize, scroll, etc.
- *
- * @param options Configuration options for element rect tracking
- * @returns The current bounding rectangle of the element
- */
-export function useElementRect({
+function createRectStore({
   element,
+  enabled,
+  throttleMs,
+  useResizeObserver,
+}: Required<ElementRectOptions>) {
+  let rect = initialRect;
+
+  return {
+    getSnapshot: () => rect,
+    subscribe: (notify: () => void) => {
+      if (!enabled) {
+        return () => {
+          /* Disabled tracking creates no subscriptions to dispose. */
+        };
+      }
+
+      const target = element ?? document.body;
+      let timeout: ReturnType<typeof setTimeout> | undefined;
+
+      const measure = () => {
+        timeout = undefined;
+        const next = target.getBoundingClientRect();
+
+        if (
+          next.x === rect.x &&
+          next.y === rect.y &&
+          next.width === rect.width &&
+          next.height === rect.height
+        ) {
+          return;
+        }
+
+        rect = next;
+        notify();
+      };
+
+      const schedule = () => {
+        timeout ??= setTimeout(measure, throttleMs);
+      };
+
+      const observer = useResizeObserver ? new ResizeObserver(schedule) : null;
+      observer?.observe(target);
+      window.addEventListener("scroll", schedule, true);
+      window.addEventListener("resize", schedule);
+      measure();
+
+      return () => {
+        clearTimeout(timeout);
+        observer?.disconnect();
+        window.removeEventListener("scroll", schedule, true);
+        window.removeEventListener("resize", schedule);
+      };
+    },
+  };
+}
+
+export function useElementRect({
+  element = null,
   enabled = true,
   throttleMs = 100,
   useResizeObserver = true,
 }: ElementRectOptions = {}): RectState {
-  const [rect, setRect] = useState<RectState>(initialRect);
-
-  const getTargetElement = useCallback((): Element | null => {
-    if (!(enabled && isClientSide())) {
-      return null;
-    }
-
-    if (!element) {
-      return document.body;
-    }
-
-    if (typeof element === "string") {
-      return document.querySelector(element);
-    }
-
-    if ("current" in element) {
-      return element.current;
-    }
-
-    return element;
-  }, [element, enabled]);
-
-  const updateRect = useThrottledCallback(
-    () => {
-      if (!(enabled && isClientSide())) {
-        return;
-      }
-
-      const targetElement = getTargetElement();
-
-      if (!targetElement) {
-        setRect(initialRect);
-
-        return;
-      }
-
-      const newRect = targetElement.getBoundingClientRect();
-      setRect({
-        bottom: newRect.bottom,
-        height: newRect.height,
-        left: newRect.left,
-        right: newRect.right,
-        top: newRect.top,
-        width: newRect.width,
-        x: newRect.x,
-        y: newRect.y,
-      });
-    },
-    throttleMs,
-    [enabled, getTargetElement],
-    { leading: true, trailing: true }
+  const store = useMemo(
+    () => createRectStore({ element, enabled, throttleMs, useResizeObserver }),
+    [element, enabled, throttleMs, useResizeObserver]
   );
 
-  useEffect(() => {
-    if (!(enabled && isClientSide())) {
-      setRect(initialRect);
-
-      return;
-    }
-
-    const targetElement = getTargetElement();
-
-    if (!targetElement) {
-      return;
-    }
-
-    updateRect();
-
-    const cleanup: (() => void)[] = [];
-
-    if (useResizeObserver && hasResizeObserver) {
-      const resizeObserver = new ResizeObserver(() => {
-        window.requestAnimationFrame(updateRect);
-      });
-
-      resizeObserver.observe(targetElement);
-      cleanup.push(() => {
-        resizeObserver.disconnect();
-      });
-    }
-
-    const handleUpdate = () => {
-      updateRect();
-    };
-
-    window.addEventListener("scroll", handleUpdate, true);
-    window.addEventListener("resize", handleUpdate, true);
-
-    cleanup.push(() => {
-      window.removeEventListener("scroll", handleUpdate);
-      window.removeEventListener("resize", handleUpdate);
-    });
-
-    return () => {
-      cleanup.forEach((fn) => {
-        fn();
-      });
-      setRect(initialRect);
-    };
-  }, [enabled, getTargetElement, updateRect, useResizeObserver]);
-
-  return rect;
+  return useSyncExternalStore(
+    store.subscribe,
+    store.getSnapshot,
+    serverSnapshot
+  );
 }
 
-/**
- * Convenience hook for tracking document.body rect
- */
 export function useBodyRect(
   options: Omit<ElementRectOptions, "element"> = {}
 ): RectState {
-  return useElementRect({
-    ...options,
-    element: isClientSide() ? document.body : null,
-  });
-}
-
-/**
- * Convenience hook for tracking a ref element's rect
- */
-export function useRefRect<T extends Element>(
-  ref: React.RefObject<T>,
-  options: Omit<ElementRectOptions, "element"> = {}
-): RectState {
-  return useElementRect({ ...options, element: ref });
+  return useElementRect(options);
 }

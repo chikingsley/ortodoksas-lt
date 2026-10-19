@@ -42,12 +42,12 @@ interface Props {
   recordKey?: string;
 }
 
-export const PeopleDirectoryWorkspace = ({
+export function PeopleDirectoryWorkspace({
   locale,
   onLocaleChange,
   onRecordChange,
   recordKey,
-}: Props) => {
+}: Props) {
   const queryClient = useQueryClient();
   const { data } = useSuspenseQuery(peopleDirectoryQueryOptions());
 
@@ -114,4 +114,4 @@ export const PeopleDirectoryWorkspace = ({
       />
     </DirectoryShell>
   );
-};
+}

@@ -1,5 +1,5 @@
 import { env } from "cloudflare:workers";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 
 import {
   createArticle,
@@ -310,19 +310,18 @@ describe("Studio Worker services", () => {
       kind: "created",
     });
 
-    if (translation.kind === "created") {
-      await expect(
-        getArticleWorkspace(database, translation.article.id)
-      ).resolves.toMatchObject({
-        canonical: {
-          byline: "Editorial Team",
-          bylineType: "organization",
-          bylineUrl: "https://ortodoksas.lt/p/kontaktai",
-          seoDescription: null,
-          seoTitle: null,
-        },
-      });
-    }
+    assert(translation.kind === "created", "Translation must be created");
+    await expect(
+      getArticleWorkspace(database, translation.article.id)
+    ).resolves.toMatchObject({
+      canonical: {
+        byline: "Editorial Team",
+        bylineType: "organization",
+        bylineUrl: "https://ortodoksas.lt/p/kontaktai",
+        seoDescription: null,
+        seoTitle: null,
+      },
+    });
 
     await expect(
       createTranslationDraft({

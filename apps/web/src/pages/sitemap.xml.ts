@@ -1,3 +1,5 @@
+import { hasText } from "@ortodoksas-lt/content/value";
+
 import {
   absoluteUrl,
   escapeXml,
@@ -12,7 +14,7 @@ export async function GET() {
     getCatalog(),
     getArticles(),
     getSections(),
-    ...localeShells.map(async (locale) => getCatalog(locale)),
+    ...localeShells.map(async (locale) => await getCatalog(locale)),
   ]);
 
   const localizedEntries = localeShells.flatMap((locale, index) =>
@@ -39,16 +41,16 @@ export async function GET() {
         path: `/${locale}${page.path}`,
         published: page.published,
       })),
-    ]
-      .filter((entry) => entry.published)
-      .map((entry) => [entry.path, entry.published as string])
+    ].flatMap((entry) =>
+      hasText(entry.published) ? [[entry.path, entry.published] as const] : []
+    )
   );
 
   const urls = [...new Set(paths)]
     .map((path) => {
       const modified = lastModified.get(path);
 
-      return `<url><loc>${escapeXml(absoluteUrl(path))}</loc>${modified ? `<lastmod>${new Date(modified).toISOString()}</lastmod>` : ""}</url>`;
+      return `<url><loc>${escapeXml(absoluteUrl(path))}</loc>${hasText(modified) ? `<lastmod>${new Date(modified).toISOString()}</lastmod>` : ""}</url>`;
     })
     .join("");
 

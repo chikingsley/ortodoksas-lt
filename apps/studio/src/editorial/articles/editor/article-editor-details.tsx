@@ -1,6 +1,8 @@
+import type { SiteLocale } from "@ortodoksas-lt/content/site";
 import { Check, ChevronDown, History, Trash2, X } from "lucide-react";
-import { useCallback } from "react";
 import type { ChangeEvent, MouseEvent } from "react";
+import { useCallback } from "react";
+import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -35,7 +37,7 @@ interface Props {
   heroFocalX: number;
   heroFocalY: number;
   historyOpen: boolean;
-  language: string;
+  language: SiteLocale;
   onBylineChange: (value: string) => void;
   onBylineTypeChange: (value: "organization" | "person") => void;
   onBylineUrlChange: (value: string) => void;
@@ -66,9 +68,160 @@ interface Props {
 }
 
 const sectionClass =
-  "border-b p-6 max-md:p-5 [&>h2]:mt-0 [&>h2]:mb-4 [&>h2]:text-[13px] [&>h2]:font-bold";
+  "border-b p-6 max-md:p-5 [&>h2]:mt-0 [&>h2]:mb-4 [&>h2]:text-sm [&>h2]:font-bold";
 
-const keepEditionLanguage = () => {};
+const keepEditionLanguage = () => {
+  /* empty */
+};
+
+const revisionMetadataSchema = z.object({
+  snapshotCompleteness: z.enum(["complete", "legacy_partial"]).optional(),
+  title: z.string().optional(),
+});
+
+function ArticleStatusSection({
+  historyOpen,
+  onHistoryOpenChange,
+  onMarkReviewed,
+  onRestoreRevision,
+  restoringVersion,
+  revisions,
+  saveState,
+  status,
+  translationKind,
+  translationReviewStatus,
+}: Pick<
+  Props,
+  | "historyOpen"
+  | "onHistoryOpenChange"
+  | "onMarkReviewed"
+  | "onRestoreRevision"
+  | "restoringVersion"
+  | "revisions"
+  | "saveState"
+  | "status"
+  | "translationKind"
+  | "translationReviewStatus"
+>) {
+  const revisionEntries = revisions.map((revision) => ({
+    metadata: revisionMetadataSchema.parse(JSON.parse(revision.metadata_json)),
+    revision,
+  }));
+
+  const hasPartialRevision = revisionEntries.some(
+    ({ metadata }) => metadata.snapshotCompleteness !== "complete"
+  );
+
+  return (
+    <section className={sectionClass}>
+      <h2>Status and history</h2>
+      <dl className="[&_dt]:text-muted-foreground m-0 [&_dd]:m-0 [&_dd]:flex [&_dd]:items-center [&_dd]:gap-1.5 [&_dd]:font-semibold [&_dd]:capitalize [&>div]:flex [&>div]:items-center [&>div]:justify-between [&>div]:py-2 [&>div]:text-xs">
+        <div>
+          <dt>Status</dt>
+          <dd>
+            <i className="bg-primary size-2 rounded-full" />
+            {formatPublicationStatus(status)}
+          </dd>
+        </div>
+        <div>
+          <dt>Translation</dt>
+          <dd>
+            <TranslationBadge
+              kind={translationKind}
+              reviewStatus={translationReviewStatus}
+            />
+          </dd>
+        </div>
+        <div>
+          <dt>Version</dt>
+          <dd>{revisions[0]?.version ?? "Unsaved"}</dd>
+        </div>
+      </dl>
+      {revisions[0] ? (
+        <p className="text-muted-foreground mt-2.5 mb-3.5 text-xs leading-relaxed">
+          Saved {new Date(revisions[0].created_at).toLocaleString()} by{" "}
+          {revisions[0].editor_id}
+        </p>
+      ) : null}
+      {translationKind !== "original" &&
+      translationReviewStatus !== "approved" ? (
+        <Button
+          disabled={saveState === "saving"}
+          onClick={onMarkReviewed}
+          variant="outline"
+        >
+          <Check /> Mark editor reviewed
+        </Button>
+      ) : null}
+      <Collapsible
+        className="group/revision-history"
+        onOpenChange={onHistoryOpenChange}
+        open={historyOpen}
+      >
+        <CollapsibleTrigger
+          render={
+            <Button
+              className="w-full justify-start"
+              size="sm"
+              type="button"
+              variant="ghost"
+            />
+          }
+        >
+          <History /> Revision history
+          <ChevronDown className="ml-auto transition-transform group-data-open/revision-history:rotate-180" />
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          {hasPartialRevision ? (
+            <p className="text-muted-foreground mt-2 mb-1 text-xs leading-relaxed">
+              Earlier versions preserve the fields recorded at the time. Newer
+              fields keep their current values during restore.
+            </p>
+          ) : null}
+          <ol className="mt-2 mb-0 list-none p-0">
+            {revisionEntries.map(({ metadata, revision }, index) => (
+              <li
+                className="flex items-start justify-between gap-2 border-t py-2.5"
+                key={revision.id}
+              >
+                <div className="[&>*]:block">
+                  <strong className="text-xs">
+                    Version {revision.version}
+                  </strong>
+                  <span className="text-muted-foreground mt-0.5 text-xs">
+                    {new Date(revision.created_at).toLocaleString()} ·{" "}
+                    {revision.editor_id}
+                  </span>
+                  <small className="text-muted-foreground mt-0.5 text-xs">
+                    {metadata.title}
+                  </small>
+                </div>
+                {index > 0 ? (
+                  <Button
+                    data-version={revision.version}
+                    disabled={restoringVersion !== null}
+                    onClick={onRestoreRevision}
+                    size="xs"
+                    type="button"
+                    variant="outline"
+                  >
+                    {restoringVersion === revision.version
+                      ? "Restoring…"
+                      : "Restore"}
+                  </Button>
+                ) : (
+                  <em className="text-muted-foreground mt-0.5 text-xs">
+                    Current
+                  </em>
+                )}
+              </li>
+            ))}
+          </ol>
+        </CollapsibleContent>
+      </Collapsible>
+    </section>
+  );
+}
 
 export function ArticleEditorDetails({
   byline,
@@ -109,18 +262,6 @@ export function ArticleEditorDetails({
   translationKind,
   translationReviewStatus,
 }: Props) {
-  const revisionEntries = revisions.map((revision) => ({
-    metadata: JSON.parse(revision.metadata_json) as {
-      snapshotCompleteness?: "complete" | "legacy_partial";
-      title: string;
-    },
-    revision,
-  }));
-
-  const hasPartialRevision = revisionEntries.some(
-    ({ metadata }) => metadata.snapshotCompleteness === "legacy_partial"
-  );
-
   const changeHeroFit = useCallback(
     (value: string | null) => {
       if (value === "contain" || value === "cover") {
@@ -132,6 +273,7 @@ export function ArticleEditorDetails({
 
   const changeHeroFocalX = useCallback(
     (value: number | readonly number[]) => {
+      // oxlint-disable-next-line anti-slop/no-runtime-typeof -- Base UI Slider returns its typed scalar or readonly array union.
       const nextValue = typeof value === "number" ? value : value[0];
 
       if (nextValue !== undefined) {
@@ -143,6 +285,7 @@ export function ArticleEditorDetails({
 
   const changeHeroFocalY = useCallback(
     (value: number | readonly number[]) => {
+      // oxlint-disable-next-line anti-slop/no-runtime-typeof -- Base UI Slider returns its typed scalar or readonly array union.
       const nextValue = typeof value === "number" ? value : value[0];
 
       if (nextValue !== undefined) {
@@ -180,114 +323,18 @@ export function ArticleEditorDetails({
       aria-label="Article details"
       className="bg-muted/30 min-w-0 border-l max-md:border-t max-md:border-l-0"
     >
-      <section className={sectionClass}>
-        <h2>Status and history</h2>
-        <dl className="[&_dt]:text-muted-foreground m-0 [&_dd]:m-0 [&_dd]:flex [&_dd]:items-center [&_dd]:gap-1.5 [&_dd]:font-semibold [&_dd]:capitalize [&>div]:flex [&>div]:items-center [&>div]:justify-between [&>div]:py-2 [&>div]:text-xs">
-          <div>
-            <dt>Status</dt>
-            <dd>
-              <i className="bg-primary size-2 rounded-full" />
-              {formatPublicationStatus(status)}
-            </dd>
-          </div>
-          <div>
-            <dt>Translation</dt>
-            <dd>
-              <TranslationBadge
-                kind={translationKind}
-                reviewStatus={translationReviewStatus}
-              />
-            </dd>
-          </div>
-          <div>
-            <dt>Version</dt>
-            <dd>{revisions[0]?.version ?? "Unsaved"}</dd>
-          </div>
-        </dl>
-        {revisions[0] ? (
-          <p className="text-muted-foreground mt-2.5 mb-3.5 text-[11px] leading-relaxed">
-            Saved {new Date(revisions[0].created_at).toLocaleString()} by{" "}
-            {revisions[0].editor_id}
-          </p>
-        ) : null}
-        {translationKind !== "original" &&
-        translationReviewStatus !== "approved" ? (
-          <Button
-            disabled={saveState === "saving"}
-            onClick={onMarkReviewed}
-            variant="outline"
-          >
-            <Check /> Mark editor reviewed
-          </Button>
-        ) : null}
-        <Collapsible
-          className="group/revision-history"
-          onOpenChange={onHistoryOpenChange}
-          open={historyOpen}
-        >
-          <CollapsibleTrigger
-            render={
-              <Button
-                className="text-secondary-foreground w-full justify-start px-0"
-                size="sm"
-                type="button"
-                variant="ghost"
-              />
-            }
-          >
-            <History /> Revision history
-            <ChevronDown className="ml-auto transition-transform group-data-open/revision-history:rotate-180" />
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            {hasPartialRevision ? (
-              <p className="text-muted-foreground mt-2 mb-1 text-[10px] leading-relaxed">
-                Earlier versions preserve the fields recorded at the time. Newer
-                fields keep their current values during restore.
-              </p>
-            ) : null}
-            <ol className="mt-2 mb-0 list-none p-0">
-              {revisionEntries.map(({ metadata, revision }, index) => (
-                <li
-                  className="flex items-start justify-between gap-2 border-t py-2.5"
-                  key={revision.id}
-                >
-                  <div className="[&>*]:block">
-                    <strong className="text-xs">
-                      Version {revision.version}
-                    </strong>
-                    <span className="text-muted-foreground mt-0.5 text-[10px]">
-                      {new Date(revision.created_at).toLocaleString()} ·{" "}
-                      {revision.editor_id}
-                    </span>
-                    <small className="text-muted-foreground mt-0.5 text-[10px]">
-                      {metadata.title}
-                    </small>
-                  </div>
-                  {index > 0 ? (
-                    <Button
-                      className="h-auto px-1.5 py-1 text-[10px]"
-                      data-version={revision.version}
-                      disabled={restoringVersion !== null}
-                      onClick={onRestoreRevision}
-                      size="xs"
-                      type="button"
-                      variant="outline"
-                    >
-                      {restoringVersion === revision.version
-                        ? "Restoring…"
-                        : "Restore"}
-                    </Button>
-                  ) : (
-                    <em className="text-muted-foreground mt-0.5 text-[10px]">
-                      Current
-                    </em>
-                  )}
-                </li>
-              ))}
-            </ol>
-          </CollapsibleContent>
-        </Collapsible>
-      </section>
+      <ArticleStatusSection
+        historyOpen={historyOpen}
+        onHistoryOpenChange={onHistoryOpenChange}
+        onMarkReviewed={onMarkReviewed}
+        onRestoreRevision={onRestoreRevision}
+        restoringVersion={restoringVersion}
+        revisions={revisions}
+        saveState={saveState}
+        status={status}
+        translationKind={translationKind}
+        translationReviewStatus={translationReviewStatus}
+      />
 
       <section className={sectionClass}>
         <h2>Automatic quality checks</h2>
@@ -300,7 +347,7 @@ export function ArticleEditorDetails({
             : `${qualityIssues.length} issues found`}
         </div>
         {qualityIssues.length > 0 ? (
-          <ul className="border-destructive/20 bg-destructive/5 text-destructive mt-0 mb-3.5 rounded-md border py-2.5 pr-2.5 pl-7 text-[11px] leading-relaxed">
+          <ul className="border-destructive/20 bg-destructive/5 text-destructive mt-0 mb-3.5 rounded-md border py-2.5 pr-2.5 pl-7 text-xs leading-relaxed">
             {qualityIssues.map((issue) => (
               <li key={issue}>{issue}</li>
             ))}
@@ -330,7 +377,7 @@ export function ArticleEditorDetails({
           onChange={keepEditionLanguage}
           value={language}
         />
-        <p className="text-muted-foreground mt-1.5 text-[11px] leading-relaxed">
+        <p className="text-muted-foreground mt-1.5 text-xs leading-relaxed">
           Language is fixed for this edition. Create another language from the
           translation workflow.
         </p>
@@ -349,7 +396,7 @@ export function ArticleEditorDetails({
           placeholder="Person or institution"
           value={byline}
         />
-        <p className="text-muted-foreground mt-1.5 text-[11px] leading-relaxed">
+        <p className="text-muted-foreground mt-1.5 text-xs leading-relaxed">
           This public byline stays separate from the signed-in editor account.
         </p>
         {byline.trim() ? (
@@ -419,7 +466,7 @@ export function ArticleEditorDetails({
               <SelectItem value="contain">Show full image</SelectItem>
             </SelectContent>
           </Select>
-          <p className="text-muted-foreground mt-2 mb-4 text-[11px] leading-relaxed">
+          <p className="text-muted-foreground mt-2 mb-4 text-xs leading-relaxed">
             Fill frame uses the focus point for homepage cards. Show full image
             keeps the complete artwork visible.
           </p>

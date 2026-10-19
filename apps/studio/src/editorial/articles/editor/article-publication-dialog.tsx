@@ -1,3 +1,4 @@
+import { hasText } from "@ortodoksas-lt/content/value";
 import {
   CheckCircle2,
   ExternalLink,
@@ -28,6 +29,53 @@ interface Props {
   verification: PublicationVerification | null;
 }
 
+function PublicationResult({
+  publicationState,
+  verification,
+  errorMessage,
+}: Pick<Props, "publicationState" | "verification" | "errorMessage">) {
+  return (
+    <>
+      {" "}
+      {publicationState === "verified" && verification ? (
+        <div className="border-success/20 bg-success-muted rounded-lg border p-3 text-sm">
+          <div className="text-success flex items-center gap-2 font-semibold">
+            <CheckCircle2 className="size-4" /> Live article verified
+          </div>
+          <a
+            className="mt-2 inline-flex items-center gap-1.5 text-xs break-all underline"
+            href={verification.url}
+            rel="noopener"
+            target="_blank"
+          >
+            {verification.url} <ExternalLink className="size-3" />
+          </a>
+        </div>
+      ) : null}
+      {publicationState === "published_unverified" && verification ? (
+        <div className="border-gold/25 bg-gold/10 rounded-lg border p-3 text-sm">
+          <strong>
+            Publication saved; live verification is still settling.
+          </strong>
+          <a
+            className="mt-2 block text-xs break-all underline"
+            href={verification.url}
+            rel="noopener"
+            target="_blank"
+          >
+            Open the public article
+          </a>
+        </div>
+      ) : null}
+      {publicationState === "error" && hasText(errorMessage) ? (
+        <div className="border-destructive/20 bg-destructive/5 text-destructive rounded-lg border p-3 text-sm">
+          {errorMessage}
+        </div>
+      ) : null}
+    </>
+  );
+}
+
 export function ArticlePublicationDialog({
   errorMessage,
   onAction,
@@ -42,6 +90,7 @@ export function ArticlePublicationDialog({
   const qualityReady = qualityIssues.length === 0;
   const working = publicationState === "working";
   const actionLabel = publishingChanges ? "Publish now" : "Verify live article";
+
   const close = useCallback(() => {
     onOpenChange(false);
   }, [onOpenChange]);
@@ -88,43 +137,11 @@ export function ArticlePublicationDialog({
           </div>
         )}
 
-        {publicationState === "verified" && verification ? (
-          <div className="border-success/20 bg-success-muted rounded-lg border p-3 text-sm">
-            <div className="text-success flex items-center gap-2 font-semibold">
-              <CheckCircle2 className="size-4" /> Live article verified
-            </div>
-            <a
-              className="mt-2 inline-flex items-center gap-1.5 text-xs break-all underline"
-              href={verification.url}
-              rel="noopener"
-              target="_blank"
-            >
-              {verification.url} <ExternalLink className="size-3" />
-            </a>
-          </div>
-        ) : null}
-
-        {publicationState === "published_unverified" && verification ? (
-          <div className="rounded-lg border border-amber-600/25 bg-amber-500/10 p-3 text-sm">
-            <strong>
-              Publication saved; live verification is still settling.
-            </strong>
-            <a
-              className="mt-2 block text-xs break-all underline"
-              href={verification.url}
-              rel="noopener"
-              target="_blank"
-            >
-              Open the public article
-            </a>
-          </div>
-        ) : null}
-
-        {publicationState === "error" && errorMessage ? (
-          <div className="border-destructive/20 bg-destructive/5 text-destructive rounded-lg border p-3 text-sm">
-            {errorMessage}
-          </div>
-        ) : null}
+        <PublicationResult
+          publicationState={publicationState}
+          verification={verification}
+          errorMessage={errorMessage}
+        />
 
         <div className="flex justify-end gap-2 border-t pt-4">
           <Button onClick={close} variant="outline">

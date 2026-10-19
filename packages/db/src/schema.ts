@@ -1,4 +1,5 @@
 import { sql } from "drizzle-orm";
+import type { AnySQLiteColumn } from "drizzle-orm/sqlite-core";
 import {
   check,
   index,
@@ -9,7 +10,6 @@ import {
   text,
   uniqueIndex,
 } from "drizzle-orm/sqlite-core";
-import type { AnySQLiteColumn } from "drizzle-orm/sqlite-core";
 
 export const mediaAssets = sqliteTable(
   "media_assets",
@@ -90,11 +90,11 @@ export const articles = sqliteTable(
     // triggers so production never requires a full articles-table rebuild.
     translationGroupId: text("translation_group_id").notNull(),
     translationKind: text("translation_kind").notNull().default("original"),
-    translationReviewedAt: integer("translation_reviewed_at"),
-    translationReviewedBy: text("translation_reviewed_by"),
     translationReviewStatus: text("translation_review_status")
       .notNull()
       .default("not_required"),
+    translationReviewedAt: integer("translation_reviewed_at"),
+    translationReviewedBy: text("translation_reviewed_by"),
     translationSourceArticleId: text(
       "translation_source_article_id"
     ).references((): AnySQLiteColumn => articles.id, { onDelete: "set null" }),

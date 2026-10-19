@@ -1,23 +1,33 @@
+"use client";
+
 import type { Editor } from "@tiptap/react";
-import { type ForwardedRef, forwardRef, useCallback, useState } from "react";
+import type { ForwardedRef } from "react";
+import { forwardRef, useCallback, useState } from "react";
 
 // --- Icons ---
 import { ChevronDownIcon } from "@/components/tiptap-icons/chevron-down-icon";
 // --- UI Primitives ---
-import type { ButtonProps } from "@/components/tiptap-ui-primitive/button";
-import { Button } from "@/components/tiptap-ui-primitive/button";
+import type { ButtonProps } from "@/components/tiptap-ui-primitive/button/button";
+import { Button } from "@/components/tiptap-ui-primitive/button/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/tiptap-ui-primitive/dropdown-menu";
+} from "@/components/tiptap-ui-primitive/dropdown-menu/dropdown-menu";
+import { ListButton } from "@/components/tiptap-ui/list-button/list-button";
 // --- Tiptap UI ---
-import { ListButton, type ListType } from "@/components/tiptap-ui/list-button";
+import type { ListType } from "@/components/tiptap-ui/list-button/use-list";
 import { useListDropdownMenu } from "@/components/tiptap-ui/list-dropdown-menu/use-list-dropdown-menu";
 // --- Hooks ---
 import { useTiptapEditor } from "@/hooks/use-tiptap-editor";
+
+const DEFAULT_LIST_TYPES: ListType[] = [
+  "bulletList",
+  "orderedList",
+  "taskList",
+];
 
 export interface ListDropdownMenuProps extends Omit<ButtonProps, "type"> {
   /**
@@ -25,28 +35,28 @@ export interface ListDropdownMenuProps extends Omit<ButtonProps, "type"> {
    */
   editor?: Editor;
   /**
+   * The list types to display in the dropdown.
+   */
+  types?: ListType[];
+  /**
    * Whether the dropdown should be hidden when no list types are available
    * @default false
    */
   hideWhenUnavailable?: boolean;
   /**
-   * Whether the dropdown should use a modal
-   */
-  modal?: boolean;
-  /**
    * Callback for when the dropdown opens or closes
    */
   onOpenChange?: (isOpen: boolean) => void;
   /**
-   * The list types to display in the dropdown.
+   * Whether the dropdown should use a modal
    */
-  types?: ListType[];
+  modal?: boolean;
 }
 
 function ListDropdownMenuImpl(
   {
     editor: providedEditor,
-    types = ["bulletList", "orderedList", "taskList"],
+    types = DEFAULT_LIST_TYPES,
     hideWhenUnavailable = false,
     onOpenChange,
     modal = true,
@@ -77,18 +87,17 @@ function ListDropdownMenuImpl(
   }
 
   return (
-    <DropdownMenu modal={modal} onOpenChange={handleOnOpenChange} open={isOpen}>
+    <DropdownMenu modal={modal} open={isOpen} onOpenChange={handleOnOpenChange}>
       <DropdownMenuTrigger asChild>
         <Button
-          aria-label="List options"
-          data-active-state={isActive ? "on" : "off"}
-          data-disabled={!canToggle}
-          disabled={!canToggle}
-          role="button"
-          tabIndex={-1}
-          tooltip="List"
           type="button"
           variant="ghost"
+          data-active-state={isActive ? "on" : "off"}
+          tabIndex={-1}
+          disabled={!canToggle}
+          data-disabled={!canToggle}
+          aria-label="List options"
+          tooltip="List"
           {...props}
           ref={ref}
         >
@@ -100,12 +109,12 @@ function ListDropdownMenuImpl(
       <DropdownMenuContent align="start">
         <DropdownMenuGroup>
           {filteredLists.map((option) => (
-            <DropdownMenuItem asChild key={option.type}>
+            <DropdownMenuItem key={option.type} asChild>
               <ListButton
                 editor={editor}
-                showTooltip={false}
-                text={option.label}
                 type={option.type}
+                text={option.label}
+                showTooltip={false}
               />
             </DropdownMenuItem>
           ))}

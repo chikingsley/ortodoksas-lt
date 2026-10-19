@@ -1,5 +1,8 @@
 ---
+import type { StructuredData } from "./structured-data";
+import { z } from "zod";
 import "../../styles/globals.css";
+import { siteLocales } from "../../i18n/config";
 import type { SiteLocale } from "../../i18n/config";
 import { getLocaleLinks, getLocalizedCounterparts } from "../../server/publication-localization";
 import { site } from "../../site";
@@ -20,7 +23,7 @@ interface Props {
   locale?: SiteLocale;
   type?: "website" | "article";
   alternates?: AlternateLink[];
-  jsonLd?: Record<string, unknown> | undefined;
+  jsonLd?: StructuredData | undefined;
 }
 
 const {
@@ -39,9 +42,11 @@ const siteUrl = Astro.site ?? new URL(site.origin);
 const canonical = new URL(canonicalPath, siteUrl).toString();
 const socialImage = image?.startsWith("/") ? new URL(image, siteUrl).toString() : image;
 
+const jsonLdImage = z.string().safeParse(jsonLd?.image);
+
 const resolvedJsonLd =
-  typeof jsonLd?.image === "string" && jsonLd.image.startsWith("/")
-    ? { ...jsonLd, image: new URL(jsonLd.image, siteUrl).toString() }
+  jsonLdImage.success && jsonLdImage.data.startsWith("/")
+    ? { ...jsonLd, image: new URL(jsonLdImage.data, siteUrl).toString() }
     : jsonLd;
 
 const [localeLinks, localizedEntries] = await Promise.all([
@@ -55,12 +60,11 @@ const localizedPaths = new Map<string, string>([...localizedEntries].map(([path,
 
 const resolvedAlternates = alternates.length
   ? alternates
-  : Object.entries(localeLinks)
-      .filter(([, destination]) => destination.hasCounterpart)
-      .map(([alternateLocale, destination]) => ({
-        href: new URL(destination.href, siteUrl).toString(),
-        hreflang: alternateLocale,
-      }));
+  : siteLocales.flatMap((alternateLocale) => {
+    const destination = localeLinks[alternateLocale];
+
+    return destination.hasCounterpart ? [{href: new URL(destination.href, siteUrl).toString(), hreflang: alternateLocale}] : [];
+  });
 
 const baseSchema = {
   "@context": "https://schema.org",
@@ -68,8 +72,8 @@ const baseSchema = {
   description,
   inLanguage: lang,
   name: title,
+  publisher: type === "article" ? { "@type": "Organization", logo: { "@type": "ImageObject", url: new URL(site.logoPath, siteUrl).toString() }, name: site.name } : undefined,
   url: canonical,
-  ...(type === "article" ? { publisher: { "@type": "Organization", logo: { "@type": "ImageObject", url: new URL(site.logoPath, siteUrl).toString() }, name: site.name } } : {}),
   ...resolvedJsonLd,
 };
 ---

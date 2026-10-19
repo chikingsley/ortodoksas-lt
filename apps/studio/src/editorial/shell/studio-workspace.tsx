@@ -1,6 +1,6 @@
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { lazy, Suspense, useCallback, useMemo, useState } from "react";
+import { Suspense, lazy, useCallback, useMemo, useState } from "react";
 
 import { ArticleInventory } from "@/editorial/articles/inventory/article-inventory";
 import type { CatalogArticle } from "@/editorial/articles/types";
@@ -11,10 +11,13 @@ import {
   createTranslationDraftMutation,
 } from "@/server/articles/article.functions";
 
-const ArticleEditor = lazy(async () =>
-  import("@/editorial/articles/editor/article-editor").then((module) => ({
-    default: module.ArticleEditor,
-  }))
+const ArticleEditor = lazy(
+  async () =>
+    await import("@/editorial/articles/editor/article-editor").then(
+      (module) => ({
+        default: module.ArticleEditor,
+      })
+    )
 );
 
 type WorkspaceRoute =
@@ -25,7 +28,7 @@ type WorkspaceRoute =
 const contentPath = (kind: CatalogArticle["kind"]) =>
   kind === "page" ? "/pages" : "/articles";
 
-export const StudioWorkspace = (route: WorkspaceRoute) => {
+export function StudioWorkspace(route: WorkspaceRoute) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { data: articles } = useSuspenseQuery(articleCatalogQueryOptions());
@@ -40,20 +43,20 @@ export const StudioWorkspace = (route: WorkspaceRoute) => {
     [articles, route]
   );
 
-  const refreshCatalog = useCallback(
-    async () => queryClient.invalidateQueries(articleCatalogQueryOptions()),
-    [queryClient]
-  );
+  const refreshCatalog = useCallback(async () => {
+    await queryClient.invalidateQueries(articleCatalogQueryOptions());
+  }, [queryClient]);
 
   const openArticle = useCallback(
-    async (article: CatalogArticle) =>
-      navigate({
+    async (article: CatalogArticle) => {
+      await navigate({
         params: { articleId: article.id },
         to:
           article.kind === "page"
             ? "/pages/$articleId"
             : "/articles/$articleId",
-      }),
+      });
+    },
     [navigate]
   );
 
@@ -63,7 +66,9 @@ export const StudioWorkspace = (route: WorkspaceRoute) => {
   }, [navigate, refreshCatalog, route.kind]);
 
   const selectContentKind = useCallback(
-    async (kind: CatalogArticle["kind"]) => navigate({ to: contentPath(kind) }),
+    async (kind: CatalogArticle["kind"]) => {
+      await navigate({ to: contentPath(kind) });
+    },
     [navigate]
   );
 
@@ -150,10 +155,16 @@ export const StudioWorkspace = (route: WorkspaceRoute) => {
         contentKind={route.kind}
         createError={createError}
         creating={creating}
-        onContentKindChange={selectContentKind}
-        onCreate={createContent}
+        onContentKindChange={(kind) => {
+          void selectContentKind(kind);
+        }}
+        onCreate={(kind) => {
+          void createContent(kind);
+        }}
         onCreateTranslation={createTranslation}
-        onOpen={openArticle}
+        onOpen={(article) => {
+          void openArticle(article);
+        }}
       />
     );
 
@@ -161,7 +172,7 @@ export const StudioWorkspace = (route: WorkspaceRoute) => {
     workspace = selectedArticle ? (
       <Suspense
         fallback={
-          <div className="text-muted-foreground grid min-h-[calc(100dvh-var(--studio-mobile-header-height))] place-items-center text-[13px] md:min-h-screen">
+          <div className="text-muted-foreground grid min-h-[calc(100dvh-var(--studio-mobile-header-height))] place-items-center text-sm md:min-h-screen">
             Įkeliamas redaktorius…
           </div>
         }
@@ -169,14 +180,18 @@ export const StudioWorkspace = (route: WorkspaceRoute) => {
         <ArticleEditor
           article={selectedArticle}
           key={selectedArticle.id}
-          onBack={closeArticle}
+          onBack={() => {
+            void closeArticle();
+          }}
           onCreateTranslation={createTranslation}
-          onOpenTranslation={openArticle}
+          onOpenTranslation={(article) => {
+            void openArticle(article);
+          }}
           translations={translations}
         />
       </Suspense>
     ) : (
-      <div className="text-muted-foreground grid min-h-[calc(100dvh-var(--studio-mobile-header-height))] place-items-center text-[13px] md:min-h-screen">
+      <div className="text-muted-foreground grid min-h-[calc(100dvh-var(--studio-mobile-header-height))] place-items-center text-sm md:min-h-screen">
         Article unavailable.
       </div>
     );
@@ -187,4 +202,4 @@ export const StudioWorkspace = (route: WorkspaceRoute) => {
       {workspace}
     </div>
   );
-};
+}

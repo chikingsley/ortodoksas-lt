@@ -1,12 +1,13 @@
-// biome-ignore-all lint/performance/noJsxPropsBind: TanStack Form collection controls bind each input to its typed field path.
 import { tiptapDocumentSchema } from "@ortodoksas-lt/content/article";
+import type { PersonEditorInput } from "@ortodoksas-lt/content/directory";
 import {
   personEditorSchema,
   slugifyDirectoryName,
 } from "@ortodoksas-lt/content/directory";
-import type { PersonEditorInput } from "@ortodoksas-lt/content/directory";
 import type { SiteLocale } from "@ortodoksas-lt/content/site";
+import { firstText, hasText } from "@ortodoksas-lt/content/value";
 import { useForm, useSelector } from "@tanstack/react-form";
+import type { JSONContent } from "@tiptap/core";
 import { useCallback, useState } from "react";
 
 import { Field, FieldLabel } from "@/components/ui/field";
@@ -14,8 +15,8 @@ import { Input } from "@/components/ui/input";
 import { DirectoryContactMethods } from "@/editorial/directories/directory-contact-methods";
 import { DirectoryEditorHeader } from "@/editorial/directories/directory-editor-header";
 import {
-  localeLabel,
   Section,
+  localeLabel,
 } from "@/editorial/directories/directory-form-controls";
 import {
   directoryIssueMessage,
@@ -35,19 +36,12 @@ const emptyDocument: PersonEditorInput["localizations"][number]["biography"] = {
   type: "doc",
 };
 
-const documentText = (value: unknown): string => {
-  if (Array.isArray(value)) {
-    return value.map(documentText).filter(Boolean).join(" ");
-  }
-
-  if (!(value && typeof value === "object")) {
-    return "";
-  }
-
-  const node = value as { content?: unknown; text?: unknown };
-
-  return typeof node.text === "string" ? node.text : documentText(node.content);
-};
+function documentText(node: JSONContent): string {
+  return (
+    node.text ??
+    (node.content ?? []).map(documentText).filter(hasText).join(" ")
+  );
+}
 
 const generatedSeoDescription = (
   localization: PersonEditorInput["localizations"][number]
@@ -66,7 +60,7 @@ interface DirectoryOption {
   value: string;
 }
 
-export const PersonEditor = ({
+export function PersonEditor({
   communityOptions,
   initialValue,
   locale,
@@ -78,7 +72,7 @@ export const PersonEditor = ({
   locale: SiteLocale;
   onLocaleChange: (locale: SiteLocale) => void;
   onSaved: (id: string) => Promise<void>;
-}) => {
+}) {
   const [message, setMessage] = useState("");
   const [slugOverride, setSlugOverride] = useState(Boolean(initialValue.slug));
 
@@ -113,7 +107,7 @@ export const PersonEditor = ({
         (item) => item.language === locale
       );
 
-      if (!activeLocalization?.displayName.trim()) {
+      if (!hasText(activeLocalization?.displayName.trim())) {
         setMessage("Enter a display name before saving.");
 
         return;
@@ -217,19 +211,23 @@ export const PersonEditor = ({
       className="grid gap-5"
       onSubmit={(event) => {
         event.preventDefault();
-        form.handleSubmit().catch(() => {
-          setMessage("Save failed");
-        });
+        void (async () => {
+          try {
+            await form.handleSubmit();
+          } catch {
+            setMessage("Save failed");
+          }
+        })();
       }}
     >
       <form.Subscribe
-        selector={(state) => [
-          state.canSubmit,
-          state.isDirty,
-          state.isSubmitting,
-        ]}
+        selector={(state) => ({
+          canSubmit: state.canSubmit,
+          isDirty: state.isDirty,
+          isSubmitting: state.isSubmitting,
+        })}
       >
-        {([canSubmit, isDirty, isSubmitting]) => (
+        {({ canSubmit, isDirty, isSubmitting }) => (
           <DirectoryEditorHeader
             canSubmit={canSubmit}
             isDirty={isDirty}
@@ -237,9 +235,11 @@ export const PersonEditor = ({
             locale={locale}
             message={message}
             onLocaleChange={onLocaleChange}
-            recordTitle={
-              localization?.displayName || initialValue.slug || "New person"
-            }
+            recordTitle={firstText(
+              localization?.displayName,
+              initialValue.slug,
+              "New person"
+            )}
             saveLabel="Save person"
           />
         )}
@@ -378,4 +378,4 @@ export const PersonEditor = ({
       </form.Field>
     </form>
   );
-};
+}

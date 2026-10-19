@@ -24,10 +24,12 @@ const depthError = {
 };
 
 await Promise.all(
-  [
-    ["{", "}"],
-    ["(", ")"],
-  ].map(async ([open, close]) => {
+  (
+    [
+      ["{", "}"],
+      ["(", ")"],
+    ] as const
+  ).map(async ([open, close]) => {
     await test(`deeply nested ${open}${close} patterns fail with a bounded validation error`, () => {
       const pattern = `${open.repeat(3000)}a${close.repeat(3000)}`;
       assert.throws(() => api.parse(pattern), depthError);

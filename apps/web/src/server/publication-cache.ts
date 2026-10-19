@@ -12,6 +12,17 @@ const bypassCache = (request: Request, url: URL) =>
   request.headers.has("authorization") ||
   sessionCookie.test(request.headers.get("cookie") ?? "");
 
+function cacheableResponse(request: Request, response: Response) {
+  return (
+    request.method === "GET" &&
+    [200, 404].includes(response.status) &&
+    !response.headers.has("set-cookie") &&
+    response.headers.get("vary")?.trim() !== "*" &&
+    !(response.headers.get("cache-control") ?? "").includes("private") &&
+    !(response.headers.get("cache-control") ?? "").includes("no-store")
+  );
+}
+
 export async function cachedPublication(
   request: Request,
   render: () => Promise<Response>
@@ -62,14 +73,7 @@ export async function cachedPublication(
   const rendered = await render();
   const response = new Response(rendered.body, rendered);
 
-  if (
-    request.method === "GET" &&
-    [200, 404].includes(response.status) &&
-    !response.headers.has("set-cookie") &&
-    response.headers.get("vary")?.trim() !== "*" &&
-    !(response.headers.get("cache-control") ?? "").includes("private") &&
-    !(response.headers.get("cache-control") ?? "").includes("no-store")
-  ) {
+  if (cacheableResponse(request, response)) {
     const stored = response.clone();
     stored.headers.set("Cache-Control", `public, max-age=${cacheSeconds}`);
     await cache.put(key, stored);

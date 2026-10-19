@@ -6,7 +6,10 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "ES2023",
-    "types": ["node"]
+    "types": ["node"],
+    "noUncheckedIndexedAccess": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true
   },
-  "include": ["src/**/*.ts", "drizzle.config.ts"]
+  "include": ["src/**/*.ts", "drizzle.config.ts", "migrations/**/*.ts"]
 }

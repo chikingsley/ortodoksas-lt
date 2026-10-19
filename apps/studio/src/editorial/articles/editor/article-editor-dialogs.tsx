@@ -1,3 +1,5 @@
+import { firstText, hasText } from "@ortodoksas-lt/content/value";
+
 import { StudioDialog } from "@/editorial/shared/studio-dialog";
 
 import type { ContentChange } from "./article-editor-types";
@@ -11,17 +13,18 @@ interface Props {
   previewOpen: boolean;
 }
 
-const FIGURE_FIELD_PATTERN = /^body\.figure\[(\d+)\]\.(alt|caption)$/u;
+const FIGURE_FIELD_PATTERN =
+  /^body\.figure\[(?<index>\d+)\]\.(?<field>alt|caption)$/u;
 
-const FIELD_LABELS: Record<string, string> = {
-  summary: "Summary",
-  title: "Title",
-};
+const FIELD_LABELS = new Map<string, string>([
+  ["summary", "Summary"],
+  ["title", "Title"],
+]);
 
 const formatField = (fieldPath: string): string => {
-  const directLabel = FIELD_LABELS[fieldPath];
+  const directLabel = FIELD_LABELS.get(fieldPath);
 
-  if (directLabel) {
+  if (hasText(directLabel)) {
     return directLabel;
   }
 
@@ -54,7 +57,7 @@ export function ArticleEditorDialogs({
   return (
     <>
       <StudioDialog
-        description="Canonical Tiptap JSON rendered through the shared renderer"
+        description="Preview the article with the public site’s formatting."
         onOpenChange={onPreviewOpenChange}
         open={previewOpen}
         title="Public article preview"
@@ -68,7 +71,7 @@ export function ArticleEditorDialogs({
       </StudioDialog>
 
       <StudioDialog
-        description="Canonical baseline compared with the current article"
+        description="Review edits to the article’s text and images."
         onOpenChange={onChangesOpenChange}
         open={changesOpen}
         popupClassName="w-[min(1440px,100%)] grid-rows-[auto_minmax(0,1fr)_auto]"
@@ -76,7 +79,7 @@ export function ArticleEditorDialogs({
       >
         {changes.length === 0 ? (
           <div className="text-muted-foreground flex min-h-[calc(100vh-64px)] items-center justify-center gap-2.5 text-sm">
-            The current article matches its canonical baseline.
+            The article matches its saved version.
           </div>
         ) : (
           <ol className="m-0 grid auto-rows-max content-start gap-4 overflow-auto p-5">
@@ -90,14 +93,14 @@ export function ArticleEditorDialogs({
                   <span>{change.change_kind}</span>
                   <span>{formatProvenance(change.provenance)}</span>
                 </div>
-                <dl className="[&_dd]:break-anywhere [&_dt]:text-muted-foreground m-0 grid grid-cols-2 [&_dd]:m-0 [&_dd]:leading-normal [&_dd]:whitespace-pre-wrap [&_dt]:mb-1.5 [&_dt]:text-xs [&_dt]:font-bold [&_dt]:uppercase [&>div]:min-w-0 [&>div]:p-4 [&>div+div]:border-l">
+                <dl className="[&_dt]:text-muted-foreground m-0 grid grid-cols-2 [&_dd]:m-0 [&_dd]:leading-normal [&_dd]:wrap-anywhere [&_dd]:whitespace-pre-wrap [&_dt]:mb-1.5 [&_dt]:text-xs [&_dt]:font-bold [&_dt]:uppercase [&>div]:min-w-0 [&>div]:p-4 [&>div+div]:border-l">
                   <div>
                     <dt>Original</dt>
-                    <dd>{change.before_value || "Empty"}</dd>
+                    <dd>{firstText(change.before_value, "Empty")}</dd>
                   </div>
                   <div>
                     <dt>Current</dt>
-                    <dd>{change.after_value || "Empty"}</dd>
+                    <dd>{firstText(change.after_value, "Empty")}</dd>
                   </div>
                 </dl>
               </li>

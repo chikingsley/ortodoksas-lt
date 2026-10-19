@@ -1,7 +1,7 @@
 import type { CommunityEditorInput } from "@ortodoksas-lt/content/directory";
 import type { SiteLocale } from "@ortodoksas-lt/content/site";
-import { useCallback } from "react";
 import type { ChangeEvent } from "react";
+import { useCallback } from "react";
 
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";

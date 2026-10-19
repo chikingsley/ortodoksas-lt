@@ -5,9 +5,6 @@ export const teamRoleLabel: Record<TeamRole, string> = {
   "org:member": "Member",
 };
 
-export const teamRoles = Object.entries(teamRoleLabel).map(
-  ([value, label]) => ({
-    label,
-    value: value as TeamRole,
-  })
+export const teamRoles = (["org:admin", "org:member"] as const).map(
+  (value) => ({ label: teamRoleLabel[value], value })
 );

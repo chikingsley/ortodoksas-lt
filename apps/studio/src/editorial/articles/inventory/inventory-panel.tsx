@@ -8,8 +8,8 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import { ValueCombobox } from "@/editorial/shared/value-combobox";
 import type { ValueOption } from "@/editorial/shared/value-combobox";
+import { ValueCombobox } from "@/editorial/shared/value-combobox";
 
 import type { CatalogArticle } from "../types";
 import type { ArticleGroup } from "./article-groups";
@@ -43,10 +43,10 @@ interface Props {
 }
 
 const tabClass =
-  "relative flex h-[50px] items-center gap-2 border-0 bg-transparent px-0 pt-px pb-0 text-xs font-medium text-muted-foreground data-active:text-primary data-active:after:absolute data-active:after:right-0 data-active:after:bottom-[-1px] data-active:after:left-0 data-active:after:h-0.5 data-active:after:bg-primary data-active:after:content-[''] max-sm:h-10 max-sm:w-full [&_span]:rounded-sm [&_span]:bg-muted [&_span]:px-1.5 [&_span]:py-0.5 [&_span]:text-[10px]";
+  "relative flex h-[50px] items-center gap-2 border-0 bg-transparent px-0 pt-px pb-0 text-xs font-medium text-muted-foreground data-active:text-primary data-active:after:absolute data-active:after:right-0 data-active:after:bottom-[-1px] data-active:after:left-0 data-active:after:h-0.5 data-active:after:bg-primary data-active:after:content-[''] max-sm:h-10 max-sm:w-full [&_span]:rounded-sm [&_span]:bg-muted [&_span]:px-1.5 [&_span]:py-0.5 [&_span]:text-xs";
 
 const headerCellClass =
-  "h-10 border-b bg-muted/40 px-3 py-0 text-left text-[10px] font-semibold text-muted-foreground uppercase tracking-wide max-sm:hidden";
+  "h-10 border-b bg-muted/40 px-3 py-0 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wide max-sm:hidden";
 
 export function InventoryPanel({
   articleGroups,
@@ -101,13 +101,13 @@ export function InventoryPanel({
 
         <Tabs.Panel value={statusFilter}>
           <div className="grid grid-cols-[minmax(300px,1fr)_180px] items-center gap-2 border-b px-4 py-3 max-sm:grid-cols-1">
-            <InputGroup className="bg-card h-9">
-              <InputGroupAddon className="pl-2.5">
+            <InputGroup className="h-9">
+              <InputGroupAddon>
                 <Search className="text-muted-foreground size-4" />
               </InputGroupAddon>
               <InputGroupInput
                 aria-label={`Search ${visibleLabel}`}
-                className="h-8 px-0 text-xs"
+                className="h-8"
                 onChange={onQueryChange}
                 placeholder={`Search ${visibleLabel} by title, text, or tag…`}
                 type="search"
@@ -145,7 +145,7 @@ export function InventoryPanel({
                   <tbody key={roleGroup.role}>
                     <tr>
                       <th
-                        className="bg-muted/70 text-primary border-b px-4 py-2 text-left text-[10px] font-semibold tracking-[0.1em] uppercase"
+                        className="bg-muted/70 text-primary border-b px-4 py-2 text-left text-xs font-semibold tracking-widest uppercase"
                         colSpan={5}
                         scope="rowgroup"
                       >
@@ -168,7 +168,7 @@ export function InventoryPanel({
                     {roleGroup.groups.length === 0 ? (
                       <tr>
                         <td
-                          className="text-muted-foreground border-b px-4 py-4 text-[11px]"
+                          className="text-muted-foreground border-b px-4 py-4 text-xs"
                           colSpan={5}
                         >
                           This group is currently empty.
@@ -191,29 +191,29 @@ export function InventoryPanel({
               )}
             </table>
             {catalogState === "loading" ? (
-              <div className="text-muted-foreground px-5 py-16 text-center text-[13px]">
+              <div className="text-muted-foreground px-5 py-16 text-center text-sm">
                 Loading the complete archive…
               </div>
             ) : null}
             {catalogState === "error" ? (
-              <div className="text-destructive px-5 py-16 text-center text-[13px]">
+              <div className="text-destructive px-5 py-16 text-center text-sm">
                 Archive loading failed. Refresh the page.
               </div>
             ) : null}
             {catalogState === "ready" && visible.length === 0 ? (
-              <div className="text-muted-foreground px-5 py-16 text-center text-[13px]">
+              <div className="text-muted-foreground px-5 py-16 text-center text-sm">
                 These filters currently return zero {visibleLabel}.
               </div>
             ) : null}
           </div>
 
           <footer className="bg-muted/40 flex min-h-[52px] items-center justify-between gap-4 px-4 max-sm:items-start max-sm:px-3.5 max-sm:py-3">
-            <p className="text-muted-foreground m-0 text-[11px] max-sm:max-w-40 max-sm:leading-snug">
+            <p className="text-muted-foreground m-0 text-xs max-sm:max-w-40 max-sm:leading-snug">
               Showing {filteredCount === 0 ? 0 : (safePage - 1) * pageSize + 1}–
               {Math.min(safePage * pageSize, filteredCount)} of{" "}
               {filteredCount.toLocaleString("en-US")}
             </p>
-            <div className="text-muted-foreground flex items-center gap-2 text-[11px]">
+            <div className="text-muted-foreground flex items-center gap-2 text-xs">
               <Button
                 aria-label="Previous page"
                 className="size-7"

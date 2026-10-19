@@ -65,14 +65,14 @@ export function ValueCombobox({
         <ComboboxContent>
           <ComboboxEmpty>{emptyMessage}</ComboboxEmpty>
           <ComboboxList>
-            {(option) => (
+            {(option: ValueOption) => (
               <ComboboxItem key={option.value} value={option}>
                 {option.label}
               </ComboboxItem>
             )}
           </ComboboxList>
           {options.length > resultLimit ? (
-            <p className="text-muted-foreground m-0 border-t px-2.5 py-2 text-[11px]">
+            <p className="text-muted-foreground m-0 border-t px-2.5 py-2 text-xs">
               Recent options appear first. Type to search all{" "}
               {options.length.toLocaleString()} choices.
             </p>

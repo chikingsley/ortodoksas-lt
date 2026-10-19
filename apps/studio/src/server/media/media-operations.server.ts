@@ -1,3 +1,4 @@
+import { hasText } from "@ortodoksas-lt/content/value";
 import { mediaAssets } from "@ortodoksas-lt/db";
 import { eq } from "drizzle-orm";
 
@@ -52,7 +53,7 @@ const toHex = (value: ArrayBuffer): string =>
     .join("");
 
 const decodeFileName = (value: string | null): string => {
-  if (!value) {
+  if (!hasText(value)) {
     return "upload";
   }
 
@@ -97,9 +98,8 @@ export const uploadMedia = async (input: {
   media: R2Bucket;
   request: Request;
 }): Promise<Response> => {
-  const contentLength = Number.parseInt(
-    input.request.headers.get("content-length") ?? "0",
-    10
+  const contentLength = Math.trunc(
+    Number(input.request.headers.get("content-length") ?? "0")
   );
 
   if (contentLength > MAX_UPLOAD_BYTES) {
@@ -114,7 +114,7 @@ export const uploadMedia = async (input: {
 
   const extension = ALLOWED_IMAGE_TYPES.get(mimeType);
 
-  if (!extension) {
+  if (!hasText(extension)) {
     return Response.json(
       { error: "Use a JPEG, PNG, WebP, AVIF, or GIF image" },
       { status: 415 }
@@ -257,9 +257,8 @@ export const serveMedia = async (input: {
 
   const url = new URL(input.request.url);
 
-  const requestedWidth = Number.parseInt(
-    url.searchParams.get("width") ?? "",
-    10
+  const requestedWidth = Math.trunc(
+    Number(url.searchParams.get("width") ?? "")
   );
 
   const outputFormat = preferredOutputFormat(
@@ -273,12 +272,13 @@ export const serveMedia = async (input: {
     record.mimeType !== "image/gif";
 
   if (canTransform) {
-    const transformed = (
-      await input.images
-        .input(object.body)
-        .transform({ width: requestedWidth })
-        .output({ format: outputFormat, quality: 82 })
-    ).response();
+    const transformation = await input.images
+      // oxlint-disable-next-line typescript/no-unsafe-argument -- Cloudflare R2 returns a byte stream; generated R2ObjectBody types currently expose ReadableStream<any>.
+      .input(object.body)
+      .transform({ width: requestedWidth })
+      .output({ format: outputFormat, quality: 82 });
+
+    const transformed = transformation.response();
 
     const headers = new Headers(transformed.headers);
     headers.set("cache-control", CACHE_CONTROL);

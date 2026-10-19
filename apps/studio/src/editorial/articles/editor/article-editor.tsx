@@ -2,14 +2,16 @@ import {
   articleBylineUrlSchema,
   tiptapDocumentSchema,
 } from "@ortodoksas-lt/content/article";
+import { siteLocaleSchema } from "@ortodoksas-lt/content/site";
+import { firstText, hasText } from "@ortodoksas-lt/content/value";
 import { getArticleQualityIssues } from "@ortodoksas-lt/editor/quality";
 import { renderArticleDocument } from "@ortodoksas-lt/editor/render";
-import { useForm, useStore } from "@tanstack/react-form";
+import { useForm, useSelector } from "@tanstack/react-form";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useBlocker } from "@tanstack/react-router";
 import type { JSONContent } from "@tiptap/core";
-import { useCallback, useMemo, useRef, useState } from "react";
 import type { ChangeEvent, MouseEvent } from "react";
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -17,6 +19,7 @@ import { normalizedFormSchema } from "@/editorial/shared/normalized-form-schema"
 import { StudioDialog } from "@/editorial/shared/studio-dialog";
 
 import type { CatalogArticle } from "../types";
+import type { ArticleWorkspaceResponse } from "./article-editor-api";
 import {
   articleWorkspaceQueryOptions,
   deleteArticleDraft,
@@ -24,7 +27,6 @@ import {
   restoreArticleRevision,
   verifyArticlePublication,
 } from "./article-editor-api";
-import type { ArticleWorkspaceResponse } from "./article-editor-api";
 import { ArticleEditorDetails } from "./article-editor-details";
 import { ArticleEditorDialogs } from "./article-editor-dialogs";
 import { ArticleEditorDocument } from "./article-editor-document";
@@ -52,15 +54,15 @@ interface EditorFormProps extends Props {
   workspace: ArticleWorkspaceResponse;
 }
 
-const LEADING_SLASH_PATTERN = /^\/+/;
-const LITHUANIAN_PREFIX_PATTERN = /^lt\//;
-const TRAILING_SLASH_PATTERN = /\/$/;
+const LEADING_SLASH_PATTERN = /^\/+/u;
+const LITHUANIAN_PREFIX_PATTERN = /^lt\//u;
+const TRAILING_SLASH_PATTERN = /\/$/u;
 
 const editorialMetadataSchema = z.object({
   byline: z.string().trim().max(200),
   bylineType: z.enum(["person", "organization"]),
   bylineUrl: articleBylineUrlSchema,
-  language: z.string().trim().min(2).max(16),
+  language: siteLocaleSchema,
   section: z.string().trim().max(160),
   seoDescription: z.string().trim().max(600),
   seoTitle: z.string().trim().max(240),
@@ -89,25 +91,6 @@ const getSlug = (path: string): string =>
     .replace(LEADING_SLASH_PATTERN, "")
     .replace(LITHUANIAN_PREFIX_PATTERN, "")
     .replace(TRAILING_SLASH_PATTERN, "");
-
-export function ArticleEditor(props: Props) {
-  const { data: workspace } = useSuspenseQuery(
-    articleWorkspaceQueryOptions(props.article.id)
-  );
-
-  const workspaceVersion = Math.max(
-    0,
-    ...workspace.revisions.map((revision) => revision.version)
-  );
-
-  return (
-    <ArticleEditorForm
-      {...props}
-      key={`${workspace.canonical.id}:${workspaceVersion}`}
-      workspace={workspace}
-    />
-  );
-}
 
 function ArticleEditorForm({
   article,
@@ -144,8 +127,11 @@ function ArticleEditorForm({
 
   const persistValidatedArticle = useRef<
     (values: ArticleFormValues, meta: ArticleSubmitMeta) => Promise<string>
-  >(async () =>
-    Promise.reject(new Error("Article persistence is still initializing"))
+  >(
+    async () =>
+      await Promise.reject(
+        new Error("Article persistence is still initializing")
+      )
   );
 
   const formDefaults = {
@@ -186,7 +172,7 @@ function ArticleEditorForm({
     },
   });
 
-  const formValues = useStore(articleForm.store, (state) => state.values);
+  const formValues = useSelector(articleForm.store, (state) => state.values);
 
   const {
     body,
@@ -252,21 +238,20 @@ function ArticleEditorForm({
     canonical.translationReviewStatus
   );
 
-  const translationSourceQuality: {
-    body: JSONContent;
-    language: string;
-    summary: string;
-    title: string;
-  } | null = translationSource
-    ? {
-        body: tiptapDocumentSchema.parse(
-          JSON.parse(translationSource.bodyJson)
-        ),
-        language: translationSource.language,
-        summary: translationSource.summary,
-        title: translationSource.title,
-      }
-    : null;
+  const translationSourceQuality = useMemo(
+    () =>
+      translationSource
+        ? {
+            body: tiptapDocumentSchema.parse(
+              JSON.parse(translationSource.bodyJson)
+            ),
+            language: translationSource.language,
+            summary: translationSource.summary,
+            title: translationSource.title,
+          }
+        : null,
+    [translationSource]
+  );
 
   const hasUnsavedChanges =
     saveState !== "saved" &&
@@ -402,7 +387,7 @@ function ArticleEditorForm({
       const options = articleWorkspaceQueryOptions(id);
 
       try {
-        return await queryClient.fetchQuery({ ...options, staleTime: 0 });
+        return await queryClient.query({ ...options, staleTime: 0 });
       } catch {
         await queryClient.invalidateQueries({
           exact: true,
@@ -429,14 +414,15 @@ function ArticleEditorForm({
         byline: values.byline,
         bylineType: values.bylineType,
         bylineUrl: values.bylineUrl,
+        expectedTranslationSourceHash:
+          submitMeta.translationReviewAction === "approve" &&
+          hasText(translationSourceCurrentHash)
+            ? translationSourceCurrentHash
+            : undefined,
         expectedVersion: Math.max(
           0,
           ...revisions.map((revision) => revision.version)
         ),
-        ...(submitMeta.translationReviewAction === "approve" &&
-        translationSourceCurrentHash
-          ? { expectedTranslationSourceHash: translationSourceCurrentHash }
-          : {}),
         heroFit: values.heroFit,
         heroFocalX: values.heroFocalX,
         heroFocalY: values.heroFocalY,
@@ -454,9 +440,7 @@ function ArticleEditorForm({
         title: values.title,
         translationGroupId,
         translationKind,
-        ...(submitMeta.translationReviewAction
-          ? { translationReviewAction: submitMeta.translationReviewAction }
-          : {}),
+        translationReviewAction: submitMeta.translationReviewAction,
       };
 
       const response = await persistArticle({
@@ -480,9 +464,7 @@ function ArticleEditorForm({
       setHeroMediaId(result.heroMediaId);
       setPublishedAt(result.publishedAt);
       setStatus(submitMeta.nextStatus);
-      setTranslationReviewStatus(
-        result.translationReviewStatus as StoredArticle["translationReviewStatus"]
-      );
+      setTranslationReviewStatus(result.translationReviewStatus);
       setSaveState("saved");
       const refreshedWorkspace = await refreshWorkspace(result.id);
 
@@ -506,7 +488,9 @@ function ArticleEditorForm({
     ]
   );
 
-  persistValidatedArticle.current = saveValidatedArticle;
+  useLayoutEffect(() => {
+    persistValidatedArticle.current = saveValidatedArticle;
+  }, [saveValidatedArticle]);
 
   const submitArticle = useCallback(
     async (
@@ -518,7 +502,7 @@ function ArticleEditorForm({
       try {
         await articleForm.handleSubmit({
           nextStatus,
-          ...(translationReviewAction ? { translationReviewAction } : {}),
+          translationReviewAction,
         });
       } catch {
         setSaveError(
@@ -534,15 +518,23 @@ function ArticleEditorForm({
   );
 
   const saveCurrentStatus = useCallback(() => {
-    submitArticle(status).catch(() => {
-      setSaveState("error");
-    });
+    void (async () => {
+      try {
+        await submitArticle(status);
+      } catch {
+        setSaveState("error");
+      }
+    })();
   }, [status, submitArticle]);
 
   const markEditorReviewed = useCallback(() => {
-    submitArticle(status, "approve").catch(() => {
-      setSaveState("error");
-    });
+    void (async () => {
+      try {
+        await submitArticle(status, "approve");
+      } catch {
+        setSaveState("error");
+      }
+    })();
   }, [status, submitArticle]);
 
   const openTranslation = useCallback(
@@ -559,8 +551,9 @@ function ArticleEditorForm({
   );
 
   const createTranslation = useCallback(
-    async (targetLanguage: "en" | "ru" | "uk" | "be") =>
-      onCreateTranslation(article, targetLanguage),
+    async (targetLanguage: "en" | "ru" | "uk" | "be") => {
+      await onCreateTranslation(article, targetLanguage);
+    },
     [article, onCreateTranslation]
   );
 
@@ -612,14 +605,18 @@ function ArticleEditorForm({
       exact: true,
       queryKey: articleWorkspaceQueryOptions(articleId).queryKey,
     });
-    await onBack();
+    onBack();
   }, [articleId, onBack, queryClient, status]);
 
   const runDeleteDraft = useCallback(() => {
-    confirmDeleteDraft().catch(() => {
-      setDeleteError("Studio encountered a draft deletion error.");
-      setDeleteState("idle");
-    });
+    void (async () => {
+      try {
+        await confirmDeleteDraft();
+      } catch {
+        setDeleteError("Studio encountered a draft deletion error.");
+        setDeleteState("idle");
+      }
+    })();
   }, [confirmDeleteDraft]);
 
   const publishOrVerify = useCallback(async (): Promise<void> => {
@@ -631,7 +628,7 @@ function ArticleEditorForm({
       ? await submitArticle("published")
       : articleId;
 
-    if (!publishedId) {
+    if (!hasText(publishedId)) {
       setPublicationError(
         "Publication stopped at the server quality gate. Resolve the listed findings and try again."
       );
@@ -658,12 +655,16 @@ function ArticleEditorForm({
   }, [articleId, saveState, status, submitArticle]);
 
   const runPublication = useCallback(() => {
-    publishOrVerify().catch(() => {
-      setPublicationError(
-        "Publication encountered a service error. The saved article remains available in Studio."
-      );
-      setPublicationState("error");
-    });
+    void (async () => {
+      try {
+        await publishOrVerify();
+      } catch {
+        setPublicationError(
+          "Publication encountered a service error. The saved article remains available in Studio."
+        );
+        setPublicationState("error");
+      }
+    })();
   }, [publishOrVerify]);
 
   const restoreRevision = useCallback(
@@ -722,10 +723,14 @@ function ArticleEditorForm({
     (event: MouseEvent<HTMLButtonElement>) => {
       const { version } = event.currentTarget.dataset;
 
-      if (version) {
-        restoreRevision(Number.parseInt(version, 10)).catch(() => {
-          setRestoringVersion(null);
-        });
+      if (hasText(version)) {
+        void (async () => {
+          try {
+            await restoreRevision(Math.trunc(Number(version)));
+          } catch {
+            setRestoringVersion(null);
+          }
+        })();
       }
     },
     [restoreRevision]
@@ -803,7 +808,7 @@ function ArticleEditorForm({
           bylineType={bylineType}
           bylineUrl={bylineUrl}
           changesCount={changes.length}
-          hasLeadImage={Boolean(heroMediaId || article.hero)}
+          hasLeadImage={Boolean(firstText(heroMediaId, article.hero))}
           heroFit={heroFit}
           heroFocalX={heroFocalX}
           heroFocalY={heroFocalY}
@@ -870,7 +875,7 @@ function ArticleEditorForm({
             The published site stays unchanged. This draft and its Studio
             revision history will be removed permanently.
           </p>
-          {deleteError ? (
+          {hasText(deleteError) ? (
             <p className="text-destructive m-0 text-sm" role="alert">
               {deleteError}
             </p>
@@ -922,5 +927,24 @@ function ArticleEditorForm({
         </div>
       </StudioDialog>
     </div>
+  );
+}
+
+export function ArticleEditor(props: Props) {
+  const { data: workspace } = useSuspenseQuery(
+    articleWorkspaceQueryOptions(props.article.id)
+  );
+
+  const workspaceVersion = Math.max(
+    0,
+    ...workspace.revisions.map((revision) => revision.version)
+  );
+
+  return (
+    <ArticleEditorForm
+      {...props}
+      key={`${workspace.canonical.id}:${workspaceVersion}`}
+      workspace={workspace}
+    />
   );
 }

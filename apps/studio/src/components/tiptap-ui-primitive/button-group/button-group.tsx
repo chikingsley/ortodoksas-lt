@@ -1,8 +1,7 @@
-import { mergeProps } from "@base-ui/react/merge-props";
-import { useRender } from "@base-ui/react/use-render";
-import { cva, type VariantProps } from "class-variance-authority";
+/* oxlint-disable jsx-a11y/prefer-tag-over-role -- WAI-ARIA group expresses related toolbar or input controls; fieldset would introduce form grouping and legend semantics. This preserves the upstream component contract. */
+import type { VariantProps } from "class-variance-authority";
+import { cva } from "class-variance-authority";
 
-import { Separator } from "@/components/tiptap-ui-primitive/separator";
 import { cn } from "@/lib/tiptap-utils";
 
 import "./button-group.scss";
@@ -26,49 +25,13 @@ function ButtonGroup({
 }: React.ComponentProps<"div"> & VariantProps<typeof buttonGroupVariants>) {
   return (
     <div
-      className={cn(buttonGroupVariants({ orientation }), className)}
-      data-orientation={orientation}
-      data-slot="tiptap-button-group"
       role="group"
+      data-slot="tiptap-button-group"
+      data-orientation={orientation}
+      className={cn(buttonGroupVariants({ orientation }), className)}
       {...props}
     />
   );
 }
 
-function ButtonGroupText({
-  className,
-  render,
-  ...props
-}: useRender.ComponentProps<"div">) {
-  return useRender({
-    defaultTagName: "div",
-    props: mergeProps<"div">(
-      { className: cn("tiptap-button-group-text", className) },
-      props
-    ),
-    render,
-    state: { slot: "tiptap-button-group-text" },
-  });
-}
-
-function ButtonGroupSeparator({
-  className,
-  orientation = "vertical",
-  ...props
-}: React.ComponentProps<typeof Separator>) {
-  return (
-    <Separator
-      className={cn("tiptap-button-group-separator", className)}
-      data-slot="tiptap-button-group-separator"
-      orientation={orientation}
-      {...props}
-    />
-  );
-}
-
-export {
-  ButtonGroup,
-  ButtonGroupSeparator,
-  ButtonGroupText,
-  buttonGroupVariants,
-};
+export { ButtonGroup, buttonGroupVariants };

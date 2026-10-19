@@ -28,11 +28,14 @@ export const slugifyDirectoryName = (value: string) =>
 const optionalText = (maximum: number) =>
   z.string().trim().max(maximum).default("");
 
-export const prepareDirectoryRecordForEditing = (record: {
-  [key: string]: unknown;
-  media: readonly { role: string }[];
-  status: string;
-}) =>
+export const prepareDirectoryRecordForEditing = <
+  T extends {
+    media: readonly { role: string }[];
+    status: string;
+  },
+>(
+  record: T
+) =>
   record.status === "published" &&
   !record.media.some(({ role }) => role === "primary")
     ? { ...record, status: "draft" }
@@ -144,7 +147,7 @@ export const communityContactKindSchema = z.enum([
 
 export const communityContactSchema = z.strictObject({
   communityId: entityIdSchema,
-  href: z.string().trim().url().max(4096),
+  href: z.string().trim().pipe(z.url().max(4096)),
   id: entityIdSchema,
   kind: communityContactKindSchema,
   sortOrder: z.number().int().nonnegative(),
@@ -228,7 +231,7 @@ const personMediaEditorSchema = z.strictObject({
 });
 
 const personContactEditorSchema = z.strictObject({
-  href: z.string().trim().url().max(4096),
+  href: z.string().trim().pipe(z.url().max(4096)),
   id: entityIdSchema.optional(),
   kind: communityContactKindSchema,
   localizations: z.array(
@@ -343,7 +346,7 @@ export const personEditorSchema = personSchema
   });
 
 const communityContactEditorSchema = z.strictObject({
-  href: z.string().trim().url().max(4096),
+  href: z.string().trim().pipe(z.url().max(4096)),
   id: entityIdSchema.optional(),
   kind: communityContactKindSchema,
   localizations: z.array(

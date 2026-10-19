@@ -4,6 +4,7 @@ import {
   createArticleSchema,
   createInteractiveArticleSchema,
   updateArticleSchema,
+  tiptapDocumentSchema,
 } from "./article";
 
 const article = {
@@ -15,6 +16,38 @@ const article = {
 };
 
 describe("article mutation boundaries", () => {
+  it("omits undefined optional node fields and preserves extension attributes", () => {
+    const input = {
+      attrs: undefined,
+      content: [
+        {
+          content: [
+            {
+              attrs: undefined,
+              marks: [{ attrs: undefined, type: "bold" }],
+              text: "Text",
+              type: "text",
+            },
+          ],
+          customFlag: true,
+          type: "paragraph",
+        },
+      ],
+      type: "doc",
+    };
+
+    expect(tiptapDocumentSchema.parse(input)).toStrictEqual({
+      content: [
+        {
+          content: [{ marks: [{ type: "bold" }], text: "Text", type: "text" }],
+          customFlag: true,
+          type: "paragraph",
+        },
+      ],
+      type: "doc",
+    });
+  });
+
   it("accepts the canonical create and update inputs", () => {
     expect(createArticleSchema.safeParse(article).success).toBe(true);
     expect(
@@ -45,6 +78,7 @@ describe("article mutation boundaries", () => {
 
   it("limits public author links to HTTP and HTTPS", () => {
     for (const bylineUrl of [
+      // oxlint-disable-next-line no-script-url -- Executable URL fixture verifies sanitizer rejection.
       "javascript:alert(1)",
       "data:text/html,<script>alert(1)</script>",
       "mailto:editor@example.com",

@@ -1,6 +1,10 @@
+"use client";
+
+/* oxlint-disable jsx-a11y/prefer-tag-over-role -- WAI-ARIA group expresses related toolbar or input controls; fieldset would introduce form grouping and legend semantics. This preserves the upstream component contract. */
+
 import { forwardRef, useCallback, useEffect, useRef, useState } from "react";
 
-import { Separator } from "@/components/tiptap-ui-primitive/separator";
+import { Separator } from "@/components/tiptap-ui-primitive/separator/separator";
 
 import "@/components/tiptap-ui-primitive/toolbar/toolbar.scss";
 import { useComposedRef } from "@/hooks/use-composed-ref";
@@ -13,39 +17,65 @@ interface ToolbarProps extends BaseProps {
   variant?: "floating" | "fixed";
 }
 
+function setContainerTabStop(
+  items: HTMLElement[],
+  currentItem: HTMLElement | undefined,
+  toolbar: HTMLElement,
+  initialContainerTabIndex: number
+) {
+  for (const item of items) {
+    item.setAttribute("tabindex", "-1");
+  }
+
+  if (currentItem === undefined) {
+    toolbar.tabIndex = initialContainerTabIndex;
+  } else {
+    toolbar.tabIndex = -1;
+
+    if (toolbar.contains(toolbar.ownerDocument.activeElement)) {
+      currentItem.focus();
+    }
+  }
+}
+
 const useToolbarNavigation = (
   toolbarRef: React.RefObject<HTMLDivElement | null>
 ) => {
   const [items, setItems] = useState<HTMLElement[]>([]);
-  const initialContainerTabIndexRef = useRef<number | null | undefined>(
-    undefined
-  );
+
+  const initialContainerTabIndexRef = useRef<{
+    tabIndex: number | null;
+  } | null>(null);
 
   const collectItems = useCallback(() => {
     if (!toolbarRef.current) {
       return [];
     }
-    return Array.from(
-      toolbarRef.current.querySelectorAll<HTMLElement>(
+
+    return [
+      ...toolbarRef.current.querySelectorAll<HTMLElement>(
         'button:not([disabled]), [role="button"]:not([disabled]), [tabindex="0"]:not([disabled])'
-      )
-    );
+      ),
+    ];
   }, [toolbarRef]);
 
   useEffect(() => {
     const toolbar = toolbarRef.current;
+
     if (!toolbar) {
       return;
     }
 
-    if (initialContainerTabIndexRef.current === undefined) {
-      initialContainerTabIndexRef.current =
+    initialContainerTabIndexRef.current ??= {
+      tabIndex:
         toolbar.hasAttribute("tabindex") && toolbar.tabIndex >= 0
           ? toolbar.tabIndex
-          : null;
-    }
+          : null,
+    };
 
-    const updateItems = () => setItems(collectItems());
+    const updateItems = () => {
+      setItems(collectItems());
+    };
 
     updateItems();
     const observer = new MutationObserver(updateItems);
@@ -56,7 +86,9 @@ const useToolbarNavigation = (
       subtree: true,
     });
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+    };
   }, [collectItems, toolbarRef]);
 
   const { selectedIndex, setSelectedIndex } = useMenuNavigation<HTMLElement>({
@@ -64,49 +96,69 @@ const useToolbarNavigation = (
     containerRef: toolbarRef,
     items,
     loopOnTab: false,
-    onSelect: (el) => el.click(),
+    onSelect: (el) => {
+      el.click();
+    },
     orientation: "horizontal",
   });
 
   useEffect(() => {
     const toolbar = toolbarRef.current;
+
     if (!toolbar) {
       return;
     }
 
     const handleFocus = (e: FocusEvent) => {
-      const target = e.target as HTMLElement;
+      const { target } = e;
+
+      if (!(target instanceof HTMLElement)) {
+        return;
+      }
+
       if (toolbar.contains(target)) {
-        target.setAttribute("data-focus-visible", "true");
+        target.dataset.focusVisible = "true";
         const itemIndex = items.indexOf(target);
-        if (itemIndex >= 0) {
+
+        if (itemIndex !== -1) {
           setSelectedIndex(itemIndex);
         }
       }
     };
 
     const handleBlur = (e: FocusEvent) => {
-      const target = e.target as HTMLElement;
+      const { target } = e;
+
+      if (!(target instanceof HTMLElement)) {
+        return;
+      }
+
       if (toolbar.contains(target)) {
-        target.removeAttribute("data-focus-visible");
+        delete target.dataset.focusVisible;
       }
 
       const nextTarget = e.relatedTarget;
       const NodeConstructor = toolbar.ownerDocument.defaultView?.Node;
-      const leavesToolbar = !(
-        nextTarget &&
-        NodeConstructor &&
-        nextTarget instanceof NodeConstructor &&
-        toolbar.contains(nextTarget)
-      );
 
-      if (leavesToolbar && initialContainerTabIndexRef.current != null) {
+      const leavesToolbar =
+        !nextTarget ||
+        !NodeConstructor ||
+        !(nextTarget instanceof NodeConstructor) ||
+        !toolbar.contains(nextTarget);
+
+      const initialTabIndex = initialContainerTabIndexRef.current?.tabIndex;
+
+      if (
+        leavesToolbar &&
+        initialTabIndex !== undefined &&
+        initialTabIndex !== null
+      ) {
         queueMicrotask(() => {
           if (
             toolbar.isConnected &&
             !toolbar.contains(toolbar.ownerDocument.activeElement)
           ) {
-            toolbar.tabIndex = initialContainerTabIndexRef.current!;
+            toolbar.tabIndex = initialTabIndex;
             setSelectedIndex(-1);
           }
         });
@@ -128,47 +180,48 @@ const useToolbarNavigation = (
     }
 
     const toolbar = toolbarRef.current;
+
     if (!toolbar) {
       return;
     }
 
-    const initialContainerTabIndex = initialContainerTabIndexRef.current;
+    const initialContainerTabIndex =
+      initialContainerTabIndexRef.current?.tabIndex;
+
     const currentIndex = selectedIndex ?? -1;
+    const currentItem = items[currentIndex];
 
-    if (initialContainerTabIndex != null) {
-      items.forEach((item) => {
-        item.tabIndex = -1;
-      });
+    if (
+      initialContainerTabIndex !== null &&
+      initialContainerTabIndex !== undefined
+    ) {
+      setContainerTabStop(
+        items,
+        currentItem,
+        toolbar,
+        initialContainerTabIndex
+      );
 
-      if (currentIndex >= 0 && items[currentIndex]) {
-        toolbar.tabIndex = -1;
-        if (toolbar.contains(toolbar.ownerDocument.activeElement)) {
-          items[currentIndex].focus();
-        }
-      } else {
-        toolbar.tabIndex = initialContainerTabIndex;
-      }
       return;
     }
 
     const existingTabStop = items.findIndex((item) => item.tabIndex === 0);
-    const activeIndex =
-      currentIndex >= 0 && items[currentIndex]
-        ? currentIndex
-        : existingTabStop >= 0
-          ? existingTabStop
-          : 0;
 
-    items.forEach((item, index) => {
-      item.tabIndex = index === activeIndex ? 0 : -1;
-    });
+    const fallbackIndex = existingTabStop === -1 ? 0 : existingTabStop;
+
+    const activeIndex =
+      currentIndex >= 0 && items[currentIndex] ? currentIndex : fallbackIndex;
+
+    for (const [index, item] of items.entries()) {
+      item.setAttribute("tabindex", index === activeIndex ? "0" : "-1");
+    }
 
     // Only restore focus while it is inside the toolbar. The item list also
     // refreshes when focus legitimately lives elsewhere (e.g. a popover
     // opened from the toolbar autofocused its input), and stealing focus
     // back would dismiss such overlays.
     if (
-      currentIndex >= 0 &&
+      currentItem !== undefined &&
       toolbar.contains(toolbar.ownerDocument.activeElement)
     ) {
       items[activeIndex]?.focus();
@@ -184,11 +237,11 @@ export const Toolbar = forwardRef<HTMLDivElement, ToolbarProps>(
 
     return (
       <div
-        aria-label="toolbar"
-        className={cn("tiptap-toolbar", className)}
-        data-variant={variant}
         ref={composedRef}
         role="toolbar"
+        aria-label="toolbar"
+        data-variant={variant}
+        className={cn("tiptap-toolbar", className)}
         {...props}
       >
         {children}
@@ -196,25 +249,28 @@ export const Toolbar = forwardRef<HTMLDivElement, ToolbarProps>(
     );
   }
 );
+
 Toolbar.displayName = "Toolbar";
 
 export const ToolbarGroup = forwardRef<HTMLDivElement, BaseProps>(
   ({ children, className, ...props }, ref) => (
     <div
-      className={cn("tiptap-toolbar-group", className)}
       ref={ref}
       role="group"
+      className={cn("tiptap-toolbar-group", className)}
       {...props}
     >
       {children}
     </div>
   )
 );
+
 ToolbarGroup.displayName = "ToolbarGroup";
 
 export const ToolbarSeparator = forwardRef<HTMLDivElement, BaseProps>(
   ({ ...props }, ref) => (
-    <Separator decorative orientation="vertical" ref={ref} {...props} />
+    <Separator ref={ref} orientation="vertical" decorative {...props} />
   )
 );
+
 ToolbarSeparator.displayName = "ToolbarSeparator";

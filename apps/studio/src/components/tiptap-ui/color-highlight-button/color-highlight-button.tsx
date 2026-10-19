@@ -1,15 +1,18 @@
-import { forwardRef, useCallback, useMemo } from "react";
+"use client";
 
-import { Badge } from "@/components/tiptap-ui-primitive/badge";
+import { firstText, hasText } from "@ortodoksas-lt/content/value";
+import { forwardRef, useCallback } from "react";
+
+import { Badge } from "@/components/tiptap-ui-primitive/badge/badge";
 // --- UI Primitives ---
-import type { ButtonProps } from "@/components/tiptap-ui-primitive/button";
-import { Button } from "@/components/tiptap-ui-primitive/button";
+import type { ButtonProps } from "@/components/tiptap-ui-primitive/button/button";
+import { Button } from "@/components/tiptap-ui-primitive/button/button";
 // --- Tiptap UI ---
-import type { UseColorHighlightConfig } from "@/components/tiptap-ui/color-highlight-button";
+import type { UseColorHighlightConfig } from "@/components/tiptap-ui/color-highlight-button/use-color-highlight";
 import {
   COLOR_HIGHLIGHT_SHORTCUT_KEY,
   useColorHighlight,
-} from "@/components/tiptap-ui/color-highlight-button";
+} from "@/components/tiptap-ui/color-highlight-button/use-color-highlight";
 // --- Hooks ---
 import { useTiptapEditor } from "@/hooks/use-tiptap-editor";
 // --- Lib ---
@@ -21,14 +24,14 @@ import "@/components/tiptap-ui/color-highlight-button/color-highlight-button.scs
 export interface ColorHighlightButtonProps
   extends Omit<ButtonProps, "type">, UseColorHighlightConfig {
   /**
+   * Optional text to display alongside the icon.
+   */
+  text?: string;
+  /**
    * Optional show shortcut keys in the button.
    * @default false
    */
   showShortcut?: boolean;
-  /**
-   * Optional text to display alongside the icon.
-   */
-  text?: string;
 }
 
 export function ColorHighlightShortcutBadge({
@@ -42,16 +45,28 @@ export function ColorHighlightShortcutBadge({
 /**
  * Button component for applying color highlights in a Tiptap editor.
  *
+ * Supports two highlighting modes:
+ * - "mark": Uses the highlight mark extension (default)
+ * - "node": Uses the node background extension
+ *
  * For custom button implementations, use the `useColorHighlight` hook instead.
  *
  * @example
  * ```tsx
+ * // Mark-based highlighting (default)
  * <ColorHighlightButton highlightColor="yellow" />
+ *
+ * // Node-based background coloring
+ * <ColorHighlightButton
+ *   highlightColor="var(--tt-color-highlight-blue)"
+ *   mode="node"
+ * />
  *
  * // With custom callback
  * <ColorHighlightButton
  *   highlightColor="red"
- *   onApplied={({ color }) => console.log(`Applied ${color}`)}
+ *   mode="mark"
+ *   onApplied={({ color, mode }) => console.log(`Applied ${color} in ${mode} mode`)}
  * />
  * ```
  */
@@ -65,6 +80,7 @@ export const ColorHighlightButton = forwardRef<
       highlightColor,
       text,
       hideWhenUnavailable = false,
+      mode = "mark",
       onApplied,
       showShortcut = false,
       onClick,
@@ -76,6 +92,7 @@ export const ColorHighlightButton = forwardRef<
     ref
   ) => {
     const { editor } = useTiptapEditor(providedEditor);
+
     const {
       isVisible,
       canColorHighlight,
@@ -87,7 +104,8 @@ export const ColorHighlightButton = forwardRef<
       editor,
       hideWhenUnavailable,
       highlightColor,
-      label: text || `Toggle highlight (${highlightColor})`,
+      label: firstText(text, `Toggle highlight (${highlightColor})`),
+      mode,
       onApplied,
       useColorValue,
     });
@@ -95,21 +113,14 @@ export const ColorHighlightButton = forwardRef<
     const handleClick = useCallback(
       (event: React.MouseEvent<HTMLButtonElement>) => {
         onClick?.(event);
+
         if (event.defaultPrevented) {
           return;
         }
+
         handleColorHighlight();
       },
       [handleColorHighlight, onClick]
-    );
-
-    const buttonStyle = useMemo(
-      () =>
-        ({
-          ...style,
-          "--highlight-color": highlightColor,
-        }) as React.CSSProperties,
-      [highlightColor, style]
     );
 
     if (!isVisible) {
@@ -118,18 +129,17 @@ export const ColorHighlightButton = forwardRef<
 
     return (
       <Button
-        aria-label={label}
-        aria-pressed={isActive}
-        data-active-state={isActive ? "on" : "off"}
-        data-disabled={!canColorHighlight}
-        disabled={!canColorHighlight}
-        onClick={handleClick}
-        role="button"
-        style={buttonStyle}
-        tabIndex={-1}
-        tooltip={label}
         type="button"
         variant="ghost"
+        data-active-state={isActive ? "on" : "off"}
+        tabIndex={-1}
+        disabled={!canColorHighlight}
+        data-disabled={!canColorHighlight}
+        aria-label={label}
+        aria-pressed={isActive}
+        tooltip={label}
+        onClick={handleClick}
+        style={{ ...style, "--highlight-color": highlightColor }}
         {...buttonProps}
         ref={ref}
       >
@@ -137,11 +147,11 @@ export const ColorHighlightButton = forwardRef<
           <>
             <span
               className="tiptap-button-highlight"
-              style={
-                { "--highlight-color": highlightColor } as React.CSSProperties
-              }
+              style={{ "--highlight-color": highlightColor }}
             />
-            {text && <span className="tiptap-button-text">{text}</span>}
+            {hasText(text) && (
+              <span className="tiptap-button-text">{text}</span>
+            )}
             {showShortcut && (
               <ColorHighlightShortcutBadge shortcutKeys={shortcutKeys} />
             )}

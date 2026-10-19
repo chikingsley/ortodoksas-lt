@@ -170,6 +170,7 @@
     overflow: hidden;
 
     .tiptap-image-upload-progress {
+      width: var(--upload-progress, 0%);
       position: absolute;
       inset: 0;
       background-color: var(--tiptap-image-upload-progress-bg);

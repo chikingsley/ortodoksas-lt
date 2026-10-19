@@ -19,8 +19,8 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 
-import { teamRoleLabel, teamRoles } from "./team-role";
 import type { TeamRole } from "./team-role";
+import { teamRoleLabel, teamRoles } from "./team-role";
 
 interface Props {
   busy: boolean;
@@ -58,7 +58,7 @@ export function InviteMemberSheet({
   }, [onOpenChange]);
 
   const submit = useCallback(
-    async (event: React.FormEvent<HTMLFormElement>) => {
+    async (event: React.SubmitEvent<HTMLFormElement>) => {
       event.preventDefault();
       const sent = await onInvite(emailAddress.trim(), role);
 
@@ -84,7 +84,9 @@ export function InviteMemberSheet({
         <form
           className="grid gap-5 px-4"
           id="team-invite-form"
-          onSubmit={submit}
+          onSubmit={(event) => {
+            void submit(event);
+          }}
         >
           <div className="grid gap-2">
             <Label htmlFor={emailId}>Email address</Label>

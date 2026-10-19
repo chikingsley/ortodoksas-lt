@@ -1,3 +1,4 @@
+import { tiptapDocumentSchema } from "@ortodoksas-lt/content/article";
 import {
   communityEditorSchema,
   personEditorSchema,
@@ -83,7 +84,9 @@ export const listPeopleDirectory = async (database: StudioDatabase) => {
               .filter((item) => item.personId === record.id)
               .map(({ biographyJson, personId: _id, ...item }) => ({
                 ...item,
-                biography: JSON.parse(biographyJson),
+                biography: tiptapDocumentSchema.parse(
+                  JSON.parse(biographyJson)
+                ),
               })),
             media: media
               .filter((item) => item.personId === record.id)

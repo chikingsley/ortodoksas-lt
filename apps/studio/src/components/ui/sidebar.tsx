@@ -2,9 +2,10 @@
 
 import { mergeProps } from "@base-ui/react/merge-props";
 import { useRender } from "@base-ui/react/use-render";
-import { cva } from "class-variance-authority";
 import type { VariantProps } from "class-variance-authority";
+import { cva } from "class-variance-authority";
 import { PanelLeftIcon } from "lucide-react";
+import type { ComponentProps } from "react";
 import {
   createContext,
   useCallback,
@@ -13,7 +14,6 @@ import {
   useMemo,
   useState,
 } from "react";
-import type { ComponentProps, CSSProperties } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -79,17 +79,18 @@ function SidebarProvider({
 
   // This is the internal state of the sidebar.
   // We use openProp and setOpenProp for control from outside the component.
-  const [_open, _setOpen] = useState(defaultOpen);
-  const open = openProp ?? _open;
+  const [internalOpen, setInternalOpen] = useState(defaultOpen);
+  const open = openProp ?? internalOpen;
 
   const setOpen = useCallback(
     (value: boolean | ((value: boolean) => boolean)) => {
+      // oxlint-disable-next-line anti-slop/no-runtime-typeof -- React controlled state accepts a boolean or updater callback.
       const openState = typeof value === "function" ? value(open) : value;
 
       if (setOpenProp) {
         setOpenProp(openState);
       } else {
-        _setOpen(openState);
+        setInternalOpen(openState);
       }
     },
     [setOpenProp, open]
@@ -97,9 +98,11 @@ function SidebarProvider({
 
   // Helper to toggle the sidebar.
   const toggleSidebar = useCallback(() => {
-    isMobile
-      ? setOpenMobile((current) => !current)
-      : setOpen((current) => !current);
+    if (isMobile) {
+      setOpenMobile((current) => !current);
+    } else {
+      setOpen((current) => !current);
+    }
   }, [isMobile, setOpen]);
 
   // Adds a keyboard shortcut to toggle the sidebar.
@@ -146,13 +149,11 @@ function SidebarProvider({
           className
         )}
         data-slot="sidebar-wrapper"
-        style={
-          {
-            "--sidebar-width": SIDEBAR_WIDTH,
-            "--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
-            ...style,
-          } as CSSProperties
-        }
+        style={{
+          "--sidebar-width": SIDEBAR_WIDTH,
+          "--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
+          ...style,
+        }}
         {...props}
       >
         {children}
@@ -201,11 +202,9 @@ function Sidebar({
           data-slot="sidebar"
           dir={dir}
           side={side}
-          style={
-            {
-              "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
-            } as CSSProperties
-          }
+          style={{
+            "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
+          }}
         >
           <SheetHeader className="sr-only">
             <SheetTitle>Sidebar</SheetTitle>
@@ -301,6 +300,7 @@ function SidebarRail({ className, ...props }: ComponentProps<"button">) {
 
   return (
     <button
+      type="button"
       aria-label="Toggle Sidebar"
       className={cn(
         "hover:after:bg-sidebar-border absolute inset-y-0 z-20 hidden w-4 transition-all ease-linear group-data-[side=left]:-right-4 group-data-[side=right]:left-0 after:absolute after:inset-y-0 after:start-1/2 after:w-[2px] sm:flex ltr:-translate-x-1/2 rtl:-translate-x-1/2",
@@ -348,7 +348,10 @@ function SidebarInput({ className, ...props }: ComponentProps<typeof Input>) {
 function SidebarHeader({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
-      className={cn("flex flex-col gap-2 p-2", className)}
+      className={cn(
+        "border-sidebar-border flex flex-col gap-2 border-b p-2 px-3",
+        className
+      )}
       data-sidebar="header"
       data-slot="sidebar-header"
       {...props}
@@ -359,7 +362,7 @@ function SidebarHeader({ className, ...props }: ComponentProps<"div">) {
 function SidebarFooter({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
-      className={cn("flex flex-col gap-2 p-2", className)}
+      className={cn("flex flex-col gap-2 p-2 pb-3", className)}
       data-sidebar="footer"
       data-slot="sidebar-footer"
       {...props}
@@ -532,7 +535,12 @@ function SidebarMenuButton({
       },
       props
     ),
-    render: tooltip ? <TooltipTrigger render={render} /> : render,
+    render:
+      tooltip !== undefined && tooltip !== "" ? (
+        <TooltipTrigger render={render} />
+      ) : (
+        render
+      ),
     state: {
       active: isActive,
       sidebar: "menu-button",
@@ -541,15 +549,14 @@ function SidebarMenuButton({
     },
   });
 
-  if (!tooltip) {
+  if (tooltip === undefined || tooltip === "") {
     return comp;
   }
 
-  if (typeof tooltip === "string") {
-    tooltip = {
-      children: tooltip,
-    };
-  }
+  // oxlint-disable-next-line anti-slop/no-runtime-typeof -- The component accepts tooltip text or typed TooltipContent props.
+  const tooltipProps =
+    // oxlint-disable-next-line anti-slop/no-runtime-typeof -- Base UI tooltip accepts text or its published props object.
+    typeof tooltip === "string" ? { children: tooltip } : tooltip;
 
   return (
     <Tooltip>
@@ -558,7 +565,7 @@ function SidebarMenuButton({
         align="center"
         hidden={state !== "collapsed" || isMobile}
         side="right"
-        {...tooltip}
+        {...tooltipProps}
       />
     </Tooltip>
   );
@@ -615,8 +622,7 @@ function SidebarMenuSkeleton({
 }: ComponentProps<"div"> & {
   showIcon?: boolean;
 }) {
-  // Random width between 50 to 90%.
-  const [width] = useState(() => `${Math.floor(Math.random() * 40) + 50}%`);
+  const width = "70%";
 
   return (
     <div
@@ -634,11 +640,9 @@ function SidebarMenuSkeleton({
       <Skeleton
         className="h-4 max-w-(--skeleton-width) flex-1"
         data-sidebar="menu-skeleton-text"
-        style={
-          {
-            "--skeleton-width": width,
-          } as CSSProperties
-        }
+        style={{
+          "--skeleton-width": width,
+        }}
       />
     </div>
   );

@@ -1,5 +1,6 @@
-import { siteLocales } from "@ortodoksas-lt/content/site";
 import type { SiteLocale } from "@ortodoksas-lt/content/site";
+import { siteLocales } from "@ortodoksas-lt/content/site";
+import { hasText } from "@ortodoksas-lt/content/value";
 
 import type { CatalogArticle } from "../types";
 
@@ -44,8 +45,8 @@ const pagePathsByRole: Record<PageRole, string[]> = {
 };
 
 const roleByPagePath = new Map<string, PageRole>(
-  Object.entries(pagePathsByRole).flatMap(([role, paths]) =>
-    paths.map((path) => [path, role as PageRole])
+  PAGE_ROLE_ORDER.flatMap((role) =>
+    pagePathsByRole[role].map((path) => [path, role] as const)
   )
 );
 
@@ -95,40 +96,53 @@ export const groupPagesByRole = (
     grouped.get(getPageRole(group.representative.path))?.push(group);
   }
 
-  return PAGE_ROLE_ORDER.map((role) => ({
-    description: PAGE_ROLE_DESCRIPTIONS[role],
-    groups: (grouped.get(role) ?? []).toSorted((left, right) => {
-      const canonicalOrder = pagePathsByRole[role];
-      const leftIndex = canonicalOrder.indexOf(left.representative.path);
-      const rightIndex = canonicalOrder.indexOf(right.representative.path);
+  return PAGE_ROLE_ORDER.flatMap((role) => {
+    const roleGroups = grouped.get(role) ?? [];
 
-      if (leftIndex !== -1 || rightIndex !== -1) {
-        return (
-          (leftIndex !== -1 ? leftIndex : Number.MAX_SAFE_INTEGER) -
-          (rightIndex !== -1 ? rightIndex : Number.MAX_SAFE_INTEGER)
-        );
-      }
-
-      return left.representative.title.localeCompare(
-        right.representative.title,
-        "lt"
-      );
-    }),
-    label: PAGE_ROLE_LABELS[role],
-    role,
-  })).filter(({ groups: roleGroups, role }) => {
-    if (role === "other") {
-      return roleGroups.length > 0;
+    if (roleGroups.length === 0 && (role === "other" || !includeEmptyRoles)) {
+      return [];
     }
 
-    return includeEmptyRoles || roleGroups.length > 0;
+    return [
+      {
+        description: PAGE_ROLE_DESCRIPTIONS[role],
+        groups: roleGroups.toSorted((left, right) => {
+          const canonicalOrder = pagePathsByRole[role];
+          const leftIndex = canonicalOrder.indexOf(left.representative.path);
+          const rightIndex = canonicalOrder.indexOf(right.representative.path);
+
+          if (leftIndex !== -1 || rightIndex !== -1) {
+            return (
+              (leftIndex === -1 ? Number.MAX_SAFE_INTEGER : leftIndex) -
+              (rightIndex === -1 ? Number.MAX_SAFE_INTEGER : rightIndex)
+            );
+          }
+
+          return left.representative.title.localeCompare(
+            right.representative.title,
+            "lt"
+          );
+        }),
+        label: PAGE_ROLE_LABELS[role],
+        role,
+      },
+    ];
   });
 };
 
-const preferredRepresentative = (articles: CatalogArticle[]) =>
-  articles.find((article) => article.language === "lt") ??
-  articles.find((article) => article.translationKind === "original") ??
-  articles[0];
+function preferredRepresentative(articles: CatalogArticle[]) {
+  const [first] = articles;
+
+  if (first === undefined) {
+    throw new Error("Article groups require at least one edition");
+  }
+
+  return (
+    articles.find((article) => article.language === "lt") ??
+    articles.find((article) => article.translationKind === "original") ??
+    first
+  );
+}
 
 export const groupArticles = (articles: CatalogArticle[]): ArticleGroup[] => {
   const grouped = new Map<string, CatalogArticle[]>();
@@ -155,19 +169,17 @@ export const groupArticles = (articles: CatalogArticle[]): ArticleGroup[] => {
       return {
         editions: Object.fromEntries(
           sortedEditions
-            .filter((article) =>
-              EDITION_LANGUAGES.includes(article.language as EditionLanguage)
-            )
+            .filter((article) => EDITION_LANGUAGES.includes(article.language))
             .map((article) => [article.language, article])
         ),
         id,
         latestPublished:
-          sortedEditions.find((article) => article.published)?.published ??
-          null,
+          sortedEditions.find((article) => hasText(article.published))
+            ?.published ?? null,
         representative,
       } satisfies ArticleGroup;
     })
-    .sort((left, right) => {
+    .toSorted((left, right) => {
       const byPublication = (right.latestPublished ?? "").localeCompare(
         left.latestPublished ?? ""
       );

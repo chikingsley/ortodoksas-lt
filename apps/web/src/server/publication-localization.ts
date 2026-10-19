@@ -1,3 +1,5 @@
+import { mapSiteLocales } from "@ortodoksas-lt/content/site";
+import { hasText } from "@ortodoksas-lt/content/value";
 import {
   articles,
   communities,
@@ -10,8 +12,8 @@ import { env } from "cloudflare:workers";
 import { and, eq } from "drizzle-orm";
 
 import type { LocaleDestination } from "../components/publication/publication";
-import { defaultLocale, localeShells, siteLocales } from "../i18n/config";
 import type { SiteLocale } from "../i18n/config";
+import { defaultLocale, localeShells, siteLocales } from "../i18n/config";
 import {
   articlePath,
   catalogEntry,
@@ -21,8 +23,18 @@ import {
   leadingSlash,
 } from "./publication-data";
 
+const hrefFor = (locale: SiteLocale, pagePath?: string) => {
+  if (locale === defaultLocale) {
+    return pagePath ?? "/";
+  }
+
+  return hasText(pagePath) ? `/${locale}${pagePath}` : `/${locale}`;
+};
+
 const DIRECTORY_DETAIL_PATH_PATTERN = /^\/(?:community|person)\/[^/]+$/u;
-const DIRECTORY_DETAIL_PARTS_PATTERN = /^\/(community|person)\/([^/]+)$/u;
+
+const DIRECTORY_DETAIL_PARTS_PATTERN =
+  /^\/(?<kind>community|person)\/(?<slug>[^/]+)$/u;
 
 async function getDirectoryLocaleLinks(publicationPath: string) {
   const match = DIRECTORY_DETAIL_PARTS_PATTERN.exec(publicationPath);
@@ -33,7 +45,7 @@ async function getDirectoryLocaleLinks(publicationPath: string) {
 
   const [, kind, slug] = match;
 
-  if (!(kind && slug)) {
+  if (!(hasText(kind) && hasText(slug))) {
     return;
   }
 
@@ -60,18 +72,13 @@ async function getDirectoryLocaleLinks(publicationPath: string) {
 
   const available = new Set(rows.map(({ language }) => language));
 
-  return Object.fromEntries(
-    siteLocales.map((locale) => [
-      locale,
-      {
-        hasCounterpart: available.has(locale),
-        href:
-          locale === defaultLocale
-            ? publicationPath
-            : `/${locale}${publicationPath}`,
-      },
-    ])
-  ) as Record<SiteLocale, LocaleDestination>;
+  return mapSiteLocales((locale) => ({
+    hasCounterpart: available.has(locale),
+    href:
+      locale === defaultLocale
+        ? publicationPath
+        : `/${locale}${publicationPath}`,
+  })) satisfies Record<string, LocaleDestination>;
 }
 
 function stripLocale(path: string) {
@@ -233,33 +240,22 @@ export async function getLocaleLinks(currentPath: string) {
     .where(
       and(
         eq(articles.status, "published"),
-        group ? eq(articles.translationGroupId, group) : eq(articles.slug, slug)
+        hasText(group)
+          ? eq(articles.translationGroupId, group)
+          : eq(articles.slug, slug)
       )
     );
 
   const pathByLocale = new Map(
     rows.flatMap((row) =>
-      siteLocales.includes(row.language as SiteLocale)
-        ? [[row.language as SiteLocale, articlePath(row.slug)] as const]
+      siteLocales.some((locale) => locale === row.language)
+        ? [[row.language, articlePath(row.slug)] as const]
         : []
     )
   );
 
-  const hrefFor = (locale: SiteLocale, pagePath?: string) => {
-    if (locale === defaultLocale) {
-      return pagePath ?? "/";
-    }
-
-    return pagePath ? `/${locale}${pagePath}` : `/${locale}`;
-  };
-
-  return Object.fromEntries(
-    siteLocales.map((locale) => [
-      locale,
-      {
-        hasCounterpart: pathByLocale.has(locale),
-        href: hrefFor(locale, pathByLocale.get(locale)),
-      },
-    ])
-  ) as Record<SiteLocale, LocaleDestination>;
+  return mapSiteLocales((locale) => ({
+    hasCounterpart: pathByLocale.has(locale),
+    href: hrefFor(locale, pathByLocale.get(locale)),
+  })) satisfies Record<string, LocaleDestination>;
 }

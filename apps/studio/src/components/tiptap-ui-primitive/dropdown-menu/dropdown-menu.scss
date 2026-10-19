@@ -150,3 +150,16 @@
   align-items: center;
   gap: 0.25rem;
 }
+
+.tiptap-dropdown-menu-item {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  border-radius: var(--tt-radius-sm);
+  outline: none;
+
+  &[data-disabled] {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+}

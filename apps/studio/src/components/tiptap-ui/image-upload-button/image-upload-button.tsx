@@ -1,38 +1,42 @@
+"use client";
+
+import { hasText } from "@ortodoksas-lt/content/value";
 import { forwardRef, useCallback } from "react";
 
-import { Badge } from "@/components/tiptap-ui-primitive/badge";
+import { Badge } from "@/components/tiptap-ui-primitive/badge/badge";
 // --- UI Primitives ---
-import type { ButtonProps } from "@/components/tiptap-ui-primitive/button";
-import { Button } from "@/components/tiptap-ui-primitive/button";
+import type { ButtonProps } from "@/components/tiptap-ui-primitive/button/button";
+import { Button } from "@/components/tiptap-ui-primitive/button/button";
 // --- Tiptap UI ---
-import type { UseImageUploadConfig } from "@/components/tiptap-ui/image-upload-button";
+import type { UseImageUploadConfig } from "@/components/tiptap-ui/image-upload-button/use-image-upload";
 import {
   IMAGE_UPLOAD_SHORTCUT_KEY,
   useImageUpload,
-} from "@/components/tiptap-ui/image-upload-button";
+} from "@/components/tiptap-ui/image-upload-button/use-image-upload";
 // --- Hooks ---
 import { useTiptapEditor } from "@/hooks/use-tiptap-editor";
 // --- Lib ---
 import { parseShortcutKeys } from "@/lib/tiptap-utils";
 
 type IconProps = React.SVGProps<SVGSVGElement>;
+
 type IconComponent = ({ className, ...props }: IconProps) => React.ReactElement;
 
 export interface ImageUploadButtonProps
   extends Omit<ButtonProps, "type">, UseImageUploadConfig {
   /**
-   * Optional custom icon component to render instead of the default.
+   * Optional text to display alongside the icon.
    */
-  icon?: React.MemoExoticComponent<IconComponent> | React.FC<IconProps>;
+  text?: string;
   /**
    * Optional show shortcut keys in the button.
    * @default false
    */
   showShortcut?: boolean;
   /**
-   * Optional text to display alongside the icon.
+   * Optional custom icon component to render instead of the default.
    */
-  text?: string;
+  icon?: React.MemoExoticComponent<IconComponent> | React.FC<IconProps>;
 }
 
 export function ImageShortcutBadge({
@@ -67,6 +71,7 @@ export const ImageUploadButton = forwardRef<
     ref
   ) => {
     const { editor } = useTiptapEditor(providedEditor);
+
     const {
       isVisible,
       canInsert,
@@ -84,9 +89,11 @@ export const ImageUploadButton = forwardRef<
     const handleClick = useCallback(
       (event: React.MouseEvent<HTMLButtonElement>) => {
         onClick?.(event);
+
         if (event.defaultPrevented) {
           return;
         }
+
         handleImage();
       },
       [handleImage, onClick]
@@ -100,24 +107,25 @@ export const ImageUploadButton = forwardRef<
 
     return (
       <Button
-        aria-label={label}
-        aria-pressed={isActive}
-        data-active-state={isActive ? "on" : "off"}
-        data-disabled={!canInsert}
-        disabled={!canInsert}
-        onClick={handleClick}
-        role="button"
-        tabIndex={-1}
-        tooltip={label}
         type="button"
         variant="ghost"
+        data-active-state={isActive ? "on" : "off"}
+        tabIndex={-1}
+        disabled={!canInsert}
+        data-disabled={!canInsert}
+        aria-label={label}
+        aria-pressed={isActive}
+        tooltip={label}
+        onClick={handleClick}
         {...buttonProps}
         ref={ref}
       >
         {children ?? (
           <>
             <RenderIcon className="tiptap-button-icon" />
-            {text && <span className="tiptap-button-text">{text}</span>}
+            {hasText(text) && (
+              <span className="tiptap-button-text">{text}</span>
+            )}
             {showShortcut && <ImageShortcutBadge shortcutKeys={shortcutKeys} />}
           </>
         )}

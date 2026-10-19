@@ -1,4 +1,5 @@
 import type { SiteLocale } from "@ortodoksas-lt/content/site";
+import { hasText } from "@ortodoksas-lt/content/value";
 import { Save } from "lucide-react";
 import { useCallback } from "react";
 
@@ -50,15 +51,21 @@ export function DirectoryEditorHeader({
 
   const changeLocale = useCallback(
     (value: string | null) => {
-      if (value) {
-        onLocaleChange(value as SiteLocale);
+      if (hasText(value)) {
+        const option = localeOptions.find(
+          (candidate) => candidate.value === value
+        );
+
+        if (option) {
+          onLocaleChange(option.value);
+        }
       }
     },
     [onLocaleChange]
   );
 
   return (
-    <header className="bg-background/95 sticky top-0 z-20 -mx-[clamp(16px,3vw,40px)] mb-5 border-b px-[clamp(16px,3vw,40px)] py-3 backdrop-blur-sm max-md:top-[var(--studio-mobile-header-height)] min-[1001px]:-mt-8 min-[1001px]:flex min-[1001px]:h-[var(--studio-shell-header-height)] min-[1001px]:items-center min-[1001px]:py-0">
+    <header className="bg-background/95 sticky top-0 z-20 -mx-[clamp(16px,3vw,40px)] mb-5 border-b px-4 py-3 backdrop-blur-sm max-md:top-[var(--studio-mobile-header-height)] min-[1001px]:-mt-8 min-[1001px]:flex min-[1001px]:h-[var(--studio-shell-header-height)] min-[1001px]:items-center min-[1001px]:py-0 md:px-8 xl:px-10">
       <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-3 max-[1000px]:grid max-[1000px]:grid-cols-[minmax(0,1fr)_auto] max-[1000px]:gap-x-3 max-[1000px]:gap-y-2">
         <div className="min-w-0 flex-1 max-[1000px]:hidden">
           <h1 className="m-0 truncate text-base font-semibold">

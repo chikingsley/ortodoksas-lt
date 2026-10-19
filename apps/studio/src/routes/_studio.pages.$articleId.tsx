@@ -9,9 +9,12 @@ export const Route = createFileRoute("/_studio/pages/$articleId")({
   component: PageEditorRoute,
   errorComponent: PageError,
   loader: async ({ context, params }) =>
-    Promise.all([
-      context.queryClient.ensureQueryData(articleCatalogQueryOptions()),
-      context.queryClient.fetchQuery({
+    await Promise.all([
+      context.queryClient.query({
+        ...articleCatalogQueryOptions(),
+        staleTime: "static",
+      }),
+      context.queryClient.query({
         ...articleWorkspaceQueryOptions(params.articleId),
         staleTime: 0,
       }),

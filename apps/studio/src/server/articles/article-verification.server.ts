@@ -1,9 +1,10 @@
+import { hasText } from "@ortodoksas-lt/content/value";
 import { articles } from "@ortodoksas-lt/db";
 import { eq } from "drizzle-orm";
 
 import type { StudioDatabase } from "../db.server";
-import { success } from "./article-operation-support.server";
 import type { StudioOperationResult } from "./article-operation-support.server";
+import { success } from "./article-operation-support.server";
 import { publicArticleUrl } from "./article-publication.server";
 
 export const verifyArticlePublication = async (input: {
@@ -39,7 +40,7 @@ export const verifyArticlePublication = async (input: {
     };
   }
 
-  if (!input.publicationOrigin) {
+  if (!hasText(input.publicationOrigin)) {
     return {
       error: "Publication origin is unavailable",
       ok: false,

@@ -21,7 +21,7 @@ export const loadHomepagePlacements = createServerFn({ method: "GET" }).handler(
 export const updateHomepagePlacementsMutation = createServerFn({
   method: "POST",
 })
-  .validator((input: unknown) => homepageLayoutSchema.parse(input))
+  .validator(homepageLayoutSchema)
   .handler(async ({ data }) => {
     await requireStudioEditor(env);
     requireStudioWritesOpen(env);

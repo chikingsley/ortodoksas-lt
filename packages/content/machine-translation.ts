@@ -1,3 +1,7 @@
+import { hasText } from "@ortodoksas-lt/content/value";
+import type { JSONContent } from "@tiptap/core";
+import { z } from "zod";
+
 import type { TiptapDocument } from "./article";
 
 const translatableAttributeNames = new Set([
@@ -15,8 +19,6 @@ const sourceEditionCuePattern =
 const trailingCuePunctuationPattern = /[:.]+$/u;
 const leadingCueSeparatorPattern = /^\s*[:—–-]?\s*/u;
 
-type JsonRecord = Record<string, unknown>;
-
 export interface ArticleTranslationSource {
   body: TiptapDocument;
   summary: string;
@@ -27,37 +29,27 @@ export interface ArticleTranslationResult extends ArticleTranslationSource {
   characterCount: number;
 }
 
-const isRecord = (value: unknown): value is JsonRecord =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
-
-const getLinkedSourceEditionCue = (value: unknown): string | undefined => {
-  if (!isRecord(value) || value.type !== "paragraph") {
+const getLinkedSourceEditionCue = (value: JSONContent): string | undefined => {
+  if (value.type !== "paragraph") {
     return;
   }
 
-  const content = Array.isArray(value.content) ? value.content : [];
+  const content = value.content ?? [];
   let hasLink = false;
   let text = "";
 
   for (const child of content) {
-    if (!isRecord(child)) {
-      return;
-    }
-
     if (child.type === "hardBreak") {
       continue;
     }
 
-    if (child.type !== "text" || typeof child.text !== "string") {
+    if (child.type !== "text" || child.text === undefined) {
       return;
     }
 
     text += child.text;
 
-    if (
-      Array.isArray(child.marks) &&
-      child.marks.some((mark) => isRecord(mark) && mark.type === "link")
-    ) {
+    if (child.marks?.some((mark) => mark.type === "link") === true) {
       hasLink = true;
     }
   }
@@ -86,7 +78,7 @@ export const normalizeArticleTranslationSource = (
   const normalizedContent = content.filter((node) => {
     const cue = getLinkedSourceEditionCue(node);
 
-    if (cue) {
+    if (hasText(cue)) {
       removedCues.push(cue);
 
       return false;
@@ -95,7 +87,13 @@ export const normalizeArticleTranslationSource = (
     return true;
   });
 
-  const summary = removedCues.reduce(stripLeadingCue, source.summary).trim();
+  let { summary } = source;
+
+  for (const cue of removedCues) {
+    summary = stripLeadingCue(summary, cue);
+  }
+
+  summary = summary.trim();
 
   return {
     body: {
@@ -107,83 +105,67 @@ export const normalizeArticleTranslationSource = (
   };
 };
 
-const collectNodeText = (value: unknown, output: string[]): void => {
-  if (Array.isArray(value)) {
-    for (const item of value) {
-      collectNodeText(item, output);
-    }
+const translatableText = z.string().min(1);
 
-    return;
-  }
-
-  if (!isRecord(value)) {
-    return;
-  }
-
-  if (typeof value.text === "string" && value.text.length > 0) {
+function collectNodeText(value: JSONContent, output: string[]): void {
+  if (hasText(value.text)) {
     output.push(value.text);
   }
 
-  if (isRecord(value.attrs)) {
-    for (const [name, attribute] of Object.entries(value.attrs)) {
-      if (
-        translatableAttributeNames.has(name) &&
-        typeof attribute === "string" &&
-        attribute.length > 0
-      ) {
-        output.push(attribute);
-      }
+  for (const [name, attribute] of Object.entries(value.attrs ?? {})) {
+    if (!translatableAttributeNames.has(name)) {
+      continue;
+    }
+
+    const text = translatableText.safeParse(attribute);
+
+    if (text.success) {
+      output.push(text.data);
     }
   }
 
-  if (Array.isArray(value.content)) {
-    collectNodeText(value.content, output);
+  for (const child of value.content ?? []) {
+    collectNodeText(child, output);
   }
-};
+}
 
-const replaceNodeText = (
-  value: unknown,
+function replaceNodeText(
+  value: JSONContent,
   translations: readonly string[],
   cursor: { index: number }
-): unknown => {
-  if (Array.isArray(value)) {
-    return value.map((item) => replaceNodeText(item, translations, cursor));
-  }
+): JSONContent {
+  const result = { ...value };
 
-  if (!isRecord(value)) {
-    return value;
-  }
-
-  const result: JsonRecord = { ...value };
-
-  if (typeof value.text === "string" && value.text.length > 0) {
+  if (hasText(value.text)) {
     result.text = translations[cursor.index] ?? value.text;
     cursor.index += 1;
   }
 
-  if (isRecord(value.attrs)) {
-    const attrs = { ...value.attrs };
+  if (value.attrs !== undefined) {
+    result.attrs = { ...value.attrs };
 
     for (const [name, attribute] of Object.entries(value.attrs)) {
-      if (
-        translatableAttributeNames.has(name) &&
-        typeof attribute === "string" &&
-        attribute.length > 0
-      ) {
-        attrs[name] = translations[cursor.index] ?? attribute;
+      if (!translatableAttributeNames.has(name)) {
+        continue;
+      }
+
+      const text = translatableText.safeParse(attribute);
+
+      if (text.success) {
+        result.attrs[name] = translations[cursor.index] ?? text.data;
         cursor.index += 1;
       }
     }
-
-    result.attrs = attrs;
   }
 
-  if (Array.isArray(value.content)) {
-    result.content = replaceNodeText(value.content, translations, cursor);
+  if (value.content !== undefined) {
+    result.content = value.content.map((child) =>
+      replaceNodeText(child, translations, cursor)
+    );
   }
 
   return result;
-};
+}
 
 export const getArticleTranslationSegments = (
   source: ArticleTranslationSource
@@ -225,11 +207,10 @@ export const applyArticleTranslations = (
     cursor.index += 1;
   }
 
-  const body = replaceNodeText(
-    normalized.body,
-    translations,
-    cursor
-  ) as TiptapDocument;
+  const body: TiptapDocument = {
+    ...replaceNodeText(normalized.body, translations, cursor),
+    type: "doc",
+  };
 
   return {
     body,

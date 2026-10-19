@@ -1,3 +1,4 @@
+import { hasText } from "@ortodoksas-lt/content/value";
 import {
   articles,
   homepageLayoutState,
@@ -12,23 +13,15 @@ import type { StudioDatabase } from "../db.server";
 
 export const homepageLayoutSchema = z.object({
   expectedRevision: z.string().min(1),
-  leadId: z.string().uuid().nullable().default(null),
-  secondaryIds: z.array(z.string().uuid()).max(4).default([]),
+  leadId: z.uuid().nullable().default(null),
+  secondaryIds: z.array(z.uuid()).max(4).default([]),
 });
 
 export const getHomepagePlacements = async (database: StudioDatabase) => {
   const rows = await database
     .select({
-      articleId: homepagePlacements.articleId,
-      createdAt: homepagePlacements.createdAt,
-      endsAt: homepagePlacements.endsAt,
-      id: homepagePlacements.id,
-      layoutRevision: homepagePlacements.layoutRevision,
-      position: homepagePlacements.position,
+      placement: homepagePlacements,
       revision: homepageLayoutState.revision,
-      slot: homepagePlacements.slot,
-      startsAt: homepagePlacements.startsAt,
-      updatedAt: homepagePlacements.updatedAt,
     })
     .from(homepageLayoutState)
     .leftJoin(
@@ -40,22 +33,8 @@ export const getHomepagePlacements = async (database: StudioDatabase) => {
 
   const revision = rows[0]?.revision ?? "initial";
 
-  const placements = rows.flatMap((row) =>
-    row.id
-      ? [
-          {
-            articleId: row.articleId as string,
-            createdAt: row.createdAt as number,
-            endsAt: row.endsAt,
-            id: row.id,
-            layoutRevision: row.layoutRevision as string,
-            position: row.position as number,
-            slot: row.slot as string,
-            startsAt: row.startsAt,
-            updatedAt: row.updatedAt as number,
-          },
-        ]
-      : []
+  const placements = rows.flatMap(({ placement }) =>
+    placement === null ? [] : [placement]
   );
 
   return { placements, revision };
@@ -116,7 +95,7 @@ export const updateHomepagePlacements = async (input: {
     };
   }
 
-  const requestedIds = [...(leadId ? [leadId] : []), ...secondaryIds];
+  const requestedIds = [...(hasText(leadId) ? [leadId] : []), ...secondaryIds];
 
   if (requestedIds.length > 0) {
     const eligible = await input.database
@@ -170,7 +149,7 @@ export const updateHomepagePlacements = async (input: {
   );
 
   const values = [
-    ...(leadId
+    ...(hasText(leadId)
       ? [
           {
             articleId: leadId,

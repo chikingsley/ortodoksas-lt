@@ -1,5 +1,9 @@
+"use client";
+
+import { firstText, hasText } from "@ortodoksas-lt/content/value";
 import type { Editor } from "@tiptap/react";
 import { useCallback, useEffect, useState } from "react";
+import { z } from "zod";
 
 // --- Icons ---
 import { LinkIcon } from "@/components/tiptap-icons/link-icon";
@@ -49,7 +53,7 @@ export interface LinkHandlerProps {
  * Checks if a link can be set in the current editor state
  */
 export function canSetLink(editor: Editor | null): boolean {
-  if (!(editor && editor.isEditable)) {
+  if (!editor || !editor.isEditable) {
     return false;
   }
 
@@ -58,6 +62,7 @@ export function canSetLink(editor: Editor | null): boolean {
   if (isNodeTypeSelected(editor, ["image"], true)) {
     return false;
   }
+
   try {
     return editor.can().setMark("link");
   } catch {
@@ -69,9 +74,10 @@ export function canSetLink(editor: Editor | null): boolean {
  * Checks if a link is currently active in the editor
  */
 export function isLinkActive(editor: Editor | null): boolean {
-  if (!(editor && editor.isEditable)) {
+  if (!editor || !editor.isEditable) {
     return false;
   }
+
   return editor.isActive("link");
 }
 
@@ -84,7 +90,7 @@ export function shouldShowLinkButton(props: {
 }): boolean {
   const { editor, hideWhenUnavailable } = props;
 
-  if (!(editor && editor.isEditable)) {
+  if (!editor || !editor.isEditable) {
     return false;
   }
 
@@ -113,39 +119,28 @@ export function shouldShowLinkButton(props: {
  */
 export function useLinkHandler(props: LinkHandlerProps) {
   const { editor, onSetLink } = props;
-  const [url, setUrl] = useState<string | null>(null);
+  const [draftUrl, setDraftUrl] = useState<string | null>(null);
+  const currentHref = z.string().safeParse(editor?.getAttributes("link").href);
+  const url = draftUrl ?? (currentHref.success ? currentHref.data : "");
 
   useEffect(() => {
     if (!editor) {
       return;
     }
 
-    // Get URL immediately on mount
-    const { href } = editor.getAttributes("link");
-
-    if (isLinkActive(editor) && url === null) {
-      setUrl(href || "");
-    }
-  }, [editor, url]);
-
-  useEffect(() => {
-    if (!editor) {
-      return;
-    }
-
-    const updateLinkState = () => {
-      const { href } = editor.getAttributes("link");
-      setUrl(href || "");
+    const resetDraft = () => {
+      setDraftUrl(null);
     };
 
-    editor.on("selectionUpdate", updateLinkState);
+    editor.on("selectionUpdate", resetDraft);
+
     return () => {
-      editor.off("selectionUpdate", updateLinkState);
+      editor.off("selectionUpdate", resetDraft);
     };
   }, [editor]);
 
   const setLink = useCallback(() => {
-    if (!(url && editor)) {
+    if (!hasText(url) || !editor) {
       return;
     }
 
@@ -162,7 +157,7 @@ export function useLinkHandler(props: LinkHandlerProps) {
 
     chain.run();
 
-    setUrl(null);
+    setDraftUrl(null);
 
     onSetLink?.();
   }, [editor, onSetLink, url]);
@@ -171,6 +166,7 @@ export function useLinkHandler(props: LinkHandlerProps) {
     if (!editor) {
       return;
     }
+
     editor
       .chain()
       .focus()
@@ -178,16 +174,17 @@ export function useLinkHandler(props: LinkHandlerProps) {
       .unsetLink()
       .setMeta("preventAutolink", true)
       .run();
-    setUrl("");
+    setDraftUrl("");
   }, [editor]);
 
   const openLink = useCallback(
     (target = "_blank", features = "noopener,noreferrer") => {
-      if (!url) {
+      if (!hasText(url)) {
         return;
       }
 
       const safeUrl = sanitizeUrl(url, window.location.href);
+
       if (safeUrl !== "#") {
         window.open(safeUrl, target, features);
       }
@@ -199,8 +196,8 @@ export function useLinkHandler(props: LinkHandlerProps) {
     openLink,
     removeLink,
     setLink,
-    setUrl,
-    url: url || "",
+    setUrl: setDraftUrl,
+    url: firstText(url, ""),
   };
 }
 
@@ -211,35 +208,12 @@ export function useLinkState(props: {
   editor: Editor | null;
   hideWhenUnavailable: boolean;
 }) {
-  const { editor, hideWhenUnavailable = false } = props;
+  const { editor, hideWhenUnavailable } = props;
 
   const canSet = canSetLink(editor);
   const isActive = isLinkActive(editor);
 
-  const [isVisible, setIsVisible] = useState(true);
-
-  useEffect(() => {
-    if (!editor) {
-      return;
-    }
-
-    const handleSelectionUpdate = () => {
-      setIsVisible(
-        shouldShowLinkButton({
-          editor,
-          hideWhenUnavailable,
-        })
-      );
-    };
-
-    handleSelectionUpdate();
-
-    editor.on("selectionUpdate", handleSelectionUpdate);
-
-    return () => {
-      editor.off("selectionUpdate", handleSelectionUpdate);
-    };
-  }, [editor, hideWhenUnavailable]);
+  const isVisible = shouldShowLinkButton({ editor, hideWhenUnavailable });
 
   return {
     canSet,
@@ -290,7 +264,7 @@ export function useLinkPopover(config?: UseLinkPopoverConfig) {
     editor: providedEditor,
     hideWhenUnavailable = false,
     onSetLink,
-  } = config || {};
+  } = config ?? {};
 
   const { editor } = useTiptapEditor(providedEditor);
 
@@ -305,8 +279,8 @@ export function useLinkPopover(config?: UseLinkPopoverConfig) {
   });
 
   return {
-    canSet,
     Icon: LinkIcon,
+    canSet,
     isActive,
     isVisible,
     label: "Link",

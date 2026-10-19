@@ -1,5 +1,7 @@
-import { defaultLocale } from "../../i18n/config";
+import { hasText } from "@ortodoksas-lt/content/value";
+
 import type { SiteLocale } from "../../i18n/config";
+import { defaultLocale } from "../../i18n/config";
 import { ui } from "../../i18n/ui";
 
 type UiCopy = (typeof ui)[SiteLocale];
@@ -77,7 +79,9 @@ function localizedHome(locale: SiteLocale) {
  */
 export function getPrimaryNavigation(
   locale: SiteLocale,
-  resolveLocalizedPath: (path: string) => string | undefined = () => {}
+  resolveLocalizedPath: (path: string) => string | undefined = () => {
+    /* empty */
+  }
 ): NavigationItem[] {
   return primaryNavigation.flatMap((item) => {
     if (item.id === "home") {
@@ -101,12 +105,12 @@ export function getPrimaryNavigation(
     const localizedPath =
       locale === defaultLocale ? undefined : resolveLocalizedPath(item.path);
 
-    if (locale !== defaultLocale && !localizedPath) {
+    if (locale !== defaultLocale && !hasText(localizedPath)) {
       return [];
     }
 
     return {
-      href: localizedPath ? `/${locale}${localizedPath}` : item.path,
+      href: hasText(localizedPath) ? `/${locale}${localizedPath}` : item.path,
       id: item.id,
       label: ui[locale][item.label],
       targetLocale: locale,
@@ -116,18 +120,20 @@ export function getPrimaryNavigation(
 
 export function getContactNavigation(
   locale: SiteLocale,
-  resolveLocalizedPath: (path: string) => string | undefined = () => {}
+  resolveLocalizedPath: (path: string) => string | undefined = () => {
+    /* empty */
+  }
 ): ContactNavigationItem[] {
   return contactNavigation.flatMap((item) => {
     const localizedPath =
       locale === defaultLocale ? undefined : resolveLocalizedPath(item.path);
 
-    if (locale !== defaultLocale && !localizedPath) {
+    if (locale !== defaultLocale && !hasText(localizedPath)) {
       return [];
     }
 
     return {
-      href: localizedPath ? `/${locale}${localizedPath}` : item.path,
+      href: hasText(localizedPath) ? `/${locale}${localizedPath}` : item.path,
       id: item.id,
       label: ui[locale][item.label],
       targetLocale: locale,

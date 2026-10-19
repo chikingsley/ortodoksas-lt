@@ -1,14 +1,13 @@
 ---
 import Homepage from "../components/home/Homepage.astro";
 import { localeShells } from '../i18n/config';
-import type { Locale } from '../i18n/config';
 import SiteLayout from "../components/layout/SiteLayout.astro";
 import { getHomepageModel } from "../server/publication-catalog";
 import { ui } from "../i18n/ui";
 
-const locale = Astro.params.locale as Locale;
+const locale = localeShells.find((candidate) => candidate === Astro.params.locale);
 
-if (!localeShells.includes(locale)) {
+if (locale === undefined) {
   return Astro.rewrite("/404");
 }
 

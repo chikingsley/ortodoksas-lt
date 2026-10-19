@@ -48,20 +48,46 @@ export const articleBylineUrlSchema = z
     { error: "Author profile URL must use HTTP or HTTPS" }
   );
 
-const tiptapMarkSchema = z.looseObject({
-  attrs: z.record(z.string(), z.unknown()).optional(),
-  type: z.string().min(1),
-});
-
-const tiptapNodeSchema = z.lazy(() =>
-  z.looseObject({
+const tiptapMarkSchema = z
+  .looseObject({
     attrs: z.record(z.string(), z.unknown()).optional(),
-    content: z.array(tiptapNodeSchema).optional(),
-    marks: z.array(tiptapMarkSchema).optional(),
-    text: z.string().optional(),
     type: z.string().min(1),
   })
-) as z.ZodType<JSONContent>;
+  .transform(({ attrs, ...mark }) =>
+    attrs === undefined ? mark : { ...mark, attrs }
+  );
+
+const tiptapNodeSchema: z.ZodType<JSONContent> = z.lazy(() =>
+  z
+    .looseObject({
+      attrs: z.record(z.string(), z.unknown()).optional(),
+      content: z.array(tiptapNodeSchema).optional(),
+      marks: z.array(tiptapMarkSchema).optional(),
+      text: z.string().optional(),
+      type: z.string().min(1),
+    })
+    .transform(({ attrs, content, marks, text, ...node }): JSONContent => {
+      const result: JSONContent = { ...node };
+
+      if (attrs !== undefined) {
+        result.attrs = attrs;
+      }
+
+      if (content !== undefined) {
+        result.content = content;
+      }
+
+      if (marks !== undefined) {
+        result.marks = marks;
+      }
+
+      if (text !== undefined) {
+        result.text = text;
+      }
+
+      return result;
+    })
+);
 
 export const tiptapDocumentSchema = tiptapNodeSchema.refine(
   (document): document is JSONContent & { type: "doc" } =>
@@ -98,11 +124,11 @@ export const createArticleSchema = z.strictObject({
   status: articleStatusSchema.default("draft"),
   summary: z.string().trim().max(600).default(""),
   title: z.string().trim().min(1).max(240),
-  translationGroupId: z.string().uuid().optional(),
+  translationGroupId: z.uuid().optional(),
   translationKind: translationKindSchema.default("original"),
   translationReviewStatus:
     translationReviewStatusSchema.default("not_required"),
-  translationSourceArticleId: z.string().uuid().optional(),
+  translationSourceArticleId: z.uuid().optional(),
   translationSourceHash: z
     .string()
     .regex(/^[0-9a-f]{64}$/u)

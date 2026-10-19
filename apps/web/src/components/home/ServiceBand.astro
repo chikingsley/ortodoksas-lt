@@ -43,15 +43,12 @@ const localizedEntries =
         serviceDefinitions.map((service) => service.href)
       );
 
-const serviceLinks = serviceDefinitions.map((service) => ({
-  ...service,
-  href:
-    locale === "lt"
-      ? service.href
-      : localizedEntries.get(service.href)
-        ? `/${locale}${localizedEntries.get(service.href)?.path}`
-        : service.href,
-}));
+const serviceLinks = serviceDefinitions.map((service) => {
+ const counterpart = localizedEntries.get(service.href);
+ const href = locale !== "lt" && counterpart ? `/${locale}${counterpart.path}` : service.href;
+
+ return { ...service, href };
+});
 
 const motifPositions = [
   "left-1/4 -translate-x-1/2 max-sm:hidden",

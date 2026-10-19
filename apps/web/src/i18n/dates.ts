@@ -1,5 +1,5 @@
-import { localeMetadata } from "./config";
 import type { SiteLocale } from "./config";
+import { localeMetadata } from "./config";
 
 // CLDR Belarusian month forms cover Workers runtimes that fall back to English.
 const belarusianMonths = [

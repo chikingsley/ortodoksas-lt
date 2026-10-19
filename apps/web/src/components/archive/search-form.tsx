@@ -29,13 +29,12 @@ export function SearchForm({
       >
         <label className="min-w-0 flex-1" htmlFor="search-query">
           <span className="sr-only">{buttonLabel}</span>
-          <InputGroup className="h-11 rounded-none bg-white">
-            <InputGroupAddon className="pl-3">
+          <InputGroup className="h-11 md:h-11">
+            <InputGroupAddon>
               <SearchIcon aria-hidden="true" />
             </InputGroupAddon>
             <InputGroupInput
               autoFocus
-              className="text-base"
               defaultValue={query}
               id="search-query"
               name="q"
@@ -44,7 +43,7 @@ export function SearchForm({
             />
           </InputGroup>
         </label>
-        <Button className="h-11 rounded-none px-5" type="submit">
+        <Button className="h-11" type="submit">
           {buttonLabel}
         </Button>
       </form>

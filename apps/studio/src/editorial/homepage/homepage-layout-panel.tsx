@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 
-import { ValueCombobox } from "@/editorial/shared/value-combobox";
 import type { ValueOption } from "@/editorial/shared/value-combobox";
+import { ValueCombobox } from "@/editorial/shared/value-combobox";
 
 interface PlacementFieldProps {
   label: string;
@@ -70,7 +70,7 @@ export function HomepageLayoutPanel({
 }: Props) {
   return (
     <section aria-label="Homepage layout" className="grid">
-      <section className="max-inventory-compact:grid-cols-[180px_minmax(0,1fr)] max-inventory-mobile:grid-cols-1 max-inventory-mobile:gap-4 max-inventory-compact:px-6 max-inventory-mobile:px-4 grid grid-cols-[220px_minmax(0,680px)] gap-8 border-b px-[42px] py-8">
+      <section className="max-inventory-compact:grid-cols-[180px_minmax(0,1fr)] max-inventory-mobile:grid-cols-1 max-inventory-mobile:gap-4 max-inventory-compact:px-6 max-inventory-mobile:px-4 grid grid-cols-[220px_minmax(0,680px)] gap-8 border-b px-10.5 py-8">
         <div>
           <h2 className="m-0 text-base font-semibold">Lead story</h2>
           <p className="text-muted-foreground mt-2 mb-0 text-xs leading-5">
@@ -92,7 +92,7 @@ export function HomepageLayoutPanel({
           />
         </label>
       </section>
-      <section className="max-inventory-compact:grid-cols-[180px_minmax(0,1fr)] max-inventory-mobile:grid-cols-1 max-inventory-mobile:gap-4 max-inventory-compact:px-6 max-inventory-mobile:px-4 grid grid-cols-[220px_minmax(0,1fr)] gap-8 px-[42px] py-8">
+      <section className="max-inventory-compact:grid-cols-[180px_minmax(0,1fr)] max-inventory-mobile:grid-cols-1 max-inventory-mobile:gap-4 max-inventory-compact:px-6 max-inventory-mobile:px-4 grid grid-cols-[220px_minmax(0,1fr)] gap-8 px-10.5 py-8">
         <div>
           <h2 className="m-0 text-base font-semibold">Supporting stories</h2>
           <p className="text-muted-foreground mt-2 mb-0 text-xs leading-5">

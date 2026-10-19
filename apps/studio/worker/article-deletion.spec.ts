@@ -56,7 +56,7 @@ describe("article draft deletion", () => {
     ).resolves.toMatchObject({ ok: false, status: 409 });
     await expect(
       deleteArticleDraft({ articleId: translation.article.id, database })
-    ).resolves.toEqual({
+    ).resolves.toStrictEqual({
       data: { id: translation.article.id },
       ok: true,
     });
@@ -78,7 +78,7 @@ describe("article draft deletion", () => {
 
     await expect(
       deleteArticleDraft({ articleId: original.data.id, database })
-    ).resolves.toEqual({ data: { id: original.data.id }, ok: true });
+    ).resolves.toStrictEqual({ data: { id: original.data.id }, ok: true });
     await expect(
       database
         .select({ id: publicationGroups.id })

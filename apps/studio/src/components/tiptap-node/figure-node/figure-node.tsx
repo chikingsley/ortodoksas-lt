@@ -1,21 +1,23 @@
-import {
-  NodeViewContent,
-  type NodeViewProps,
-  NodeViewWrapper,
-} from "@tiptap/react";
+import { figureAttributesSchema } from "@ortodoksas-lt/content/media";
+import { hasText } from "@ortodoksas-lt/content/value";
+import type { NodeViewProps } from "@tiptap/react";
+import { NodeViewContent, NodeViewWrapper } from "@tiptap/react";
 import type { ChangeEvent } from "react";
 
 const readField = (event: ChangeEvent<HTMLInputElement>): string =>
   event.currentTarget.value;
 
-export const FigureNodeView = ({
+export function FigureNodeView({
   node,
   selected,
   updateAttributes,
-}: NodeViewProps) => {
+}: NodeViewProps) {
+  const attributes = figureAttributesSchema.parse(node.attrs);
+
   const updateAlt = (event: ChangeEvent<HTMLInputElement>) => {
     updateAttributes({ alt: readField(event), altProvenance: "manual" });
   };
+
   const updateCredit = (event: ChangeEvent<HTMLInputElement>) => {
     updateAttributes({ credit: readField(event) });
   };
@@ -24,35 +26,35 @@ export const FigureNodeView = ({
     <NodeViewWrapper
       as="figure"
       className="article-figure"
-      data-figure-role={node.attrs.role}
-      data-media-id={node.attrs.mediaId ?? undefined}
+      data-figure-role={attributes.role}
+      data-media-id={attributes.mediaId ?? undefined}
       data-selected={selected ? "true" : undefined}
     >
       <img
-        alt={node.attrs.alt}
+        alt={attributes.alt}
         contentEditable={false}
-        height={node.attrs.height ?? undefined}
-        src={node.attrs.src}
+        height={attributes.height ?? undefined}
+        src={attributes.src}
         srcSet={
-          node.attrs.mediaId
+          hasText(attributes.mediaId)
             ? [320, 640, 960, 1280, 1600]
                 .map(
                   (width) =>
-                    `/api/media/${node.attrs.mediaId}?width=${width} ${width}w`
+                    `/api/media/${attributes.mediaId}?width=${width} ${width}w`
                 )
                 .join(", ")
             : undefined
         }
-        title={node.attrs.title ?? undefined}
-        width={node.attrs.width ?? undefined}
+        title={attributes.title ?? undefined}
+        width={attributes.width ?? undefined}
       />
       <NodeViewContent
         className="article-figure-caption"
         data-placeholder="Add a caption…"
       />
-      {node.attrs.credit ? (
+      {hasText(attributes.credit) ? (
         <p className="article-figure-credit" contentEditable={false}>
-          {node.attrs.credit}
+          {attributes.credit}
         </p>
       ) : null}
       {selected ? (
@@ -63,12 +65,12 @@ export const FigureNodeView = ({
               onChange={updateAlt}
               placeholder="Describe what is visible"
               type="text"
-              value={node.attrs.alt}
+              value={attributes.alt}
             />
           </label>
-          <p className="article-figure-provenance">
-            Alt text: {node.attrs.altProvenance}. Caption:{" "}
-            {node.attrs.captionProvenance}.
+          <p className="text-muted-foreground text-xs">
+            Alt text: {attributes.altProvenance}. Caption:{" "}
+            {attributes.captionProvenance}.
           </p>
           <label>
             <span>Credit</span>
@@ -76,11 +78,11 @@ export const FigureNodeView = ({
               onChange={updateCredit}
               placeholder="Photographer or source"
               type="text"
-              value={node.attrs.credit}
+              value={attributes.credit}
             />
           </label>
         </div>
       ) : null}
     </NodeViewWrapper>
   );
-};
+}

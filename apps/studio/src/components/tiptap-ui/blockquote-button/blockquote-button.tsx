@@ -1,15 +1,18 @@
+"use client";
+
+import { hasText } from "@ortodoksas-lt/content/value";
 import { forwardRef, useCallback } from "react";
 
-import { Badge } from "@/components/tiptap-ui-primitive/badge";
+import { Badge } from "@/components/tiptap-ui-primitive/badge/badge";
 // --- UI Primitives ---
-import type { ButtonProps } from "@/components/tiptap-ui-primitive/button";
-import { Button } from "@/components/tiptap-ui-primitive/button";
+import type { ButtonProps } from "@/components/tiptap-ui-primitive/button/button";
+import { Button } from "@/components/tiptap-ui-primitive/button/button";
 // --- Tiptap UI ---
-import type { UseBlockquoteConfig } from "@/components/tiptap-ui/blockquote-button";
+import type { UseBlockquoteConfig } from "@/components/tiptap-ui/blockquote-button/use-blockquote";
 import {
   BLOCKQUOTE_SHORTCUT_KEY,
   useBlockquote,
-} from "@/components/tiptap-ui/blockquote-button";
+} from "@/components/tiptap-ui/blockquote-button/use-blockquote";
 // --- Hooks ---
 import { useTiptapEditor } from "@/hooks/use-tiptap-editor";
 // --- Lib ---
@@ -18,14 +21,14 @@ import { parseShortcutKeys } from "@/lib/tiptap-utils";
 export interface BlockquoteButtonProps
   extends Omit<ButtonProps, "type">, UseBlockquoteConfig {
   /**
+   * Optional text to display alongside the icon.
+   */
+  text?: string;
+  /**
    * Optional show shortcut keys in the button.
    * @default false
    */
   showShortcut?: boolean;
-  /**
-   * Optional text to display alongside the icon.
-   */
-  text?: string;
 }
 
 export function BlockquoteShortcutBadge({
@@ -59,6 +62,7 @@ export const BlockquoteButton = forwardRef<
     ref
   ) => {
     const { editor } = useTiptapEditor(providedEditor);
+
     const {
       isVisible,
       canToggle,
@@ -76,9 +80,11 @@ export const BlockquoteButton = forwardRef<
     const handleClick = useCallback(
       (event: React.MouseEvent<HTMLButtonElement>) => {
         onClick?.(event);
+
         if (event.defaultPrevented) {
           return;
         }
+
         handleToggle();
       },
       [handleToggle, onClick]
@@ -90,24 +96,25 @@ export const BlockquoteButton = forwardRef<
 
     return (
       <Button
-        aria-label={label}
-        aria-pressed={isActive}
-        data-active-state={isActive ? "on" : "off"}
-        data-disabled={!canToggle}
-        disabled={!canToggle}
-        onClick={handleClick}
-        role="button"
-        tabIndex={-1}
-        tooltip="Blockquote"
         type="button"
         variant="ghost"
+        data-active-state={isActive ? "on" : "off"}
+        tabIndex={-1}
+        disabled={!canToggle}
+        data-disabled={!canToggle}
+        aria-label={label}
+        aria-pressed={isActive}
+        tooltip="Blockquote"
+        onClick={handleClick}
         {...buttonProps}
         ref={ref}
       >
         {children ?? (
           <>
             <Icon className="tiptap-button-icon" />
-            {text && <span className="tiptap-button-text">{text}</span>}
+            {hasText(text) && (
+              <span className="tiptap-button-text">{text}</span>
+            )}
             {showShortcut && (
               <BlockquoteShortcutBadge shortcutKeys={shortcutKeys} />
             )}

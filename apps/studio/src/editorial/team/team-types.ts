@@ -1,27 +1,14 @@
-import type { TeamRole } from "./team-role";
+import type {
+  OrganizationInvitationResource,
+  OrganizationMembershipResource,
+} from "@clerk/tanstack-react-start/types";
 
-interface TeamPublicUserData {
-  firstName: string | null;
-  hasImage: boolean;
-  identifier: string;
-  imageUrl: string;
-  lastName: string | null;
-  userId?: string;
-}
+export type TeamMemberResource = Pick<
+  OrganizationMembershipResource,
+  "createdAt" | "destroy" | "id" | "publicUserData" | "role" | "update"
+>;
 
-export interface TeamMemberResource {
-  createdAt: Date;
-  destroy: () => Promise<unknown>;
-  id: string;
-  publicUserData?: TeamPublicUserData;
-  role: string;
-  update: (params: { role: TeamRole }) => Promise<unknown>;
-}
-
-export interface TeamInvitationResource {
-  createdAt: Date;
-  emailAddress: string;
-  id: string;
-  revoke: () => Promise<unknown>;
-  role: string;
-}
+export type TeamInvitationResource = Pick<
+  OrganizationInvitationResource,
+  "createdAt" | "emailAddress" | "id" | "revoke" | "role"
+>;

@@ -7,6 +7,23 @@ import linkTextRepairMigration from "./0013_repair_malformed_publication_link_te
 import baselineMediaMigration from "./0015_canonicalize_baseline_media.sql?raw";
 import externalReferenceRepairMigration from "./0016_repair_external_reference_url.sql?raw";
 
+const document = (firstAttrs: MediaAttributes, secondAttrs: MediaAttributes) =>
+  JSON.stringify({
+    content: [
+      { attrs: firstAttrs, type: "figure" },
+      {
+        content: [{ attrs: secondAttrs, type: "figure" }],
+        type: "blockquote",
+      },
+    ],
+    type: "doc",
+  });
+
+interface MediaAttributes {
+  mediaId: string | null;
+  src: string;
+}
+
 const mediaId = `media_${"a".repeat(64)}`;
 const recoveredSource = "https://legacy.example/recovered.jpg";
 const unresolvedSource = "https://legacy.example/unresolved.jpg";
@@ -167,7 +184,7 @@ describe("Blogger content cleanup migration", () => {
       )
     );
 
-    const article = JSON.parse(
+    const article: unknown = JSON.parse(
       String(
         database
           .prepare("SELECT body_json FROM articles WHERE id = 'article'")
@@ -175,24 +192,34 @@ describe("Blogger content cleanup migration", () => {
       )
     );
 
-    expect(article.content[0].content[0]).toMatchObject({
-      marks: [{ attrs: { href: "/2020/01/story" } }],
-      text: "https://ortodoksas.lt/2020/01/story",
-    });
-    expect(article.content[0].content[1]).toMatchObject({
-      marks: [{ attrs: { href: "https://example.com/reference.html" } }],
-    });
-    expect(article.content[0].content[2]).toMatchObject({
-      marks: [
+    expect(article).toMatchObject({
+      content: [
         {
-          attrs: { href: "/2013/11/sv-jono-auksaburnio-liturgija-su" },
+          content: [
+            {
+              marks: [{ attrs: { href: "/2020/01/story" } }],
+              text: "https://ortodoksas.lt/2020/01/story",
+            },
+            {
+              marks: [
+                { attrs: { href: "https://example.com/reference.html" } },
+              ],
+            },
+            {
+              marks: [
+                {
+                  attrs: { href: "/2013/11/sv-jono-auksaburnio-liturgija-su" },
+                },
+              ],
+              text: "https://ortodoksas.lt/2013/11/sv-jono-auksaburnio-liturgija-su",
+            },
+            {
+              marks: [{ attrs: { href: canonicalExternalReference } }],
+              text: canonicalExternalReference,
+            },
+          ],
         },
       ],
-      text: "https://ortodoksas.lt/2013/11/sv-jono-auksaburnio-liturgija-su",
-    });
-    expect(article.content[0].content[3]).toMatchObject({
-      marks: [{ attrs: { href: canonicalExternalReference } }],
-      text: canonicalExternalReference,
     });
 
     const revision = database
@@ -201,12 +228,20 @@ describe("Blogger content cleanup migration", () => {
       )
       .get();
 
-    expect(JSON.parse(String(revision?.body_json)).content[0].attrs).toEqual({
-      mediaId,
-      src: `/api/media/${mediaId}`,
-    });
-    expect(JSON.parse(String(revision?.metadata_json))).toEqual({
-      title: "Historical revision",
+    const revisionBody: unknown = JSON.parse(String(revision?.body_json));
+
+    const revisionMetadata: unknown = JSON.parse(
+      String(revision?.metadata_json)
+    );
+
+    expect({ body: revisionBody, metadata: revisionMetadata }).toStrictEqual({
+      body: {
+        content: [
+          { attrs: { mediaId, src: `/api/media/${mediaId}` }, type: "figure" },
+        ],
+        type: "doc",
+      },
+      metadata: { title: "Historical revision" },
     });
 
     const baseline = database
@@ -215,9 +250,11 @@ describe("Blogger content cleanup migration", () => {
       )
       .get();
 
-    expect(JSON.parse(String(baseline?.body_json)).content[0].attrs).toEqual({
-      mediaId: null,
-      src: unresolvedSource,
+    expect(JSON.parse(String(baseline?.body_json))).toStrictEqual({
+      content: [
+        { attrs: { mediaId: null, src: unresolvedSource }, type: "figure" },
+      ],
+      type: "doc",
     });
 
     const sourceColumnCount = database
@@ -243,18 +280,6 @@ describe("Baseline media canonicalization migration", () => {
   it("copies canonical media references from the matching current figures", () => {
     const database = new DatabaseSync(":memory:");
     const secondMediaId = `media_${"c".repeat(64)}`;
-
-    const document = (firstAttrs: object, secondAttrs: object) =>
-      JSON.stringify({
-        content: [
-          { attrs: firstAttrs, type: "figure" },
-          {
-            content: [{ attrs: secondAttrs, type: "figure" }],
-            type: "blockquote",
-          },
-        ],
-        type: "doc",
-      });
 
     database.exec(`
       CREATE TABLE media_assets (id TEXT PRIMARY KEY, r2_key TEXT NOT NULL);
@@ -295,7 +320,7 @@ describe("Baseline media canonicalization migration", () => {
       baselineMediaMigration.replaceAll("--> statement-breakpoint", "")
     );
 
-    const baseline = JSON.parse(
+    const baseline: unknown = JSON.parse(
       String(
         database
           .prepare(
@@ -305,14 +330,14 @@ describe("Baseline media canonicalization migration", () => {
       )
     );
 
-    expect(baseline.content[0].attrs).toEqual({
-      mediaId,
-      src: `/api/media/${mediaId}`,
-    });
-    expect(baseline.content[1].content[0].attrs).toEqual({
-      mediaId: secondMediaId,
-      src: `/api/media/${secondMediaId}`,
-    });
+    expect(baseline).toStrictEqual(
+      JSON.parse(
+        document(
+          { mediaId, src: `/api/media/${mediaId}` },
+          { mediaId: secondMediaId, src: `/api/media/${secondMediaId}` }
+        )
+      )
+    );
     database.close();
   });
 });

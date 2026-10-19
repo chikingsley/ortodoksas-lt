@@ -10,7 +10,9 @@
     "./publication-link": "./publication-link.ts",
     "./sections": "./sections.ts",
     "./site": "./site.ts",
-    "./translation": "./translation.ts"
+    "./translation": "./translation.ts",
+    "./value": "./value.ts",
+    "./media": "./media.ts"
   },
   "scripts": {
     "test": "vitest run"

@@ -1,13 +1,10 @@
 ---
 import SiteLayout from "../components/layout/SiteLayout.astro";
 import { localeShells } from '../i18n/config';
-import type { SiteLocale } from '../i18n/config';
 
-const requestedLocale = Astro.url.pathname.split("/")[1];
+const [, requestedLocale] = Astro.url.pathname.split("/");
 
-const locale: SiteLocale = localeShells.includes(requestedLocale as never)
-  ? (requestedLocale as SiteLocale)
-  : "lt";
+const locale = localeShells.find((candidate) => candidate === requestedLocale) ?? "lt";
 
 const copy = {
   be: {

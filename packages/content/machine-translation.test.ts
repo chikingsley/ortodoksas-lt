@@ -29,7 +29,7 @@ const source = {
 
 describe("article machine translation", () => {
   it("extracts only reader-facing text in stable order", () => {
-    expect(getArticleTranslationSegments(source)).toEqual([
+    expect(getArticleTranslationSegments(source)).toStrictEqual([
       "Title",
       "Summary",
       "Body text",
@@ -47,7 +47,7 @@ describe("article machine translation", () => {
 
     expect(result.title).toBe("Antraštė");
     expect(result.summary).toBe("Santrauka");
-    expect(result.body).toEqual({
+    expect(result.body).toStrictEqual({
       content: [
         {
           content: [{ text: "Tekstas", type: "text" }],
@@ -105,7 +105,9 @@ describe("article machine translation", () => {
       title: "Article title",
     };
 
-    expect(normalizeArticleTranslationSource(sourceWithEditionLink)).toEqual({
+    expect(
+      normalizeArticleTranslationSource(sourceWithEditionLink)
+    ).toStrictEqual({
       body: {
         content: [
           {
@@ -118,7 +120,7 @@ describe("article machine translation", () => {
       summary: "Article summary",
       title: "Article title",
     });
-    expect(getArticleTranslationSegments(sourceWithEditionLink)).toEqual([
+    expect(getArticleTranslationSegments(sourceWithEditionLink)).toStrictEqual([
       "Article title",
       "Article summary",
       "Article body",
@@ -148,7 +150,7 @@ describe("article machine translation", () => {
       title: "Translation notes",
     };
 
-    expect(normalizeArticleTranslationSource(linkedSentence)).toEqual(
+    expect(normalizeArticleTranslationSource(linkedSentence)).toStrictEqual(
       linkedSentence
     );
   });

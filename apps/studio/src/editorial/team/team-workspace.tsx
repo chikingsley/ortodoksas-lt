@@ -28,6 +28,7 @@ interface Feedback {
   message: string;
 }
 
+// oxlint-disable-next-line anti-slop/no-unknown-parameters -- This catch boundary accepts arbitrary thrown values and narrows Error before reading its message.
 const readError = (error: unknown) =>
   error instanceof Error
     ? error.message
@@ -44,6 +45,7 @@ export function TeamWorkspace() {
   const [inviteOpen, setInviteOpen] = useState(false);
   const [busyKey, setBusyKey] = useState<string>();
   const [feedback, setFeedback] = useState<Feedback>();
+
   const openInvite = useCallback(() => {
     setInviteOpen(true);
   }, []);
@@ -175,13 +177,13 @@ export function TeamWorkspace() {
     <>
       <div className="mx-auto min-h-[calc(100dvh-var(--studio-mobile-header-height))] w-full max-w-[1500px] pb-12 md:min-h-svh">
         <StudioPageHeader>
-          <h1 className="m-0 text-2xl font-[650] tracking-[-0.03em]">Team</h1>
+          <h1 className="m-0 text-2xl font-semibold tracking-tight">Team</h1>
           <Button onClick={openInvite} size="lg" type="button">
             <UserPlus data-icon="inline-start" /> Invite member
           </Button>
         </StudioPageHeader>
 
-        <div className="max-inventory-compact:px-6 max-inventory-mobile:px-4 grid w-full gap-6 px-[42px] py-6">
+        <div className="max-inventory-compact:px-6 max-inventory-mobile:px-4 grid w-full gap-6 px-10.5 py-6">
           {feedback ? (
             <div
               aria-live="polite"
@@ -197,19 +199,19 @@ export function TeamWorkspace() {
           ) : null}
 
           <Card>
-            <CardHeader className="border-b">
+            <CardHeader separated>
               <CardTitle>Members</CardTitle>
               <CardDescription>
                 People who can sign in to the Editorial Studio.
               </CardDescription>
             </CardHeader>
-            <CardContent className="p-0">
+            <CardContent flush>
               {loading ? (
-                <div aria-busy="true" className="grid gap-3 p-4" role="status">
+                <output aria-busy="true" className="grid gap-3 p-4">
                   <span className="sr-only">Loading members</span>
                   <Skeleton className="h-12 w-full" />
                   <Skeleton className="h-12 w-full" />
-                </div>
+                </output>
               ) : (
                 <TeamMemberList
                   busyKey={busyKey}
@@ -223,18 +225,18 @@ export function TeamWorkspace() {
           </Card>
 
           <Card>
-            <CardHeader className="border-b">
+            <CardHeader separated>
               <CardTitle>Pending invitations</CardTitle>
               <CardDescription>
                 Invitations waiting for the recipient to accept.
               </CardDescription>
             </CardHeader>
-            <CardContent className="p-0">
+            <CardContent flush>
               {loading ? (
-                <div aria-busy="true" className="p-4" role="status">
+                <output aria-busy="true" className="p-4">
                   <span className="sr-only">Loading invitations</span>
                   <Skeleton className="h-12 w-full" />
-                </div>
+                </output>
               ) : (
                 <TeamInvitationList
                   busyKey={busyKey}

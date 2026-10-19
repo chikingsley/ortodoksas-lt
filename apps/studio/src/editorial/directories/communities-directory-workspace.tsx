@@ -43,12 +43,12 @@ interface Props {
   recordKey?: string;
 }
 
-export const CommunitiesDirectoryWorkspace = ({
+export function CommunitiesDirectoryWorkspace({
   locale,
   onLocaleChange,
   onRecordChange,
   recordKey,
-}: Props) => {
+}: Props) {
   const queryClient = useQueryClient();
   const { data } = useSuspenseQuery(communityDirectoryQueryOptions());
 
@@ -105,4 +105,4 @@ export const CommunitiesDirectoryWorkspace = ({
       />
     </DirectoryShell>
   );
-};
+}

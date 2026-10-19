@@ -1,5 +1,7 @@
-import { cva } from "class-variance-authority";
+/* oxlint-disable jsx-a11y/prefer-tag-over-role -- WAI-ARIA group expresses related toolbar or input controls; fieldset would introduce form grouping and legend semantics. This preserves the upstream component contract. */
+import { hasText } from "@ortodoksas-lt/content/value";
 import type { VariantProps } from "class-variance-authority";
+import { cva } from "class-variance-authority";
 import { useMemo } from "react";
 
 import { Label } from "@/components/ui/label";
@@ -156,12 +158,14 @@ function FieldSeparator({
         "relative -my-2 h-5 text-sm group-data-[variant=outline]/field-group:-mb-2",
         className
       )}
-      data-content={!!children}
+      data-content={
+        children !== undefined && children !== null && children !== false
+      }
       data-slot="field-separator"
       {...props}
     >
       <Separator className="absolute inset-0 top-1/2" />
-      {children ? (
+      {children !== undefined && children !== null && children !== false ? (
         <span
           className="bg-background text-muted-foreground relative mx-auto block w-fit px-2"
           data-slot="field-separator-content"
@@ -178,15 +182,16 @@ function FieldError({
   children,
   errors,
   ...props
-}: React.ComponentProps<"div"> & {
+}: Omit<React.ComponentProps<"div">, "children"> & {
+  children?: Exclude<React.ReactNode, Promise<unknown>>;
   errors?: ({ message?: string } | undefined)[];
 }) {
   const content = useMemo(() => {
-    if (children) {
+    if (children !== undefined && children !== null && children !== false) {
       return children;
     }
 
-    if (!errors?.length) {
+    if (errors === undefined || errors.length === 0) {
       return null;
     }
 
@@ -201,13 +206,15 @@ function FieldError({
     return (
       <ul className="ml-4 flex list-disc flex-col gap-1">
         {uniqueErrors.map((error) =>
-          error?.message ? <li key={error.message}>{error.message}</li> : null
+          hasText(error?.message) ? (
+            <li key={error.message}>{error.message}</li>
+          ) : null
         )}
       </ul>
     );
   }, [children, errors]);
 
-  if (!content) {
+  if (content === undefined || content === null) {
     return null;
   }
 

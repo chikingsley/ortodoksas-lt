@@ -26,17 +26,18 @@ interface RowProps {
 function TeamInvitationRow({ busy, invitation, onRevoke }: RowProps) {
   const [confirming, setConfirming] = useState(false);
   const role = invitation.role === "org:admin" ? "org:admin" : "org:member";
+
   const requestRevoke = useCallback(() => {
     setConfirming(true);
   }, []);
+
   const cancelRevoke = useCallback(() => {
     setConfirming(false);
   }, []);
 
-  const revoke = useCallback(
-    async () => await onRevoke(invitation.id),
-    [invitation.id, onRevoke]
-  );
+  const revoke = useCallback(async () => {
+    await onRevoke(invitation.id);
+  }, [invitation.id, onRevoke]);
 
   return (
     <li className="grid items-center gap-4 px-4 py-3 sm:grid-cols-[minmax(0,1fr)_7rem_auto]">
@@ -65,7 +66,9 @@ function TeamInvitationRow({ busy, invitation, onRevoke }: RowProps) {
             </Button>
             <Button
               disabled={busy}
-              onClick={revoke}
+              onClick={() => {
+                void revoke();
+              }}
               size="sm"
               type="button"
               variant="destructive"

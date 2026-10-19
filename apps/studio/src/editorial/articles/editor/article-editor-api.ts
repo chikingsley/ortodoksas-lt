@@ -1,3 +1,8 @@
+import {
+  createInteractiveArticleSchema,
+  updateArticleSchema,
+} from "@ortodoksas-lt/content/article";
+import { hasText } from "@ortodoksas-lt/content/value";
 import { queryOptions } from "@tanstack/react-query";
 
 import type { StudioOperationResult } from "@/server/articles/article-operation-support.server";
@@ -11,6 +16,8 @@ import {
   updateArticleMutation,
   verifyArticlePublicationQuery,
 } from "@/server/articles/article.functions";
+import type { PersistedArticle } from "@/shared/article-contract";
+import { storedArticleSchema } from "@/shared/article-contract";
 
 import type {
   BaselineResponse,
@@ -27,15 +34,6 @@ export interface ArticleWorkspaceResponse {
   revisions: Revision[];
   translationSource: StoredArticle | null;
   translationSourceCurrentHash: string | null;
-}
-
-interface PersistedArticle {
-  heroMediaId: string | null;
-  id: string;
-  publishedAt: number | null;
-  status: string;
-  translationReviewStatus: string;
-  version: number;
 }
 
 const TRANSLATION_CREATION_FIELDS = new Set([
@@ -62,21 +60,20 @@ export async function fetchArticleWorkspace(
     throw new Error("Article request failed");
   }
 
-  return workspace as ArticleWorkspaceResponse;
+  return workspace;
 }
 
 export const articleWorkspaceQueryOptions = (articleId: string) =>
   queryOptions({
-    queryFn: async ({ signal }) => fetchArticleWorkspace(articleId, signal),
+    queryFn: async ({ signal }) =>
+      await fetchArticleWorkspace(articleId, signal),
     queryKey: ["studio", "article-workspace", articleId] as const,
   });
 
 export async function fetchArticleBaseline(
   articleId: string
 ): Promise<BaselineResponse | null> {
-  return (await loadArticleBaseline({
-    data: { articleId },
-  })) as BaselineResponse | null;
+  return await loadArticleBaseline({ data: { articleId } });
 }
 
 export async function fetchArticleRevisions(
@@ -96,25 +93,28 @@ export async function persistArticle({
     )
   );
 
-  if (articleId) {
+  if (hasText(articleId)) {
     const updatePayload = Object.fromEntries(
       Object.entries(payload).filter(
         ([field]) => !IMMUTABLE_UPDATE_FIELDS.has(field)
       )
     );
 
-    return updateArticleMutation({
-      data: { articleId, payload: updatePayload },
+    return await updateArticleMutation({
+      data: { articleId, payload: updateArticleSchema.parse(updatePayload) },
     });
   }
 
-  return createArticleMutation({
-    data: { ...interactivePayload, baseline },
+  return await createArticleMutation({
+    data: createInteractiveArticleSchema.parse({
+      ...interactivePayload,
+      baseline,
+    }),
   });
 }
 
 export async function deleteArticleDraft(articleId: string) {
-  return deleteArticleDraftMutation({ data: { articleId } });
+  return await deleteArticleDraftMutation({ data: { articleId } });
 }
 
 export async function verifyArticlePublication(
@@ -136,5 +136,5 @@ export async function restoreArticleRevision(
     data: { articleId, expectedVersion, version },
   });
 
-  return result.ok ? (result.data.article as StoredArticle) : null;
+  return result.ok ? storedArticleSchema.parse(result.data.article) : null;
 }

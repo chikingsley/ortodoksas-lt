@@ -16,7 +16,7 @@ describe("structured directory migration", () => {
       services: number;
     }>();
 
-    expect(counts).toEqual({
+    expect(counts).toStrictEqual({
       communities: 9,
       localizations: 45,
       service_localizations: 50,
@@ -29,9 +29,9 @@ describe("structured directory migration", () => {
       env.DB.prepare(
         "INSERT INTO communities (address_line, country_code, created_at, id, latitude, locality, longitude, postal_code, operational_status, slug, sort_order, status, type, updated_at) VALUES ('', 'LT', 1, 'invalid-coordinate', 54.6, '', NULL, '', 'active', 'invalid-coordinate', 0, 'draft', 'community', 1)"
       ).run()
-    ).rejects.toThrow();
+    ).rejects.toThrow(/CHECK constraint failed/u);
     const integrity = await env.DB.prepare("PRAGMA foreign_key_check").all();
-    expect(integrity.results).toEqual([]);
+    expect(integrity.results).toStrictEqual([]);
   });
 
   it("enforces the article publication-group relationship in D1", async () => {

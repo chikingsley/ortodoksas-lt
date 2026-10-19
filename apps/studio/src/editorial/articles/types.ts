@@ -3,6 +3,7 @@ import {
   translationKindSchema,
   translationReviewStatusSchema,
 } from "@ortodoksas-lt/content/article";
+import { siteLocaleSchema } from "@ortodoksas-lt/content/site";
 import { z } from "zod";
 
 export const catalogArticleSchema = z.object({
@@ -11,7 +12,7 @@ export const catalogArticleSchema = z.object({
   id: z.string(),
   kind: z.enum(["article", "page"]),
   labels: z.array(z.string()),
-  language: z.string(),
+  language: siteLocaleSchema,
   path: z.string(),
   published: z.string().nullable(),
   section: z.string(),

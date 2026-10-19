@@ -1,4 +1,6 @@
+import { tiptapDocumentSchema } from "@ortodoksas-lt/content/article";
 import { getSectionOptions } from "@ortodoksas-lt/content/sections";
+import { hasText } from "@ortodoksas-lt/content/value";
 import {
   articles,
   homepageLayoutState,
@@ -14,8 +16,8 @@ import {
   localizeHomepageCatalog,
 } from "../components/home/homepage-model";
 import type { ContentPage } from "../components/publication/publication";
-import { defaultLocale } from "../i18n/config";
 import type { SiteLocale } from "../i18n/config";
+import { defaultLocale } from "../i18n/config";
 import {
   homepageCandidates,
   homepageMonths,
@@ -94,7 +96,7 @@ export async function getHomepageCatalog(language: SiteLocale = defaultLocale) {
   const homepageCatalog = canonicalCatalog.filter(
     (entry) =>
       entry.kind === "page" ||
-      (entry.translationGroupId
+      (hasText(entry.translationGroupId)
         ? homepageGroups.has(entry.translationGroupId)
         : false)
   );
@@ -128,9 +130,9 @@ export async function getHomepageModel(language: SiteLocale = defaultLocale) {
 }
 
 export async function getArticles(language: SiteLocale = defaultLocale) {
-  return (await getCatalog(language)).filter(
-    (entry) => entry.kind === "article"
-  );
+  const catalog = await getCatalog(language);
+
+  return catalog.filter((entry) => entry.kind === "article");
 }
 
 export async function getRecentArticles(language: SiteLocale, limit: number) {
@@ -183,9 +185,7 @@ export async function getPage(language: SiteLocale, path: string) {
 
   const heroes = await heroMap([row]);
 
-  const body = JSON.parse(row.bodyJson) as Parameters<
-    typeof renderArticleBody
-  >[0];
+  const body = tiptapDocumentSchema.parse(JSON.parse(row.bodyJson));
 
   return {
     ...catalogEntry(row, heroes),

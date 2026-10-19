@@ -1,24 +1,9 @@
 "use client";
 
-export type SpacerOrientation = "horizontal" | "vertical";
+import { cn } from "@/lib/tiptap-utils";
 
-export function Spacer({
-  orientation = "horizontal",
-  size,
-  style = {},
-  ...props
-}: React.ComponentProps<"div"> & {
-  orientation?: SpacerOrientation;
-  size?: string | number;
-}) {
-  const computedStyle = {
-    ...style,
-    ...(orientation === "horizontal" && !size && { flex: 1 }),
-    ...(size && {
-      height: orientation === "horizontal" ? "1px" : size,
-      width: orientation === "vertical" ? "1px" : size,
-    }),
-  };
-
-  return <div {...props} style={computedStyle} />;
+export function Spacer({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div aria-hidden="true" className={cn("flex-1", className)} {...props} />
+  );
 }

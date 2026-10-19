@@ -7,6 +7,7 @@ import type {
   TranslationKind,
   TranslationReviewStatus,
 } from "@ortodoksas-lt/content/translation";
+import { hasText } from "@ortodoksas-lt/content/value";
 
 import type { SiteLocale } from "../../i18n/config";
 import { formatPublicationDate } from "../../i18n/dates";
@@ -23,8 +24,8 @@ export interface CatalogEntry {
   heroFocalX: number;
   heroFocalY: number;
   heroMediaId: string | null;
-  homepage?: "feed" | "lead" | "secondary";
-  homepageOrder?: number;
+  homepage?: "feed" | "lead" | "secondary" | undefined;
+  homepageOrder?: number | undefined;
   kind: "article" | "page";
   labels: string[];
   pageTemplate: PageTemplate;
@@ -52,22 +53,27 @@ export interface LocaleDestination {
   href: string;
 }
 
-const imageSourcePattern = /\bsrc\s*=\s*["']([^"']+)["']/i;
-const firstMediaTablePattern = /<table\b[\s\S]*?<img\b[^>]*>[\s\S]*?<\/table>/i;
+const imageSourcePattern = /\bsrc\s*=\s*["'](?<source>[^"']+)["']/iu;
+
+const firstMediaTablePattern =
+  /<table\b[\s\S]*?<img\b[^>]*>[\s\S]*?<\/table>/iu;
 
 const standaloneStrongHeadingPattern =
-  /<p>\s*<strong>([^<]{1,180})<\/strong>\s*<\/p>/gi;
+  /<p>\s*<strong>(?<heading>[^<]{1,180})<\/strong>\s*<\/p>/giu;
 
-const youtubeIframePattern = /<iframe\b[^>]*><\/iframe\s*>/gi;
+const youtubeIframePattern = /<iframe\b[^>]*><\/iframe\s*>/giu;
 
 const youtubeEmbedSourcePattern =
-  /\bsrc\s*=\s*["'](https:\/\/www\.youtube-nocookie\.com\/embed\/[A-Za-z0-9_-]+(?:\?[^"']*)?)["']/i;
+  /\bsrc\s*=\s*["'](?<source>https:\/\/www\.youtube-nocookie\.com\/embed\/[A-Za-z0-9_-]+(?:\?[^"']*)?)["']/iu;
 
-const leadFigurePattern = /<figure\b[^>]*\bdata-figure-role=["']lead["']/i;
-const openingFigurePattern = /^\s*<figure\b/i;
-const figurePattern = /<figure\b[^>]*>[\s\S]*?<\/figure>/gi;
-const figureMediaIdPattern = /\bdata-media-id=(?:"([^"]+)"|'([^']+)')/i;
-const hrefPattern = /\bhref\s*=\s*(["'])([^"']+)\1/giu;
+const leadFigurePattern = /<figure\b[^>]*\bdata-figure-role=["']lead["']/iu;
+const openingFigurePattern = /^\s*<figure\b/iu;
+const figurePattern = /<figure\b[^>]*>[\s\S]*?<\/figure>/giu;
+
+const figureMediaIdPattern =
+  /\bdata-media-id=(?:"(?<doubleQuotedId>[^"]+)"|'(?<singleQuotedId>[^']+)')/iu;
+
+const hrefPattern = /\bhref\s*=\s*(?<quote>["'])(?<source>[^"']+)\1/giu;
 const localizedPathPattern = /^\/(?:be|en|ru|uk)(?:\/|$)/u;
 
 const sourceTranslationLabels = new Set([
@@ -105,7 +111,7 @@ export function formatDate(
   value: string | null | undefined,
   locale: SiteLocale = "lt"
 ) {
-  if (!value) {
+  if (!hasText(value)) {
     return "";
   }
 
@@ -115,20 +121,20 @@ export function formatDate(
 export function normalizeText(value: string) {
   return value
     .normalize("NFD")
-    .replaceAll(/[\u0300-\u036F]/g, "")
+    .replaceAll(/[\u0300-\u036F]/gu, "")
     .toLocaleLowerCase("lt");
 }
 
 export function sectionSlug(section: string) {
   return normalizeText(section)
-    .replaceAll(/[^a-z0-9]+/g, "-")
-    .replaceAll(/^-|-$/g, "");
+    .replaceAll(/[^a-z0-9]+/gu, "-")
+    .replaceAll(/^-|-$/gu, "");
 }
 
 export function excerpt(value: string, length = 180) {
   const text = value
-    .replaceAll(/<[^>]+>/g, " ")
-    .replaceAll(/\s+/g, " ")
+    .replaceAll(/<[^>]+>/gu, " ")
+    .replaceAll(/\s+/gu, " ")
     .trim();
 
   return text.length > length
@@ -151,9 +157,9 @@ export function cleanHtml(value: string, options: CleanHtmlOptions = {}) {
       /<(?<closing>\/?)h1(?<attributes>\b[^>]*)>/giu,
       "<$<closing>h2$<attributes>>"
     )
-    .replaceAll(/<script[\s\S]*?<\/script>/gi, "")
-    .replaceAll(/<style[\s\S]*?<\/style>/gi, "")
-    .replaceAll(/\s+on[a-z]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, "")
+    .replaceAll(/<script[\s\S]*?<\/script>/giu, "")
+    .replaceAll(/<style[\s\S]*?<\/style>/giu, "")
+    .replaceAll(/\s+on[a-z]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/giu, "")
     .replace(youtubeIframePattern, (frame) => {
       if (!youtubeEmbedSourcePattern.test(frame)) {
         return "";
@@ -163,25 +169,28 @@ export function cleanHtml(value: string, options: CleanHtmlOptions = {}) {
 
       return `<!--canonical-youtube-${index}-->`;
     })
-    .replaceAll(/<(iframe|frame|object|form)\b[\s\S]*?<\/\1\s*>/gi, "")
-    .replaceAll(/<(?:iframe|frame|object|embed|form)\b[^>]*\/?\s*>/gi, "")
-    .replaceAll(/<link\b[^>]*>/gi, "")
-    .replaceAll(/<base\b[^>]*>/gi, "")
     .replaceAll(
-      /\s+(?:href|src|data|action|formaction)\s*=\s*(?:"\s*(?:javascript|vbscript|file):[^"]*"|'\s*(?:javascript|vbscript|file):[^']*')/gi,
+      /<(?<element>iframe|frame|object|form)\b[\s\S]*?<\/\1\s*>/giu,
+      ""
+    )
+    .replaceAll(/<(?:iframe|frame|object|embed|form)\b[^>]*\/?\s*>/giu, "")
+    .replaceAll(/<link\b[^>]*>/giu, "")
+    .replaceAll(/<base\b[^>]*>/giu, "")
+    .replaceAll(
+      /\s+(?:href|src|data|action|formaction)\s*=\s*(?:"\s*(?:javascript|vbscript|file):[^"]*"|'\s*(?:javascript|vbscript|file):[^']*')/giu,
       ""
     )
     .replace(standaloneStrongHeadingPattern, "<h2>$1</h2>")
     .replaceAll(
-      /<!--canonical-youtube-(\d+)-->/g,
+      /<!--canonical-youtube-(?<index>\d+)-->/gu,
       (_token, index: string) => trustedYoutubeFrames[Number(index)] ?? ""
     );
 
-  if (!hero) {
+  if (!hasText(hero)) {
     return cleaned;
   }
 
-  const withoutHeroFigure = heroMediaId
+  const withoutHeroFigure = hasText(heroMediaId)
     ? cleaned.replace(figurePattern, (figure) => {
         const mediaId = figureMediaIdPattern.exec(figure);
 
@@ -200,10 +209,10 @@ export function cleanHtml(value: string, options: CleanHtmlOptions = {}) {
     ? withoutHeroFigure.replace(firstMediaTablePattern, "")
     : withoutHeroFigure;
 
-  return deduped.replaceAll(/<img\b[^>]*>/gi, (tag) => {
+  return deduped.replaceAll(/<img\b[^>]*>/giu, (tag) => {
     const source = imageSourcePattern.exec(tag)?.[1];
 
-    const sourceName = source
+    const sourceName = hasText(source)
       ? (decodeURIComponent(source).split("?")[0]?.split("/").pop() ?? "")
       : undefined;
 

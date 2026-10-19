@@ -1,3 +1,6 @@
+import { hasText } from "@ortodoksas-lt/content/value";
+import type { LinkOptions } from "@tiptap/extension-link";
+import { isAllowedUri } from "@tiptap/extension-link";
 import type { Node as PMNode } from "@tiptap/pm/model";
 import type { Transaction } from "@tiptap/pm/state";
 import {
@@ -7,39 +10,28 @@ import {
   TextSelection,
 } from "@tiptap/pm/state";
 import { CellSelection, cellAround } from "@tiptap/pm/tables";
-import {
-  type Editor,
-  findParentNodeClosestToPos,
-  type NodeWithPos,
-} from "@tiptap/react";
-import { type ClassValue, clsx } from "clsx";
-export const MAC_SYMBOLS: Record<string, string> = {
-  alt: "⌥",
-  backspace: "Del",
-  capslock: "⇪",
-  command: "⌘",
-  control: "⌃",
-  ctrl: "⌃",
-  delete: "⌦",
-  enter: "⏎",
-  escape: "⎋",
-  meta: "⌘",
-  mod: "⌘",
-  option: "⌥",
-  shift: "⇧",
-} as const;
+import type { Editor, NodeWithPos } from "@tiptap/react";
+import { findParentNodeClosestToPos } from "@tiptap/react";
+import type { ClassValue } from "clsx";
+import { clsx } from "clsx";
 
-export const SR_ONLY = {
-  borderWidth: 0,
-  clip: "rect(0, 0, 0, 0)",
-  height: "1px",
-  margin: "-1px",
-  overflow: "hidden",
-  padding: 0,
-  position: "absolute",
-  whiteSpace: "nowrap",
-  width: "1px",
-} as const;
+export const MAC_SYMBOLS = new Map<string, string>(
+  Object.entries({
+    alt: "⌥",
+    backspace: "Del",
+    capslock: "⇪",
+    command: "⌘",
+    control: "⌃",
+    ctrl: "⌃",
+    delete: "⌦",
+    enter: "⏎",
+    escape: "⎋",
+    meta: "⌘",
+    mod: "⌘",
+    option: "⌥",
+    shift: "⇧",
+  })
+);
 
 export function cn(...inputs: ClassValue[]): string {
   return clsx(inputs);
@@ -59,18 +51,19 @@ export function isMac(): boolean {
 /**
  * Formats a shortcut key based on the platform (Mac or non-Mac)
  * @param key - The key to format (e.g., "ctrl", "alt", "shift")
- * @param isMac - Boolean indicating if the platform is Mac
+ * @param macPlatform - Boolean indicating if the platform is Mac
  * @param capitalize - Whether to capitalize the key (default: true)
  * @returns Formatted shortcut key symbol
  */
 export const formatShortcutKey = (
   key: string,
-  isMac: boolean,
+  macPlatform: boolean,
   capitalize = true
 ) => {
-  if (isMac) {
+  if (macPlatform) {
     const lowerKey = key.toLowerCase();
-    return MAC_SYMBOLS[lowerKey] || (capitalize ? key.toUpperCase() : key);
+
+    return MAC_SYMBOLS.get(lowerKey) ?? (capitalize ? key.toUpperCase() : key);
   }
 
   return capitalize ? key.charAt(0).toUpperCase() + key.slice(1) : key;
@@ -90,7 +83,7 @@ export const parseShortcutKeys = (props: {
 }) => {
   const { shortcutKeys, delimiter = "+", capitalize = true } = props;
 
-  if (!shortcutKeys) {
+  if (!hasText(shortcutKeys)) {
     return [];
   }
 
@@ -113,6 +106,7 @@ export const isMarkInSchema = (
   if (!editor?.schema) {
     return false;
   }
+
   return editor.schema.spec.marks.get(markName) !== undefined;
 };
 
@@ -129,6 +123,7 @@ export const isNodeInSchema = (
   if (!editor?.schema) {
     return false;
   }
+
   return editor.schema.spec.nodes.get(nodeName) !== undefined;
 };
 
@@ -142,14 +137,18 @@ export function focusNextNode(editor: Editor) {
   const { doc, selection } = state;
 
   const nextSel = Selection.findFrom(selection.$to, 1, true);
+
   if (nextSel) {
     view.dispatch(state.tr.setSelection(nextSel).scrollIntoView());
+
     return true;
   }
 
   const paragraphType = state.schema.nodes.paragraph;
+
   if (!paragraphType) {
     console.warn("No paragraph node type found in schema.");
+
     return false;
   }
 
@@ -161,6 +160,7 @@ export function focusNextNode(editor: Editor) {
   const $inside = tr.doc.resolve(end + 1);
   tr = tr.setSelection(TextSelection.near($inside)).scrollIntoView();
   view.dispatch(tr);
+
   return true;
 }
 
@@ -170,7 +170,7 @@ export function focusNextNode(editor: Editor) {
  * @returns boolean indicating if the value is a valid number
  */
 export function isValidPosition(pos: number | null | undefined): pos is number {
-  return typeof pos === "number" && pos >= 0;
+  return pos !== null && pos !== undefined && Number.isFinite(pos) && pos >= 0;
 }
 
 /**
@@ -186,7 +186,16 @@ const warnedMissingExtensions = new Set<string>();
 
 export function isExtensionAvailable(
   editor: Editor | null,
-  extensionNames: string | string[]
+  extensionNames: string | string[],
+  options?: {
+    /**
+     * Skip the missing-extension console hint. Pass `true` when absence is a
+     * supported state the caller handles gracefully (e.g. a
+     * `hideWhenUnavailable` button probing whether to render at all) rather
+     * than a configuration mistake worth flagging.
+     */
+    silent?: boolean;
+  }
 ): boolean {
   if (!editor || editor.isDestroyed) {
     return false;
@@ -196,16 +205,13 @@ export function isExtensionAvailable(
     ? extensionNames
     : [extensionNames];
 
-  const extensions = editor.extensionManager?.extensions;
-  if (!extensions) {
-    return false;
-  }
+  const { extensions } = editor.extensionManager;
 
   const found = names.some((name) =>
     extensions.some((ext) => ext.name === name)
   );
 
-  if (!found) {
+  if (!found && options?.silent !== true) {
     const key = names.join(", ");
 
     if (!warnedMissingExtensions.has(key)) {
@@ -228,13 +234,17 @@ export function isExtensionAvailable(
 export function findNodeAtPosition(editor: Editor, position: number) {
   try {
     const node = editor.state.doc.nodeAt(position);
+
     if (!node) {
       console.warn(`No node found at position ${position}`);
+
       return null;
     }
+
     return node;
   } catch (error) {
     console.error(`Error getting node at position ${position}:`, error);
+
     return null;
   }
 }
@@ -254,7 +264,7 @@ export function findNodePosition(props: {
 }): { pos: number; node: PMNode } | null {
   const { editor, node, nodePos } = props;
 
-  if (!(editor && editor.state?.doc)) {
+  if (editor === null) {
     return null;
   }
 
@@ -262,7 +272,7 @@ export function findNodePosition(props: {
   const hasValidNode = node !== undefined && node !== null;
   const hasValidPos = isValidPosition(nodePos);
 
-  if (!(hasValidNode || hasValidPos)) {
+  if (!hasValidNode && !hasValidPos) {
     return null;
   }
 
@@ -272,13 +282,14 @@ export function findNodePosition(props: {
     let foundNode: PMNode | null = null;
 
     editor.state.doc.descendants((currentNode, pos) => {
-      // TODO: Needed?
       // if (currentNode.type && currentNode.type.name === node!.type.name) {
       if (currentNode === node) {
         foundPos = pos;
         foundNode = currentNode;
+
         return false;
       }
+
       return true;
     });
 
@@ -289,9 +300,10 @@ export function findNodePosition(props: {
 
   // If we have a valid position, use findNodeAtPosition
   if (hasValidPos) {
-    const nodeAtPos = findNodeAtPosition(editor, nodePos!);
+    const nodeAtPos = findNodeAtPosition(editor, nodePos);
+
     if (nodeAtPos) {
-      return { node: nodeAtPos, pos: nodePos! };
+      return { node: nodeAtPos, pos: nodePos };
     }
   }
 
@@ -300,9 +312,11 @@ export function findNodePosition(props: {
 
 /**
  * Determines whether the current selection contains a node whose type matches
- * any of the provided node type names.
+ * any of the provided node type names. A name also matches the node types in
+ * the schema group of that name, so `"image"` covers every node built from
+ * the shared image extension, whatever the node is called.
  * @param editor Tiptap editor instance
- * @param nodeTypeNames List of node type names to match against
+ * @param nodeTypeNames List of node type or group names to match against
  * @param checkAncestorNodes Whether to check ancestor node types up the depth chain
  */
 export function isNodeTypeSelected(
@@ -310,29 +324,34 @@ export function isNodeTypeSelected(
   nodeTypeNames: string[] = [],
   checkAncestorNodes = false
 ): boolean {
-  if (!(editor && editor.state.selection)) {
+  if (editor === null) {
     return false;
   }
 
   const { selection } = editor.state;
+
   if (selection.empty) {
     return false;
   }
 
+  const matches = (node: PMNode) =>
+    nodeTypeNames.some(
+      (name) => node.type.name === name || node.type.isInGroup(name)
+    );
+
   // Direct node selection check
   if (selection instanceof NodeSelection) {
     const selectedNode = selection.node;
-    return selectedNode
-      ? nodeTypeNames.includes(selectedNode.type.name)
-      : false;
+
+    return matches(selectedNode);
   }
 
   // Depth-based ancestor node check
   if (checkAncestorNodes) {
     const { $from } = selection;
-    for (let depth = $from.depth; depth > 0; depth--) {
-      const ancestorNode = $from.node(depth);
-      if (nodeTypeNames.includes(ancestorNode.type.name)) {
+
+    for (let { depth } = $from; depth > 0; depth -= 1) {
+      if (matches($from.node(depth))) {
         return true;
       }
     }
@@ -352,7 +371,7 @@ export function selectionWithinConvertibleTypes(
   editor: Editor,
   types: string[] = []
 ): boolean {
-  if (!editor || types.length === 0) {
+  if (types.length === 0) {
     return false;
   }
 
@@ -361,8 +380,7 @@ export function selectionWithinConvertibleTypes(
   const allowed = new Set(types);
 
   if (selection instanceof NodeSelection) {
-    const nodeType = selection.node?.type?.name;
-    return !!nodeType && allowed.has(nodeType);
+    return allowed.has(selection.node.type.name);
   }
 
   if (selection instanceof TextSelection || selection instanceof AllSelection) {
@@ -370,93 +388,34 @@ export function selectionWithinConvertibleTypes(
     state.doc.nodesBetween(selection.from, selection.to, (node) => {
       if (node.isTextblock && !allowed.has(node.type.name)) {
         valid = false;
-        return false; // stop early
+
+        return false;
       }
+
       return valid;
     });
+
     return valid;
   }
 
   return false;
 }
 
-type ProtocolOptions = {
-  /**
-   * The protocol scheme to be registered.
-   * @default '''
-   * @example 'ftp'
-   * @example 'git'
-   */
-  scheme: string;
-
-  /**
-   * If enabled, it allows optional slashes after the protocol.
-   * @default false
-   * @example true
-   */
-  optionalSlashes?: boolean;
-};
-
-type ProtocolConfig = Array<ProtocolOptions | string>;
-
-const ATTR_WHITESPACE =
-  // eslint-disable-next-line no-control-regex
-  /[\u0000-\u0020\u00A0\u1680\u180E\u2000-\u2029\u205F\u3000]/g;
-
-export function isAllowedUri(
-  uri: string | undefined,
-  protocols?: ProtocolConfig
-) {
-  const allowedProtocols: string[] = [
-    "http",
-    "https",
-    "ftp",
-    "ftps",
-    "mailto",
-    "tel",
-    "callto",
-    "sms",
-    "cid",
-    "xmpp",
-  ];
-
-  if (protocols) {
-    protocols.forEach((protocol) => {
-      const nextProtocol =
-        typeof protocol === "string" ? protocol : protocol.scheme;
-
-      if (nextProtocol) {
-        allowedProtocols.push(nextProtocol);
-      }
-    });
-  }
-
-  return (
-    !uri ||
-    uri.replace(ATTR_WHITESPACE, "").match(
-      new RegExp(
-        // eslint-disable-next-line no-useless-escape
-        `^(?:(?:${allowedProtocols.join("|")}):|[^a-z]|[a-z0-9+.-]+(?:[^a-z+.-:]|$))`,
-        "i"
-      )
-    )
-  );
-}
-
 export function sanitizeUrl(
   inputUrl: string,
   baseUrl: string,
-  protocols?: ProtocolConfig
+  protocols?: LinkOptions["protocols"]
 ): string {
   try {
     const url = new URL(inputUrl, baseUrl);
 
-    if (isAllowedUri(url.href, protocols)) {
+    if (isAllowedUri(url.href, protocols) !== null) {
       return url.href;
     }
   } catch {
     // If URL creation fails, it's considered invalid
   }
+
   return "#";
 }
 
@@ -470,93 +429,26 @@ export function sanitizeUrl(
  *               Pass `undefined` to remove the attribute.
  * @returns true if at least one node was updated, false otherwise
  */
-export function updateNodesAttr<A extends string = string, V = unknown>(
+export function updateNodesAttr(
   tr: Transaction,
   targets: readonly NodeWithPos[],
-  attrName: A,
-  next: V | ((prev: V | undefined) => V | undefined)
+  attrName: string,
+  next: string | null
 ): boolean {
-  if (!targets.length) {
-    return false;
-  }
-
   let changed = false;
 
   for (const { pos } of targets) {
-    // Always re-read from the transaction's current doc
     const currentNode = tr.doc.nodeAt(pos);
-    if (!currentNode) {
+
+    if (currentNode === null || currentNode.attrs[attrName] === next) {
       continue;
     }
 
-    const prevValue = (currentNode.attrs as Record<string, unknown>)[
-      attrName
-    ] as V | undefined;
-    const resolvedNext =
-      typeof next === "function"
-        ? (next as (p: V | undefined) => V | undefined)(prevValue)
-        : next;
-
-    if (prevValue === resolvedNext) {
-      continue;
-    }
-
-    const nextAttrs: Record<string, unknown> = { ...currentNode.attrs };
-    if (resolvedNext === undefined) {
-      // Remove the key entirely instead of setting null
-      delete nextAttrs[attrName];
-    } else {
-      nextAttrs[attrName] = resolvedNext;
-    }
-
-    tr.setNodeMarkup(pos, undefined, nextAttrs);
+    tr.setNodeAttribute(pos, attrName, next);
     changed = true;
   }
 
   return changed;
-}
-
-/**
- * Selects the entire content of the current block node if the selection is empty.
- * If the selection is not empty, it does nothing.
- * @param editor The Tiptap editor instance
- */
-export function selectCurrentBlockContent(editor: Editor) {
-  const { selection, doc } = editor.state;
-
-  if (!selection.empty) {
-    return;
-  }
-
-  const $pos = selection.$from;
-  let blockNode = null;
-  let blockPos = -1;
-
-  for (let depth = $pos.depth; depth >= 0; depth--) {
-    const node = $pos.node(depth);
-    const pos = $pos.start(depth);
-
-    if (node.isBlock && node.textContent.trim()) {
-      blockNode = node;
-      blockPos = pos;
-      break;
-    }
-  }
-
-  if (blockNode && blockPos >= 0) {
-    const from = blockPos;
-    const to = blockPos + blockNode.nodeSize - 2; // -2 to exclude the closing tag
-
-    if (from < to) {
-      const $from = doc.resolve(from);
-      const $to = doc.resolve(to);
-      const newSelection = TextSelection.between($from, $to, 1);
-
-      if (newSelection && !selection.eq(newSelection)) {
-        editor.view.dispatch(editor.state.tr.setSelection(newSelection));
-      }
-    }
-  }
 }
 
 /**
@@ -578,14 +470,17 @@ export function getSelectedNodesOfType(
         results.push({ node, pos });
       }
     });
+
     return results;
   }
 
   if (selection instanceof NodeSelection) {
     const { node, from: pos } = selection;
-    if (node && allowed.has(node.type.name)) {
+
+    if (allowed.has(node.type.name)) {
       results.push({ node, pos });
     }
+
     return results;
   }
 
@@ -594,8 +489,10 @@ export function getSelectedNodesOfType(
 
   if (cell) {
     const cellNode = selection.$anchor.doc.nodeAt(cell.pos);
+
     if (cellNode && allowed.has(cellNode.type.name)) {
       results.push({ node: cellNode, pos: cell.pos });
+
       return results;
     }
   }
@@ -610,13 +507,6 @@ export function getSelectedNodesOfType(
   }
 
   return results;
-}
-
-/**
- * Clamps a value between min and max bounds
- */
-export function clamp(value: number, min: number, max: number): number {
-  return Math.max(min, Math.min(value, max));
 }
 
 export function getSelectedBlockNodes(editor: Editor): PMNode[] {

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import {
   Combobox,
@@ -42,48 +42,49 @@ export function CommunityAddressSearch({
     []
   );
 
-  const latestRequest = useRef(0);
-
   useEffect(() => {
-    if (selected?.label === query) {
-      return;
-    }
-
     const normalizedQuery = query.trim();
-    const requestId = latestRequest.current + 1;
-    latestRequest.current = requestId;
-    setSuggestions([]);
 
-    if (normalizedQuery.length < MINIMUM_QUERY_LENGTH) {
-      setStatus("idle");
-
+    if (
+      selected?.label === query ||
+      normalizedQuery.length < MINIMUM_QUERY_LENGTH
+    ) {
       return;
     }
 
-    setStatus("loading");
+    let active = true;
+
+    const search = async () => {
+      try {
+        const results = await searchCommunityAddressesQuery({
+          data: { query: normalizedQuery },
+        });
+
+        if (active) {
+          setSuggestions(results);
+          setStatus("ready");
+        }
+      } catch {
+        if (active) {
+          setStatus("error");
+        }
+      }
+    };
 
     const timer = window.setTimeout(() => {
-      searchCommunityAddressesQuery({ data: { query: normalizedQuery } })
-        .then((results) => {
-          if (latestRequest.current === requestId) {
-            setSuggestions(results);
-            setStatus("ready");
-          }
-        })
-        .catch(() => {
-          if (latestRequest.current === requestId) {
-            setStatus("error");
-          }
-        });
+      void search();
     }, SEARCH_DELAY_MS);
 
     return () => {
+      active = false;
       window.clearTimeout(timer);
     };
   }, [query, selected?.label]);
 
   const updateQuery = useCallback((value: string) => {
     setQuery(value);
+    setSuggestions([]);
+    setStatus(value.trim().length < MINIMUM_QUERY_LENGTH ? "idle" : "loading");
     setSelected((current) => (current?.label === value ? current : null));
   }, []);
 
@@ -148,7 +149,7 @@ export function CommunityAddressSearch({
         <ComboboxContent>
           <ComboboxEmpty>{emptyMessage}</ComboboxEmpty>
           <ComboboxList>
-            {(suggestion) => (
+            {(suggestion: CommunityAddressSuggestion) => (
               <ComboboxItem key={suggestion.id} value={suggestion}>
                 <span className="min-w-0 truncate">{suggestion.label}</span>
               </ComboboxItem>

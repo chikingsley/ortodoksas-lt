@@ -1,4 +1,3 @@
-// biome-ignore-all lint/performance/noJsxPropsBind: Each collection row binds controls to its own index.
 import type { SiteLocale } from "@ortodoksas-lt/content/site";
 import { ImagePlus, Trash2 } from "lucide-react";
 
@@ -61,11 +60,15 @@ export function DirectoryMediaGallery({
             const file = event.target.files?.[0];
 
             if (file) {
-              onUpload(file).catch((error) => {
-                onUploadError(
-                  error instanceof Error ? error.message : "Upload failed"
-                );
-              });
+              void (async () => {
+                try {
+                  await onUpload(file);
+                } catch (error) {
+                  onUploadError(
+                    error instanceof Error ? error.message : "Upload failed"
+                  );
+                }
+              })();
             }
           }}
           type="file"

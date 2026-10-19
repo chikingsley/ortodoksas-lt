@@ -1,3 +1,4 @@
+import { hasText } from "@ortodoksas-lt/content/value";
 import { useCallback } from "react";
 
 import {
@@ -37,7 +38,7 @@ export function LanguageSelect({
 
   const updateLanguage = useCallback(
     (nextLanguage: string | null) => {
-      if (nextLanguage) {
+      if (hasText(nextLanguage)) {
         onChange(nextLanguage);
       }
     },

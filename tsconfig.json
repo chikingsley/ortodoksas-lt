@@ -1,11 +1,26 @@
 {
   "files": [],
   "references": [
-    { "path": "./apps/web" },
-    { "path": "./apps/studio" },
-    { "path": "./packages/db" }
+    {
+      "path": "./apps/web"
+    },
+    {
+      "path": "./apps/studio"
+    },
+    {
+      "path": "./packages/db"
+    }
   ],
   "compilerOptions": {
-    "strictNullChecks": true
+    "noUncheckedIndexedAccess": true,
+    "strictNullChecks": true,
+    "target": "ES2024",
+    "lib": ["ES2024", "DOM"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true
   }
 }

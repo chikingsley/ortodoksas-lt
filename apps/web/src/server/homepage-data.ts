@@ -8,8 +8,8 @@ import { env } from "cloudflare:workers";
 import { and, desc, eq, inArray, isNotNull } from "drizzle-orm";
 
 import type { CatalogEntry } from "../components/publication/publication";
-import { defaultLocale } from "../i18n/config";
 import type { SiteLocale } from "../i18n/config";
+import { defaultLocale } from "../i18n/config";
 import { formatPublicationMonth } from "../i18n/dates";
 import {
   catalogEntry,

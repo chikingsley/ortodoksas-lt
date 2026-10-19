@@ -10,31 +10,11 @@ allowBuilds:
   sharp: true
   utf-8-validate: false
   workerd: true
-minimumReleaseAgeExclude:
-  - "@cloudflare/vite-plugin@1.51.0"
-  - miniflare@5.20260801.0-alpha || 5.20260828.0-alpha
-  - ultracite@7.10.1
-  - wrangler@4.119.0 || 4.127.1
-  - "@clerk/cli-darwin-arm64@3.1.0"
-  - "@clerk/cli-darwin-x64@3.1.0"
-  - "@clerk/cli-linux-arm64-musl@3.1.0"
-  - "@clerk/cli-linux-arm64@3.1.0"
-  - "@clerk/cli-linux-x64-musl@3.1.0"
-  - "@clerk/cli-linux-x64@3.1.0"
-  - "@clerk/cli-win32-arm64@3.1.0"
-  - "@clerk/cli-win32-x64@3.1.0"
-  - clerk@3.1.0
-  - "@cloudflare/vitest-plugin@1.1.2"
-  - "@cloudflare/workerd-darwin-64@1.20260828.1"
-  - "@cloudflare/workerd-darwin-arm64@1.20260828.1"
-  - "@cloudflare/workerd-linux-64@1.20260828.1"
-  - "@cloudflare/workerd-linux-arm64@1.20260828.1"
-  - "@cloudflare/workerd-windows-64@1.20260828.1"
-  - workerd@1.20260828.1
-  - esbuild@0.28.2
 overrides:
   esbuild@<=0.24.2: ^0.28.2
 patchedDependencies:
+  "@tanstack/react-router@1.170.45": patches/@tanstack__react-router@1.170.45.patch
+  vite@8.3.4: patches/vite@8.3.4.patch
   braces@3.0.3: patches/braces@3.0.3.patch
 peerDependencyRules:
   allowAny:
@@ -47,3 +27,15 @@ peerDependencyRules:
 audit:
   ignore:
     - GHSA-vfj7-8cjw-p6xm
+
+# Explicit 2026-10-19 Cloudflare upgrade: exact versions released within pnpm's
+# 24-hour default window. Ordinary dependency updates retain the age gate.
+minimumReleaseAgeExclude:
+  - "@cloudflare/workerd-darwin-64@1.20261019.1"
+  - "@cloudflare/workerd-darwin-arm64@1.20261019.1"
+  - "@cloudflare/workerd-linux-64@1.20261019.1"
+  - "@cloudflare/workerd-linux-arm64@1.20261019.1"
+  - "@cloudflare/workerd-windows-64@1.20261019.1"
+  - miniflare@5.20261019.0-beta
+  - workerd@1.20261019.1
+  - wrangler@4.151.2

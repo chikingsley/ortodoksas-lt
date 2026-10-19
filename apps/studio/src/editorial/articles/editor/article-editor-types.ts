@@ -1,50 +1,19 @@
+import type { UpdateArticleInput } from "@ortodoksas-lt/content/article";
 import type { JSONContent } from "@tiptap/core";
+import type { z } from "zod";
 
-export interface StoredArticle {
-  bodyJson: string;
-  byline: string | null;
-  bylineType: "organization" | "person";
-  bylineUrl: string | null;
-  heroFit: "contain" | "cover";
-  heroFocalX: number;
-  heroFocalY: number;
-  heroMediaId: string | null;
-  id: string;
-  kind: "article" | "page";
-  labelsJson: string;
-  language: string;
-  publishedAt: number | null;
-  section: string;
-  seoDescription: string | null;
-  seoTitle: string | null;
-  slug: string;
-  status: "draft" | "scheduled" | "published" | "archived";
-  summary: string;
-  title: string;
-  translationGroupId: string;
-  translationKind: "original" | "human" | "machine";
-  translationReviewedAt: number | null;
-  translationReviewedBy: string | null;
-  translationReviewStatus:
-    | "approved"
-    | "changes_requested"
-    | "not_required"
-    | "pending";
-  translationSourceArticleId: string | null;
-  translationSourceHash: string | null;
-}
+import type {
+  contentChangeSchema,
+  storedArticleSchema,
+} from "@/shared/article-contract";
+
+export type StoredArticle = z.infer<typeof storedArticleSchema>;
 
 export interface ArticleResponse {
   article: StoredArticle;
 }
 
-export interface ContentChange {
-  after_value: string | null;
-  before_value: string | null;
-  change_kind: "added" | "changed" | "removed";
-  field_path: string;
-  provenance: "generated" | "manual" | "normalized";
-}
+export type ContentChange = z.infer<typeof contentChangeSchema>;
 
 export interface BaselineResponse {
   baseline: { body_json: string };
@@ -67,7 +36,10 @@ export interface PersistArticleInput {
     summary: string;
     title: string;
   };
-  payload: Record<string, unknown>;
+  payload: UpdateArticleInput & {
+    kind: "article" | "page";
+    translationGroupId: string;
+  };
 }
 
 export interface PublicationVerification {

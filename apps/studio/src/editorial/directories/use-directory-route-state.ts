@@ -1,5 +1,5 @@
-import { siteLocaleSchema } from "@ortodoksas-lt/content/site";
 import type { SiteLocale } from "@ortodoksas-lt/content/site";
+import { siteLocaleSchema } from "@ortodoksas-lt/content/site";
 import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect } from "react";
 
@@ -27,10 +27,11 @@ export const useDirectoryRouteState = ({
     }
 
     const storedLanguage = siteLocaleSchema
+      // oxlint-disable-next-line promise/prefer-await-to-then -- Zod.catch supplies a synchronous validation fallback.
       .catch("lt")
       .parse(localStorage.getItem(DIRECTORY_LANGUAGE_KEY));
 
-    navigate({
+    void navigate({
       replace: true,
       search: { language: storedLanguage, record },
       to,
@@ -41,7 +42,7 @@ export const useDirectoryRouteState = ({
     async (nextLanguage: SiteLocale) => {
       localStorage.setItem(DIRECTORY_LANGUAGE_KEY, nextLanguage);
 
-      return navigate({
+      await navigate({
         replace: true,
         search: { language: nextLanguage, record },
         to,
@@ -51,12 +52,13 @@ export const useDirectoryRouteState = ({
   );
 
   const changeRecord = useCallback(
-    async (nextRecord: string, replace = false) =>
-      navigate({
+    async (nextRecord: string, replace = false) => {
+      await navigate({
         replace,
         search: { language: locale, record: nextRecord },
         to,
-      }),
+      });
+    },
     [locale, navigate, to]
   );
 

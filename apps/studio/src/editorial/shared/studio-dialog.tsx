@@ -25,11 +25,11 @@ export function StudioDialog({
   return (
     <Dialog.Root onOpenChange={onOpenChange} open={open}>
       <Dialog.Portal>
-        <Dialog.Backdrop className="fixed inset-0 z-[100] bg-[rgb(12_21_18/68%)]" />
+        <Dialog.Backdrop className="bg-foreground fixed inset-0 z-[100]" />
         <Dialog.Viewport className="max-editor-phone:p-0 fixed inset-0 z-[101] grid place-items-center p-6">
           <Dialog.Popup
             className={cn(
-              "bg-card max-editor-phone:h-full max-editor-phone:w-full max-editor-phone:rounded-none grid h-[min(860px,100%)] w-[min(1180px,100%)] grid-rows-[auto_minmax(0,1fr)] overflow-hidden rounded-[14px] shadow-[0_24px_70px_rgb(0_0_0/30%)] outline-none",
+              "bg-card max-editor-phone:h-full max-editor-phone:w-full max-editor-phone:rounded-none grid h-[min(860px,100%)] w-[min(1180px,100%)] grid-rows-[auto_minmax(0,1fr)] overflow-hidden rounded-xl shadow-2xl outline-none",
               popupClassName
             )}
           >
@@ -38,7 +38,7 @@ export function StudioDialog({
                 <Dialog.Title className="block text-sm font-bold">
                   {title}
                 </Dialog.Title>
-                <Dialog.Description className="text-muted-foreground mt-0.5 block text-[11px]">
+                <Dialog.Description className="text-muted-foreground mt-0.5 block text-xs">
                   {description}
                 </Dialog.Description>
               </div>

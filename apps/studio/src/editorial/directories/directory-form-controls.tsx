@@ -1,5 +1,6 @@
 import type { SiteLocale } from "@ortodoksas-lt/content/site";
 import { siteLocales } from "@ortodoksas-lt/content/site";
+import { hasText } from "@ortodoksas-lt/content/value";
 import { useCallback, useId } from "react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,20 +26,24 @@ export const localeOptions = siteLocales.map((locale) => ({
   value: locale,
 }));
 
-export const Section = ({
+export function Section({
   children,
   title,
 }: {
   children: React.ReactNode;
   title: string;
-}) => (
-  <Card>
-    <CardHeader>
-      <CardTitle>{title}</CardTitle>
-    </CardHeader>
-    <CardContent className="grid gap-4">{children}</CardContent>
-  </Card>
-);
+}) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid gap-4">{children}</div>
+      </CardContent>
+    </Card>
+  );
+}
 
 interface SelectFieldProps<T extends string> {
   label: string;
@@ -58,11 +63,17 @@ export function SelectField<T extends string>({
 
   const update = useCallback(
     (nextValue: string | null) => {
-      if (nextValue) {
-        onChange(nextValue as T);
+      if (hasText(nextValue)) {
+        const selectedOption = options.find(
+          (option) => option.value === nextValue
+        );
+
+        if (selectedOption !== undefined) {
+          onChange(selectedOption.value);
+        }
       }
     },
-    [onChange]
+    [onChange, options]
   );
 
   return (

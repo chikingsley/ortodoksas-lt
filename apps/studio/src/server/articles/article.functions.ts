@@ -24,7 +24,7 @@ import {
 import { createTranslationDraft } from "./article-translation.server";
 import { verifyArticlePublication } from "./article-verification.server";
 
-const articleIdSchema = z.object({ articleId: z.string().uuid() });
+const articleIdSchema = z.object({ articleId: z.uuid() });
 
 const articleMutationSchema = articleIdSchema.extend({
   payload: updateArticleSchema,
@@ -40,7 +40,7 @@ const translationDraftSchema = articleIdSchema.extend({
 });
 
 export const loadArticleWorkspace = createServerFn({ method: "GET" })
-  .validator((input: unknown) => articleIdSchema.parse(input))
+  .validator(articleIdSchema)
   .handler(async ({ data }) => {
     await requireStudioEditor(env);
 
@@ -48,7 +48,7 @@ export const loadArticleWorkspace = createServerFn({ method: "GET" })
   });
 
 export const loadArticleBaseline = createServerFn({ method: "GET" })
-  .validator((input: unknown) => articleIdSchema.parse(input))
+  .validator(articleIdSchema)
   .handler(async ({ data }) => {
     await requireStudioEditor(env);
 
@@ -56,7 +56,7 @@ export const loadArticleBaseline = createServerFn({ method: "GET" })
   });
 
 export const loadArticleRevisions = createServerFn({ method: "GET" })
-  .validator((input: unknown) => articleIdSchema.parse(input))
+  .validator(articleIdSchema)
   .handler(async ({ data }) => {
     await requireStudioEditor(env);
 
@@ -64,9 +64,7 @@ export const loadArticleRevisions = createServerFn({ method: "GET" })
   });
 
 export const createArticleMutation = createServerFn({ method: "POST" })
-  .validator((payload: unknown) =>
-    createInteractiveArticleSchema.parse(payload)
-  )
+  .validator(createInteractiveArticleSchema)
   .handler(async ({ data }) => {
     const editor = await requireStudioEditor(env);
     requireStudioWritesOpen(env);
@@ -79,7 +77,7 @@ export const createArticleMutation = createServerFn({ method: "POST" })
   });
 
 export const updateArticleMutation = createServerFn({ method: "POST" })
-  .validator((input: unknown) => articleMutationSchema.parse(input))
+  .validator(articleMutationSchema)
   .handler(async ({ data }) => {
     const editor = await requireStudioEditor(env);
     requireStudioWritesOpen(env);
@@ -93,7 +91,7 @@ export const updateArticleMutation = createServerFn({ method: "POST" })
   });
 
 export const deleteArticleDraftMutation = createServerFn({ method: "POST" })
-  .validator((input: unknown) => articleIdSchema.parse(input))
+  .validator(articleIdSchema)
   .handler(async ({ data }) => {
     await requireStudioEditor(env);
     requireStudioWritesOpen(env);
@@ -105,7 +103,7 @@ export const deleteArticleDraftMutation = createServerFn({ method: "POST" })
   });
 
 export const restoreArticleRevisionMutation = createServerFn({ method: "POST" })
-  .validator((input: unknown) => restoreRevisionSchema.parse(input))
+  .validator(restoreRevisionSchema)
   .handler(async ({ data }) => {
     const editor = await requireStudioEditor(env);
     requireStudioWritesOpen(env);
@@ -120,7 +118,7 @@ export const restoreArticleRevisionMutation = createServerFn({ method: "POST" })
   });
 
 export const createTranslationDraftMutation = createServerFn({ method: "POST" })
-  .validator((input: unknown) => translationDraftSchema.parse(input))
+  .validator(translationDraftSchema)
   .handler(async ({ data }) => {
     const editor = await requireStudioEditor(env);
     requireStudioWritesOpen(env);
@@ -134,7 +132,7 @@ export const createTranslationDraftMutation = createServerFn({ method: "POST" })
   });
 
 export const verifyArticlePublicationQuery = createServerFn({ method: "GET" })
-  .validator((input: unknown) => articleIdSchema.parse(input))
+  .validator(articleIdSchema)
   .handler(async ({ data }) => {
     await requireStudioEditor(env);
 

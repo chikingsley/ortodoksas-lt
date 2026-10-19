@@ -1,5 +1,5 @@
 import { UserButton } from "@clerk/tanstack-react-start";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useSyncExternalStore } from "react";
 
 import {
   SidebarInset,
@@ -14,26 +14,43 @@ interface Props {
 
 const SIDEBAR_STORAGE_KEY = "ortodoksas-studio-sidebar-open";
 
+function subscribeSidebar(notify: () => void) {
+  window.addEventListener("storage", notify);
+  window.addEventListener("studio-sidebar-change", notify);
+
+  return () => {
+    window.removeEventListener("storage", notify);
+    window.removeEventListener("studio-sidebar-change", notify);
+  };
+}
+
+function readSidebar() {
+  return localStorage.getItem(SIDEBAR_STORAGE_KEY) !== "false";
+}
+
+function serverSidebar() {
+  return true;
+}
+
 export function StudioShell({ children }: Props) {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  useEffect(() => {
-    setSidebarOpen(localStorage.getItem(SIDEBAR_STORAGE_KEY) !== "false");
-  }, []);
+  const sidebarOpen = useSyncExternalStore(
+    subscribeSidebar,
+    readSidebar,
+    serverSidebar
+  );
 
   const changeSidebarOpen = useCallback((open: boolean) => {
-    setSidebarOpen(open);
     localStorage.setItem(SIDEBAR_STORAGE_KEY, String(open));
+    window.dispatchEvent(new Event("studio-sidebar-change"));
   }, []);
 
   return (
     <SidebarProvider
       onOpenChange={changeSidebarOpen}
       open={sidebarOpen}
-      style={
-        {
-          "--sidebar-width": "224px",
-        } as React.CSSProperties
-      }
+      style={{
+        "--sidebar-width": "224px",
+      }}
     >
       <StudioSidebar />
       <SidebarInset className="min-w-0 overflow-x-clip">

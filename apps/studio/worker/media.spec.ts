@@ -36,6 +36,8 @@ describe("Studio Worker services", () => {
 
     expect(response.status).toBe(200);
     expect(response.headers.get("content-type")).toBe("image/png");
-    expect(new Uint8Array(await response.arrayBuffer())).toEqual(IMAGE_BYTES);
+    expect(new Uint8Array(await response.arrayBuffer())).toStrictEqual(
+      IMAGE_BYTES
+    );
   });
 });

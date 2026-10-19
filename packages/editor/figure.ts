@@ -1,3 +1,5 @@
+import { figureAttributesSchema } from "@ortodoksas-lt/content/media";
+import { hasText } from "@ortodoksas-lt/content/value";
 import { Node } from "@tiptap/core";
 
 export interface FigureAttributes {
@@ -24,30 +26,38 @@ declare module "@tiptap/core" {
   }
 }
 
-const readImageAttributes = (element: HTMLElement) => {
-  const image =
-    element.tagName === "IMG" ? element : element.querySelector("img");
+function imageDimension(image: Element | null, name: "height" | "width") {
+  const value = image?.getAttribute(name);
 
+  return hasText(value) ? Math.trunc(Number(value)) : null;
+}
+
+function readFigureMetadata(element: HTMLElement) {
   return {
-    alt: image?.getAttribute("alt") ?? "",
     altProvenance: element.dataset.altProvenance ?? "missing",
     captionProvenance: element.dataset.captionProvenance ?? "missing",
     credit:
       element.dataset.credit ??
       element.querySelector("[data-figure-credit]")?.textContent?.trim() ??
       "",
-    height: image?.getAttribute("height")
-      ? Number.parseInt(image.getAttribute("height") ?? "", 10)
-      : null,
     mediaId: element.dataset.mediaId,
     role: element.dataset.figureRole === "lead" ? "lead" : "content",
     sourceAlt: element.dataset.sourceAlt ?? "",
     sourceCaption: element.dataset.sourceCaption ?? "",
+  };
+}
+
+const readImageAttributes = (element: HTMLElement) => {
+  const image =
+    element.tagName === "IMG" ? element : element.querySelector("img");
+
+  return {
+    ...readFigureMetadata(element),
+    alt: image?.getAttribute("alt") ?? "",
+    height: imageDimension(image, "height"),
     src: image?.getAttribute("src") ?? "",
     title: image?.getAttribute("title"),
-    width: image?.getAttribute("width")
-      ? Number.parseInt(image.getAttribute("width") ?? "", 10)
-      : null,
+    width: imageDimension(image, "width"),
   };
 };
 
@@ -117,25 +127,23 @@ export const Figure = Node.create({
       src,
       title,
       width,
-    } = node.attrs;
+    } = figureAttributesSchema.parse(node.attrs);
 
     const imageAttributes = {
       alt,
-      ...(height ? { height } : {}),
-      ...(mediaId
-        ? {
-            sizes: "(max-width: 720px) 100vw, 720px",
-            srcset: [320, 640, 960, 1280, 1600]
-              .map(
-                (responsiveWidth) =>
-                  `/api/media/${mediaId}?width=${responsiveWidth} ${responsiveWidth}w`
-              )
-              .join(", "),
-          }
-        : {}),
+      height: height ?? undefined,
+      sizes: hasText(mediaId) ? "(max-width: 720px) 100vw, 720px" : undefined,
       src,
-      ...(title ? { title } : {}),
-      ...(width ? { width } : {}),
+      srcset: hasText(mediaId)
+        ? [320, 640, 960, 1280, 1600]
+            .map(
+              (responsiveWidth) =>
+                `/api/media/${mediaId}?width=${responsiveWidth} ${responsiveWidth}w`
+            )
+            .join(", ")
+        : undefined,
+      title: hasText(title) ? title : undefined,
+      width: width ?? undefined,
     };
 
     return [
@@ -144,11 +152,13 @@ export const Figure = Node.create({
         class: "article-figure",
         "data-alt-provenance": altProvenance,
         "data-caption-provenance": captionProvenance,
-        "data-credit": credit || undefined,
+        "data-credit": hasText(credit) ? credit : undefined,
         "data-figure-role": role,
-        "data-media-id": mediaId || undefined,
-        "data-source-alt": sourceAlt || undefined,
-        "data-source-caption": sourceCaption || undefined,
+        "data-media-id": hasText(mediaId) ? mediaId : undefined,
+        "data-source-alt": hasText(sourceAlt) ? sourceAlt : undefined,
+        "data-source-caption": hasText(sourceCaption)
+          ? sourceCaption
+          : undefined,
       },
       ["img", imageAttributes],
       ["figcaption", 0],

@@ -1,10 +1,11 @@
+import type { SectionLocale } from "@ortodoksas-lt/content/sections";
 import {
   getSectionLabel,
   getSectionOptions,
 } from "@ortodoksas-lt/content/sections";
-import type { SectionLocale } from "@ortodoksas-lt/content/sections";
-import { useCallback, useMemo, useState } from "react";
+import { hasText } from "@ortodoksas-lt/content/value";
 import type { ChangeEvent, KeyboardEvent } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,26 +19,28 @@ import {
 
 interface Props {
   id?: string;
-  language?: string;
+  language?: SectionLocale;
   onChange: (value: string) => void;
   options?: Iterable<string>;
   value: string;
 }
 
-export const SectionSelect = ({
+const EMPTY_OPTIONS: string[] = [];
+
+export function SectionSelect({
   id,
   language = "lt",
   onChange,
-  options = [],
+  options = EMPTY_OPTIONS,
   value,
-}: Props) => {
+}: Props) {
   const [adding, setAdding] = useState(false);
   const [draft, setDraft] = useState("");
 
   const sectionOptions = useMemo(
     () =>
       getSectionOptions([...options, value]).map((section) => ({
-        label: getSectionLabel(section, language as SectionLocale),
+        label: getSectionLabel(section, language),
         value: section,
       })),
     [language, options, value]
@@ -61,7 +64,7 @@ export const SectionSelect = ({
 
   const selectSection = useCallback(
     (nextValue: string | null) => {
-      if (nextValue) {
+      if (hasText(nextValue)) {
         onChange(nextValue);
       }
     },
@@ -144,9 +147,9 @@ export const SectionSelect = ({
           Add new section
         </Button>
       )}
-      <small className="text-muted-foreground mt-1.5 block text-[11px] leading-snug">
+      <small className="text-muted-foreground mt-1.5 block text-xs leading-snug">
         Select a canonical section or add a deliberate new one.
       </small>
     </div>
   );
-};
+}

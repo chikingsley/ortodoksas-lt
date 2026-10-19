@@ -4,11 +4,11 @@ type SvgProps = React.ComponentPropsWithoutRef<"svg">;
 
 export const SunIcon = memo(({ className, ...props }: SvgProps) => (
   <svg
-    className={className}
-    fill="currentColor"
-    height="24"
-    viewBox="0 0 24 24"
     width="24"
+    height="24"
+    className={className}
+    viewBox="0 0 24 24"
+    fill="currentColor"
     xmlns="http://www.w3.org/2000/svg"
     {...props}
   >
@@ -17,10 +17,10 @@ export const SunIcon = memo(({ className, ...props }: SvgProps) => (
       fill="currentColor"
     />
     <path
+      fillRule="evenodd"
       clipRule="evenodd"
       d="M7 12C7 9.23858 9.23858 7 12 7C14.7614 7 17 9.23858 17 12C17 14.7614 14.7614 17 12 17C9.23858 17 7 14.7614 7 12ZM12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9Z"
       fill="currentColor"
-      fillRule="evenodd"
     />
     <path
       d="M13 20C13 19.4477 12.5523 19 12 19C11.4477 19 11 19.4477 11 20V22C11 22.5523 11.4477 23 12 23C12.5523 23 13 22.5523 13 22V20Z"

@@ -1,4 +1,3 @@
-// biome-ignore-all lint/performance/noJsxPropsBind: Record lists bind each row to its record identifier.
 import { Plus } from "lucide-react";
 import { useCallback, useState } from "react";
 
@@ -16,7 +15,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 
 const TRAILING_S_PATTERN = /s$/u;
 
-export const DirectoryShell = ({
+export function DirectoryShell({
   children,
   onCreate,
   onSelect,
@@ -30,7 +29,7 @@ export const DirectoryShell = ({
   records: { id: string; label: string }[];
   selectedId: string | null;
   title: string;
-}) => {
+}) {
   const [mobilePickerOpen, setMobilePickerOpen] = useState(false);
 
   const selectRecord = useCallback(
@@ -86,7 +85,7 @@ export const DirectoryShell = ({
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto p-3">{recordList}</div>
       </aside>
-      <div className="min-w-0 px-[clamp(16px,3vw,40px)] py-4 min-[1001px]:py-8 sm:py-6">
+      <div className="min-w-0 px-4 py-4 min-[1001px]:py-8 sm:py-6 md:px-8 xl:px-10">
         <div className="mx-auto mb-3 hidden max-w-6xl items-center justify-between gap-3 max-[1000px]:flex">
           <Sheet onOpenChange={setMobilePickerOpen} open={mobilePickerOpen}>
             <SheetTrigger
@@ -114,4 +113,4 @@ export const DirectoryShell = ({
       </div>
     </div>
   );
-};
+}

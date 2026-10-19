@@ -1,13 +1,15 @@
-import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
 
 import { StudioShell } from "@/editorial/shell/studio-shell";
 import { getStudioAuthState } from "@/server/auth";
 
-const StudioLayout = () => (
-  <StudioShell>
-    <Outlet />
-  </StudioShell>
-);
+function StudioLayout() {
+  return (
+    <StudioShell>
+      <Outlet />
+    </StudioShell>
+  );
+}
 
 export const Route = createFileRoute("/_studio")({
   beforeLoad: async () => {

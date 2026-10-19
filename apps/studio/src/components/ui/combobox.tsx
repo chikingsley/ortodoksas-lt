@@ -2,8 +2,8 @@
 
 import { Combobox as ComboboxPrimitive } from "@base-ui/react";
 import { CheckIcon, ChevronDownIcon, XIcon } from "lucide-react";
-import { useRef } from "react";
 import type { ComponentPropsWithRef } from "react";
+import { useRef } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -74,9 +74,7 @@ function ComboboxInput({
         {showTrigger ? (
           <InputGroupButton
             aria-label={
-              typeof inputLabel === "string"
-                ? `Open ${inputLabel}`
-                : "Open options"
+              inputLabel === undefined ? "Open options" : `Open ${inputLabel}`
             }
             className="group-has-data-[slot=combobox-clear]/input-group:hidden data-pressed:bg-transparent"
             data-slot="input-group-button"

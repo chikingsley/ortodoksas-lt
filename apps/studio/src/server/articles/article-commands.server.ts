@@ -1,9 +1,15 @@
+import type {
+  TiptapDocument,
+  UpdateArticleInput,
+} from "@ortodoksas-lt/content/article";
 import {
   createInteractiveArticleSchema,
+  tiptapDocumentSchema,
+  translationReviewStatusSchema,
   updateArticleSchema,
 } from "@ortodoksas-lt/content/article";
-import type { TiptapDocument } from "@ortodoksas-lt/content/article";
 import { canonicalizePublicationDocument } from "@ortodoksas-lt/content/publication-link";
+import { hasText } from "@ortodoksas-lt/content/value";
 import {
   articleBaselines,
   articleContentChanges,
@@ -15,12 +21,14 @@ import { annotateArticleBody } from "@ortodoksas-lt/editor/provenance";
 import { and, desc, eq, exists } from "drizzle-orm";
 import { alias } from "drizzle-orm/sqlite-core";
 
+import type { PersistedArticle } from "../../shared/article-contract";
 import type { StudioDatabase } from "../db.server";
 import {
   contentChangeInsertQueries,
   findMediaId,
   hashText,
 } from "./article-content.server";
+import type { StudioOperationResult } from "./article-operation-support.server";
 import {
   articlePersistenceQueries,
   contentChanges,
@@ -37,27 +45,89 @@ import {
   success,
   validationIssues,
 } from "./article-operation-support.server";
-import type { StudioOperationResult } from "./article-operation-support.server";
 import { publicationTimestamp } from "./article-publication.server";
 import {
   articleRevisionMetadata,
   parseArticleRevisionMetadata,
 } from "./article-revision.server";
 
+type BaselineContent = Pick<
+  typeof articleBaselines.$inferSelect,
+  "bodyJson" | "summary" | "title"
+>;
+
+function baselineText(
+  baseline: BaselineContent | undefined,
+  fallback: { summary: string; title: string }
+) {
+  return {
+    baselineSummary: baseline?.summary ?? fallback.summary,
+    baselineTitle: baseline?.title ?? fallback.title,
+  };
+}
+
+function annotateSavedBody(
+  body: TiptapDocument,
+  baseline: BaselineContent | undefined
+) {
+  const baselineBody = hasText(baseline?.bodyJson)
+    ? tiptapDocumentSchema.parse(JSON.parse(baseline.bodyJson))
+    : body;
+
+  return annotateArticleBody(
+    body,
+    canonicalizePublicationDocument(baselineBody)
+  );
+}
+
+function restoredRevisionBody(
+  bodyJson: string,
+  metadata: ReturnType<typeof parseArticleRevisionMetadata>,
+  group: typeof publicationGroups.$inferSelect | undefined
+) {
+  const body = tiptapDocumentSchema.parse(JSON.parse(bodyJson));
+
+  return canonicalizePublicationDocument(
+    metadata.snapshotCompleteness === "legacy_partial"
+      ? sanitizeDirectoryBody(body, group?.pageTemplate ?? "standard")
+      : body
+  );
+}
+
+function annotateRestoredBody(
+  body: TiptapDocument,
+  baseline: BaselineContent | undefined
+) {
+  return baseline
+    ? annotateArticleBody(
+        body,
+        canonicalizePublicationDocument(
+          tiptapDocumentSchema.parse(JSON.parse(baseline.bodyJson))
+        )
+      )
+    : { body, changes: [] };
+}
+
+async function publishedUpdateIssues(
+  database: StudioDatabase,
+  article: UpdateArticleInput,
+  sourceArticleId: string | null
+) {
+  if (article.status !== "published") {
+    return [];
+  }
+
+  return await getPublicationQualityIssues(database, {
+    ...article,
+    translationSourceArticleId: sourceArticleId ?? undefined,
+  });
+}
+
 export const createArticle = async (input: {
   database: StudioDatabase;
   editorId: string;
   payload: unknown;
-}): Promise<
-  StudioOperationResult<{
-    heroMediaId: string | null;
-    id: string;
-    publishedAt: number | null;
-    status: string;
-    translationReviewStatus: string;
-    version: number;
-  }>
-> => {
+}): Promise<StudioOperationResult<PersistedArticle>> => {
   const parsed = createInteractiveArticleSchema.safeParse(input.payload);
 
   if (!parsed.success) {
@@ -101,7 +171,7 @@ export const createArticle = async (input: {
   const translationGroupId =
     parsed.data.translationGroupId ?? crypto.randomUUID();
 
-  const existingGroup = parsed.data.translationGroupId
+  const existingGroup = hasText(parsed.data.translationGroupId)
     ? await input.database.query.publicationGroups.findFirst({
         where: eq(publicationGroups.id, parsed.data.translationGroupId),
       })
@@ -176,9 +246,9 @@ export const createArticle = async (input: {
     title: parsed.data.title,
     translationGroupId,
     translationKind: "original",
+    translationReviewStatus: "not_required",
     translationReviewedAt: null,
     translationReviewedBy: null,
-    translationReviewStatus: "not_required",
     translationSourceArticleId: null,
     translationSourceHash: null,
     updatedAt: timestamp,
@@ -238,16 +308,7 @@ export const updateArticle = async (input: {
   database: StudioDatabase;
   editorId: string;
   payload: unknown;
-}): Promise<
-  StudioOperationResult<{
-    heroMediaId: string | null;
-    id: string;
-    publishedAt: number | null;
-    status: string;
-    translationReviewStatus: string;
-    version: number;
-  }>
-> => {
+}): Promise<StudioOperationResult<PersistedArticle>> => {
   const parsed = updateArticleSchema.safeParse(input.payload);
 
   if (!parsed.success) {
@@ -276,21 +337,19 @@ export const updateArticle = async (input: {
 
   const { article: existingArticle } = identityResolution;
 
-  if (parsed.data.status === "published") {
-    const qualityIssues = await getPublicationQualityIssues(input.database, {
-      ...parsed.data,
-      translationSourceArticleId:
-        existingArticle.translationSourceArticleId ?? undefined,
-    });
+  const qualityIssues = await publishedUpdateIssues(
+    input.database,
+    parsed.data,
+    existingArticle.translationSourceArticleId
+  );
 
-    if (qualityIssues.length > 0) {
-      return {
-        error: "Article quality checks failed",
-        issues: qualityIssues,
-        ok: false,
-        status: 422,
-      };
-    }
+  if (qualityIssues.length > 0) {
+    return {
+      error: "Article quality checks failed",
+      issues: qualityIssues,
+      ok: false,
+      status: 422,
+    };
   }
 
   const [latestRevision] = await input.database
@@ -314,13 +373,8 @@ export const updateArticle = async (input: {
   const version = currentVersion + 1;
   const timestamp = Date.now();
 
-  const baselineBody = baseline?.bodyJson
-    ? (JSON.parse(baseline.bodyJson) as TiptapDocument)
-    : parsed.data.body;
-
   const currentBody = canonicalizePublicationDocument(parsed.data.body);
-  const comparableBaselineBody = canonicalizePublicationDocument(baselineBody);
-  const annotated = annotateArticleBody(currentBody, comparableBaselineBody);
+  const annotated = annotateSavedBody(currentBody, baseline);
   const bodyJson = JSON.stringify(annotated.body);
 
   const heroMediaId =
@@ -334,8 +388,7 @@ export const updateArticle = async (input: {
   );
 
   const changes = contentChanges({
-    baselineSummary: baseline?.summary ?? parsed.data.summary,
-    baselineTitle: baseline?.title ?? parsed.data.title,
+    ...baselineText(baseline, parsed.data),
     bodyChanges: annotated.changes,
     summary: parsed.data.summary,
     title: parsed.data.title,
@@ -496,7 +549,9 @@ export const updateArticle = async (input: {
       id: input.articleId,
       publishedAt,
       status: parsed.data.status,
-      translationReviewStatus: nextArticle.translationReviewStatus,
+      translationReviewStatus: translationReviewStatusSchema.parse(
+        nextArticle.translationReviewStatus
+      ),
       version,
     })
   );
@@ -580,29 +635,17 @@ export const restoreArticleRevision = async (input: {
     }),
   ]);
 
-  const restoredBody = canonicalizePublicationDocument(
-    metadata.snapshotCompleteness === "legacy_partial"
-      ? sanitizeDirectoryBody(
-          JSON.parse(revision.bodyJson) as TiptapDocument,
-          publicationGroup?.pageTemplate ?? "standard"
-        )
-      : (JSON.parse(revision.bodyJson) as TiptapDocument)
+  const restoredBody = restoredRevisionBody(
+    revision.bodyJson,
+    metadata,
+    publicationGroup
   );
 
-  const annotated = baseline
-    ? annotateArticleBody(
-        restoredBody,
-        canonicalizePublicationDocument(
-          JSON.parse(baseline.bodyJson) as TiptapDocument
-        )
-      )
-    : { body: restoredBody, changes: [] };
-
+  const annotated = annotateRestoredBody(restoredBody, baseline);
   const restoredBodyJson = JSON.stringify(annotated.body);
 
   const changes = contentChanges({
-    baselineSummary: baseline?.summary ?? metadata.summary,
-    baselineTitle: baseline?.title ?? metadata.title,
+    ...baselineText(baseline, metadata),
     bodyChanges: annotated.changes,
     summary: metadata.summary,
     title: metadata.title,

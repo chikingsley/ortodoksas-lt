@@ -37,10 +37,14 @@ export interface UseImageUploadConfig {
  * Checks if image can be inserted in the current editor state
  */
 export function canInsertImage(editor: Editor | null): boolean {
-  if (!(editor && editor.isEditable)) {
+  if (!editor || !editor.isEditable) {
     return false;
   }
-  if (!isExtensionAvailable(editor, "imageUpload")) {
+
+  // Silent: editors without the upload extension are a supported state — the
+  // button hides via `hideWhenUnavailable` (e.g. page-docx inserts images
+  // through its own action) — not a configuration mistake to warn about.
+  if (!isExtensionAvailable(editor, "imageUpload", { silent: true })) {
     return false;
   }
 
@@ -51,9 +55,10 @@ export function canInsertImage(editor: Editor | null): boolean {
  * Checks if image is currently active
  */
 export function isImageActive(editor: Editor | null): boolean {
-  if (!(editor && editor.isEditable)) {
+  if (!editor || !editor.isEditable) {
     return false;
   }
+
   return editor.isActive("imageUpload");
 }
 
@@ -61,9 +66,10 @@ export function isImageActive(editor: Editor | null): boolean {
  * Inserts an image in the editor
  */
 export function insertImage(editor: Editor | null): boolean {
-  if (!(editor && editor.isEditable)) {
+  if (!editor || !editor.isEditable) {
     return false;
   }
+
   if (!canInsertImage(editor)) {
     return false;
   }
@@ -90,7 +96,7 @@ export function shouldShowButton(props: {
 }): boolean {
   const { editor, hideWhenUnavailable } = props;
 
-  if (!(editor && editor.isEditable)) {
+  if (!editor || !editor.isEditable) {
     return false;
   }
 
@@ -98,7 +104,9 @@ export function shouldShowButton(props: {
     return true;
   }
 
-  if (!isExtensionAvailable(editor, "imageUpload")) {
+  // Silent by intent: `hideWhenUnavailable` means "absence is fine, just
+  // don't render" — see canInsertImage.
+  if (!isExtensionAvailable(editor, "imageUpload", { silent: true })) {
     return false;
   }
 
@@ -150,7 +158,7 @@ export function useImageUpload(config?: UseImageUploadConfig) {
     editor: providedEditor,
     hideWhenUnavailable = false,
     onInserted,
-  } = config || {};
+  } = config ?? {};
 
   const { editor } = useTiptapEditor(providedEditor);
   const isMobile = useIsBreakpoint();
@@ -182,9 +190,11 @@ export function useImageUpload(config?: UseImageUploadConfig) {
     }
 
     const success = insertImage(editor);
+
     if (success) {
       onInserted?.();
     }
+
     return success;
   }, [editor, onInserted]);
 
@@ -195,16 +205,16 @@ export function useImageUpload(config?: UseImageUploadConfig) {
       handleImage();
     },
     {
-      enabled: isVisible && canInsert,
       enableOnContentEditable: !isMobile,
       enableOnFormTags: true,
+      enabled: isVisible && canInsert,
     }
   );
 
   return {
+    Icon: ImagePlusIcon,
     canInsert,
     handleImage,
-    Icon: ImagePlusIcon,
     isActive,
     isVisible,
     label: "Add image",

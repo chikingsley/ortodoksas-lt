@@ -1,12 +1,13 @@
 import { getSectionOptions } from "@ortodoksas-lt/content/sections";
+import { hasText } from "@ortodoksas-lt/content/value";
 import { articles, publicationGroups } from "@ortodoksas-lt/db";
 import { env } from "cloudflare:workers";
-import { and, count, desc, eq, gte, inArray, like, lt, or } from "drizzle-orm";
 import type { SQL } from "drizzle-orm";
+import { and, count, desc, eq, gte, inArray, like, lt, or } from "drizzle-orm";
 import { z } from "zod";
 
-import { defaultLocale } from "../i18n/config";
 import type { SiteLocale } from "../i18n/config";
+import { defaultLocale } from "../i18n/config";
 import { site } from "../site";
 import {
   catalogEntry,
@@ -35,17 +36,54 @@ interface ArchiveQuery {
   year?: string;
 }
 
+async function getArchiveTotal(
+  language: SiteLocale,
+  options: ArchiveQuery,
+  where: SQL | undefined
+) {
+  if (hasText(options.query) || hasText(options.label)) {
+    const [row] = await database()
+      .select({ value: count() })
+      .from(articles)
+      .innerJoin(
+        publicationGroups,
+        eq(publicationGroups.id, articles.translationGroupId)
+      )
+      .where(where);
+
+    return row?.value ?? 0;
+  }
+
+  return (
+    (await env.DB.prepare(
+      "SELECT COALESCE(SUM(total),0) AS value FROM publication_counts WHERE language = ? AND (? IS NULL OR section = ?) AND (? IS NULL OR month LIKE ?)"
+    )
+      .bind(
+        language,
+        hasText(options.section) ? options.section : null,
+        hasText(options.section) ? options.section : null,
+        hasText(options.year) && fourDigitYear.test(options.year)
+          ? options.year
+          : null,
+        hasText(options.year) && fourDigitYear.test(options.year)
+          ? `${options.year}-%`
+          : null
+      )
+      .first<number>("value")) ?? 0
+  );
+}
+
 export async function getArchiveArticles(
   language: SiteLocale,
   options: ArchiveQuery
 ) {
-  const conditions: SQL[] = [
+  const conditions: (SQL | undefined)[] = [
     eq(articles.status, "published"),
     eq(articles.language, language),
     eq(publicationGroups.kind, "article"),
   ];
 
-  if (options.query) {
+  if (hasText(options.query)) {
     const pattern = `%${options.query.replaceAll(/[%_]/gu, (character) => `\\${character}`)}%`;
     conditions.push(
       or(
@@ -53,19 +91,19 @@ export async function getArchiveArticles(
         like(articles.summary, pattern),
         like(articles.section, pattern),
         like(articles.labelsJson, pattern)
-      ) as SQL
+      )
     );
   }
 
-  if (options.section) {
+  if (hasText(options.section)) {
     conditions.push(eq(articles.section, options.section));
   }
 
-  if (options.label) {
+  if (hasText(options.label)) {
     conditions.push(like(articles.labelsJson, `%${options.label}%`));
   }
 
-  if (options.year && fourDigitYear.test(options.year)) {
+  if (hasText(options.year) && fourDigitYear.test(options.year)) {
     const start = Date.UTC(Number(options.year), 0, 1);
     const end = Date.UTC(Number(options.year) + 1, 0, 1);
     conditions.push(
@@ -76,33 +114,7 @@ export async function getArchiveArticles(
 
   const where = and(...conditions);
 
-  const total =
-    options.query || options.label
-      ? ((
-          await database()
-            .select({ value: count() })
-            .from(articles)
-            .innerJoin(
-              publicationGroups,
-              eq(publicationGroups.id, articles.translationGroupId)
-            )
-            .where(where)
-        )[0]?.value ?? 0)
-      : ((await env.DB.prepare(
-          "SELECT COALESCE(SUM(total),0) AS value FROM publication_counts WHERE language = ? AND (? IS NULL OR section = ?) AND (? IS NULL OR month LIKE ?)"
-        )
-          .bind(
-            language,
-            options.section || null,
-            options.section || null,
-            options.year && fourDigitYear.test(options.year)
-              ? options.year
-              : null,
-            options.year && fourDigitYear.test(options.year)
-              ? `${options.year}-%`
-              : null
-          )
-          .first<number>("value")) ?? 0);
+  const total = await getArchiveTotal(language, options, where);
 
   const limit = Math.max(1, Math.min(100, Math.trunc(options.limit)));
 
@@ -154,18 +166,18 @@ async function readArchiveFacets(language: SiteLocale) {
   return {
     labels: [
       ...new Set(rows.flatMap((row) => parseLabels(row.labelsJson))),
-    ].sort((left, right) => left.localeCompare(right, language)),
+    ].toSorted((left, right) => left.localeCompare(right, language)),
     sections: getSectionOptions(rows.map((row) => row.section)),
     total: rows.length,
     years: [
       ...new Set(
         rows.flatMap((row) =>
-          row.publishedAt
-            ? [new Date(row.publishedAt).getUTCFullYear().toString()]
-            : []
+          row.publishedAt === null
+            ? []
+            : [new Date(row.publishedAt).getUTCFullYear().toString()]
         )
       ),
-    ].sort((left, right) => right.localeCompare(left)),
+    ].toSorted((left, right) => right.localeCompare(left)),
   };
 }
 

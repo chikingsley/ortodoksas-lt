@@ -1,8 +1,8 @@
-import { getTranslationDisplayState } from "@ortodoksas-lt/content/translation";
 import type {
   TranslationKind,
   TranslationReviewStatus,
 } from "@ortodoksas-lt/content/translation";
+import { getTranslationDisplayState } from "@ortodoksas-lt/content/translation";
 
 const translationLabels = {
   automatic: "Automatic",

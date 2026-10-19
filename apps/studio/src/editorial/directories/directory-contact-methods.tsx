@@ -1,4 +1,3 @@
-// biome-ignore-all lint/performance/noJsxPropsBind: Each collection row binds controls to its own index.
 import type { SiteLocale } from "@ortodoksas-lt/content/site";
 import { Plus, Trash2 } from "lucide-react";
 

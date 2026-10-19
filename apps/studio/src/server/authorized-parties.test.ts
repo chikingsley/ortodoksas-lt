@@ -8,11 +8,11 @@ describe("Clerk authorized parties", () => {
       parseAuthorizedParties(
         "http://localhost:5173/, https://studio.example, http://localhost:5173"
       )
-    ).toEqual(["http://localhost:5173", "https://studio.example"]);
+    ).toStrictEqual(["http://localhost:5173", "https://studio.example"]);
   });
 
   it("requires an explicit origin list", () => {
-    expect(() => parseAuthorizedParties(undefined)).toThrow(
+    expect(() => parseAuthorizedParties()).toThrow(
       "CLERK_AUTHORIZED_PARTIES requires at least one origin"
     );
   });

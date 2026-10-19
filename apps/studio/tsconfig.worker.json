@@ -8,7 +8,9 @@
     "moduleResolution": "Bundler",
     "types": ["./worker-configuration.d.ts", "@cloudflare/vitest-plugin/types"],
     "strict": true,
-    "noUncheckedIndexedAccess": true
+    "noUncheckedIndexedAccess": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true
   },
   "include": ["worker", "worker-configuration.d.ts"]
 }

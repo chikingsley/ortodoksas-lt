@@ -1,6 +1,17 @@
 import { env, exports } from "cloudflare:workers";
 import { describe, expect, it } from "vitest";
 
+const emptyArticleBody = JSON.stringify({
+  content: [{ type: "paragraph" }],
+  type: "doc",
+});
+
+const articleBody = (text: string) =>
+  JSON.stringify({
+    content: [{ content: [{ text, type: "text" }], type: "paragraph" }],
+    type: "doc",
+  });
+
 const disabledRussianLocale = /<button[^>]+disabled[^>]+lang="ru"/u;
 
 describe("Astro Worker runtime", () => {
@@ -10,7 +21,7 @@ describe("Astro Worker runtime", () => {
     );
 
     expect(response.status).toBe(200);
-    await expect(response.json()).resolves.toEqual({
+    await expect(response.json()).resolves.toStrictEqual({
       environment: "production",
       status: "ok",
     });
@@ -155,21 +166,16 @@ describe("Astro Worker runtime", () => {
   it("keeps the publication group while switching a directory locale", async () => {
     const groupId = "11111111-1111-4111-8111-111111111111";
 
-    const body = JSON.stringify({
-      content: [{ type: "paragraph" }],
-      type: "doc",
-    });
-
     await env.DB.batch([
       env.DB.prepare(
         "INSERT INTO publication_groups (id, kind, page_template, created_at, updated_at) VALUES (?, 'page', 'community_directory', 1, 1)"
       ).bind(groupId),
       env.DB.prepare(
         "INSERT INTO articles (id, translation_group_id, language, slug, title, body_json, status, translation_kind, published_at, created_at, updated_at, kind, translation_review_status) VALUES (?, ?, 'lt', 'p/bendruomenes-test', 'Bendruomenės', ?, 'published', 'original', 1, 1, 1, 'page', 'not_required')"
-      ).bind("21111111-1111-4111-8111-111111111111", groupId, body),
+      ).bind("21111111-1111-4111-8111-111111111111", groupId, emptyArticleBody),
       env.DB.prepare(
         "INSERT INTO articles (id, translation_group_id, language, slug, title, body_json, status, translation_kind, published_at, created_at, updated_at, kind, translation_review_status) VALUES (?, ?, 'en', 'p/communities-test', 'Communities', ?, 'published', 'human', 1, 1, 1, 'page', 'approved')"
-      ).bind("31111111-1111-4111-8111-111111111111", groupId, body),
+      ).bind("31111111-1111-4111-8111-111111111111", groupId, emptyArticleBody),
     ]);
 
     const lithuanian = await exports.default.fetch(
@@ -196,12 +202,6 @@ describe("Astro Worker runtime", () => {
     const articleGroupId = "41111111-1111-4111-8111-111111111111";
     const pageGroupId = "51111111-1111-4111-8111-111111111111";
 
-    const body = (text: string) =>
-      JSON.stringify({
-        content: [{ content: [{ text, type: "text" }], type: "paragraph" }],
-        type: "doc",
-      });
-
     await env.DB.batch([
       env.DB.prepare(
         "INSERT INTO publication_groups (id, kind, page_template, created_at, updated_at) VALUES (?, 'article', 'standard', 1, 1)"
@@ -214,21 +214,21 @@ describe("Astro Worker runtime", () => {
       ).bind(
         "61111111-1111-4111-8111-111111111111",
         articleGroupId,
-        body("Šviesakalnis yra šiame straipsnyje.")
+        articleBody("Šviesakalnis yra šiame straipsnyje.")
       ),
       env.DB.prepare(
         "INSERT INTO articles (id, translation_group_id, language, slug, title, body_json, status, translation_kind, published_at, created_at, updated_at, kind, translation_review_status) VALUES (?, ?, 'en', '2026/fts-search', 'English search article', ?, 'published', 'human', 10, 1, 1, 'article', 'approved')"
       ).bind(
         "71111111-1111-4111-8111-111111111111",
         articleGroupId,
-        body("Sviesakalnis appears in English.")
+        articleBody("Sviesakalnis appears in English.")
       ),
       env.DB.prepare(
         "INSERT INTO articles (id, translation_group_id, language, slug, title, body_json, status, translation_kind, published_at, created_at, updated_at, kind, translation_review_status) VALUES (?, ?, 'lt', 'p/fts-page', 'Paieškos puslapis', ?, 'published', 'original', 10, 1, 1, 'page', 'not_required')"
       ).bind(
         "81111111-1111-4111-8111-111111111111",
         pageGroupId,
-        body("Šviesakalnis yra instituciniame puslapyje.")
+        articleBody("Šviesakalnis yra instituciniame puslapyje.")
       ),
     ]);
 
@@ -257,9 +257,11 @@ describe("Astro Worker runtime", () => {
     await expect(rss.text()).resolves.toContain(
       "https://ortodoksas.lt/2026/fts-paieska"
     );
+
     const sitemap = await exports.default.fetch(
       "https://ortodoksas.test/sitemap.xml"
     );
+
     await expect(sitemap.text()).resolves.toContain(
       "https://ortodoksas.lt/2026/fts-paieska"
     );
@@ -268,7 +270,7 @@ describe("Astro Worker runtime", () => {
       "UPDATE articles SET body_json = ?, updated_at = 2 WHERE id = ?"
     )
       .bind(
-        body("Naujasžodis pakeitė ankstesnį paieškos terminą."),
+        articleBody("Naujasžodis pakeitė ankstesnį paieškos terminą."),
         "61111111-1111-4111-8111-111111111111"
       )
       .run();

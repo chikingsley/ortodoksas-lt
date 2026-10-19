@@ -1,3 +1,4 @@
+import { hasText } from "@ortodoksas-lt/content/value";
 import {
   articleBaselines,
   articleContentChanges,
@@ -6,6 +7,10 @@ import {
 } from "@ortodoksas-lt/db";
 import { asc, desc, eq } from "drizzle-orm";
 
+import {
+  contentChangeSchema,
+  storedArticleSchema,
+} from "../../shared/article-contract";
 import type { StudioDatabase } from "../db.server";
 import { getTranslationSourceHash } from "./article-translation.server";
 
@@ -41,7 +46,12 @@ export const getArticleBaseline = async (
       .orderBy(asc(articleContentChanges.fieldPath)),
   ]);
 
-  return baseline ? { baseline, changes } : null;
+  return baseline
+    ? {
+        baseline,
+        changes: changes.map((change) => contentChangeSchema.parse(change)),
+      }
+    : null;
 };
 
 export const getArticleRevisions = (
@@ -75,7 +85,7 @@ export const getArticleWorkspace = async (
   const [baselineRecord, revisions, translationSource] = await Promise.all([
     getArticleBaseline(database, articleId),
     getArticleRevisions(database, articleId),
-    canonical.translationSourceArticleId
+    hasText(canonical.translationSourceArticleId)
       ? database.query.articles.findFirst({
           where: eq(articles.id, canonical.translationSourceArticleId),
         })
@@ -84,10 +94,13 @@ export const getArticleWorkspace = async (
 
   return {
     baseline: baselineRecord?.baseline ?? { body_json: canonical.bodyJson },
-    canonical,
+    canonical: storedArticleSchema.parse(canonical),
     changes: baselineRecord?.changes ?? [],
     revisions,
-    translationSource: translationSource ?? null,
+    translationSource:
+      translationSource === null || translationSource === undefined
+        ? null
+        : storedArticleSchema.parse(translationSource),
     translationSourceCurrentHash: translationSource
       ? await getTranslationSourceHash(translationSource)
       : null,

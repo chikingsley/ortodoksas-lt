@@ -1,7 +1,8 @@
 import { siteLocales } from "@ortodoksas-lt/content/site";
+import { hasText } from "@ortodoksas-lt/content/value";
 import { ArrowLeft, Eye, LoaderCircle, Save, Send } from "lucide-react";
-import { useCallback, useState } from "react";
 import type { MouseEvent } from "react";
+import { useCallback, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { formatTranslationLabel } from "@/editorial/shared/translation-label";
@@ -30,10 +31,10 @@ interface CreateTranslationButtonProps {
   onCreate: (language: "en" | "ru" | "uk" | "be") => Promise<void>;
 }
 
-const CreateTranslationButton = ({
+function CreateTranslationButton({
   language,
   onCreate,
-}: CreateTranslationButtonProps) => {
+}: CreateTranslationButtonProps) {
   const [state, setState] = useState<"idle" | "creating" | "error">("idle");
   const label = { creating: "Creating", error: "Retry", idle: "Create" }[state];
 
@@ -43,15 +44,19 @@ const CreateTranslationButton = ({
     }
 
     setState("creating");
-    onCreate(language).catch(() => {
-      setState("error");
-    });
+    void (async () => {
+      try {
+        await onCreate(language);
+      } catch {
+        setState("error");
+      }
+    })();
   }, [language, onCreate, state]);
 
   return (
     <button
       aria-label={`Create ${language.toUpperCase()} translation`}
-      className="text-primary hover:border-primary hover:bg-accent inline-flex min-h-8 items-center gap-1.5 rounded-md border border-dashed px-2.5 py-1.5 whitespace-nowrap transition-colors disabled:cursor-wait disabled:opacity-60 [&_small]:text-[10px] [&_strong]:text-[10px]"
+      className="text-primary hover:border-primary hover:bg-accent inline-flex min-h-8 items-center gap-1.5 rounded-md border border-dashed px-2.5 py-1.5 whitespace-nowrap transition-colors disabled:cursor-wait disabled:opacity-60 [&_small]:text-xs [&_strong]:text-xs"
       disabled={state === "creating"}
       onClick={createTranslation}
       type="button"
@@ -65,7 +70,7 @@ const CreateTranslationButton = ({
       </small>
     </button>
   );
-};
+}
 
 export function ArticleEditorHeader({
   articleId,
@@ -84,7 +89,7 @@ export function ArticleEditorHeader({
   const saveMessage = {
     dirty: "Unsaved changes",
     error: saveError ?? "Save failed — try again",
-    saved: articleId ? "Saved to Studio" : "Source loaded",
+    saved: hasText(articleId) ? "Saved to Studio" : "Source loaded",
     saving: "Saving…",
   }[saveState];
 
@@ -108,7 +113,7 @@ export function ArticleEditorHeader({
             <h1 className="max-w-[min(42vw,540px)] overflow-hidden text-sm font-semibold text-ellipsis whitespace-nowrap max-md:max-w-[calc(100vw-76px)]">
               {title || "Untitled article"}
             </h1>
-            <span className="text-muted-foreground mt-0.5 text-[11px]">
+            <span className="text-muted-foreground mt-0.5 text-xs">
               {saveMessage}
             </span>
           </div>
@@ -116,7 +121,6 @@ export function ArticleEditorHeader({
         <div className="flex items-center gap-2 max-md:grid max-md:w-full max-md:grid-cols-3 [&_button]:min-w-0 [&_svg]:size-4 [&_svg]:flex-none">
           <Button
             aria-label="Preview article"
-            className="max-md:px-2"
             onClick={onPreview}
             variant="outline"
           >
@@ -124,7 +128,6 @@ export function ArticleEditorHeader({
           </Button>
           <Button
             aria-label={saveLabel}
-            className="max-md:px-2"
             disabled={saveState === "saving"}
             onClick={onSave}
             variant="outline"
@@ -139,7 +142,6 @@ export function ArticleEditorHeader({
           </Button>
           <Button
             aria-label={status === "published" ? "Verify live" : "Publish"}
-            className="max-md:px-2"
             disabled={saveState === "saving"}
             onClick={onPublish}
           >
@@ -158,7 +160,7 @@ export function ArticleEditorHeader({
         aria-label="Article translations"
         className="bg-card flex min-h-[52px] items-center gap-4 border-b px-5 py-2 max-md:block max-md:px-3"
       >
-        <span className="text-muted-foreground flex-none text-[11px] font-bold max-md:mb-1.5 max-md:block">
+        <span className="text-muted-foreground flex-none text-xs font-bold max-md:mb-1.5 max-md:block">
           Translations
         </span>
         <div className="no-scrollbar flex min-w-0 gap-1.5 overflow-x-auto">
@@ -173,7 +175,7 @@ export function ArticleEditorHeader({
                   aria-current={
                     counterpart.id === articleId ? "page" : undefined
                   }
-                  className="bg-muted text-muted-foreground aria-[current=page]:border-primary/30 aria-[current=page]:bg-accent aria-[current=page]:text-primary inline-flex min-h-8 items-center gap-1.5 rounded-md border px-2.5 py-1.5 whitespace-nowrap [&_small]:text-[10px] [&_strong]:text-[10px]"
+                  className="bg-muted text-muted-foreground aria-[current=page]:border-primary/30 aria-[current=page]:bg-accent aria-[current=page]:text-primary inline-flex min-h-8 items-center gap-1.5 rounded-md border px-2.5 py-1.5 whitespace-nowrap [&_small]:text-xs [&_strong]:text-xs"
                   data-article-id={counterpart.id}
                   key={editionLanguage}
                   onClick={onOpenTranslation}
@@ -193,7 +195,7 @@ export function ArticleEditorHeader({
             if (editionLanguage === "lt") {
               return (
                 <span
-                  className="text-muted-foreground inline-flex min-h-8 items-center gap-1.5 rounded-md border border-dashed px-2.5 py-1.5 whitespace-nowrap [&_small]:text-[10px] [&_strong]:text-[10px]"
+                  className="text-muted-foreground inline-flex min-h-8 items-center gap-1.5 rounded-md border border-dashed px-2.5 py-1.5 whitespace-nowrap [&_small]:text-xs [&_strong]:text-xs"
                   key={editionLanguage}
                 >
                   <strong>{editionLanguage.toUpperCase()}</strong>

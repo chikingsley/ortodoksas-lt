@@ -1,4 +1,5 @@
 import type { TiptapDocument } from "@ortodoksas-lt/content/article";
+import { figureAttributesSchema } from "@ortodoksas-lt/content/media";
 import type { JSONContent } from "@tiptap/core";
 
 export interface ContentChange {
@@ -33,13 +34,18 @@ const comparableNode = (node: JSONContent | undefined): JSONContent | null => {
     )
   );
 
-  return {
+  const comparable = {
     ...node,
-    ...(Object.keys(attrs).length > 0 ? { attrs } : { attrs: undefined }),
-    ...(node.content
-      ? { content: node.content.map((child) => comparableNode(child) ?? child) }
-      : {}),
+    attrs: Object.keys(attrs).length > 0 ? attrs : undefined,
   };
+
+  if (node.content) {
+    comparable.content = node.content.map(
+      (child) => comparableNode(child) ?? child
+    );
+  }
+
+  return comparable;
 };
 
 const nodeValue = (node: JSONContent | undefined): string => {
@@ -83,7 +89,7 @@ const valueChange = (
 };
 
 const getFieldProvenance = (
-  explicit: unknown,
+  explicit: FieldProvenance,
   change: ContentChange | null,
   value: string
 ): FieldProvenance => {
@@ -104,10 +110,15 @@ const annotateFigure = (
   figureIndex: number,
   changes: ContentChange[]
 ): JSONContent => {
+  const sourceAttributes = figureAttributesSchema.parse(
+    sourceFigure?.attrs ?? {}
+  );
+
+  const attributes = figureAttributesSchema.parse(node.attrs ?? {});
   const sourceCaption = textContent(sourceFigure);
   const caption = textContent(node);
-  const sourceAlt = String(sourceFigure?.attrs?.alt ?? "");
-  const alt = String(node.attrs?.alt ?? "");
+  const sourceAlt = sourceAttributes.alt;
+  const { alt } = attributes;
 
   const captionChange = valueChange(
     sourceCaption,
@@ -131,8 +142,8 @@ const annotateFigure = (
     changes.push(altChange);
   }
 
-  const sourceSrc = String(sourceFigure?.attrs?.src ?? "");
-  const src = String(node.attrs?.src ?? "");
+  const sourceSrc = sourceAttributes.src;
+  const { src } = attributes;
 
   const sourceChange = valueChange(
     sourceSrc,
@@ -150,12 +161,12 @@ const annotateFigure = (
     attrs: {
       ...node.attrs,
       altProvenance: getFieldProvenance(
-        node.attrs?.altProvenance,
+        attributes.altProvenance,
         altChange,
         alt
       ),
       captionProvenance: getFieldProvenance(
-        node.attrs?.captionProvenance,
+        attributes.captionProvenance,
         captionChange,
         caption
       ),
@@ -168,7 +179,7 @@ const annotateFigure = (
 export const annotateArticleBody = (
   body: TiptapDocument,
   baseline: TiptapDocument
-): { body: TiptapDocument; changes: ContentChange[] } => {
+) => {
   const baselineFigures =
     baseline.content?.filter((node) => node.type === "figure") ?? [];
 
@@ -222,8 +233,14 @@ export const annotateArticleBody = (
     }
   }
 
+  const annotatedBody = { ...body };
+
+  if (content) {
+    annotatedBody.content = content;
+  }
+
   return {
-    body: { ...body, ...(content ? { content } : {}) },
+    body: annotatedBody,
     changes,
   };
 };

@@ -26,7 +26,7 @@ const photonFeatureSchema = z.object({
       town: z.string().optional(),
       village: z.string().optional(),
     })
-    .passthrough(),
+    .loose(),
 });
 
 const photonResponseSchema = z.object({
@@ -59,6 +59,18 @@ const normalizeLithuanianPostalCode = (
     ? `LT-${postalCode}`
     : postalCode;
 
+function getLocality(
+  properties: z.infer<typeof photonFeatureSchema>["properties"]
+) {
+  return (
+    properties.city ??
+    properties.town ??
+    properties.village ??
+    properties.locality ??
+    ""
+  );
+}
+
 const toAddressSuggestion = (
   feature: z.infer<typeof photonFeatureSchema>
 ): CommunityAddressSuggestion | null => {
@@ -74,12 +86,7 @@ const toAddressSuggestion = (
     properties.housenumber
   ).join(" ");
 
-  const locality =
-    properties.city ??
-    properties.town ??
-    properties.village ??
-    properties.locality ??
-    "";
+  const locality = getLocality(properties);
 
   const postalCode = normalizeLithuanianPostalCode(
     properties.postcode ?? "",
@@ -104,7 +111,7 @@ const toAddressSuggestion = (
 
   return {
     addressLabel: addressLabel || label,
-    addressLine: addressLine || properties.name || "",
+    addressLine: (addressLine || properties.name) ?? "",
     countryCode,
     id: `${properties.osm_type ?? "place"}-${properties.osm_id ?? `${latitude}-${longitude}`}`,
     label,
@@ -138,12 +145,11 @@ export const searchCommunityAddresses = async (
 
   const payload = photonResponseSchema.parse(await response.json());
 
-  const results = payload.features
-    .map(toAddressSuggestion)
-    .filter(
-      (suggestion): suggestion is CommunityAddressSuggestion =>
-        suggestion !== null
-    );
+  const results = payload.features.flatMap((feature) => {
+    const suggestion = toAddressSuggestion(feature);
+
+    return suggestion ? [suggestion] : [];
+  });
 
   return [
     ...new Map(

@@ -10,17 +10,23 @@ describe("Studio write mode", () => {
   });
 
   it("returns a retryable maintenance response during cutover", () => {
+    let response: unknown;
+
     try {
       requireStudioWritesOpen({ STUDIO_WRITE_MODE: "frozen" });
     } catch (error: unknown) {
-      expect(error).toBeInstanceOf(Response);
-      const response = error as Response;
-      expect(response.status).toBe(503);
-      expect(response.headers.get("retry-after")).toBe("300");
-
-      return;
+      response = error;
     }
 
-    throw new Error("Frozen write mode must return a maintenance response");
+    expect(response).toBeInstanceOf(Response);
+
+    if (!(response instanceof Response)) {
+      throw new Error("Expected the maintenance response");
+    }
+
+    expect({
+      retryAfter: response.headers.get("retry-after"),
+      status: response.status,
+    }).toStrictEqual({ retryAfter: "300", status: 503 });
   });
 });

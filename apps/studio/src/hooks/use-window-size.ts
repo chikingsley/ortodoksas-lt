@@ -1,32 +1,32 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
-import { useThrottledCallback } from "@/hooks/use-throttled-callback";
+import { useThrottledViewport } from "@/hooks/use-throttled-callback";
 
 export interface WindowSizeState {
+  /**
+   * The width of the window's visual viewport in pixels.
+   */
+  width: number;
   /**
    * The height of the window's visual viewport in pixels.
    */
   height: number;
-  /**
-   * The distance from the left of the visual viewport to the left of the layout viewport.
-   */
-  offsetLeft: number;
   /**
    * The distance from the top of the visual viewport to the top of the layout viewport.
    * Particularly useful for handling mobile keyboard appearance.
    */
   offsetTop: number;
   /**
+   * The distance from the left of the visual viewport to the left of the layout viewport.
+   */
+  offsetLeft: number;
+  /**
    * The scale factor of the visual viewport.
    * This is useful for scaling elements based on the current zoom level.
    */
   scale: number;
-  /**
-   * The width of the window's visual viewport in pixels.
-   */
-  width: number;
 }
 
 /**
@@ -48,7 +48,7 @@ export function useWindowSize(): WindowSizeState {
     width: 0,
   });
 
-  const handleViewportChange = useThrottledCallback(() => {
+  useThrottledViewport(() => {
     if (typeof window === "undefined") {
       return;
     }
@@ -59,13 +59,7 @@ export function useWindowSize(): WindowSizeState {
       return;
     }
 
-    const {
-      width = 0,
-      height = 0,
-      offsetTop = 0,
-      offsetLeft = 0,
-      scale = 0,
-    } = vp;
+    const { width, height, offsetTop, offsetLeft, scale } = vp;
 
     setWindowSize((prevState) => {
       if (
@@ -81,22 +75,6 @@ export function useWindowSize(): WindowSizeState {
       return { height, offsetLeft, offsetTop, scale, width };
     });
   }, 200);
-
-  useEffect(() => {
-    const { visualViewport } = window;
-
-    if (!visualViewport) {
-      return;
-    }
-
-    visualViewport.addEventListener("resize", handleViewportChange);
-
-    handleViewportChange();
-
-    return () => {
-      visualViewport.removeEventListener("resize", handleViewportChange);
-    };
-  }, [handleViewportChange]);
 
   return windowSize;
 }

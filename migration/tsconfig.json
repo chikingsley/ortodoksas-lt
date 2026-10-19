@@ -1,0 +1,11 @@
+{
+  "extends": "../tsconfig.tooling.json",
+  "include": [
+    "**/*.mts",
+    "**/*.mjs"
+  ],
+  "compilerOptions": {
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true
+  }
+}

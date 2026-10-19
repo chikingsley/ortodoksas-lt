@@ -33,7 +33,7 @@ export const loadPeopleDirectory = createServerFn({ method: "GET" }).handler(
 );
 
 export const savePersonDirectoryMutation = createServerFn({ method: "POST" })
-  .validator((input: unknown) => personEditorSchema.parse(input))
+  .validator(personEditorSchema)
   .handler(async ({ data }) => {
     await requireStudioEditor(env);
     requireStudioWritesOpen(env);
@@ -53,7 +53,7 @@ export const loadCommunityDirectory = createServerFn({ method: "GET" }).handler(
 );
 
 export const saveCommunityDirectoryMutation = createServerFn({ method: "POST" })
-  .validator((input: unknown) => communityEditorSchema.parse(input))
+  .validator(communityEditorSchema)
   .handler(async ({ data }) => {
     await requireStudioEditor(env);
     requireStudioWritesOpen(env);
@@ -65,7 +65,7 @@ export const saveCommunityDirectoryMutation = createServerFn({ method: "POST" })
   });
 
 export const searchCommunityAddressesQuery = createServerFn({ method: "GET" })
-  .validator((input: unknown) => communityAddressSearchSchema.parse(input))
+  .validator(communityAddressSearchSchema)
   .handler(async ({ data }) => {
     await requireStudioEditor(env);
 
@@ -74,12 +74,12 @@ export const searchCommunityAddressesQuery = createServerFn({ method: "GET" })
 
 export const peopleDirectoryQueryOptions = () =>
   queryOptions({
-    queryFn: async () => loadPeopleDirectory(),
+    queryFn: async () => await loadPeopleDirectory(),
     queryKey: ["studio", "people-directory"] as const,
   });
 
 export const communityDirectoryQueryOptions = () =>
   queryOptions({
-    queryFn: async () => loadCommunityDirectory(),
+    queryFn: async () => await loadCommunityDirectory(),
     queryKey: ["studio", "community-directory"] as const,
   });

@@ -2,7 +2,12 @@
   "extends": "../tsconfig.worker.json",
   "compilerOptions": {
     "noEmit": true,
-    "types": ["../worker-configuration.d.ts", "@cloudflare/vitest-plugin/types"]
+    "types": [
+      "../worker-configuration.d.ts",
+      "@cloudflare/vitest-plugin/types"
+    ],
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true
   },
   "include": ["./**/*.ts", "../worker-configuration.d.ts"]
 }

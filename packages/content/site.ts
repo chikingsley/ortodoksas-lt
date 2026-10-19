@@ -27,3 +27,15 @@ export const pageTemplateSchema = z.enum([
 ]);
 
 export type PageTemplate = z.infer<typeof pageTemplateSchema>;
+
+export function mapSiteLocales<T>(
+  value: (locale: SiteLocale) => T
+): Record<SiteLocale, T> {
+  return {
+    be: value("be"),
+    en: value("en"),
+    lt: value("lt"),
+    ru: value("ru"),
+    uk: value("uk"),
+  };
+}

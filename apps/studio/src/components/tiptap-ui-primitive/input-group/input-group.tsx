@@ -1,9 +1,12 @@
-import { cva, type VariantProps } from "class-variance-authority";
-import type * as React from "react";
+"use client";
 
-import { Button } from "@/components/tiptap-ui-primitive/button";
-import { Input } from "@/components/tiptap-ui-primitive/input";
-import { Textarea } from "@/components/tiptap-ui-primitive/textarea";
+/* oxlint-disable jsx-a11y/prefer-tag-over-role -- WAI-ARIA group expresses related toolbar or input controls; fieldset would introduce form grouping and legend semantics. This preserves the upstream component contract. */
+
+import type { VariantProps } from "class-variance-authority";
+import { cva } from "class-variance-authority";
+import * as React from "react";
+
+import { Input } from "@/components/tiptap-ui-primitive/input/input";
 import { cn } from "@/lib/tiptap-utils";
 
 import "./input-group.scss";
@@ -11,9 +14,9 @@ import "./input-group.scss";
 function InputGroup({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
-      className={cn("tiptap-input-group", className)}
       data-slot="tiptap-input-group"
       role="group"
+      className={cn("tiptap-input-group", className)}
       {...props}
     />
   );
@@ -40,59 +43,11 @@ function InputGroupAddon({
 }: React.ComponentProps<"div"> & VariantProps<typeof inputGroupAddonVariants>) {
   return (
     <div
-      className={cn(inputGroupAddonVariants({ align }), className)}
-      data-align={align}
       data-slot="tiptap-input-group-addon"
-      onClick={(e) => {
-        if ((e.target as HTMLElement).closest("button")) {
-          return;
-        }
-        e.currentTarget.parentElement?.querySelector("input")?.focus();
-      }}
-      role="group"
+      data-align={align}
+      className={cn(inputGroupAddonVariants({ align }), className)}
       {...props}
     />
-  );
-}
-
-const inputGroupButtonVariants = cva("tiptap-input-group-button", {
-  defaultVariants: {
-    size: "xs",
-  },
-  variants: {
-    size: {
-      "icon-sm": "tiptap-input-group-button--icon-sm",
-      "icon-xs": "tiptap-input-group-button--icon-xs",
-      sm: "tiptap-input-group-button--sm",
-      xs: "tiptap-input-group-button--xs",
-    },
-  },
-});
-
-function InputGroupButton({
-  className,
-  type = "button",
-  variant = "ghost",
-  size = "xs",
-  ...props
-}: Omit<React.ComponentProps<typeof Button>, "size" | "type"> &
-  VariantProps<typeof inputGroupButtonVariants> & {
-    type?: "button" | "submit" | "reset";
-  }) {
-  return (
-    <Button
-      className={cn(inputGroupButtonVariants({ size }), className)}
-      data-size={size}
-      type={type}
-      variant={variant}
-      {...props}
-    />
-  );
-}
-
-function InputGroupText({ className, ...props }: React.ComponentProps<"span">) {
-  return (
-    <span className={cn("tiptap-input-group-text", className)} {...props} />
   );
 }
 
@@ -102,34 +57,11 @@ function InputGroupInput({
 }: React.ComponentProps<"input">) {
   return (
     <Input
+      data-slot="tiptap-input-group-control"
       className={cn("tiptap-input-group-control", className)}
-      data-slot="tiptap-input-group-control"
       {...props}
     />
   );
 }
 
-function InputGroupTextarea({
-  className,
-  ...props
-}: React.ComponentProps<"textarea">) {
-  return (
-    <Textarea
-      className={cn(
-        "tiptap-input-group-control tiptap-input-group-control--textarea",
-        className
-      )}
-      data-slot="tiptap-input-group-control"
-      {...props}
-    />
-  );
-}
-
-export {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupInput,
-  InputGroupText,
-  InputGroupTextarea,
-};
+export { InputGroup, InputGroupAddon, InputGroupInput };

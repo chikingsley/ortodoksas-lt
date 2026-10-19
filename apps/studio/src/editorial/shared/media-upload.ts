@@ -1,4 +1,23 @@
+import { z } from "zod";
+
 import type { UploadedMedia } from "@/components/tiptap-node/image-upload-node/image-upload-node-extension";
+
+const provenanceSchema = z.enum(["generated", "manual", "missing", "source"]);
+
+const uploadResponseSchema = z.object({
+  media: z.object({
+    altText: z.string(),
+    altTextProvenance: provenanceSchema,
+    caption: z.string(),
+    captionProvenance: provenanceSchema,
+    height: z.number().nullable(),
+    id: z.string().min(1),
+    url: z.string().startsWith("/api/media/"),
+    width: z.number().nullable(),
+  }),
+});
+
+const uploadErrorSchema = z.object({ error: z.string().min(1) });
 
 export const MAX_MEDIA_FILE_SIZE = 5 * 1024 * 1024;
 
@@ -7,9 +26,7 @@ export const uploadStudioMedia = async (
   onProgress?: (event: { progress: number }) => void,
   abortSignal?: AbortSignal
 ): Promise<UploadedMedia> => {
-  if (!file) {
-    throw new Error("Choose an image to upload");
-  }
+  abortSignal?.throwIfAborted();
 
   if (file.size > MAX_MEDIA_FILE_SIZE) {
     throw new Error(
@@ -17,6 +34,7 @@ export const uploadStudioMedia = async (
     );
   }
 
+  // oxlint-disable-next-line promise/avoid-new -- XMLHttpRequest exposes upload progress through events.
   return await new Promise<UploadedMedia>((resolve, reject) => {
     const request = new XMLHttpRequest();
     request.open("POST", "/api/media");
@@ -32,18 +50,18 @@ export const uploadStudioMedia = async (
       }
     });
     request.addEventListener("load", () => {
-      const response = request.response as {
-        error?: string;
-        media?: UploadedMedia;
-      } | null;
+      const response = uploadResponseSchema.safeParse(request.response);
 
-      if (request.status >= 200 && request.status < 300 && response?.media) {
-        resolve(response.media);
+      if (request.status >= 200 && request.status < 300 && response.success) {
+        resolve(response.data.media);
 
         return;
       }
 
-      reject(new Error(response?.error ?? "Image upload failed"));
+      const failure = uploadErrorSchema.safeParse(request.response);
+      reject(
+        new Error(failure.success ? failure.data.error : "Image upload failed")
+      );
     });
     request.addEventListener("error", () => {
       reject(new Error("Image upload failed"));
@@ -51,14 +69,18 @@ export const uploadStudioMedia = async (
     request.addEventListener("abort", () => {
       reject(new Error("Upload cancelled"));
     });
-    abortSignal?.addEventListener(
-      "abort",
+
+    const abort = () => {
+      request.abort();
+    };
+
+    abortSignal?.addEventListener("abort", abort, { once: true });
+    request.addEventListener(
+      "loadend",
       () => {
-        request.abort();
+        abortSignal?.removeEventListener("abort", abort);
       },
-      {
-        once: true,
-      }
+      { once: true }
     );
     request.send(file);
   });

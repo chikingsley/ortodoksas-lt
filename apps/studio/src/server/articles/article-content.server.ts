@@ -1,3 +1,4 @@
+import { hasText } from "@ortodoksas-lt/content/value";
 import {
   articleContentChanges,
   articleRevisions,
@@ -10,32 +11,6 @@ import { alias, unionAll } from "drizzle-orm/sqlite-core";
 import type { StudioDatabase } from "../db.server";
 
 const CONTENT_CHANGE_INSERT_SIZE = 10;
-const MEDIA_PATH_PATTERN = /^\/api\/media\/(media_[0-9a-f]{64})$/u;
-
-const toHex = (value: ArrayBuffer): string =>
-  [...new Uint8Array(value)]
-    .map((byte) => byte.toString(16).padStart(2, "0"))
-    .join("");
-
-export const hashText = async (value: string): Promise<string> =>
-  toHex(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value)));
-
-export const textChangeProvenance = (
-  beforeValue: string,
-  afterValue: string
-): "manual" | "normalized" =>
-  beforeValue.trim() === afterValue ? "normalized" : "manual";
-
-export const insertContentChanges = async (
-  database: StudioDatabase,
-  articleId: string,
-  timestamp: number,
-  changes: readonly ContentChange[]
-): Promise<void> => {
-  await Promise.all(
-    contentChangeInsertQueries(database, articleId, timestamp, changes)
-  );
-};
 
 export const contentChangeInsertQueries = (
   database: StudioDatabase,
@@ -61,7 +36,7 @@ export const contentChangeInsertQueries = (
       provenance: change.provenance,
     }));
 
-    if (!guardRevisionId) {
+    if (!hasText(guardRevisionId)) {
       return database.insert(articleContentChanges).values(values);
     }
 
@@ -102,11 +77,38 @@ export const contentChangeInsertQueries = (
   });
 };
 
+const MEDIA_PATH_PATTERN = /^\/api\/media\/(?<mediaId>media_[0-9a-f]{64})$/u;
+
+const toHex = (value: ArrayBuffer): string =>
+  [...new Uint8Array(value)]
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+
+export const hashText = async (value: string): Promise<string> =>
+  toHex(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value)));
+
+export const textChangeProvenance = (
+  beforeValue: string,
+  afterValue: string
+): "manual" | "normalized" =>
+  beforeValue.trim() === afterValue ? "normalized" : "manual";
+
+export const insertContentChanges = async (
+  database: StudioDatabase,
+  articleId: string,
+  timestamp: number,
+  changes: readonly ContentChange[]
+): Promise<void> => {
+  await Promise.all(
+    contentChangeInsertQueries(database, articleId, timestamp, changes)
+  );
+};
+
 export const findMediaId = async (
   database: StudioDatabase,
   source: string | undefined
 ): Promise<string | null> => {
-  if (!source) {
+  if (!hasText(source)) {
     return null;
   }
 
@@ -118,7 +120,7 @@ export const findMediaId = async (
 
   const [, mediaId] = mediaPath;
 
-  if (!mediaId) {
+  if (!hasText(mediaId)) {
     return null;
   }
 

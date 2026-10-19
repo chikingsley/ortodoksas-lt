@@ -69,10 +69,10 @@ describe("article service contracts", () => {
           timestamp: 789,
         }
       )
-    ).toEqual({
+    ).toStrictEqual({
+      translationReviewStatus: "approved",
       translationReviewedAt: 789,
       translationReviewedBy: "server-editor",
-      translationReviewStatus: "approved",
     });
 
     expect(
@@ -84,10 +84,10 @@ describe("article service contracts", () => {
         },
         { editorId: "server-editor", timestamp: 790 }
       )
-    ).toEqual({
+    ).toStrictEqual({
+      translationReviewStatus: "changes_requested",
       translationReviewedAt: null,
       translationReviewedBy: null,
-      translationReviewStatus: "changes_requested",
     });
 
     expect(
@@ -99,7 +99,7 @@ describe("article service contracts", () => {
         },
         { editorId: "server-editor", timestamp: 791 }
       )
-    ).toEqual({});
+    ).toStrictEqual({});
 
     expect(
       translationMetadataUpdate(
@@ -110,10 +110,10 @@ describe("article service contracts", () => {
         },
         { editorId: "server-editor", timestamp: 792 }
       )
-    ).toEqual({
+    ).toStrictEqual({
+      translationReviewStatus: "pending",
       translationReviewedAt: null,
       translationReviewedBy: null,
-      translationReviewStatus: "pending",
     });
   });
 });

@@ -6,13 +6,13 @@ import { useEffect, useState } from "react";
 // --- Icons ---
 import { HeadingIcon } from "@/components/tiptap-icons/heading-icon";
 // --- Tiptap UI ---
+import type { Level } from "@/components/tiptap-ui/heading-button/use-heading";
 import {
   canToggle,
   headingIcons,
   isHeadingActive,
-  type Level,
   shouldShowButton,
-} from "@/components/tiptap-ui/heading-button";
+} from "@/components/tiptap-ui/heading-button/use-heading";
 // --- Hooks ---
 import { useTiptapEditor } from "@/hooks/use-tiptap-editor";
 
@@ -25,15 +25,15 @@ export interface UseHeadingDropdownMenuConfig {
    */
   editor?: Editor | null;
   /**
-   * Whether the dropdown should hide when headings are not available.
-   * @default false
-   */
-  hideWhenUnavailable?: boolean;
-  /**
    * Available heading levels to show in the dropdown
    * @default [1, 2, 3, 4, 5, 6]
    */
   levels?: Level[];
+  /**
+   * Whether the dropdown should hide when headings are not available.
+   * @default false
+   */
+  hideWhenUnavailable?: boolean;
 }
 
 /**
@@ -43,9 +43,10 @@ export function getActiveHeadingLevel(
   editor: Editor | null,
   levels: Level[] = [1, 2, 3, 4, 5, 6]
 ): Level | undefined {
-  if (!(editor && editor.isEditable)) {
-    return;
+  if (!editor || !editor.isEditable) {
+    return undefined;
   }
+
   return levels.find((level) => isHeadingActive(editor, level));
 }
 
@@ -93,7 +94,7 @@ export function useHeadingDropdownMenu(config?: UseHeadingDropdownMenuConfig) {
     editor: providedEditor,
     levels = [1, 2, 3, 4, 5, 6],
     hideWhenUnavailable = false,
-  } = config || {};
+  } = config ?? {};
 
   const { editor } = useTiptapEditor(providedEditor);
   const [isVisible, setIsVisible] = useState(true);
@@ -123,9 +124,9 @@ export function useHeadingDropdownMenu(config?: UseHeadingDropdownMenuConfig) {
   }, [editor, hideWhenUnavailable, levels]);
 
   return {
+    Icon: activeLevel ? headingIcons[activeLevel] : HeadingIcon,
     activeLevel,
     canToggle: canToggleState,
-    Icon: activeLevel ? headingIcons[activeLevel] : HeadingIcon,
     isActive,
     isVisible,
     label: "Heading",

@@ -1,3 +1,5 @@
+"use client";
+
 import type { ChainedCommands, Editor } from "@tiptap/react";
 import { useCallback, useEffect, useState } from "react";
 
@@ -18,13 +20,13 @@ export type TextAlign = "left" | "center" | "right" | "justify";
  */
 export interface UseTextAlignConfig {
   /**
-   * The text alignment to apply.
-   */
-  align: TextAlign;
-  /**
    * The Tiptap editor instance.
    */
   editor?: Editor | null;
+  /**
+   * The text alignment to apply.
+   */
+  align: TextAlign;
   /**
    * Whether the button should hide when alignment is not available.
    * @default false
@@ -67,6 +69,7 @@ export function canSetTextAlign(
   if (!editor || editor.isDestroyed || !editor.isEditable) {
     return false;
   }
+
   if (
     !isExtensionAvailable(editor, "textAlign") ||
     isNodeTypeSelected(editor, ["image", "horizontalRule"])
@@ -96,9 +99,10 @@ export function isTextAlignActive(
   editor: Editor | null,
   align: TextAlign
 ): boolean {
-  if (!(editor && editor.isEditable)) {
+  if (!editor || !editor.isEditable) {
     return false;
   }
+
   return editor.isActive({ textAlign: align });
 }
 
@@ -109,12 +113,14 @@ export function setTextAlign(editor: Editor | null, align: TextAlign): boolean {
   if (!editor || editor.isDestroyed || !editor.isEditable) {
     return false;
   }
+
   if (!canSetTextAlign(editor, align)) {
     return false;
   }
 
   try {
     const chain = editor.chain().focus();
+
     if (hasSetTextAlign(chain)) {
       return chain.setTextAlign(align).run();
     }
@@ -232,16 +238,18 @@ export function useTextAlign(config: UseTextAlignConfig) {
     }
 
     const success = setTextAlign(editor, align);
+
     if (success) {
       onAligned?.();
     }
+
     return success;
   }, [editor, align, onAligned]);
 
   return {
+    Icon: textAlignIcons[align],
     canAlign,
     handleTextAlign,
-    Icon: textAlignIcons[align],
     isActive,
     isVisible,
     label: textAlignLabels[align],

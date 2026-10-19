@@ -11,7 +11,7 @@ import {
 interface Article {
   hero: string | null;
   homepage?: "feed" | "lead" | "secondary";
-  homepageOrder?: number;
+  homepageOrder?: number | undefined;
   path: string;
   published: string | null;
 }
@@ -25,7 +25,7 @@ function article(
   return {
     hero: `/media/${path}.jpg`,
     homepage,
-    ...(homepageOrder === undefined ? {} : { homepageOrder }),
+    homepageOrder,
     path,
     published,
   };
@@ -70,7 +70,7 @@ describe(selectHomepageArticles, () => {
     ]);
 
     expect(result.lead?.path).toBe("/lead");
-    expect(result.secondary.map((entry) => entry.path)).toEqual([
+    expect(result.secondary.map((entry) => entry.path)).toStrictEqual([
       "/first",
       "/third",
       "/latest",
@@ -97,13 +97,15 @@ describe(selectHomepageArticles, () => {
       article("/five", "2026-08-01"),
     ]);
 
-    expect(result.secondary.map((entry) => entry.path)).toEqual([
+    expect(result.secondary.map((entry) => entry.path)).toStrictEqual([
       "/one",
       "/two",
       "/three",
       "/four",
     ]);
-    expect(result.remaining.map((entry) => entry.path)).toEqual(["/five"]);
+    expect(result.remaining.map((entry) => entry.path)).toStrictEqual([
+      "/five",
+    ]);
   });
 
   it("builds archive, section, recent-story, and library presentation data", () => {
@@ -131,12 +133,12 @@ describe(selectHomepageArticles, () => {
     });
 
     expect(model.lead?.path).toBe("/lead");
-    expect(model.recent.map((entry) => entry.path)).toEqual([
+    expect(model.recent.map((entry) => entry.path)).toStrictEqual([
       "/five",
       "/six",
       "/seven",
     ]);
-    expect(model.archiveMonths).toEqual([
+    expect(model.archiveMonths).toStrictEqual([
       ["2026 m. rugpjūtis", 6],
       ["2026 m. liepa", 2],
     ]);
@@ -168,7 +170,7 @@ describe(selectHomepageArticles, () => {
       ],
     });
 
-    expect(model.sectionGroups.map((group) => group.title)).toEqual([
+    expect(model.sectionGroups.map((group) => group.title)).toStrictEqual([
       "Naujienos",
       "Pamokslai",
     ]);
@@ -192,7 +194,7 @@ describe(localizeHomepageCatalog, () => {
       translationGroupId: "group-1",
     });
 
-    expect(localizeHomepageCatalog([canonical], [localized])).toEqual([
+    expect(localizeHomepageCatalog([canonical], [localized])).toStrictEqual([
       {
         ...localized,
         hero: canonical.hero,
@@ -214,7 +216,7 @@ describe(localizeHomepageCatalog, () => {
       translationGroupId: "group-1",
     });
 
-    expect(localizeHomepageCatalog([canonical], [])).toEqual([]);
+    expect(localizeHomepageCatalog([canonical], [])).toStrictEqual([]);
   });
 });
 
@@ -239,6 +241,6 @@ describe(getHomepageArticleGroups, () => {
           { articles: [recent], href: "/section", title: "Section" },
         ],
       })
-    ).toEqual(new Set(["lead-group", "recent-group"]));
+    ).toStrictEqual(new Set(["lead-group", "recent-group"]));
   });
 });

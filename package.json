@@ -6,13 +6,14 @@
   "scripts": {
     "build": "pnpm --filter @ortodoksas-lt/web build && pnpm --filter @ortodoksas-lt/studio build",
     "build:canonical": "pnpm --filter @ortodoksas-lt/web build",
-    "check": "pnpm lint && pnpm test:security && pnpm --filter @ortodoksas-lt/content test && pnpm --filter @ortodoksas-lt/editor test && pnpm --filter @ortodoksas-lt/db check && pnpm --filter @ortodoksas-lt/web check && pnpm --filter @ortodoksas-lt/studio check",
+    "check": "pnpm lint && pnpm typecheck:tooling && pnpm test:security && pnpm --filter @ortodoksas-lt/content test && pnpm --filter @ortodoksas-lt/editor test && pnpm --filter @ortodoksas-lt/db check && pnpm --filter @ortodoksas-lt/web check && pnpm --filter @ortodoksas-lt/studio check",
     "dev:studio": "pnpm --filter @ortodoksas-lt/studio dev",
     "dev:web": "pnpm --filter @ortodoksas-lt/web dev",
     "fix": "ultracite fix",
-    "lint": "oxfmt --check && node --test tests/lint-baseline.test.mjs",
-    "lint:strict": "ultracite check",
-    "test:security": "node --test tests/braces-security.test.mts"
+    "lint": "oxfmt --check && oxlint --deny-warnings",
+    "lint:strict": "oxfmt --check && oxlint --deny-warnings",
+    "test:security": "node --test tests/braces-security.test.mts",
+    "typecheck:tooling": "pnpm --filter @ortodoksas-lt/studio exec tsc -p ../../tsconfig.tooling.json"
   },
   "devDependencies": {
     "@shadcn/lint": "^0.2.1",
@@ -25,5 +26,5 @@
     "ultracite": "8.0.1",
     "zod": "^4.6.7"
   },
-  "packageManager": "pnpm@11.20.0"
+  "packageManager": "pnpm@12.14.0"
 }

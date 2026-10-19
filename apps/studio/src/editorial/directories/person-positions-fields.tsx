@@ -1,4 +1,3 @@
-// biome-ignore-all lint/performance/noJsxPropsBind: Collection controls bind each row to its current index.
 import type { PersonEditorInput } from "@ortodoksas-lt/content/directory";
 import type { SiteLocale } from "@ortodoksas-lt/content/site";
 import { ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react";
@@ -88,10 +87,14 @@ export function PersonPositionsFields({
                   disabled={index === 0}
                   onClick={() => {
                     const next = [...positions];
-                    [next[index - 1], next[index]] = [
-                      next[index],
-                      next[index - 1],
-                    ];
+                    const previous = next[index - 1];
+
+                    if (previous === undefined) {
+                      return;
+                    }
+
+                    next[index] = previous;
+                    next[index - 1] = position;
                     onChange(
                       next.map((item, itemIndex) => ({
                         ...item,
@@ -110,10 +113,14 @@ export function PersonPositionsFields({
                   disabled={index === positions.length - 1}
                   onClick={() => {
                     const next = [...positions];
-                    [next[index], next[index + 1]] = [
-                      next[index + 1],
-                      next[index],
-                    ];
+                    const following = next[index + 1];
+
+                    if (following === undefined) {
+                      return;
+                    }
+
+                    next[index] = following;
+                    next[index + 1] = position;
                     onChange(
                       next.map((item, itemIndex) => ({
                         ...item,

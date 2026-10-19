@@ -1,14 +1,21 @@
 import { clerkMiddleware } from "@clerk/tanstack-react-start/server";
 import { createCsrfMiddleware, createStart } from "@tanstack/react-start";
+import { z } from "zod";
 
 import { parseAuthorizedParties } from "./server/authorized-parties";
 
+const runtimeEnvironmentSchema = z.object({
+  process: z
+    .object({
+      env: z
+        .object({ CLERK_AUTHORIZED_PARTIES: z.string().optional() })
+        .optional(),
+    })
+    .optional(),
+});
+
 const runtimeEnvironment = () =>
-  (
-    globalThis as typeof globalThis & {
-      process?: { env?: { CLERK_AUTHORIZED_PARTIES?: string } };
-    }
-  ).process?.env;
+  runtimeEnvironmentSchema.parse(globalThis).process?.env;
 
 const csrfMiddleware = createCsrfMiddleware({
   filter: (context) =>

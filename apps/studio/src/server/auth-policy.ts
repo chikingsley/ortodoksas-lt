@@ -1,3 +1,5 @@
+import { hasText } from "@ortodoksas-lt/content/value";
+
 export type StudioRole = "admin" | "editor";
 
 export interface StudioEditor {
@@ -18,7 +20,11 @@ export const getAuthorizedEditor = (
   organizationId: string | undefined
 ): StudioEditor | null => {
   if (
-    !(authentication.isAuthenticated && authentication.userId && organizationId)
+    !(
+      authentication.isAuthenticated &&
+      hasText(authentication.userId) &&
+      hasText(organizationId)
+    )
   ) {
     return null;
   }

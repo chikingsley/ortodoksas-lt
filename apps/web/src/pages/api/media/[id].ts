@@ -1,3 +1,4 @@
+import { hasText } from "@ortodoksas-lt/content/value";
 import { mediaAssets } from "@ortodoksas-lt/db";
 import type { APIRoute } from "astro";
 import { env } from "cloudflare:workers";
@@ -9,7 +10,7 @@ import { mediaResponse } from "../../../server/media-response";
 export const ALL: APIRoute = async ({ params, request }) => {
   const { id } = params;
 
-  if (!id) {
+  if (!hasText(id)) {
     return new Response("Media unavailable", { status: 404 });
   }
 
@@ -21,7 +22,7 @@ export const ALL: APIRoute = async ({ params, request }) => {
 
   const key = record[0]?.r2Key;
 
-  return key
+  return hasText(key)
     ? await mediaResponse(request, env.MEDIA, key)
     : new Response("Media unavailable", { status: 404 });
 };

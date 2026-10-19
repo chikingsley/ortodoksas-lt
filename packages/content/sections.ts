@@ -52,7 +52,7 @@ const sectionLabels: Record<
 const isHistoricalSection = (
   section: string
 ): section is (typeof HISTORICAL_SECTIONS)[number] =>
-  HISTORICAL_SECTIONS.includes(section as (typeof HISTORICAL_SECTIONS)[number]);
+  HISTORICAL_SECTIONS.some((candidate) => candidate === section);
 
 export const getSectionLabel = (
   section: string,
@@ -62,9 +62,13 @@ export const getSectionLabel = (
     return sectionLabels[locale][section];
   }
 
-  const [first = "", ...rest] = [...section.trim()];
+  const segments = new Intl.Segmenter(locale, {
+    granularity: "grapheme",
+  }).segment(section.trim());
 
-  return `${first.toLocaleUpperCase(locale)}${rest.join("")}`;
+  const [first, ...rest] = Array.from(segments, (part) => part.segment);
+
+  return `${(first ?? "").toLocaleUpperCase(locale)}${rest.join("")}`;
 };
 
 export const getSectionOptions = (sections: Iterable<string>): string[] =>
@@ -73,4 +77,4 @@ export const getSectionOptions = (sections: Iterable<string>): string[] =>
       ...HISTORICAL_SECTIONS,
       ...Array.from(sections, (section) => section.trim()).filter(Boolean),
     ]),
-  ].sort((left, right) => left.localeCompare(right, "lt"));
+  ].toSorted((left, right) => left.localeCompare(right, "lt"));

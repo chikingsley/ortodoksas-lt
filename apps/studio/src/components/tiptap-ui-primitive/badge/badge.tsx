@@ -1,3 +1,6 @@
+"use client";
+
+import { firstText } from "@ortodoksas-lt/content/value";
 import { forwardRef } from "react";
 
 import "@/components/tiptap-ui-primitive/badge/badge-colors.scss";
@@ -5,10 +8,10 @@ import "@/components/tiptap-ui-primitive/badge/badge-group.scss";
 import "@/components/tiptap-ui-primitive/badge/badge.scss";
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLDivElement> {
-  appearance?: "default" | "subdued" | "emphasized";
-  size?: "default" | "small";
-  trimText?: boolean;
   variant?: "ghost" | "white" | "gray" | "green" | "yellow" | "default";
+  size?: "default" | "small";
+  appearance?: "default" | "subdued" | "emphasized";
+  trimText?: boolean;
 }
 
 export const Badge = forwardRef<HTMLDivElement, BadgeProps>(
@@ -25,12 +28,12 @@ export const Badge = forwardRef<HTMLDivElement, BadgeProps>(
     ref
   ) => (
     <div
-      className={`tiptap-badge ${className || ""}`}
-      data-appearance={appearance}
-      data-size={size}
-      data-style={variant}
-      data-text-trim={trimText ? "on" : "off"}
       ref={ref}
+      className={`tiptap-badge ${firstText(className, "")}`}
+      data-style={variant}
+      data-size={size}
+      data-appearance={appearance}
+      data-text-trim={trimText ? "on" : "off"}
       {...props}
     >
       {children}

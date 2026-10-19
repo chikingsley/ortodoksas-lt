@@ -1,3 +1,5 @@
+"use client";
+
 import type { Editor } from "@tiptap/react";
 import { useCallback, useEffect, useState } from "react";
 
@@ -32,6 +34,10 @@ export interface UseMarkConfig {
    */
   editor?: Editor | null;
   /**
+   * The type of mark to toggle
+   */
+  type: Mark;
+  /**
    * Whether the button should hide when mark is not available.
    * @default false
    */
@@ -40,10 +46,6 @@ export interface UseMarkConfig {
    * Callback function called after a successful mark toggle.
    */
   onToggled?: () => void;
-  /**
-   * The type of mark to toggle
-   */
-  type: Mark;
 }
 
 export const markIcons = {
@@ -70,9 +72,10 @@ export const MARK_SHORTCUT_KEYS: Record<Mark, string> = {
  * Checks if a mark can be toggled in the current editor state
  */
 export function canToggleMark(editor: Editor | null, type: Mark): boolean {
-  if (!(editor && editor.isEditable)) {
+  if (!editor || !editor.isEditable) {
     return false;
   }
+
   if (!isMarkInSchema(type, editor) || isNodeTypeSelected(editor, ["image"])) {
     return false;
   }
@@ -84,9 +87,10 @@ export function canToggleMark(editor: Editor | null, type: Mark): boolean {
  * Checks if a mark is currently active
  */
 export function isMarkActive(editor: Editor | null, type: Mark): boolean {
-  if (!(editor && editor.isEditable)) {
+  if (!editor || !editor.isEditable) {
     return false;
   }
+
   return editor.isActive(type);
 }
 
@@ -94,9 +98,10 @@ export function isMarkActive(editor: Editor | null, type: Mark): boolean {
  * Toggles a mark in the editor
  */
 export function toggleMark(editor: Editor | null, type: Mark): boolean {
-  if (!(editor && editor.isEditable)) {
+  if (!editor || !editor.isEditable) {
     return false;
   }
+
   if (!canToggleMark(editor, type)) {
     return false;
   }
@@ -218,16 +223,18 @@ export function useMark(config: UseMarkConfig) {
     }
 
     const success = toggleMark(editor, type);
+
     if (success) {
       onToggled?.();
     }
+
     return success;
   }, [editor, type, onToggled]);
 
   return {
+    Icon: markIcons[type],
     canToggle,
     handleMark,
-    Icon: markIcons[type],
     isActive,
     isVisible,
     label: getFormattedMarkName(type),

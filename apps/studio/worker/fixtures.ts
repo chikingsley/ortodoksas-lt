@@ -9,7 +9,7 @@ export const IMAGE_BYTES = Uint8Array.from(
   atob(
     "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII="
   ),
-  (character) => character.charCodeAt(0)
+  (character) => character.codePointAt(0) ?? 0
 );
 
 export const EDITOR_ID = "clerk-test-editor";
@@ -33,8 +33,8 @@ export const uploadHero = async (fileName: string) => {
 
   return z
     .object({
-      reused: z.boolean(),
       media: z.object({ id: z.string(), url: z.string() }),
+      reused: z.boolean(),
     })
     .parse(await response.json());
 };

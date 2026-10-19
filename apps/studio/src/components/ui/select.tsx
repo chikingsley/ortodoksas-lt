@@ -54,6 +54,42 @@ function SelectTrigger({
   );
 }
 
+function SelectScrollUpButton({
+  className,
+  ...props
+}: React.ComponentProps<typeof SelectPrimitive.ScrollUpArrow>) {
+  return (
+    <SelectPrimitive.ScrollUpArrow
+      className={cn(
+        "bg-popover top-0 z-10 flex w-full cursor-default items-center justify-center py-1 [&_svg:not([class*='size-'])]:size-4",
+        className
+      )}
+      data-slot="select-scroll-up-button"
+      {...props}
+    >
+      <ChevronUpIcon />
+    </SelectPrimitive.ScrollUpArrow>
+  );
+}
+
+function SelectScrollDownButton({
+  className,
+  ...props
+}: React.ComponentProps<typeof SelectPrimitive.ScrollDownArrow>) {
+  return (
+    <SelectPrimitive.ScrollDownArrow
+      className={cn(
+        "bg-popover bottom-0 z-10 flex w-full cursor-default items-center justify-center py-1 [&_svg:not([class*='size-'])]:size-4",
+        className
+      )}
+      data-slot="select-scroll-down-button"
+      {...props}
+    >
+      <ChevronDownIcon />
+    </SelectPrimitive.ScrollDownArrow>
+  );
+}
+
 function SelectContent({
   className,
   children,
@@ -147,42 +183,6 @@ function SelectSeparator({
       data-slot="select-separator"
       {...props}
     />
-  );
-}
-
-function SelectScrollUpButton({
-  className,
-  ...props
-}: React.ComponentProps<typeof SelectPrimitive.ScrollUpArrow>) {
-  return (
-    <SelectPrimitive.ScrollUpArrow
-      className={cn(
-        "bg-popover top-0 z-10 flex w-full cursor-default items-center justify-center py-1 [&_svg:not([class*='size-'])]:size-4",
-        className
-      )}
-      data-slot="select-scroll-up-button"
-      {...props}
-    >
-      <ChevronUpIcon />
-    </SelectPrimitive.ScrollUpArrow>
-  );
-}
-
-function SelectScrollDownButton({
-  className,
-  ...props
-}: React.ComponentProps<typeof SelectPrimitive.ScrollDownArrow>) {
-  return (
-    <SelectPrimitive.ScrollDownArrow
-      className={cn(
-        "bg-popover bottom-0 z-10 flex w-full cursor-default items-center justify-center py-1 [&_svg:not([class*='size-'])]:size-4",
-        className
-      )}
-      data-slot="select-scroll-down-button"
-      {...props}
-    >
-      <ChevronDownIcon />
-    </SelectPrimitive.ScrollDownArrow>
   );
 }
 

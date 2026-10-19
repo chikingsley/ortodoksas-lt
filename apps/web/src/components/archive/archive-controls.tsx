@@ -1,7 +1,7 @@
 import { getSectionLabel } from "@ortodoksas-lt/content/sections";
 import { SearchIcon } from "lucide-react";
-import { useCallback, useState } from "react";
 import type { ChangeEvent } from "react";
+import { useCallback, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -39,9 +39,6 @@ interface ArchiveControlsProps {
 }
 
 const allValue = "__all__";
-
-const filterControlText =
-  "font-sans text-base font-normal text-foreground md:text-sm";
 
 export function ArchiveControls({
   initialLabel = "",
@@ -127,7 +124,7 @@ export function ArchiveControls({
       >
         <SelectTrigger
           aria-label={labelsForLocale.archiveSection}
-          className={`w-full lg:w-44 ${filterControlText}`}
+          className="w-full lg:w-44"
         >
           <SelectValue />
         </SelectTrigger>
@@ -149,7 +146,6 @@ export function ArchiveControls({
         <ComboboxInput
           aria-label={labelsForLocale.archiveLabel}
           className="w-full lg:w-44"
-          inputClassName={`${filterControlText} placeholder:text-foreground`}
           placeholder={labelsForLocale.archiveLabelPlaceholder}
           showClear
         />
@@ -173,7 +169,7 @@ export function ArchiveControls({
       >
         <SelectTrigger
           aria-label={labelsForLocale.archiveYear}
-          className={`w-full lg:w-44 ${filterControlText}`}
+          className="w-full lg:w-44"
         >
           <SelectValue />
         </SelectTrigger>
@@ -186,10 +182,7 @@ export function ArchiveControls({
         </SelectContent>
       </Select>
 
-      <Button
-        className="bg-primary text-primary-foreground hover:bg-primary/90 h-8 rounded-none px-5 text-sm"
-        type="submit"
-      >
+      <Button className="h-11 md:h-8" type="submit">
         {labelsForLocale.search}
       </Button>
     </form>

@@ -13,7 +13,11 @@ export function ArticleRouteError({ to }: { to: "/articles" | "/pages" }) {
             choose another item.
           </p>
         </div>
-        <Button render={<Link to={to} />} variant="outline">
+        <Button
+          nativeButton={false}
+          render={<Link to={to} />}
+          variant="outline"
+        >
           Return to content
         </Button>
       </div>

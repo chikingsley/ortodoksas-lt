@@ -1,14 +1,8 @@
 {
+  "extends": "../tsconfig.tooling.json",
+  "include": ["**/*.mts", "**/*.mjs"],
   "compilerOptions": {
-    "target": "ES2024",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "types": ["node"],
-    "allowJs": true,
-    "checkJs": true,
-    "noEmit": true,
-    "strict": true,
-    "skipLibCheck": true
-  },
-  "include": ["*.mjs", "braces-security.test.mts"]
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true
+  }
 }

@@ -1,3 +1,5 @@
+"use client";
+
 import { Switch as SwitchPrimitive } from "@base-ui/react/switch";
 
 import { cn } from "@/lib/tiptap-utils";
@@ -13,14 +15,14 @@ function Switch({
 }) {
   return (
     <SwitchPrimitive.Root
-      className={cn("tiptap-switch", className)}
-      data-size={size}
       data-slot="tiptap-switch"
+      data-size={size}
+      className={cn("tiptap-switch", className)}
       {...props}
     >
       <SwitchPrimitive.Thumb
-        className="tiptap-switch-thumb"
         data-slot="tiptap-switch-thumb"
+        className="tiptap-switch-thumb"
       />
     </SwitchPrimitive.Root>
   );

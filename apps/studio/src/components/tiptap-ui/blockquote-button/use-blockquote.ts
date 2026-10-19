@@ -1,6 +1,5 @@
 "use client";
 
-import { NodeSelection, TextSelection } from "@tiptap/pm/state";
 import type { Editor } from "@tiptap/react";
 import { useCallback, useEffect, useState } from "react";
 
@@ -8,13 +7,11 @@ import { useCallback, useEffect, useState } from "react";
 import { BlockquoteIcon } from "@/components/tiptap-icons/blockquote-icon";
 // --- Hooks ---
 import { useTiptapEditor } from "@/hooks/use-tiptap-editor";
+import { createBlockConversionChain } from "@/lib/block-conversion";
 // --- UI Utils ---
 import {
-  findNodePosition,
-  getSelectedBlockNodes,
   isNodeInSchema,
   isNodeTypeSelected,
-  isValidPosition,
   selectionWithinConvertibleTypes,
 } from "@/lib/tiptap-utils";
 
@@ -46,9 +43,10 @@ export function canToggleBlockquote(
   editor: Editor | null,
   turnInto = true
 ): boolean {
-  if (!(editor && editor.isEditable)) {
+  if (!editor || !editor.isEditable) {
     return false;
   }
+
   if (
     !isNodeInSchema("blockquote", editor) ||
     isNodeTypeSelected(editor, ["image"])
@@ -84,75 +82,19 @@ export function canToggleBlockquote(
  * Toggles blockquote formatting for a specific node or the current selection
  */
 export function toggleBlockquote(editor: Editor | null): boolean {
-  if (!(editor && editor.isEditable)) {
+  if (!editor || !editor.isEditable) {
     return false;
   }
+
   if (!canToggleBlockquote(editor)) {
     return false;
   }
 
   try {
-    const view = editor.view;
-    let state = view.state;
-    let tr = state.tr;
+    const chain = createBlockConversionChain(editor);
 
-    const blocks = getSelectedBlockNodes(editor);
-
-    // In case a selection contains multiple blocks, we only allow
-    // toggling to node if there's exactly one block selected
-    // we also dont block the canToggle since it will fall back to the bottom logic
-    const isPossibleToTurnInto =
-      selectionWithinConvertibleTypes(editor, [
-        "paragraph",
-        "heading",
-        "bulletList",
-        "orderedList",
-        "taskList",
-        "blockquote",
-        "codeBlock",
-      ]) && blocks.length === 1;
-
-    // No selection, find the the cursor position
-    if (
-      (state.selection.empty || state.selection instanceof TextSelection) &&
-      isPossibleToTurnInto
-    ) {
-      const pos = findNodePosition({
-        editor,
-        node: state.selection.$anchor.node(1),
-      })?.pos;
-      if (!isValidPosition(pos)) {
-        return false;
-      }
-
-      tr = tr.setSelection(NodeSelection.create(state.doc, pos));
-      view.dispatch(tr);
-      state = view.state;
-    }
-
-    const selection = state.selection;
-
-    let chain = editor.chain().focus();
-
-    // Handle NodeSelection
-    if (selection instanceof NodeSelection) {
-      const firstChild = selection.node.firstChild?.firstChild;
-      const lastChild = selection.node.lastChild?.lastChild;
-
-      const from = firstChild
-        ? selection.from + firstChild.nodeSize
-        : selection.from + 1;
-
-      const to = lastChild
-        ? selection.to - lastChild.nodeSize
-        : selection.to - 1;
-
-      const resolvedFrom = state.doc.resolve(from);
-      const resolvedTo = state.doc.resolve(to);
-
-      chain = chain
-        .setTextSelection(TextSelection.between(resolvedFrom, resolvedTo))
-        .clearNodes();
+    if (chain === null) {
+      return false;
     }
 
     const toggle = editor.isActive("blockquote")
@@ -242,12 +184,12 @@ export function useBlockquote(config?: UseBlockquoteConfig) {
     editor: providedEditor,
     hideWhenUnavailable = false,
     onToggled,
-  } = config || {};
+  } = config ?? {};
 
   const { editor } = useTiptapEditor(providedEditor);
   const [isVisible, setIsVisible] = useState<boolean>(true);
   const canToggle = canToggleBlockquote(editor);
-  const isActive = editor?.isActive("blockquote");
+  const isActive = editor?.isActive("blockquote") ?? false;
 
   useEffect(() => {
     if (!editor) {
@@ -273,16 +215,18 @@ export function useBlockquote(config?: UseBlockquoteConfig) {
     }
 
     const success = toggleBlockquote(editor);
+
     if (success) {
       onToggled?.();
     }
+
     return success;
   }, [editor, onToggled]);
 
   return {
+    Icon: BlockquoteIcon,
     canToggle,
     handleToggle,
-    Icon: BlockquoteIcon,
     isActive,
     isVisible,
     label: "Blockquote",

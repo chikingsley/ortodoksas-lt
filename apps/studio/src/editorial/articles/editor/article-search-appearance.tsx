@@ -1,5 +1,5 @@
-import { useCallback, useState } from "react";
 import type { ChangeEvent, SyntheticEvent } from "react";
+import { useCallback, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
@@ -65,13 +65,13 @@ export function ArticleSearchAppearance({
   return (
     <>
       <div aria-live="polite" className="bg-card rounded-lg border p-3.5">
-        <div className="truncate text-[11px] text-emerald-700">
+        <div className="text-success truncate text-xs">
           ortodoksas.lt › {publicPath.replaceAll("/", " › ")}
         </div>
-        <div className="mt-1 line-clamp-2 text-base leading-snug text-[#1a0dab]">
+        <div className="text-primary mt-1 line-clamp-2 text-base leading-snug">
           {effectiveTitle} · ortodoksas.lt
         </div>
-        <p className="text-muted-foreground mt-1 mb-0 line-clamp-3 text-[11px] leading-relaxed">
+        <p className="text-muted-foreground mt-1 mb-0 line-clamp-3 text-xs leading-relaxed">
           {effectiveDescription}
         </p>
       </div>
@@ -88,7 +88,7 @@ export function ArticleSearchAppearance({
           <Field>
             <div className="flex items-center justify-between gap-3">
               <FieldLabel htmlFor="article-seo-title">Search title</FieldLabel>
-              <span className="text-muted-foreground text-[10px]">
+              <span className="text-muted-foreground text-xs">
                 {effectiveTitle.length} characters
               </span>
             </div>
@@ -105,7 +105,7 @@ export function ArticleSearchAppearance({
               <FieldLabel htmlFor="article-seo-description">
                 Search description
               </FieldLabel>
-              <span className="text-muted-foreground text-[10px]">
+              <span className="text-muted-foreground text-xs">
                 {effectiveDescription.length} characters
               </span>
             </div>

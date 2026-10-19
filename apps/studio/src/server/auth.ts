@@ -1,8 +1,8 @@
 import { auth } from "@clerk/tanstack-react-start/server";
 import { createServerFn } from "@tanstack/react-start";
 
-import { getAuthorizedEditor } from "./auth-policy";
 import type { StudioEditor } from "./auth-policy";
+import { getAuthorizedEditor } from "./auth-policy";
 
 export type { StudioEditor, StudioRole } from "./auth-policy";
 

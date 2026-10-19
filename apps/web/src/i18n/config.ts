@@ -1,5 +1,5 @@
-import { siteLocales as sharedSiteLocales } from "@ortodoksas-lt/content/site";
 import type { SiteLocale as SharedSiteLocale } from "@ortodoksas-lt/content/site";
+import { siteLocales as sharedSiteLocales } from "@ortodoksas-lt/content/site";
 
 export const siteLocales = sharedSiteLocales;
 

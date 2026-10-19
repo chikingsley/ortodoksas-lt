@@ -1,5 +1,6 @@
 import { siteLocaleSchema } from "@ortodoksas-lt/content/site";
 import { createFileRoute } from "@tanstack/react-router";
+import { z } from "zod";
 
 import { PeopleDirectoryWorkspace } from "@/editorial/directories/people-directory-workspace";
 import { useDirectoryRouteState } from "@/editorial/directories/use-directory-route-state";
@@ -8,7 +9,7 @@ import {
   peopleDirectoryQueryOptions,
 } from "@/server/directories/directory.functions";
 
-const PeopleRoute = () => {
+function PeopleRoute() {
   const { language, record } = Route.useSearch();
 
   const { changeLanguage, changeRecord, locale } = useDirectoryRouteState({
@@ -20,25 +21,32 @@ const PeopleRoute = () => {
   return (
     <PeopleDirectoryWorkspace
       locale={locale}
-      onLocaleChange={changeLanguage}
-      onRecordChange={changeRecord}
+      onLocaleChange={(nextLocale) => {
+        void changeLanguage(nextLocale);
+      }}
+      onRecordChange={(nextRecord, replace) => {
+        void changeRecord(nextRecord, replace);
+      }}
       recordKey={record}
     />
   );
-};
+}
 
 export const Route = createFileRoute("/_studio/people")({
   component: PeopleRoute,
   loader: async ({ context }) =>
-    Promise.all([
-      context.queryClient.ensureQueryData(peopleDirectoryQueryOptions()),
-      context.queryClient.ensureQueryData(communityDirectoryQueryOptions()),
+    await Promise.all([
+      context.queryClient.query({
+        ...peopleDirectoryQueryOptions(),
+        staleTime: "static",
+      }),
+      context.queryClient.query({
+        ...communityDirectoryQueryOptions(),
+        staleTime: "static",
+      }),
     ]),
   validateSearch: (search) => ({
     language: siteLocaleSchema.optional().parse(search.language),
-    record:
-      typeof search.record === "string" && search.record.length > 0
-        ? search.record
-        : undefined,
+    record: z.string().min(1).optional().parse(search.record),
   }),
 });

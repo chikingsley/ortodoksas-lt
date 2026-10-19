@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef, useCallback, useEffect, useRef } from "react";
+import { forwardRef, useCallback, useEffect, useId, useRef } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
 // --- Icons ---
@@ -12,31 +12,31 @@ import { CloseIcon } from "@/components/tiptap-icons/close-icon";
 import { ExternalLinkIcon } from "@/components/tiptap-icons/external-link-icon";
 import { SearchIcon } from "@/components/tiptap-icons/search-icon";
 import { WholeWordIcon } from "@/components/tiptap-icons/whole-word-icon";
+import { ButtonGroup } from "@/components/tiptap-ui-primitive/button-group/button-group";
 // --- UI Primitives ---
-import type { ButtonProps } from "@/components/tiptap-ui-primitive/button";
-import { Button } from "@/components/tiptap-ui-primitive/button";
-import { ButtonGroup } from "@/components/tiptap-ui-primitive/button-group";
+import type { ButtonProps } from "@/components/tiptap-ui-primitive/button/button";
+import { Button } from "@/components/tiptap-ui-primitive/button/button";
 import {
   Card,
   CardBody,
   CardFooter,
   CardHeader,
-} from "@/components/tiptap-ui-primitive/card";
+} from "@/components/tiptap-ui-primitive/card/card";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
-} from "@/components/tiptap-ui-primitive/input-group";
-import { Separator } from "@/components/tiptap-ui-primitive/separator";
-import { Switch } from "@/components/tiptap-ui-primitive/switch";
+} from "@/components/tiptap-ui-primitive/input-group/input-group";
+import { Separator } from "@/components/tiptap-ui-primitive/separator/separator";
+import { Switch } from "@/components/tiptap-ui-primitive/switch/switch";
 // --- Tiptap UI ---
-import type { UseSearchAndReplaceConfig } from "@/components/tiptap-ui/search-and-replace";
+import type { UseSearchAndReplaceConfig } from "@/components/tiptap-ui/search-and-replace/use-search-and-replace";
 import {
   NEXT_RESULT_SHORTCUT_KEY,
   PREVIOUS_RESULT_SHORTCUT_KEY,
   SEARCH_AND_REPLACE_SHORTCUT_KEY,
   useSearchAndReplace,
-} from "@/components/tiptap-ui/search-and-replace";
+} from "@/components/tiptap-ui/search-and-replace/use-search-and-replace";
 // --- Hooks ---
 import { useComposedRef } from "@/hooks/use-composed-ref";
 // --- Lib ---
@@ -45,22 +45,32 @@ import { cn } from "@/lib/tiptap-utils";
 // --- Styles ---
 import "@/components/tiptap-ui/search-and-replace/search-and-replace.scss";
 
+function isModKey(event: React.KeyboardEvent): boolean {
+  return event.metaKey || event.ctrlKey;
+}
+
+function isResultArrow(event: React.KeyboardEvent) {
+  return (
+    (event.key === "ArrowDown" || event.key === "ArrowUp") &&
+    !event.shiftKey &&
+    !event.altKey &&
+    !isModKey(event) &&
+    !event.nativeEvent.isComposing
+  );
+}
+
 export interface SearchAndReplaceProps
   extends
     Omit<React.HTMLAttributes<HTMLDivElement>, "children">,
     UseSearchAndReplaceConfig {
   /**
-   * Whether the search input focuses itself when the panel becomes open.
+   * Whether the panel is active. While `false` the panel stays mounted but
+   * hidden: highlights are cleared and the entered terms are kept, so
+   * toggling back on restores the previous search. Unmounting the panel
+   * instead clears the search entirely.
    * @default true
    */
-  autoFocusSearch?: boolean;
-  /**
-   * Whether the built-in Mod+F shortcut is bound. While bound (and `onOpen`
-   * is wired), it replaces the browser's find-in-page everywhere on the
-   * page — an app with its own search should never surface the native one.
-   * @default true
-   */
-  enableShortcut?: boolean;
+  open?: boolean;
   /**
    * Called when the panel requests to close (close button or Escape). The
    * panel does not position or dismiss itself — rendering, placement and
@@ -75,20 +85,20 @@ export interface SearchAndReplaceProps
    */
   onOpen?: () => void;
   /**
-   * Whether the panel is active. While `false` the panel stays mounted but
-   * hidden: highlights are cleared and the entered terms are kept, so
-   * toggling back on restores the previous search. Unmounting the panel
-   * instead clears the search entirely.
+   * Whether the built-in Mod+F shortcut is bound. While bound (and `onOpen`
+   * is wired), it replaces the browser's find-in-page everywhere on the
+   * page — an app with its own search should never surface the native one.
    * @default true
    */
-  open?: boolean;
+  enableShortcut?: boolean;
+  /**
+   * Whether the search input focuses itself when the panel becomes open.
+   * @default true
+   */
+  autoFocusSearch?: boolean;
 }
 
 export type SearchAndReplaceContentProps = SearchAndReplaceProps;
-
-function isModKey(event: React.KeyboardEvent): boolean {
-  return event.metaKey || event.ctrlKey;
-}
 
 const REGEX_DOCS_URL =
   "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions";
@@ -124,15 +134,15 @@ function RegexExampleButton({
       orientation="horizontal"
     >
       <Button
+        type="button"
         className="tiptap-search-replace-regex-example-button"
         data-regex-example={pattern}
         onClick={onApply}
-        size="small"
-        type="button"
         variant="ghost"
+        size="small"
       >
         <span className="tiptap-button-text">{children}</span>
-        <ArrowRightIcon aria-hidden="true" className="tiptap-button-icon" />
+        <ArrowRightIcon className="tiptap-button-icon" aria-hidden="true" />
       </Button>
     </ButtonGroup>
   );
@@ -148,18 +158,17 @@ export const SearchAndReplaceButton = forwardRef<
   ButtonProps
 >(({ className, children, ...props }, ref) => (
   <Button
-    aria-label="Search and replace"
-    className={className}
-    ref={ref}
-    role="button"
-    shortcutKeys={SEARCH_AND_REPLACE_SHORTCUT_KEY}
-    tabIndex={-1}
-    tooltip="Search and replace"
     type="button"
+    className={className}
     variant="ghost"
+    tabIndex={-1}
+    aria-label="Search and replace"
+    tooltip="Search and replace"
+    shortcutKeys={SEARCH_AND_REPLACE_SHORTCUT_KEY}
+    ref={ref}
     {...props}
   >
-    {children || <SearchIcon className="tiptap-button-icon" />}
+    {children ?? <SearchIcon className="tiptap-button-icon" />}
   </Button>
 ));
 
@@ -225,14 +234,17 @@ export const SearchAndReplace = forwardRef<
     } = searchAndReplace;
 
     const searchInputRef = useRef<HTMLInputElement>(null);
+    const searchInputId = useId();
     const panelRef = useRef<HTMLDivElement>(null);
     const composedPanelRef = useComposedRef(panelRef, ref);
 
     const focusSearchInput = useCallback(() => {
       const input = searchInputRef.current;
+
       if (!input) {
         return;
       }
+
       input.focus();
       input.select();
     }, []);
@@ -242,9 +254,11 @@ export const SearchAndReplace = forwardRef<
     const applyRegexExample = useCallback(
       (pattern: string, replacement?: string) => {
         setSearchTerm(pattern);
+
         if (replacement !== undefined) {
           setReplaceTerm(replacement);
         }
+
         focusSearchInput();
       },
       [setSearchTerm, setReplaceTerm, focusSearchInput]
@@ -261,6 +275,7 @@ export const SearchAndReplace = forwardRef<
         if (open) {
           event.preventDefault();
           focusSearchInput();
+
           return;
         }
 
@@ -272,9 +287,9 @@ export const SearchAndReplace = forwardRef<
         onOpen();
       },
       {
-        enabled: enableShortcut && isVisible && canSearch,
         enableOnContentEditable: true,
         enableOnFormTags: true,
+        enabled: enableShortcut && isVisible && canSearch,
       },
       [open, onOpen, focusSearchInput]
     );
@@ -288,11 +303,13 @@ export const SearchAndReplace = forwardRef<
       "up,down",
       (event) => {
         const target = event.target instanceof Node ? event.target : null;
-        if (panelRef.current?.contains(target)) {
+
+        if (panelRef.current?.contains(target) === true) {
           return;
         }
 
         event.preventDefault();
+
         if (event.key === "ArrowDown") {
           goToNext();
         } else {
@@ -318,6 +335,7 @@ export const SearchAndReplace = forwardRef<
       if (previousOpenRef.current === open) {
         return;
       }
+
       previousOpenRef.current = open;
 
       if (open) {
@@ -334,8 +352,10 @@ export const SearchAndReplace = forwardRef<
     useEffect(() => {
       if (!open) {
         focusedForOpenRef.current = false;
+
         return;
       }
+
       if (focusedForOpenRef.current || !autoFocusSearch || !canSearch) {
         return;
       }
@@ -352,6 +372,7 @@ export const SearchAndReplace = forwardRef<
             event.stopPropagation();
             onClose();
           }
+
           return;
         }
 
@@ -359,20 +380,15 @@ export const SearchAndReplace = forwardRef<
         // panel — inputs, nav buttons, options — like Notion's find bar.
         // Handled at the panel so a focused button navigates too (and the
         // page doesn't scroll instead).
-        if (
-          (event.key === "ArrowDown" || event.key === "ArrowUp") &&
-          !event.shiftKey &&
-          !event.altKey &&
-          !isModKey(event) &&
-          !event.nativeEvent.isComposing &&
-          canNavigate
-        ) {
+        if (isResultArrow(event) && canNavigate) {
           event.preventDefault();
+
           if (event.key === "ArrowDown") {
             goToNext();
           } else {
             goToPrevious();
           }
+
           return;
         }
 
@@ -386,6 +402,7 @@ export const SearchAndReplace = forwardRef<
             event.preventDefault();
             event.stopPropagation();
             goToNext();
+
             return;
           }
 
@@ -437,63 +454,74 @@ export const SearchAndReplace = forwardRef<
 
     return (
       <Card
-        aria-label="Search and replace"
         className={cn("tiptap-search-replace", className)}
         data-open={open ? "true" : "false"}
+        // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role -- Upstream modeless panel manages focus and visibility while leaving the editor interactive.
+        role="dialog"
+        aria-label="Search and replace"
         onKeyDown={handlePanelKeyDown}
         ref={composedPanelRef}
-        role="dialog"
         {...divProps}
       >
         <CardHeader className="tiptap-search-replace-header">
-          <span aria-live="polite" className="tiptap-search-replace-count">
+          <span className="tiptap-search-replace-count" aria-live="polite">
             {resultCountLabel}
           </span>
 
           <div className="tiptap-search-replace-nav-group">
-            <ButtonGroup className="button-group" orientation="horizontal">
+            <ButtonGroup
+              className="tiptap-button-group"
+              orientation="horizontal"
+            >
               <ButtonGroup>
                 <Button
-                  aria-label="Previous result"
-                  data-search-replace-action="prev"
-                  disabled={!canNavigate}
-                  onClick={goToPrevious}
-                  shortcutKeys={PREVIOUS_RESULT_SHORTCUT_KEY}
-                  size="small"
-                  tooltip="Previous result"
                   type="button"
+                  data-search-replace-action="prev"
                   variant="ghost"
+                  size="small"
+                  disabled={!canNavigate}
+                  aria-label="Previous result"
+                  tooltip="Previous result"
+                  shortcutKeys={PREVIOUS_RESULT_SHORTCUT_KEY}
+                  onClick={() => {
+                    goToPrevious();
+                  }}
                 >
                   <ChevronUpIcon className="tiptap-button-icon" />
                 </Button>
               </ButtonGroup>
               <ButtonGroup>
                 <Button
-                  aria-label="Next result"
-                  data-search-replace-action="next"
-                  disabled={!canNavigate}
-                  onClick={goToNext}
-                  shortcutKeys={NEXT_RESULT_SHORTCUT_KEY}
-                  size="small"
-                  tooltip="Next result"
                   type="button"
+                  data-search-replace-action="next"
                   variant="ghost"
+                  size="small"
+                  disabled={!canNavigate}
+                  aria-label="Next result"
+                  tooltip="Next result"
+                  shortcutKeys={NEXT_RESULT_SHORTCUT_KEY}
+                  onClick={() => {
+                    goToNext();
+                  }}
                 >
                   <ChevronDownIcon className="tiptap-button-icon" />
                 </Button>
               </ButtonGroup>
             </ButtonGroup>
 
-            <ButtonGroup className="button-group" orientation="horizontal">
+            <ButtonGroup
+              className="tiptap-button-group"
+              orientation="horizontal"
+            >
               <Button
-                aria-label="Close"
-                data-search-replace-action="close"
-                onClick={onClose}
-                shortcutKeys="esc"
-                size="small"
-                tooltip="Close"
                 type="button"
+                data-search-replace-action="close"
                 variant="ghost"
+                size="small"
+                aria-label="Close"
+                tooltip="Close"
+                shortcutKeys="esc"
+                onClick={onClose}
               >
                 <CloseIcon className="tiptap-button-icon" />
               </Button>
@@ -506,27 +534,29 @@ export const SearchAndReplace = forwardRef<
             <div className="tiptap-search-replace-inputs">
               <InputGroup className="tiptap-search-replace-input-group">
                 <InputGroupInput
+                  data-field="search-query"
+                  placeholder="Search"
                   aria-label="Search"
-                  autoCapitalize="off"
+                  value={searchTerm}
+                  autoFocus={open && autoFocusSearch}
                   autoComplete="off"
                   autoCorrect="off"
-                  autoFocus={open && autoFocusSearch}
-                  data-field="search-query"
-                  disabled={!canSearch}
-                  onChange={(event) => setSearchTerm(event.target.value)}
-                  onKeyDown={handleSearchKeyDown}
-                  placeholder="Search"
-                  ref={searchInputRef}
+                  autoCapitalize="off"
                   spellCheck={false}
-                  value={searchTerm}
+                  disabled={!canSearch}
+                  onChange={(event) => {
+                    setSearchTerm(event.target.value);
+                  }}
+                  onKeyDown={handleSearchKeyDown}
+                  ref={searchInputRef}
                 />
                 <InputGroupAddon
                   align="inline-end"
                   className="tiptap-search-replace-keyboard-hint-addon"
                 >
                   <kbd
-                    aria-hidden="true"
                     className="tiptap-search-replace-keyboard-hint"
+                    aria-hidden="true"
                   >
                     ↵
                   </kbd>
@@ -535,25 +565,27 @@ export const SearchAndReplace = forwardRef<
 
               <InputGroup className="tiptap-search-replace-input-group">
                 <InputGroupInput
+                  data-field="replace-query"
+                  placeholder="Replace"
                   aria-label="Replace"
-                  autoCapitalize="off"
+                  value={replaceTerm}
                   autoComplete="off"
                   autoCorrect="off"
-                  data-field="replace-query"
-                  disabled={!canSearch}
-                  onChange={(event) => setReplaceTerm(event.target.value)}
-                  onKeyDown={handleReplaceKeyDown}
-                  placeholder="Replace"
+                  autoCapitalize="off"
                   spellCheck={false}
-                  value={replaceTerm}
+                  disabled={!canSearch}
+                  onChange={(event) => {
+                    setReplaceTerm(event.target.value);
+                  }}
+                  onKeyDown={handleReplaceKeyDown}
                 />
                 <InputGroupAddon
                   align="inline-end"
                   className="tiptap-search-replace-keyboard-hint-addon"
                 >
                   <kbd
-                    aria-hidden="true"
                     className="tiptap-search-replace-keyboard-hint"
+                    aria-hidden="true"
                   >
                     ↵
                   </kbd>
@@ -563,31 +595,31 @@ export const SearchAndReplace = forwardRef<
 
             <div className="tiptap-search-replace-options">
               <Button
-                aria-checked={caseSensitive}
+                type="button"
                 data-option="match-case"
+                variant="check"
+                aria-checked={caseSensitive}
                 disabled={!canSearch}
                 onClick={toggleCaseSensitive}
-                type="button"
-                variant="check"
               >
                 <CaseSensitiveIcon
-                  aria-hidden="true"
                   className="tiptap-button-icon"
+                  aria-hidden="true"
                 />
                 <span className="tiptap-button-text">Match case</span>
               </Button>
 
               <Button
-                aria-checked={wholeWord}
+                type="button"
                 data-option="whole-words"
+                variant="check"
+                aria-checked={wholeWord}
                 disabled={!canSearch}
                 onClick={toggleWholeWord}
-                type="button"
-                variant="check"
               >
                 <WholeWordIcon
-                  aria-hidden="true"
                   className="tiptap-button-icon"
+                  aria-hidden="true"
                 />
                 <span className="tiptap-button-text">Whole words</span>
               </Button>
@@ -598,16 +630,18 @@ export const SearchAndReplace = forwardRef<
 
           <div className="tiptap-search-replace-regex-toggle">
             <label
-              className="tiptap-search-replace-regex-toggle-row"
+              htmlFor={`${searchInputId}-regex`}
               data-option="use-regex"
+              className="tiptap-search-replace-regex-toggle-row"
             >
               <span className="tiptap-search-replace-regex-toggle-label">
                 Use regular expression
               </span>
               <Switch
+                id={`${searchInputId}-regex`}
                 checked={useRegex}
-                disabled={!canSearch}
                 onCheckedChange={toggleUseRegex}
+                disabled={!canSearch}
               />
             </label>
 
@@ -619,14 +653,16 @@ export const SearchAndReplace = forwardRef<
                   </span>
 
                   <ButtonGroup
-                    className="tiptap-search-replace-regex-example-list"
                     orientation="vertical"
+                    className="tiptap-search-replace-regex-example-list"
                   >
                     {REGEX_SEARCH_EXAMPLES.map(({ label, pattern }) => (
                       <RegexExampleButton
                         key={pattern}
-                        onApply={() => applyRegexExample(pattern)}
                         pattern={pattern}
+                        onApply={() => {
+                          applyRegexExample(pattern);
+                        }}
                       >
                         {label} <code>{pattern}</code>
                       </RegexExampleButton>
@@ -635,8 +671,8 @@ export const SearchAndReplace = forwardRef<
                 </div>
 
                 <Separator
-                  className="tiptap-search-replace-regex-help-separator"
                   orientation="horizontal"
+                  className="tiptap-search-replace-regex-help-separator"
                 />
 
                 <div className="tiptap-search-replace-regex-help-section">
@@ -645,14 +681,16 @@ export const SearchAndReplace = forwardRef<
                   </span>
 
                   <ButtonGroup
-                    className="tiptap-search-replace-regex-example-list"
                     orientation="vertical"
+                    className="tiptap-search-replace-regex-example-list"
                   >
                     {REGEX_REPLACE_EXAMPLES.map(({ pattern, replacement }) => (
                       <RegexExampleButton
                         key={pattern}
-                        onApply={() => applyRegexExample(pattern, replacement)}
                         pattern={pattern}
+                        onApply={() => {
+                          applyRegexExample(pattern, replacement);
+                        }}
                       >
                         <code>{pattern}</code> to <code>{replacement}</code>
                       </RegexExampleButton>
@@ -663,13 +701,13 @@ export const SearchAndReplace = forwardRef<
                     className="tiptap-search-replace-regex-docs-link"
                     data-search-replace-action="regex-docs"
                     href={REGEX_DOCS_URL}
-                    rel="noopener noreferrer"
                     target="_blank"
+                    rel="noopener noreferrer"
                   >
                     Learn about regular expressions
                     <ExternalLinkIcon
-                      aria-hidden="true"
                       className="tiptap-search-replace-regex-docs-link-icon"
+                      aria-hidden="true"
                     />
                   </a>
                 </div>
@@ -681,25 +719,29 @@ export const SearchAndReplace = forwardRef<
         </CardBody>
 
         <CardFooter className="tiptap-search-replace-actions">
-          <ButtonGroup className="button-group" orientation="horizontal">
+          <ButtonGroup className="tiptap-button-group" orientation="horizontal">
             <ButtonGroup>
               <Button
-                aria-label="Replace current result"
+                type="button"
                 data-search-replace-action="replace"
                 disabled={!canReplace}
-                onClick={replaceCurrent}
-                type="button"
+                aria-label="Replace current result"
+                onClick={() => {
+                  replaceCurrent();
+                }}
               >
                 Replace
               </Button>
             </ButtonGroup>
             <ButtonGroup>
               <Button
-                aria-label="Replace all results"
+                type="button"
                 data-search-replace-action="replace-all"
                 disabled={!canReplaceAll}
-                onClick={replaceAll}
-                type="button"
+                aria-label="Replace all results"
+                onClick={() => {
+                  replaceAll();
+                }}
               >
                 Replace all
               </Button>

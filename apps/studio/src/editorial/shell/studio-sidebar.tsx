@@ -1,4 +1,5 @@
 import { UserButton, useUser } from "@clerk/tanstack-react-start";
+import { hasText } from "@ortodoksas-lt/content/value";
 import {
   Link,
   useMatchRoute,
@@ -83,22 +84,24 @@ interface StudioBrandProps {
   logoClassName?: string;
 }
 
-export const StudioBrand = ({ className, logoClassName }: StudioBrandProps) => (
-  <div className={cn("flex min-w-0 items-center gap-2.5", className)}>
-    <img
-      alt="ortodoksas.lt"
-      className={cn("block h-auto w-[112px] shrink-0", logoClassName)}
-      height="193"
-      src={publicationLogoUrl}
-      width="1022"
-    />
-    <span className="text-brand-dark text-[10px] font-semibold tracking-[0.14em] uppercase">
-      Studio
-    </span>
-  </div>
-);
+export function StudioBrand({ className, logoClassName }: StudioBrandProps) {
+  return (
+    <div className={cn("flex min-w-0 items-center gap-2.5", className)}>
+      <img
+        alt="ortodoksas.lt"
+        className={cn("block h-auto w-[112px] shrink-0", logoClassName)}
+        height="193"
+        src={publicationLogoUrl}
+        width="1022"
+      />
+      <span className="text-brand-dark text-xs font-semibold tracking-widest uppercase">
+        Studio
+      </span>
+    </div>
+  );
+}
 
-export const StudioSidebar = () => {
+export function StudioSidebar() {
   const { isMobile, setOpenMobile } = useSidebar();
   const { user } = useUser();
   const { studioRole } = useRouteContext({ from: "/_studio" });
@@ -112,9 +115,8 @@ export const StudioSidebar = () => {
   const emailName = emailAddress?.split("@")[0];
 
   const displayName =
-    user?.fullName ||
-    user?.username ||
-    (emailName ? titleCaseIdentifier(emailName) : "Studio editor");
+    [user?.fullName, user?.username].find(hasText) ??
+    (hasText(emailName) ? titleCaseIdentifier(emailName) : "Studio editor");
 
   const accountLabel = emailAddress ?? "Editor account";
 
@@ -128,9 +130,10 @@ export const StudioSidebar = () => {
     <Sidebar
       aria-label="Studio navigation"
       collapsible="icon"
+      // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role -- Sidebar renders both desktop containers and a mobile Sheet; its navigation landmark must persist in either layout.
       role="navigation"
     >
-      <SidebarHeader className="border-sidebar-border h-[var(--studio-shell-header-height)] justify-center border-b px-3">
+      <SidebarHeader className="h-[var(--studio-shell-header-height)] justify-center">
         <StudioBrand className="group-data-[collapsible=icon]:hidden" />
       </SidebarHeader>
       <SidebarContent>
@@ -145,8 +148,8 @@ export const StudioSidebar = () => {
 
                 const Icon = item.icon;
 
-                const isActive = item.matchPaths.some((to) =>
-                  matchRoute({ fuzzy: true, to })
+                const isActive = item.matchPaths.some(
+                  (to) => matchRoute({ fuzzy: true, to }) !== false
                 );
 
                 const target =
@@ -181,7 +184,7 @@ export const StudioSidebar = () => {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="pb-3">
+      <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
             <div className="flex h-12 w-full items-center gap-2 overflow-hidden rounded-md p-2 group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:p-0">
@@ -192,7 +195,7 @@ export const StudioSidebar = () => {
                 <strong className="block truncate text-xs">
                   {displayName}
                 </strong>
-                <small className="text-muted-foreground mt-0.5 block truncate text-[10px]">
+                <small className="text-muted-foreground mt-0.5 block truncate text-xs">
                   {accountLabel}
                 </small>
               </span>
@@ -203,4 +206,4 @@ export const StudioSidebar = () => {
       <SidebarRail />
     </Sidebar>
   );
-};
+}

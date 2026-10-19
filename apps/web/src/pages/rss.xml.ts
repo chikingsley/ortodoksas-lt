@@ -1,3 +1,5 @@
+import { hasText } from "@ortodoksas-lt/content/value";
+
 import { absoluteUrl, escapeXml } from "../components/publication/publication";
 import { getRecentArticles } from "../server/publication-catalog";
 
@@ -5,11 +7,13 @@ export async function GET() {
   const articles = await getRecentArticles("lt", 50);
 
   const items = articles
-    .filter((entry) => entry.published)
+    .flatMap((entry) =>
+      hasText(entry.published) ? [{ ...entry, published: entry.published }] : []
+    )
     .slice(0, 50)
     .map(
       (entry) =>
-        `<item><title>${escapeXml(entry.title)}</title><link>${escapeXml(absoluteUrl(entry.path))}</link><guid isPermaLink="true">${escapeXml(absoluteUrl(entry.path))}</guid><description>${escapeXml(entry.description)}</description><pubDate>${new Date(entry.published as string).toUTCString()}</pubDate><category>${escapeXml(entry.section)}</category></item>`
+        `<item><title>${escapeXml(entry.title)}</title><link>${escapeXml(absoluteUrl(entry.path))}</link><guid isPermaLink="true">${escapeXml(absoluteUrl(entry.path))}</guid><description>${escapeXml(entry.description)}</description><pubDate>${new Date(entry.published).toUTCString()}</pubDate><category>${escapeXml(entry.section)}</category></item>`
     )
     .join("");
 

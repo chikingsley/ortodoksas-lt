@@ -38,5 +38,5 @@ export async function persistHomepagePlacements(input: {
     secondaryIds: string[];
   }>
 > {
-  return updateHomepagePlacementsMutation({ data: input });
+  return await updateHomepagePlacementsMutation({ data: input });
 }

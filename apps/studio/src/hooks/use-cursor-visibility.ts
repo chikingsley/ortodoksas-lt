@@ -1,3 +1,5 @@
+"use client";
+
 import type { Editor } from "@tiptap/react";
 import { useEffect } from "react";
 
@@ -51,7 +53,7 @@ export function useCursorVisibility({
       const { from } = state.selection;
       const cursorCoords = view.coordsAtPos(from);
 
-      if (windowHeight < rect.height && cursorCoords) {
+      if (windowHeight < rect.height) {
         const availableSpace = windowHeight - cursorCoords.top;
 
         // If the cursor is hidden behind the overlay or offscreen, scroll it into view

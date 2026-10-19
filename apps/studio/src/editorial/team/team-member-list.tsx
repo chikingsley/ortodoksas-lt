@@ -10,8 +10,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { teamRoleLabel, teamRoles } from "./team-role";
 import type { TeamRole } from "./team-role";
+import { teamRoleLabel, teamRoles } from "./team-role";
 import type { TeamMemberResource } from "./team-types";
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
@@ -46,7 +46,7 @@ const memberName = (member: TeamMemberResource) => {
     .filter(Boolean)
     .join(" ");
 
-  return name || member.publicUserData?.identifier || "Studio member";
+  return (name || member.publicUserData?.identifier) ?? "Studio member";
 };
 
 const memberInitials = (member: TeamMemberResource) => {
@@ -100,23 +100,23 @@ function TeamMemberRow({
   const requestRemoval = useCallback(() => {
     setConfirming(true);
   }, []);
+
   const cancelRemoval = useCallback(() => {
     setConfirming(false);
   }, []);
 
-  const remove = useCallback(
-    async () => await onRemove(member.id),
-    [member.id, onRemove]
-  );
+  const remove = useCallback(async () => {
+    await onRemove(member.id);
+  }, [member.id, onRemove]);
 
   return (
     <li className="grid items-center gap-4 px-4 py-3 sm:grid-cols-[minmax(0,1fr)_8rem_auto]">
       <div className="flex min-w-0 items-center gap-3">
         <Avatar size="lg">
-          {member.publicUserData?.hasImage ? (
+          {member.publicUserData?.hasImage === true ? (
             <AvatarImage alt="" src={member.publicUserData.imageUrl} />
           ) : null}
-          <AvatarFallback className="font-medium">{initials}</AvatarFallback>
+          <AvatarFallback>{initials}</AvatarFallback>
         </Avatar>
         <span className="min-w-0">
           <strong className="block truncate text-sm font-medium">
@@ -138,7 +138,9 @@ function TeamMemberRow({
 
       <Select
         disabled={busy || isCurrentUser}
-        onValueChange={changeRole}
+        onValueChange={(value) => {
+          void changeRole(value);
+        }}
         value={role}
       >
         <SelectTrigger aria-label={`Role for ${identifier}`} className="w-full">
@@ -167,7 +169,9 @@ function TeamMemberRow({
             </Button>
             <Button
               disabled={busy}
-              onClick={remove}
+              onClick={() => {
+                void remove();
+              }}
               size="sm"
               type="button"
               variant="destructive"

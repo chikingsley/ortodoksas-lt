@@ -143,13 +143,13 @@ describe("translation readiness migration", () => {
     database.exec(sql);
     database.exec(sql);
 
-    expect(
-      database
+    expect({
+      ...database
         .prepare(
           "SELECT body_json, converter_version, source_hash, summary, title FROM article_baselines WHERE article_id = ?"
         )
-        .get(targetId)
-    ).toEqual({
+        .get(targetId),
+    }).toStrictEqual({
       body_json: sourceBody,
       converter_version: "translation-v1",
       source_hash: sourceHash,

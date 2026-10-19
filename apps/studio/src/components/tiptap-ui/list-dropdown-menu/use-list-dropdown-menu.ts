@@ -8,12 +8,12 @@ import { ListIcon } from "@/components/tiptap-icons/list-icon";
 import { ListOrderedIcon } from "@/components/tiptap-icons/list-ordered-icon";
 import { ListTodoIcon } from "@/components/tiptap-icons/list-todo-icon";
 // --- Tiptap UI ---
+import type { ListType } from "@/components/tiptap-ui/list-button/use-list";
 import {
   canToggleList,
   isListActive,
-  type ListType,
   listIcons,
-} from "@/components/tiptap-ui/list-button";
+} from "@/components/tiptap-ui/list-button/use-list";
 // --- Hooks ---
 import { useTiptapEditor } from "@/hooks/use-tiptap-editor";
 // --- Lib ---
@@ -28,21 +28,21 @@ export interface UseListDropdownMenuConfig {
    */
   editor?: Editor | null;
   /**
-   * Whether the dropdown should be hidden when no list types are available
-   * @default false
-   */
-  hideWhenUnavailable?: boolean;
-  /**
    * The list types to display in the dropdown.
    * @default ["bulletList", "orderedList", "taskList"]
    */
   types?: ListType[];
+  /**
+   * Whether the dropdown should be hidden when no list types are available
+   * @default false
+   */
+  hideWhenUnavailable?: boolean;
 }
 
 export interface ListOption {
-  icon: React.ElementType;
   label: string;
   type: ListType;
+  icon: React.ElementType;
 }
 
 export const listOptions: ListOption[] = [
@@ -67,9 +67,10 @@ export function canToggleAnyList(
   editor: Editor | null,
   listTypes: ListType[]
 ): boolean {
-  if (!(editor && editor.isEditable)) {
+  if (!editor || !editor.isEditable) {
     return false;
   }
+
   return listTypes.some((type) => canToggleList(editor, type));
 }
 
@@ -77,9 +78,10 @@ export function isAnyListActive(
   editor: Editor | null,
   listTypes: ListType[]
 ): boolean {
-  if (!(editor && editor.isEditable)) {
+  if (!editor || !editor.isEditable) {
     return false;
   }
+
   return listTypes.some((type) => isListActive(editor, type));
 }
 
@@ -126,9 +128,10 @@ export function getActiveListType(
   editor: Editor | null,
   availableTypes: ListType[]
 ): ListType | undefined {
-  if (!(editor && editor.isEditable)) {
-    return;
+  if (!editor || !editor.isEditable) {
+    return undefined;
   }
+
   return availableTypes.find((type) => isListActive(editor, type));
 }
 
@@ -176,7 +179,7 @@ export function useListDropdownMenu(config?: UseListDropdownMenuConfig) {
     editor: providedEditor,
     types = ["bulletList", "orderedList", "taskList"],
     hideWhenUnavailable = false,
-  } = config || {};
+  } = config ?? {};
 
   const { editor } = useTiptapEditor(providedEditor);
   const [isVisible, setIsVisible] = useState(true);
@@ -217,10 +220,10 @@ export function useListDropdownMenu(config?: UseListDropdownMenuConfig) {
   }, [canToggleAny, editor, hideWhenUnavailable, listInSchema, types]);
 
   return {
+    Icon: activeList ? listIcons[activeList.type] : ListIcon,
     activeType,
     canToggle: canToggleAny,
     filteredLists,
-    Icon: activeList ? listIcons[activeList.type] : ListIcon,
     isActive: isAnyActive,
     isVisible,
     label: "List",

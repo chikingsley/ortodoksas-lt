@@ -1,3 +1,9 @@
+/* ── Panel ──────────────────────────────────────────────────── */
+
+/* The panel is deliberately unpositioned — place it from the outside
+   (docked in a corner, inside a popover, inline in a toolbar, …).
+   Variables are scoped to the panel and defer to shared primitive tokens
+   when those stylesheets are present. */
 .tiptap-search-replace {
   --tiptap-search-replace-count-color: var(--tt-gray-light-a-400);
   --tiptap-search-replace-option-text-color: var(--tt-gray-light-a-600);

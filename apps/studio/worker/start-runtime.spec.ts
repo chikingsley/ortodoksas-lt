@@ -6,14 +6,17 @@ describe("TanStack Start Worker runtime", () => {
     vi.spyOn(globalThis, "fetch").mockImplementation(async (...args) => {
       const request = new Request(...args);
       const url = new URL(request.url);
-      throw new Error(
-        "Unexpected outbound request: " + url.origin + url.pathname
+
+      return await Promise.reject(
+        new Error(`Unexpected outbound request: ${url.origin}${url.pathname}`)
       );
     });
   });
+
   afterAll(() => {
     vi.restoreAllMocks();
   });
+
   it("renders the signed-out Studio shell", async () => {
     const response = await worker.default.fetch("https://studio.test/sign-in");
     expect(response.status).toBe(200);
@@ -26,9 +29,10 @@ describe("TanStack Start Worker runtime", () => {
     const response = await worker.default.fetch(
       "https://studio.test/api/media/missing"
     );
+
     expect(response.status).toBe(401);
     expect(response.headers.get("cache-control")).toBe("private, no-store");
-    await expect(response.json()).resolves.toEqual({
+    await expect(response.json()).resolves.toStrictEqual({
       error: "Authentication required",
     });
   });
@@ -45,6 +49,7 @@ describe("TanStack Start Worker runtime", () => {
         method: "POST",
       }
     );
+
     expect(response.status).toBe(403);
   });
 });

@@ -14,7 +14,7 @@ const section = sectionValue === "__all__" ? "" : sectionValue;
 const label = Astro.url.searchParams.get("zyma")?.trim() ?? "";
 const yearValue = Astro.url.searchParams.get("metai")?.trim() ?? "";
 const year = yearValue === "__all__" ? "" : yearValue;
-const requestedPage = Number.parseInt(Astro.url.searchParams.get("page") ?? "1", 10) || 1;
+const requestedPage = Math.trunc(Number(Astro.url.searchParams.get("page") ?? "1")) || 1;
 const pageSize = 20;
 const facets = await getArchiveFacets();
 

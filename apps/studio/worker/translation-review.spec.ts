@@ -1,7 +1,7 @@
 import { articleRevisions } from "@ortodoksas-lt/db";
 import { env } from "cloudflare:workers";
 import { and, eq } from "drizzle-orm";
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 
 import {
   createArticle,
@@ -45,9 +45,7 @@ describe("Studio Worker services", () => {
 
     expect(source.ok).toBe(true);
 
-    if (!source.ok) {
-      return;
-    }
+    assert(source.ok, "Source article must be created");
 
     const translationDraft = await createTranslationDraft({
       database,
@@ -58,9 +56,10 @@ describe("Studio Worker services", () => {
 
     expect(translationDraft.kind).toBe("created");
 
-    if (translationDraft.kind !== "created") {
-      return;
-    }
+    assert(
+      translationDraft.kind === "created",
+      "Translation draft must be created"
+    );
 
     const translationId = translationDraft.article.id;
 
@@ -114,7 +113,7 @@ describe("Studio Worker services", () => {
     );
 
     const approvedAt = approvedWorkspace?.canonical.translationReviewedAt;
-    expect(approvedAt).toEqual(expect.any(Number));
+    expect(approvedAt).toStrictEqual(expect.any(Number));
 
     const ordinarySave = await updateArticle({
       articleId: translationId,
@@ -242,9 +241,9 @@ describe("Studio Worker services", () => {
 
     expect(sourceInvalidatedWorkspace).toMatchObject({
       canonical: {
+        translationReviewStatus: "pending",
         translationReviewedAt: null,
         translationReviewedBy: null,
-        translationReviewStatus: "pending",
       },
     });
     expect(sourceInvalidatedWorkspace?.revisions[0]).toMatchObject({
@@ -281,7 +280,7 @@ describe("Studio Worker services", () => {
       },
     });
 
-    expect(staleApproval).toEqual({
+    expect(staleApproval).toStrictEqual({
       error: "Translation source changed since this editor loaded it",
       ok: false,
       status: 409,
@@ -385,24 +384,26 @@ describe("Studio Worker services", () => {
       getArticleWorkspace(database, translationId),
     ]);
 
-    expect(concurrentSource).toBeDefined();
-    expect(concurrentTranslation).toBeDefined();
+    assert.exists(concurrentSource);
+    assert.exists(concurrentTranslation);
 
-    if (!(concurrentSource && concurrentTranslation)) {
-      return;
-    }
+    const concurrentStatus =
+      concurrentTranslation.canonical.translationReviewStatus;
 
-    if (
-      concurrentTranslation.canonical.translationReviewStatus === "approved"
-    ) {
-      await expect(
-        getTranslationSourceHash(concurrentSource.canonical)
-      ).resolves.toBe(concurrentTranslation.canonical.translationSourceHash);
-    } else {
-      expect(concurrentTranslation.canonical.translationReviewStatus).toBe(
-        "pending"
-      );
-    }
+    const concurrentHash = await getTranslationSourceHash(
+      concurrentSource.canonical
+    );
+
+    expect([
+      { hash: concurrentHash, status: "approved" },
+      {
+        hash: concurrentTranslation.canonical.translationSourceHash,
+        status: "pending",
+      },
+    ]).toContainEqual({
+      hash: concurrentTranslation.canonical.translationSourceHash,
+      status: concurrentStatus,
+    });
 
     const changesRequested = await updateArticle({
       articleId: translationId,
@@ -437,9 +438,8 @@ describe("Studio Worker services", () => {
     expect(preRestoreSource).toBeDefined();
     expect(preRestoreTranslation).toBeDefined();
 
-    if (!(preRestoreSource && preRestoreTranslation)) {
-      return;
-    }
+    assert.exists(preRestoreSource);
+    assert.exists(preRestoreTranslation);
 
     const restoreRaceApproval = await updateArticle({
       articleId: translationId,
@@ -465,9 +465,7 @@ describe("Studio Worker services", () => {
 
     expect(restoreRaceApproval.ok).toBe(true);
 
-    if (!restoreRaceApproval.ok) {
-      return;
-    }
+    assert(restoreRaceApproval.ok, "Translation approval must succeed");
 
     const approvedVersion = restoreRaceApproval.data.version;
     await Promise.all([
@@ -509,23 +507,25 @@ describe("Studio Worker services", () => {
       getArticleWorkspace(database, translationId),
     ]);
 
-    expect(postRestoreSource).toBeDefined();
-    expect(postRestoreTranslation).toBeDefined();
+    assert.exists(postRestoreSource);
+    assert.exists(postRestoreTranslation);
 
-    if (!(postRestoreSource && postRestoreTranslation)) {
-      return;
-    }
+    const postRestoreStatus =
+      postRestoreTranslation.canonical.translationReviewStatus;
 
-    if (
-      postRestoreTranslation.canonical.translationReviewStatus === "approved"
-    ) {
-      await expect(
-        getTranslationSourceHash(postRestoreSource.canonical)
-      ).resolves.toBe(postRestoreTranslation.canonical.translationSourceHash);
-    } else {
-      expect(postRestoreTranslation.canonical.translationReviewStatus).toBe(
-        "pending"
-      );
-    }
+    const postRestoreHash = await getTranslationSourceHash(
+      postRestoreSource.canonical
+    );
+
+    expect([
+      { hash: postRestoreHash, status: "approved" },
+      {
+        hash: postRestoreTranslation.canonical.translationSourceHash,
+        status: "pending",
+      },
+    ]).toContainEqual({
+      hash: postRestoreTranslation.canonical.translationSourceHash,
+      status: postRestoreStatus,
+    });
   });
 });

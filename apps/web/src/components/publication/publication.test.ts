@@ -92,7 +92,7 @@ describe("publication links", () => {
       getInternalPublicationPaths(
         '<a href="/2026/08/clean">Clean</a><a href="https://ortodoksas.lt/p/history.html?ref=old#section">Historical</a>'
       )
-    ).toEqual(["/2026/08/clean", "/p/history"]);
+    ).toStrictEqual(["/2026/08/clean", "/p/history"]);
   });
 
   it("canonicalizes historical internal links while preserving suffixes", () => {

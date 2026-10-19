@@ -1,5 +1,7 @@
-import { localeShells } from "../../i18n/config";
+import { firstText, hasText } from "@ortodoksas-lt/content/value";
+
 import type { SiteLocale } from "../../i18n/config";
+import { localeShells } from "../../i18n/config";
 import { ui } from "../../i18n/ui";
 import {
   getCommunityDirectory,
@@ -7,6 +9,7 @@ import {
 } from "../../server/directory-data";
 import { getPage } from "../../server/publication-catalog";
 import { getLocalizedCounterparts } from "../../server/publication-localization";
+import type { ContentPage } from "./publication";
 import {
   canonicalizePublicationLinks,
   cleanHtml,
@@ -14,16 +17,14 @@ import {
   hasLeadFigure,
   localizePublicationLinks,
 } from "./publication";
-import type { ContentPage } from "./publication";
 
 const CALENDAR_PREFIX_PATTERN = /^🗓️\s*/u;
 
 const resolveLocalePath = (path: string) => {
   const [requestedLocale, ...remainingSegments] = path.split("/");
 
-  const locale: SiteLocale = localeShells.includes(requestedLocale as never)
-    ? (requestedLocale as SiteLocale)
-    : "lt";
+  const locale: SiteLocale =
+    localeShells.find((candidate) => candidate === requestedLocale) ?? "lt";
 
   const localized = locale !== "lt";
 
@@ -60,31 +61,29 @@ const getLocalizedHtml = async (
   );
 };
 
-const getDirectoryData = (
-  pageTemplate: "community_directory" | "people_directory" | string,
-  locale: SiteLocale
-) => {
+const getDirectoryData = async (pageTemplate: string, locale: SiteLocale) => {
   if (pageTemplate === "people_directory") {
-    return getPeopleDirectory(locale).then((people) => ({
-      kind: "people" as const,
-      people,
-    }));
+    const people = await getPeopleDirectory(locale);
+
+    return { kind: "people" as const, people };
   }
 
   if (pageTemplate === "community_directory") {
-    return getCommunityDirectory(locale).then((communities) => ({
-      kind: "communities" as const,
-      communities,
-    }));
+    const communities = await getCommunityDirectory(locale);
+
+    return { communities, kind: "communities" as const };
   }
+
+  return null;
 };
 
 const getSearchMetadata = (page: ContentPage, displayTitle: string) => ({
-  description:
-    page.seoDescription?.trim() ||
-    page.description ||
-    `${displayTitle} · ortodoksas.lt`,
-  searchTitle: page.seoTitle?.trim() || displayTitle,
+  description: firstText(
+    page.seoDescription?.trim(),
+    page.description,
+    `${displayTitle} · ortodoksas.lt`
+  ),
+  searchTitle: firstText(page.seoTitle?.trim(), displayTitle),
 });
 
 const getArticleSchema = (page: ContentPage, canonicalPath: string) => {
@@ -92,17 +91,17 @@ const getArticleSchema = (page: ContentPage, canonicalPath: string) => {
     return;
   }
 
-  const author = page.byline
+  const author = hasText(page.byline)
     ? {
         "@type": page.bylineType === "organization" ? "Organization" : "Person",
         name: page.byline,
-        ...(page.bylineUrl ? { url: page.bylineUrl } : {}),
+        url: hasText(page.bylineUrl) ? page.bylineUrl : undefined,
       }
     : undefined;
 
   return {
     articleSection: page.section,
-    ...(author ? { author } : {}),
+    author,
     dateModified: page.published ?? undefined,
     datePublished: page.published ?? undefined,
     headline: page.title,

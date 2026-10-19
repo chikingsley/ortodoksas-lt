@@ -1,6 +1,9 @@
+import { hasText } from "@ortodoksas-lt/content/value";
 import type { JSONContent } from "@tiptap/core";
+import { z } from "zod";
 
 import type { TiptapDocument } from "./article";
+import { siteLocales } from "./site";
 
 type LocalizedPublicationLocale = "be" | "en" | "ru" | "uk";
 
@@ -37,7 +40,8 @@ const HOST_LOCALES = new Map<string, LocalizedPublicationLocale>([
   ["uk.ortodoksas.lt", "uk"],
 ]);
 
-const LOCALIZED_PUBLICATION_PATH_PATTERN = /^\/(be|en|ru|uk)(\/.*)$/u;
+const LOCALIZED_PUBLICATION_PATH_PATTERN =
+  /^\/(?<locale>be|en|ru|uk)(?<path>\/.*)$/u;
 
 const PUBLICATION_PATH_PATTERN =
   /^\/(?:p\/[^/?#]+|\d{4}\/\d{2}\/[^/?#]+)(?:\.html)?$/u;
@@ -67,16 +71,18 @@ export const parseInternalPublicationHref = (
 
     const path = canonicalPublicationPath(localizedMatch?.[2] ?? url.pathname);
 
-    if (!path) {
+    if (!hasText(path)) {
       return;
     }
 
     const locale =
-      (localizedMatch?.[1] as LocalizedPublicationLocale | undefined) ??
-      HOST_LOCALES.get(url.hostname);
+      siteLocales.find(
+        (candidate): candidate is LocalizedPublicationLocale =>
+          candidate !== "lt" && candidate === localizedMatch?.[1]
+      ) ?? HOST_LOCALES.get(url.hostname);
 
     return {
-      ...(locale ? { locale } : {}),
+      ...(locale === undefined ? undefined : { locale }),
       path,
       suffix: `${url.search}${url.hash}`,
     };
@@ -119,31 +125,36 @@ const canonicalizeVisibleUrl = (value: string): string => {
   return value.replace(trimmed, replacement);
 };
 
-const canonicalizeNode = (node: JSONContent): JSONContent => ({
-  ...node,
-  ...(node.marks
-    ? {
-        marks: node.marks.map((mark) => {
-          const href = mark.attrs?.href;
+function canonicalizeNode(node: JSONContent): JSONContent {
+  const canonical = { ...node };
 
-          return typeof href === "string"
-            ? {
-                ...mark,
-                attrs: {
-                  ...mark.attrs,
-                  href: canonicalizePublicationHref(href),
-                },
-              }
-            : mark;
-        }),
-      }
-    : {}),
-  ...(node.content ? { content: node.content.map(canonicalizeNode) } : {}),
-  ...(typeof node.text === "string"
-    ? { text: canonicalizeVisibleUrl(node.text) }
-    : {}),
-});
+  if (node.marks) {
+    canonical.marks = node.marks.map((mark) => {
+      const href = z.string().safeParse(mark.attrs?.href);
+
+      return href.success
+        ? {
+            ...mark,
+            attrs: {
+              ...mark.attrs,
+              href: canonicalizePublicationHref(href.data),
+            },
+          }
+        : mark;
+    });
+  }
+
+  if (node.content) {
+    canonical.content = node.content.map(canonicalizeNode);
+  }
+
+  if (node.text !== undefined) {
+    canonical.text = canonicalizeVisibleUrl(node.text);
+  }
+
+  return canonical;
+}
 
 export const canonicalizePublicationDocument = (
   document: TiptapDocument
-): TiptapDocument => canonicalizeNode(document) as TiptapDocument;
+): TiptapDocument => ({ ...canonicalizeNode(document), type: "doc" });

@@ -1,16 +1,28 @@
 {
   "files": [],
   "compilerOptions": {
+    "noUncheckedIndexedAccess": true,
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "paths": { "@/*": ["./src/*"] },
+    "paths": {
+      "@/*": ["./src/*"]
+    },
     "skipLibCheck": true,
     "target": "ES2023",
-    "strictNullChecks": true
+    "strictNullChecks": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "strict": true
   },
   "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" },
-    { "path": "./tsconfig.worker.json" }
+    {
+      "path": "./tsconfig.app.json"
+    },
+    {
+      "path": "./tsconfig.node.json"
+    },
+    {
+      "path": "./tsconfig.worker.json"
+    }
   ]
 }

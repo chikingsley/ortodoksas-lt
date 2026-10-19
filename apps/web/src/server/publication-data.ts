@@ -1,8 +1,9 @@
+import {
+  translationKindSchema,
+  translationReviewStatusSchema,
+} from "@ortodoksas-lt/content/article";
 import { pageTemplateSchema } from "@ortodoksas-lt/content/site";
-import type {
-  TranslationKind,
-  TranslationReviewStatus,
-} from "@ortodoksas-lt/content/translation";
+import { firstText, hasText } from "@ortodoksas-lt/content/value";
 import { articles, mediaAssets, publicationGroups } from "@ortodoksas-lt/db";
 import { env } from "cloudflare:workers";
 import { and, desc, eq, inArray } from "drizzle-orm";
@@ -88,16 +89,16 @@ export async function heroMap(rows: Pick<ArticleRow, "heroMediaId">[]) {
     (_, index) => ids.slice(index * 100, index * 100 + 100)
   );
 
-  const media = (
-    await Promise.all(
-      batches.map((batch) =>
-        database()
-          .select({ altText: mediaAssets.altText, id: mediaAssets.id })
-          .from(mediaAssets)
-          .where(inArray(mediaAssets.id, batch))
-      )
+  const mediaBatches = await Promise.all(
+    batches.map((batch) =>
+      database()
+        .select({ altText: mediaAssets.altText, id: mediaAssets.id })
+        .from(mediaAssets)
+        .where(inArray(mediaAssets.id, batch))
     )
-  ).flat();
+  );
+
+  const media = mediaBatches.flat();
 
   return new Map(media.map((asset) => [asset.id, asset.altText]));
 }
@@ -119,27 +120,32 @@ export function catalogEntry(
     bylineType: row.bylineType === "organization" ? "organization" : "person",
     bylineUrl: row.bylineUrl,
     description: row.summary,
-    hero: row.heroMediaId ? `/api/media/${row.heroMediaId}` : null,
-    heroAlt: row.heroMediaId ? heroes.get(row.heroMediaId) || row.title : "",
+    hero: hasText(row.heroMediaId) ? `/api/media/${row.heroMediaId}` : null,
+    heroAlt: hasText(row.heroMediaId)
+      ? firstText(heroes.get(row.heroMediaId), row.title)
+      : "",
     heroFit: row.heroFit === "contain" ? "contain" : "cover",
     heroFocalX: row.heroFocalX,
     heroFocalY: row.heroFocalY,
     heroMediaId: row.heroMediaId,
-    ...(homepage ? { homepage } : {}),
-    ...(placement ? { homepageOrder: placement.position } : {}),
+    homepage,
+    homepageOrder: placement?.position,
     kind: row.kind === "page" ? "page" : "article",
     labels: parseLabels(row.labelsJson),
+    // oxlint-disable-next-line promise/prefer-await-to-then -- Zod.catch supplies a synchronous schema default.
     pageTemplate: pageTemplateSchema.catch("standard").parse(row.pageTemplate),
     path: articlePath(row.slug),
-    published: row.publishedAt ? new Date(row.publishedAt).toISOString() : null,
+    published:
+      row.publishedAt === null ? null : new Date(row.publishedAt).toISOString(),
     section: row.section,
     seoDescription: row.seoDescription,
     seoTitle: row.seoTitle,
     title: row.title,
     translationGroupId: row.translationGroupId,
-    translationKind: row.translationKind as TranslationKind,
-    translationReviewStatus:
-      row.translationReviewStatus as TranslationReviewStatus,
+    translationKind: translationKindSchema.parse(row.translationKind),
+    translationReviewStatus: translationReviewStatusSchema.parse(
+      row.translationReviewStatus
+    ),
   };
 }
 

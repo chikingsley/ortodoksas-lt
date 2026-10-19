@@ -1,4 +1,3 @@
-// biome-ignore-all lint/performance/noJsxPropsBind: Collection controls bind each row to its current index.
 import type { CommunityEditorInput } from "@ortodoksas-lt/content/directory";
 import type { SiteLocale } from "@ortodoksas-lt/content/site";
 import { Plus, Trash2 } from "lucide-react";

@@ -1,6 +1,7 @@
 import type { JSONContent } from "@tiptap/core";
 
-const isHardBreak = (node: JSONContent): boolean => node.type === "hardBreak";
+const isHardBreak = (node: JSONContent | undefined): boolean =>
+  node?.type === "hardBreak";
 
 const trimHardBreaks = (content: JSONContent[]): JSONContent[] => {
   let start = 0;
@@ -42,10 +43,11 @@ const splitParagraph = (node: JSONContent): JSONContent[] => {
     groups.at(-1)?.push(child);
   }
 
-  return groups
-    .map(trimHardBreaks)
-    .filter((group) => group.length > 0)
-    .map((group) => ({ ...node, content: group }));
+  return groups.flatMap((group) => {
+    const trimmed = trimHardBreaks(group);
+
+    return trimmed.length > 0 ? [{ ...node, content: trimmed }] : [];
+  });
 };
 
 export const canonicalizeTiptapDocument = (

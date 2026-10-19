@@ -1,3 +1,4 @@
+import { hasText } from "@ortodoksas-lt/content/value";
 import {
   useMutation,
   useQueryClient,
@@ -66,7 +67,7 @@ export function HomepageWorkspace({ articles }: Props) {
       }
 
       if (result.status === 409) {
-        const latest = await queryClient.fetchQuery(
+        const latest = await queryClient.query(
           homepagePlacementsQueryOptions()
         );
 
@@ -100,9 +101,9 @@ export function HomepageWorkspace({ articles }: Props) {
             article.kind === "article" &&
             article.language === "lt" &&
             article.status === "published" &&
-            article.hero
+            hasText(article.hero)
         )
-        .sort((left, right) =>
+        .toSorted((left, right) =>
           (right.published ?? "").localeCompare(left.published ?? "")
         ),
     [articles]
@@ -152,16 +153,16 @@ export function HomepageWorkspace({ articles }: Props) {
   }, [layoutRevision, leadId, saveMutation, secondaryIds]);
 
   return (
-    <div className="max-inventory-mobile:pb-12 mx-auto w-full max-w-[1500px] pb-[72px]">
+    <div className="max-inventory-mobile:pb-12 mx-auto w-full max-w-[1500px] pb-18">
       <StudioPageHeader>
         <div>
-          <h1 className="m-0 text-2xl font-[650] tracking-[-0.03em]">
+          <h1 className="m-0 text-2xl font-semibold tracking-tight">
             Homepage
           </h1>
           {state === "saved" ? (
-            <p className="text-success mt-1 mb-0 text-xs" role="status">
+            <output className="text-success mt-1 mb-0 block text-xs">
               Layout saved.
-            </p>
+            </output>
           ) : null}
           {state === "error" ? (
             <p className="text-destructive mt-1 mb-0 text-xs" role="alert">

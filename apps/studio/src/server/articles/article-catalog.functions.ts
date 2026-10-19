@@ -3,6 +3,8 @@ import {
   translationKindSchema,
   translationReviewStatusSchema,
 } from "@ortodoksas-lt/content/article";
+import { siteLocaleSchema } from "@ortodoksas-lt/content/site";
+import { hasText } from "@ortodoksas-lt/content/value";
 import { articles, publicationGroups } from "@ortodoksas-lt/db";
 import { queryOptions } from "@tanstack/react-query";
 import { createServerFn } from "@tanstack/react-start";
@@ -10,8 +12,8 @@ import { env } from "cloudflare:workers";
 import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
 
-import { catalogArticleSchema } from "@/editorial/articles/types";
 import type { CatalogArticle } from "@/editorial/articles/types";
+import { catalogArticleSchema } from "@/editorial/articles/types";
 
 import { requireStudioEditor } from "../auth";
 import { getDatabase } from "../db.server";
@@ -70,18 +72,21 @@ const getArticleCatalog = createServerFn({ method: "GET" }).handler(
 
     const catalog: CatalogArticle[] = result.map((article) => ({
       description: article.description,
-      hero: article.heroMediaId ? `/api/media/${article.heroMediaId}` : null,
+      hero: hasText(article.heroMediaId)
+        ? `/api/media/${article.heroMediaId}`
+        : null,
       id: article.id,
       kind: article.kind === "page" ? "page" : "article",
       labels: z.array(z.string()).parse(JSON.parse(article.labelsJson)),
-      language: article.language,
+      language: siteLocaleSchema.parse(article.language),
       path: `/${article.path}`,
-      published: article.publishedAt
-        ? new Date(article.publishedAt).toISOString()
-        : null,
+      published:
+        article.publishedAt === null
+          ? null
+          : new Date(article.publishedAt).toISOString(),
       section: article.section,
       status: articleStatusSchema.parse(article.status),
-      thumbnail: article.heroMediaId
+      thumbnail: hasText(article.heroMediaId)
         ? `/api/media/${article.heroMediaId}`
         : null,
       title: article.title,
@@ -103,7 +108,7 @@ const getArticleCatalog = createServerFn({ method: "GET" }).handler(
 
 export const articleCatalogQueryOptions = () =>
   queryOptions({
-    queryFn: async () => getArticleCatalog(),
+    queryFn: async () => await getArticleCatalog(),
     queryKey: ["studio", "articles"] as const,
     staleTime: 30_000,
   });

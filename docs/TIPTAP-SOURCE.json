@@ -1,0 +1,967 @@
+{
+  "retrieved": "2026-10-19",
+  "registry": "https://template.tiptap.dev/api/registry/components/",
+  "adaptations": "QUALITY-2026-10-19.md",
+  "files": [
+    {
+      "registry": "align-center-icon",
+      "path": "components/tiptap-icons/align-center-icon.tsx",
+      "upstreamSha256": "0449707a50aff5e800573e5ad82814e5a7b17ac5b4e28b440b0a02def6faec9e",
+      "included": true
+    },
+    {
+      "registry": "align-justify-icon",
+      "path": "components/tiptap-icons/align-justify-icon.tsx",
+      "upstreamSha256": "0b6b3812a0d7f502901cfc19a3c6922e9961feba6396628bf2dfcd25f9889ff6",
+      "included": true
+    },
+    {
+      "registry": "align-left-icon",
+      "path": "components/tiptap-icons/align-left-icon.tsx",
+      "upstreamSha256": "7f5f20c684ad15c665476e4781368ad26941032ef5a970bb71f57645e9511d3c",
+      "included": true
+    },
+    {
+      "registry": "align-right-icon",
+      "path": "components/tiptap-icons/align-right-icon.tsx",
+      "upstreamSha256": "d6999b588590ce24c0c66aa8bd9770caa5655667d4f5121deb3754632f00888a",
+      "included": true
+    },
+    {
+      "registry": "arrow-left-icon",
+      "path": "components/tiptap-icons/arrow-left-icon.tsx",
+      "upstreamSha256": "565861598f21eae5156c2e1c0eba85afea8d6eb098eb075403e925f5487b1697",
+      "included": true
+    },
+    {
+      "registry": "arrow-right-icon",
+      "path": "components/tiptap-icons/arrow-right-icon.tsx",
+      "upstreamSha256": "c77e7afb8a7f7be14b0ad7c138e9f136dc49e97a5268222769c714e45518e10a",
+      "included": true
+    },
+    {
+      "registry": "badge",
+      "path": "components/tiptap-ui-primitive/badge/badge-colors.scss",
+      "upstreamSha256": "c311de041a9db3e6cda7f76d632fad346f7550467177725cbfcf548d6c2d4ea4",
+      "included": true
+    },
+    {
+      "registry": "badge",
+      "path": "components/tiptap-ui-primitive/badge/badge-group.scss",
+      "upstreamSha256": "d0cb773d68cef017d98c8fb5b2c328d7c4f373b15ecc6850d76145979678c097",
+      "included": true
+    },
+    {
+      "registry": "badge",
+      "path": "components/tiptap-ui-primitive/badge/badge.scss",
+      "upstreamSha256": "62a3fd89ad6f6494f443783ba4a99bb732ffce9afca72688b3a151cffdaccdcd",
+      "included": true
+    },
+    {
+      "registry": "badge",
+      "path": "components/tiptap-ui-primitive/badge/badge.tsx",
+      "upstreamSha256": "1fbd41cea204eaa8393a18c89222f68f1fefb39d03d15d74c1e2e5d7a99718a4",
+      "included": true
+    },
+    {
+      "registry": "badge",
+      "path": "components/tiptap-ui-primitive/badge/index.tsx",
+      "upstreamSha256": "81ad73491cb8a1b830298a77ce0d1a91f6808f5351e39113afdc011600e25f37",
+      "included": false
+    },
+    {
+      "registry": "ban-icon",
+      "path": "components/tiptap-icons/ban-icon.tsx",
+      "upstreamSha256": "3d7879fdf79e1c92ab89b3a2563b6feb132d959cfdc657bc0cfc3525ef2076ff",
+      "included": true
+    },
+    {
+      "registry": "blockquote-button",
+      "path": "components/tiptap-ui/blockquote-button/blockquote-button.tsx",
+      "upstreamSha256": "6a823aa6f9d487b6798e24779b224d03e734af0fc23e09013514d8f4e783a4b6",
+      "included": true
+    },
+    {
+      "registry": "blockquote-button",
+      "path": "components/tiptap-ui/blockquote-button/index.tsx",
+      "upstreamSha256": "c871b34f59ffb113e99cb4bfff222dd5144bf737108a34e3a6256593ef57dd98",
+      "included": false
+    },
+    {
+      "registry": "blockquote-button",
+      "path": "components/tiptap-ui/blockquote-button/use-blockquote.ts",
+      "upstreamSha256": "40a441c7f4318edaa68bfe5e3955a4a8d36ead13fdd0bb87786d4348d3875354",
+      "included": true
+    },
+    {
+      "registry": "blockquote-icon",
+      "path": "components/tiptap-icons/blockquote-icon.tsx",
+      "upstreamSha256": "5810ee4c8999bbbcb7862adddba532f6174b647ea220e9c636e9aa6eec22e593",
+      "included": true
+    },
+    {
+      "registry": "blockquote-node",
+      "path": "components/tiptap-node/blockquote-node/blockquote-node.scss",
+      "upstreamSha256": "b945a853c52cb20e18493694b73397150ab59f3722ce916d057acc8221f1285b",
+      "included": true
+    },
+    {
+      "registry": "bold-icon",
+      "path": "components/tiptap-icons/bold-icon.tsx",
+      "upstreamSha256": "c6152ebdbd0c428f878f12731557ce66e7284652ce1ceace87a1b7163e86c95b",
+      "included": true
+    },
+    {
+      "registry": "button-group",
+      "path": "components/tiptap-ui-primitive/button-group/button-group.scss",
+      "upstreamSha256": "02c2f2d85398e0ed737f98e56d8999b2203b6dc1ac02df721c0f75568dc2f762",
+      "included": true
+    },
+    {
+      "registry": "button-group",
+      "path": "components/tiptap-ui-primitive/button-group/button-group.tsx",
+      "upstreamSha256": "509790df71b6207aceec81d20ae516381664f8b3f4e41823ab924f7b09ee1add",
+      "included": true
+    },
+    {
+      "registry": "button-group",
+      "path": "components/tiptap-ui-primitive/button-group/index.tsx",
+      "upstreamSha256": "6daa24b131a888185afbacfa5bb7d12c07edcd16f33dbb6dc6528ffff1b982da",
+      "included": false
+    },
+    {
+      "registry": "button",
+      "path": "components/tiptap-ui-primitive/button/button-colors.scss",
+      "upstreamSha256": "7dcb6cce116336efaca0a768cd59d60e2b313240123ac8442ce78aefa9e85afd",
+      "included": true
+    },
+    {
+      "registry": "button",
+      "path": "components/tiptap-ui-primitive/button/button.scss",
+      "upstreamSha256": "e4c07db120178e19f178edab0085eaa5ec88d5120bb9f595440b400cc562aa6e",
+      "included": true
+    },
+    {
+      "registry": "button",
+      "path": "components/tiptap-ui-primitive/button/button.tsx",
+      "upstreamSha256": "e0179db1beeaf840ddd4b81377faced2b44499de8cf91f401f7823d800f9b782",
+      "included": true
+    },
+    {
+      "registry": "button",
+      "path": "components/tiptap-ui-primitive/button/index.tsx",
+      "upstreamSha256": "ba9130d2ead921ef44b042091f1d2f339696771aed8e8ebada07646b5cdd375b",
+      "included": false
+    },
+    {
+      "registry": "card",
+      "path": "components/tiptap-ui-primitive/card/card.scss",
+      "upstreamSha256": "42950a12b605b88a92c1cf14695ecd210d43a701c0e04256bdb0d344c0418a02",
+      "included": true
+    },
+    {
+      "registry": "card",
+      "path": "components/tiptap-ui-primitive/card/card.tsx",
+      "upstreamSha256": "067a59bfa35115dcfcb5f58d1dcacaa2cdeb6c9ce7f2f5d4104502bc02b627f6",
+      "included": true
+    },
+    {
+      "registry": "card",
+      "path": "components/tiptap-ui-primitive/card/index.tsx",
+      "upstreamSha256": "5a42e9abafd5de36f4f26e385aa2402defc0665761a004bca78511383c34d1ba",
+      "included": false
+    },
+    {
+      "registry": "case-sensitive-icon",
+      "path": "components/tiptap-icons/case-sensitive-icon.tsx",
+      "upstreamSha256": "df3d54b0c2d9d0cd92d37d44b918d46f9a5a710b6d92c97c20ec54a6225689fa",
+      "included": true
+    },
+    {
+      "registry": "check-icon",
+      "path": "components/tiptap-icons/check-icon.tsx",
+      "upstreamSha256": "298c6487d5d7e679f8251a97883638869ed85b6ff6b6eaecc6e224adab41b8c0",
+      "included": true
+    },
+    {
+      "registry": "chevron-down-icon",
+      "path": "components/tiptap-icons/chevron-down-icon.tsx",
+      "upstreamSha256": "314f2f7473f60ba8e2b9240348f60337644d8d3b55da5a087275ac286a1f43c8",
+      "included": true
+    },
+    {
+      "registry": "chevron-up-icon",
+      "path": "components/tiptap-icons/chevron-up-icon.tsx",
+      "upstreamSha256": "b913d361e4e17898f10bda1a63bd015de81792381c6e184759f1d16a587f4b2f",
+      "included": true
+    },
+    {
+      "registry": "close-icon",
+      "path": "components/tiptap-icons/close-icon.tsx",
+      "upstreamSha256": "a2f20ae312bdc2743d98047da8b2b5160314909ab08ce75c99f790c8d900d7f5",
+      "included": true
+    },
+    {
+      "registry": "code-block-button",
+      "path": "components/tiptap-ui/code-block-button/code-block-button.tsx",
+      "upstreamSha256": "af315407b0962f6576631e6dd237e4e907ff5a498cab899ba1c2e8ed43689b52",
+      "included": true
+    },
+    {
+      "registry": "code-block-button",
+      "path": "components/tiptap-ui/code-block-button/index.tsx",
+      "upstreamSha256": "aa29a706e69a6bf73e98e07a7e272bf6a0b299d8aacc2ca48872f1d604f58b3e",
+      "included": false
+    },
+    {
+      "registry": "code-block-button",
+      "path": "components/tiptap-ui/code-block-button/use-code-block.ts",
+      "upstreamSha256": "b97ab068ac1a33285ab707790f65311f5846a8892b6532f1fbcbef1684d787b7",
+      "included": true
+    },
+    {
+      "registry": "code-block-icon",
+      "path": "components/tiptap-icons/code-block-icon.tsx",
+      "upstreamSha256": "542adab7003b09d72c168d1df3e7c13231d084b07272d1e0c904850480b7fc76",
+      "included": true
+    },
+    {
+      "registry": "code-block-node",
+      "path": "components/tiptap-node/code-block-node/code-block-node.scss",
+      "upstreamSha256": "e0cd584b72de8b344a049e0c84afecf683923cec9348d6e6aa003a34a61cf657",
+      "included": true
+    },
+    {
+      "registry": "code2-icon",
+      "path": "components/tiptap-icons/code2-icon.tsx",
+      "upstreamSha256": "2710b40c6d29dad96900993073410f95a58e9fd55399189e594f94d32c84dabe",
+      "included": true
+    },
+    {
+      "registry": "color-highlight-button",
+      "path": "components/tiptap-ui/color-highlight-button/color-highlight-button.scss",
+      "upstreamSha256": "8ed29651763eb3cd5e13acde4c8b3208013a5830bf54c7fe37690a305e533500",
+      "included": true
+    },
+    {
+      "registry": "color-highlight-button",
+      "path": "components/tiptap-ui/color-highlight-button/color-highlight-button.tsx",
+      "upstreamSha256": "de32df879014fbe05c2dcad4c660f3a11af480bc2b00fe299dfe30886db4d61c",
+      "included": true
+    },
+    {
+      "registry": "color-highlight-button",
+      "path": "components/tiptap-ui/color-highlight-button/index.tsx",
+      "upstreamSha256": "d75e60760d56889f2186d67392702f7b18f6ca4f418b699db7b5c07ab7e33d7e",
+      "included": false
+    },
+    {
+      "registry": "color-highlight-button",
+      "path": "components/tiptap-ui/color-highlight-button/use-color-highlight.ts",
+      "upstreamSha256": "244ba5ba99f740ca0f32ed3cd2fb7ed5644b0c0a89eb08820e65bdc3b323edbf",
+      "included": true
+    },
+    {
+      "registry": "color-highlight-popover",
+      "path": "components/tiptap-ui/color-highlight-popover/color-highlight-popover.tsx",
+      "upstreamSha256": "6cfd6c3386e51d9e176e6b1614b37c37e569adcafa2952cb0836b5f914d571b1",
+      "included": true
+    },
+    {
+      "registry": "color-highlight-popover",
+      "path": "components/tiptap-ui/color-highlight-popover/index.tsx",
+      "upstreamSha256": "26d5790a04b19e1f800b17340f1cb817e2b3dca3126afbbb5d97f4b9a8baa438",
+      "included": false
+    },
+    {
+      "registry": "corner-down-left-icon",
+      "path": "components/tiptap-icons/corner-down-left-icon.tsx",
+      "upstreamSha256": "df215a94d5ef88e2ad00bb30b8f5d2da64010ee1ba1c15f22ea3631ced634fc5",
+      "included": true
+    },
+    {
+      "registry": "dropdown-menu",
+      "path": "components/tiptap-ui-primitive/dropdown-menu/dropdown-menu.tsx",
+      "upstreamSha256": "e8301aaf01e1c34045bf3e0d5b58ab2bd1b197356e73d02bbed92a11cd2c836a",
+      "included": true
+    },
+    {
+      "registry": "dropdown-menu",
+      "path": "components/tiptap-ui-primitive/dropdown-menu/dropdown-menu.scss",
+      "upstreamSha256": "fee65105e2003323856d9cde87661f1b93e94957eb281a451389e785c15b1c2a",
+      "included": true
+    },
+    {
+      "registry": "dropdown-menu",
+      "path": "components/tiptap-ui-primitive/dropdown-menu/index.tsx",
+      "upstreamSha256": "dab0c2b8c23db41a8d9918eca4ade2a917a6bde9cbd3300d300320137b88e3bd",
+      "included": false
+    },
+    {
+      "registry": "external-link-icon",
+      "path": "components/tiptap-icons/external-link-icon.tsx",
+      "upstreamSha256": "7536d1d5f4a8b7d6ca21ab358b19886f6b664019d429e44d8d51020bec966d2f",
+      "included": true
+    },
+    {
+      "registry": "heading-button",
+      "path": "components/tiptap-ui/heading-button/heading-button.tsx",
+      "upstreamSha256": "ebc47abadf5ea822402ed7b5f97df4fd3cedad796c66fc0d224067e770be8b15",
+      "included": true
+    },
+    {
+      "registry": "heading-button",
+      "path": "components/tiptap-ui/heading-button/index.tsx",
+      "upstreamSha256": "69fe607e4c8f84547983d156f5afe1e25e3ae8dee435947de5320f0eedd4531b",
+      "included": false
+    },
+    {
+      "registry": "heading-button",
+      "path": "components/tiptap-ui/heading-button/use-heading.ts",
+      "upstreamSha256": "3a9cd5b13a5799e504c545ec8547a7a008c078cbabc7e062b446196f8d42ccab",
+      "included": true
+    },
+    {
+      "registry": "heading-dropdown-menu",
+      "path": "components/tiptap-ui/heading-dropdown-menu/heading-dropdown-menu.tsx",
+      "upstreamSha256": "858d0a6ae09bd4546bac65a0b780bf149199359903a59d66c6636c616934f273",
+      "included": true
+    },
+    {
+      "registry": "heading-dropdown-menu",
+      "path": "components/tiptap-ui/heading-dropdown-menu/index.tsx",
+      "upstreamSha256": "7339885e9b1c1edb5b8bb5d05454ce0e5836c53e2533d6aa9e55009872ddafb1",
+      "included": false
+    },
+    {
+      "registry": "heading-dropdown-menu",
+      "path": "components/tiptap-ui/heading-dropdown-menu/use-heading-dropdown-menu.ts",
+      "upstreamSha256": "f1dc80e172c9b6994e94a4ef55b4f817d695bea42eccd2b7f419ccc921a1ea12",
+      "included": true
+    },
+    {
+      "registry": "heading-five-icon",
+      "path": "components/tiptap-icons/heading-five-icon.tsx",
+      "upstreamSha256": "e9257c59fc5ba6e3e7c78c138178a78052dbc5b635c89305c30ccedd8ef5de54",
+      "included": true
+    },
+    {
+      "registry": "heading-four-icon",
+      "path": "components/tiptap-icons/heading-four-icon.tsx",
+      "upstreamSha256": "8fdcfe79045f3309bb017201e2b0011b5ac19189f19f8e815fa616b9d947de30",
+      "included": true
+    },
+    {
+      "registry": "heading-icon",
+      "path": "components/tiptap-icons/heading-icon.tsx",
+      "upstreamSha256": "3b02adfcfed80120c7faffe067ed147e459d27e1b4ae5c673e1b0b8eaa13307f",
+      "included": true
+    },
+    {
+      "registry": "heading-node",
+      "path": "components/tiptap-node/heading-node/heading-node.scss",
+      "upstreamSha256": "20f84095b3fdb7538faa83d4960d9f1adb5cf3c4f7c9722662382741e1083110",
+      "included": true
+    },
+    {
+      "registry": "heading-one-icon",
+      "path": "components/tiptap-icons/heading-one-icon.tsx",
+      "upstreamSha256": "da276b8ad0b9481f1c3ee6a99b121b33e322376728c0c50e0c313884eb5e5ad1",
+      "included": true
+    },
+    {
+      "registry": "heading-six-icon",
+      "path": "components/tiptap-icons/heading-six-icon.tsx",
+      "upstreamSha256": "0e5786e8408cc3424647e5c3142079c35c9c6edc37e875352b91707b579e5b03",
+      "included": true
+    },
+    {
+      "registry": "heading-three-icon",
+      "path": "components/tiptap-icons/heading-three-icon.tsx",
+      "upstreamSha256": "a7b60c1051f988b1303a77bc0ff6a2aad4d47df42ea8920a6dece719b25ba901",
+      "included": true
+    },
+    {
+      "registry": "heading-two-icon",
+      "path": "components/tiptap-icons/heading-two-icon.tsx",
+      "upstreamSha256": "72400576338fa0f83bb5c3fda735d6120b594c59a77de198da248bf94d0cdce5",
+      "included": true
+    },
+    {
+      "registry": "highlighter-icon",
+      "path": "components/tiptap-icons/highlighter-icon.tsx",
+      "upstreamSha256": "faf11e1ffbb25ff88c1416493907c3bd07613624fb64a38c844a86038d3e96c1",
+      "included": true
+    },
+    {
+      "registry": "horizontal-rule-node",
+      "path": "components/tiptap-node/horizontal-rule-node/horizontal-rule-node-extension.ts",
+      "upstreamSha256": "aeaf7f4499c36c79b6994111efac670bdc984a20982cb953c3caf5c900a9563a",
+      "included": true
+    },
+    {
+      "registry": "horizontal-rule-node",
+      "path": "components/tiptap-node/horizontal-rule-node/horizontal-rule-node.scss",
+      "upstreamSha256": "1baead700a5bd15786770a7ec57406625a3fd51981ca8e53b1bba14265994aa5",
+      "included": true
+    },
+    {
+      "registry": "image-node",
+      "path": "components/tiptap-node/image-node/image-node.scss",
+      "upstreamSha256": "72a67c91d848ddda36c12083b7b16295013c8b411ee12b1d748df265f31ad19a",
+      "included": true
+    },
+    {
+      "registry": "image-plus-icon",
+      "path": "components/tiptap-icons/image-plus-icon.tsx",
+      "upstreamSha256": "478fb3d5109b860a4de4947a9114601f92d7598fb9197d91a7f4109608e25546",
+      "included": true
+    },
+    {
+      "registry": "image-upload-button",
+      "path": "components/tiptap-ui/image-upload-button/image-upload-button.tsx",
+      "upstreamSha256": "510aca01cfd8da0012da9e8fabfeda3f18064ba71323f5c2ad8c2ff21f58982f",
+      "included": true
+    },
+    {
+      "registry": "image-upload-button",
+      "path": "components/tiptap-ui/image-upload-button/index.tsx",
+      "upstreamSha256": "982872afa9969e49a100ae0744c79cebf449877ee91f3e4a1ab1834eec3a49da",
+      "included": false
+    },
+    {
+      "registry": "image-upload-button",
+      "path": "components/tiptap-ui/image-upload-button/use-image-upload.ts",
+      "upstreamSha256": "4ac6b756e320ef30df366f2890b05e81e3347c9c9c04f5f42db31da6f19f01b2",
+      "included": true
+    },
+    {
+      "registry": "image-upload-node",
+      "path": "components/tiptap-node/image-upload-node/image-upload-node-extension.ts",
+      "upstreamSha256": "37774a0c14fa9bb9a1af6ef6eb549d8d6ca0c5bbae8e3d6ea260027cbd0142c4",
+      "included": true
+    },
+    {
+      "registry": "image-upload-node",
+      "path": "components/tiptap-node/image-upload-node/image-upload-node.scss",
+      "upstreamSha256": "9fce3a746eadd5be3a6ea910852a94c5b456e38ac764b5eb8644cbe7e4d9e83e",
+      "included": true
+    },
+    {
+      "registry": "image-upload-node",
+      "path": "components/tiptap-node/image-upload-node/image-upload-node.tsx",
+      "upstreamSha256": "14e0ce86813e5430b36b95a85a9e892e9ad121200f0115e773610d6c3ee9defc",
+      "included": true
+    },
+    {
+      "registry": "image-upload-node",
+      "path": "components/tiptap-node/image-upload-node/index.tsx",
+      "upstreamSha256": "9fa87b052eb3ee415fcdcf549c744b34d7f6b03f439ff861bf478c137cbba9c2",
+      "included": false
+    },
+    {
+      "registry": "input-group",
+      "path": "components/tiptap-ui-primitive/input-group/input-group.tsx",
+      "upstreamSha256": "30f2049c7bdd3145fa7ebd4ca984d3ec23efbe3692157c502bcf03d590c52644",
+      "included": true
+    },
+    {
+      "registry": "input-group",
+      "path": "components/tiptap-ui-primitive/input-group/input-group.scss",
+      "upstreamSha256": "ff13152d8e68e707118bee29127157b31ab17fb9cb66d8703a7c4cf49d3ea89d",
+      "included": true
+    },
+    {
+      "registry": "input-group",
+      "path": "components/tiptap-ui-primitive/input-group/index.tsx",
+      "upstreamSha256": "0f423fe35fd6bb68ea745c4da46f89622ef72789ce716e0f1b5293c7a891d961",
+      "included": false
+    },
+    {
+      "registry": "input",
+      "path": "components/tiptap-ui-primitive/input/input.tsx",
+      "upstreamSha256": "b926fbec8be85e65117bf029c769cf50447d7e18d0cd4e0f496d82bf9ed04118",
+      "included": true
+    },
+    {
+      "registry": "input",
+      "path": "components/tiptap-ui-primitive/input/input.scss",
+      "upstreamSha256": "fe415daeecb5f6961f415d425be03de2d286f8dd6105036d3cea943c1a43d9c9",
+      "included": true
+    },
+    {
+      "registry": "input",
+      "path": "components/tiptap-ui-primitive/input/index.tsx",
+      "upstreamSha256": "aab0825399bfbc98165b3619e172054f43380756f64521bb2b77919731a37864",
+      "included": false
+    },
+    {
+      "registry": "italic-icon",
+      "path": "components/tiptap-icons/italic-icon.tsx",
+      "upstreamSha256": "b22e8fe72568d8c3940d551d1cfcd5ed49a18c89b853a34986d28f137b8a2033",
+      "included": true
+    },
+    {
+      "registry": "link-icon",
+      "path": "components/tiptap-icons/link-icon.tsx",
+      "upstreamSha256": "7fcf0d6934a2b8c15f226dc52729324660e06ba52922d487068d311471dcc406",
+      "included": true
+    },
+    {
+      "registry": "link-popover",
+      "path": "components/tiptap-ui/link-popover/link-popover.tsx",
+      "upstreamSha256": "83356d4cfccdc0f3ea648087b4642159875f6a4c9efab0e45c668d9c0fba0028",
+      "included": true
+    },
+    {
+      "registry": "link-popover",
+      "path": "components/tiptap-ui/link-popover/link-popover.scss",
+      "upstreamSha256": "291064a0a9bda50597bd07e0f8acc59ca1eeb3af282a42bcf190f2544fc64e76",
+      "included": true
+    },
+    {
+      "registry": "link-popover",
+      "path": "components/tiptap-ui/link-popover/index.tsx",
+      "upstreamSha256": "a266a0e43a0bea509aec6da865f427f516acc3f24f3dcca608f76f7aea709237",
+      "included": false
+    },
+    {
+      "registry": "link-popover",
+      "path": "components/tiptap-ui/link-popover/use-link-popover.ts",
+      "upstreamSha256": "c4d8e7b82ee4ce88aacde8ea873fb4b7a278b3689e8141f3051e2364e51d1a32",
+      "included": true
+    },
+    {
+      "registry": "list-button",
+      "path": "components/tiptap-ui/list-button/list-button.tsx",
+      "upstreamSha256": "fec02090811495d58e95d44239ddac12fb429da5834cb4302888fe0090843db2",
+      "included": true
+    },
+    {
+      "registry": "list-button",
+      "path": "components/tiptap-ui/list-button/index.tsx",
+      "upstreamSha256": "64845024baabbb7d47967febc9a3f8f046a8e60e2886def03b6d1fe3f606ab82",
+      "included": false
+    },
+    {
+      "registry": "list-button",
+      "path": "components/tiptap-ui/list-button/use-list.ts",
+      "upstreamSha256": "a900a07625d634a8551ea0d2adc6051e485fc2efac9ac4c87da0b6a31760aadb",
+      "included": true
+    },
+    {
+      "registry": "list-dropdown-menu",
+      "path": "components/tiptap-ui/list-dropdown-menu/list-dropdown-menu.tsx",
+      "upstreamSha256": "cee3354f325a4113d581eb44b00c97a5a0c692f7c08f27cbb68b9e827e2804a3",
+      "included": true
+    },
+    {
+      "registry": "list-dropdown-menu",
+      "path": "components/tiptap-ui/list-dropdown-menu/index.tsx",
+      "upstreamSha256": "caa266a898c0fc9a6d06335e263fe124f027ac911bf2b36353210458d5d68206",
+      "included": false
+    },
+    {
+      "registry": "list-dropdown-menu",
+      "path": "components/tiptap-ui/list-dropdown-menu/use-list-dropdown-menu.ts",
+      "upstreamSha256": "5b34e34362bdba79afad10f5c26919f917486d2e86d2304f8668ac38ea612570",
+      "included": true
+    },
+    {
+      "registry": "list-icon",
+      "path": "components/tiptap-icons/list-icon.tsx",
+      "upstreamSha256": "9e9cb6d7a9320427b0db609d5e604441ea98464efd01172e498575e2e7e908e8",
+      "included": true
+    },
+    {
+      "registry": "list-node",
+      "path": "components/tiptap-node/list-node/list-node.scss",
+      "upstreamSha256": "6d2bfc5afcde2470b641732d3a4996b3d98222a635303c89790da11f476b928b",
+      "included": true
+    },
+    {
+      "registry": "list-ordered-icon",
+      "path": "components/tiptap-icons/list-ordered-icon.tsx",
+      "upstreamSha256": "b5b5075581583e441db2c175447e71b81fa1c0e50712d53ed43cb3da43cf782a",
+      "included": true
+    },
+    {
+      "registry": "list-todo-icon",
+      "path": "components/tiptap-icons/list-todo-icon.tsx",
+      "upstreamSha256": "14a06b936fc2498002df9f913ddae765465e97e762835dec60df10a4bdf2cea6",
+      "included": true
+    },
+    {
+      "registry": "mark-button",
+      "path": "components/tiptap-ui/mark-button/mark-button.tsx",
+      "upstreamSha256": "e84f0712d17688ff7762730c46416c11367a99f38229a4c34b8cc0ffc9ef2ce1",
+      "included": true
+    },
+    {
+      "registry": "mark-button",
+      "path": "components/tiptap-ui/mark-button/index.tsx",
+      "upstreamSha256": "1499519977fab6ca3f1383c8e9be8b23c3d463c8b0b8ceb988d337c054ceef96",
+      "included": false
+    },
+    {
+      "registry": "mark-button",
+      "path": "components/tiptap-ui/mark-button/use-mark.ts",
+      "upstreamSha256": "8f7432b8987de12745a868e655c897e4db931ab68ee0180fa88b117a095b26ea",
+      "included": true
+    },
+    {
+      "registry": "moon-star-icon",
+      "path": "components/tiptap-icons/moon-star-icon.tsx",
+      "upstreamSha256": "9478d5468d66d1e2508f8cd3f1b9c663e088292522a2a7af7dd977781bca7dd1",
+      "included": true
+    },
+    {
+      "registry": "node-background-extension",
+      "path": "components/tiptap-extension/node-background-extension.ts",
+      "upstreamSha256": "847be9136f88c6b5e32ad87dbfc518d337893bdb435150383e4daec7b72b2cf6",
+      "included": true
+    },
+    {
+      "registry": "paragraph-node",
+      "path": "components/tiptap-node/paragraph-node/paragraph-node.scss",
+      "upstreamSha256": "632e8eeb9e9e92111fecce35f923b7992132cd1f6a6edd53a83752d8d574f546",
+      "included": true
+    },
+    {
+      "registry": "popover",
+      "path": "components/tiptap-ui-primitive/popover/popover.tsx",
+      "upstreamSha256": "50415d737178c0109002486fdb4d60b255bcb20e23201250b4e1fdb51efaa528",
+      "included": true
+    },
+    {
+      "registry": "popover",
+      "path": "components/tiptap-ui-primitive/popover/popover.scss",
+      "upstreamSha256": "abfc9b1271c0f872c472f8416c290c8c4fb859656db5e168b5914d75c8a66e17",
+      "included": true
+    },
+    {
+      "registry": "popover",
+      "path": "components/tiptap-ui-primitive/popover/index.tsx",
+      "upstreamSha256": "f2062fe83ae3e98ea90b66a0a8d27a4b659ad8dccae0a88b85500dba9808d645",
+      "included": false
+    },
+    {
+      "registry": "redo2-icon",
+      "path": "components/tiptap-icons/redo2-icon.tsx",
+      "upstreamSha256": "2a3833887160e877666dfd06e2ee0f7043106aa40877fd066ac704d625e5b7ff",
+      "included": true
+    },
+    {
+      "registry": "search-and-replace",
+      "path": "components/tiptap-ui/search-and-replace/search-and-replace.scss",
+      "upstreamSha256": "d821ce68040b64b9918edf97f54eb0456bce55dcbc981b8653b736c3141a1a75",
+      "included": true
+    },
+    {
+      "registry": "search-and-replace",
+      "path": "components/tiptap-ui/search-and-replace/search-and-replace.tsx",
+      "upstreamSha256": "1bba13a66f97eb42bdd16064f854b9310151d35c05a7bb1108df796651ccd1fd",
+      "included": true
+    },
+    {
+      "registry": "search-and-replace",
+      "path": "components/tiptap-ui/search-and-replace/index.tsx",
+      "upstreamSha256": "9db745e71c4382ff4141bfbc174683e0e327a70d0cc26092069f7533f4289cbb",
+      "included": false
+    },
+    {
+      "registry": "search-and-replace",
+      "path": "components/tiptap-ui/search-and-replace/use-search-and-replace.ts",
+      "upstreamSha256": "df8e1b083053e97e4715b9b0d39faf03b76f03f8e78764155c7c8f2b448c7fcf",
+      "included": true
+    },
+    {
+      "registry": "search-icon",
+      "path": "components/tiptap-icons/search-icon.tsx",
+      "upstreamSha256": "f3e49f05956c1b2e07f5563350553ae35b4a253786000d39f21acb56673642d5",
+      "included": true
+    },
+    {
+      "registry": "separator",
+      "path": "components/tiptap-ui-primitive/separator/separator.scss",
+      "upstreamSha256": "fb4f37772cc0d8c896fde2816316be1b47132c77453e14688061bd3db85efad7",
+      "included": true
+    },
+    {
+      "registry": "separator",
+      "path": "components/tiptap-ui-primitive/separator/separator.tsx",
+      "upstreamSha256": "d198a05fb187eb3e645397055d357ed9ce17ad791bcd68c1c5fbee86b461741e",
+      "included": true
+    },
+    {
+      "registry": "separator",
+      "path": "components/tiptap-ui-primitive/separator/index.tsx",
+      "upstreamSha256": "15022a2f6e562c53e8e0e05380d52ffac619351e497dfd15c8c5495b6db90601",
+      "included": false
+    },
+    {
+      "registry": "simple-editor",
+      "path": "components/tiptap-templates/simple/simple-editor.scss",
+      "upstreamSha256": "45e5cb2f888d5003dcf3b593aa48cac87ae9383fd60db2f3297a320e4707915a",
+      "included": true
+    },
+    {
+      "registry": "simple-editor",
+      "path": "components/tiptap-templates/simple/simple-editor.tsx",
+      "upstreamSha256": "a7f241444982df47e0ee59b2af3521179d70cf34ee22181e1d6ebb9f1c8cb544",
+      "included": true
+    },
+    {
+      "registry": "simple-editor",
+      "path": "components/tiptap-templates/simple/theme-toggle.tsx",
+      "upstreamSha256": "3f8670b600524e46e9a02a965ef262ec04a16a53623a57984ec0ac67fee40a26",
+      "included": true
+    },
+    {
+      "registry": "spacer",
+      "path": "components/tiptap-ui-primitive/spacer/spacer.tsx",
+      "upstreamSha256": "cf2c13774a8268c4d67628b1257c56fc9d0910a92b7f0b7c0daf0b764839424f",
+      "included": true
+    },
+    {
+      "registry": "spacer",
+      "path": "components/tiptap-ui-primitive/spacer/index.tsx",
+      "upstreamSha256": "0edc1568b551aceb01bd83aca4974449b60ebc0becdc57fe559f8db2f38fb48a",
+      "included": false
+    },
+    {
+      "registry": "strike-icon",
+      "path": "components/tiptap-icons/strike-icon.tsx",
+      "upstreamSha256": "a29ab570ebe3abe2ede2404b2b452205318ce125e84fcb8f23e7e2a8b7ae4129",
+      "included": true
+    },
+    {
+      "registry": "styles",
+      "path": "styles/_variables.scss",
+      "upstreamSha256": "ca13d9d458162405b33327f83dd4d5c930e04c4f03648016fdd7ec73145b8c91",
+      "included": true
+    },
+    {
+      "registry": "styles",
+      "path": "styles/_keyframe-animations.scss",
+      "upstreamSha256": "1803b74fff82ae664de5f31998f58adbd6e2195146869b9567477e7075768bec",
+      "included": true
+    },
+    {
+      "registry": "subscript-icon",
+      "path": "components/tiptap-icons/subscript-icon.tsx",
+      "upstreamSha256": "ef2df6bd2384669f011099ed66c690ad515596b15a10d0a6b95604fcb329cac0",
+      "included": true
+    },
+    {
+      "registry": "sun-icon",
+      "path": "components/tiptap-icons/sun-icon.tsx",
+      "upstreamSha256": "b21479879abbcdda5dfc09768ebbc1ec1a86498ca23cbcbae4eb36ddf5ca6bb7",
+      "included": true
+    },
+    {
+      "registry": "superscript-icon",
+      "path": "components/tiptap-icons/superscript-icon.tsx",
+      "upstreamSha256": "4de50e75d05a97cf93deb6c14c4211f30f3273d9780e21e4c3325bd51e65e5bf",
+      "included": true
+    },
+    {
+      "registry": "switch",
+      "path": "components/tiptap-ui-primitive/switch/switch.scss",
+      "upstreamSha256": "366f1eec02c7db268cbecdb5c526d92284318bc00b5501f70791cf513ac7ab7b",
+      "included": true
+    },
+    {
+      "registry": "switch",
+      "path": "components/tiptap-ui-primitive/switch/switch.tsx",
+      "upstreamSha256": "280adb67029c917910c201e695b2a16da06157159de2357c67894d459e1e3dc6",
+      "included": true
+    },
+    {
+      "registry": "switch",
+      "path": "components/tiptap-ui-primitive/switch/index.tsx",
+      "upstreamSha256": "cd3d3b96454fa5e66a75077f4177a81d5166ab0419e84add423b806d8521f1ea",
+      "included": false
+    },
+    {
+      "registry": "text-align-button",
+      "path": "components/tiptap-ui/text-align-button/text-align-button.tsx",
+      "upstreamSha256": "704a2c997eef5f0fbb6ad94a4a9cc358c11c89a71cfea774f5db85d8e128edac",
+      "included": true
+    },
+    {
+      "registry": "text-align-button",
+      "path": "components/tiptap-ui/text-align-button/index.tsx",
+      "upstreamSha256": "7cf9c7242b5b8a71fba7819cae79a1e0b5efdc8b85a36132f0d7a7a5855d6524",
+      "included": false
+    },
+    {
+      "registry": "text-align-button",
+      "path": "components/tiptap-ui/text-align-button/use-text-align.ts",
+      "upstreamSha256": "eddf601fbac5b10b5506b06746e90db52ae35542dbadb326c7fb424782ee7286",
+      "included": true
+    },
+    {
+      "registry": "textarea",
+      "path": "components/tiptap-ui-primitive/textarea/textarea.tsx",
+      "upstreamSha256": "06b64d3461e71790b26b68d70ba9aaa51702091ac615063e57f9a8c0e55bc537",
+      "included": false
+    },
+    {
+      "registry": "textarea",
+      "path": "components/tiptap-ui-primitive/textarea/textarea.scss",
+      "upstreamSha256": "8b27e3a74172b50ba78251663f3300d124bdc5f65aa6a055c6b23cbd6dc1e623",
+      "included": false
+    },
+    {
+      "registry": "textarea",
+      "path": "components/tiptap-ui-primitive/textarea/index.tsx",
+      "upstreamSha256": "cc8aad975d7b469cb03d29f1bf3a0a7fad094d1ccb8f309fdf3939e11bd9eeef",
+      "included": false
+    },
+    {
+      "registry": "tiptap-utils",
+      "path": "lib/tiptap-utils.ts",
+      "upstreamSha256": "8de470736a687b04d45839c25371b20e45881312961671094ee6711641e6934b",
+      "included": true
+    },
+    {
+      "registry": "toolbar",
+      "path": "components/tiptap-ui-primitive/toolbar/toolbar.scss",
+      "upstreamSha256": "c962575cc3b233977aef912758005bd88cdec3f9a829bf7fd0fc90491a4e2648",
+      "included": true
+    },
+    {
+      "registry": "toolbar",
+      "path": "components/tiptap-ui-primitive/toolbar/toolbar.tsx",
+      "upstreamSha256": "67c2ea6177ea63c585c659d506f349f1caf2d0b44c1111759d15b8073e5eb36b",
+      "included": true
+    },
+    {
+      "registry": "toolbar",
+      "path": "components/tiptap-ui-primitive/toolbar/index.tsx",
+      "upstreamSha256": "01ec5b92a33733aae0dd34f16f51a9c336e64376cfe790f88fe09c1581ff9458",
+      "included": false
+    },
+    {
+      "registry": "tooltip",
+      "path": "components/tiptap-ui-primitive/tooltip/tooltip.scss",
+      "upstreamSha256": "6e4a967d5e369a38060f74e8f1164bee763a4aa8906953b4c78b8b8a596db06f",
+      "included": true
+    },
+    {
+      "registry": "tooltip",
+      "path": "components/tiptap-ui-primitive/tooltip/tooltip.tsx",
+      "upstreamSha256": "96e7c9bf1b8f253cb36fd2d6de4094762dd6bfef214bdd3d52406b8dd15f97b1",
+      "included": true
+    },
+    {
+      "registry": "tooltip",
+      "path": "components/tiptap-ui-primitive/tooltip/index.tsx",
+      "upstreamSha256": "25fafcee9ce83db8a01c3d6a5fd2b10697f7d2038d2654a531ff3a347370fa51",
+      "included": false
+    },
+    {
+      "registry": "trash-icon",
+      "path": "components/tiptap-icons/trash-icon.tsx",
+      "upstreamSha256": "1c87791930fdcf29f5c5ee2c7fc2c0339bb9c5b823cbb788d9bda1a71647544a",
+      "included": true
+    },
+    {
+      "registry": "underline-icon",
+      "path": "components/tiptap-icons/underline-icon.tsx",
+      "upstreamSha256": "eb180636b1f5f9662c2b0c1525b6d16830f1cc6daa6bb2277d46e34ded3d67a4",
+      "included": true
+    },
+    {
+      "registry": "undo-redo-button",
+      "path": "components/tiptap-ui/undo-redo-button/undo-redo-button.tsx",
+      "upstreamSha256": "5def1cc0973abf7cf212aca23c02b25353309242e11d2bb01aeb3fc1a08f489a",
+      "included": true
+    },
+    {
+      "registry": "undo-redo-button",
+      "path": "components/tiptap-ui/undo-redo-button/index.tsx",
+      "upstreamSha256": "267e8f1625035bc48d986c70142e5601c0290fddeb46f4ffd0401078e5fc5383",
+      "included": false
+    },
+    {
+      "registry": "undo-redo-button",
+      "path": "components/tiptap-ui/undo-redo-button/use-undo-redo.ts",
+      "upstreamSha256": "136aea8e9183e4831b167c2999a69f7d6f3305852c1b707629457fc0f4fa5c97",
+      "included": true
+    },
+    {
+      "registry": "undo2-icon",
+      "path": "components/tiptap-icons/undo2-icon.tsx",
+      "upstreamSha256": "cd380e52a075c08bbefe6e57a9707c21a79212e474a31f8cdb52577048c9e1da",
+      "included": true
+    },
+    {
+      "registry": "use-composed-ref",
+      "path": "hooks/use-composed-ref.ts",
+      "upstreamSha256": "fa30c4084ae16a5396737144ae2cf835f03ebe5e8714a405ce2837777fdd9075",
+      "included": true
+    },
+    {
+      "registry": "use-cursor-visibility",
+      "path": "hooks/use-cursor-visibility.ts",
+      "upstreamSha256": "b34cf956eeae0b5e11e11badc7236eba3169e8fd06a56687b4b79fa09cf05101",
+      "included": true
+    },
+    {
+      "registry": "use-element-rect",
+      "path": "hooks/use-element-rect.ts",
+      "upstreamSha256": "8b68ceca726808535716aa5d2756f5724e30ac6a68dc7afc2834fc0e481c66dc",
+      "included": true
+    },
+    {
+      "registry": "use-is-breakpoint",
+      "path": "hooks/use-is-breakpoint.ts",
+      "upstreamSha256": "0035e7382732b93a05b79a654916b58ac508a3afd8272f3df402081ff909ffad",
+      "included": true
+    },
+    {
+      "registry": "use-menu-navigation",
+      "path": "hooks/use-menu-navigation.ts",
+      "upstreamSha256": "d6d9b3cc1280efa2ed46bb9f2e98689045896dae69c791cf15a92efba0cadf0b",
+      "included": true
+    },
+    {
+      "registry": "use-scrolling",
+      "path": "hooks/use-scrolling.ts",
+      "upstreamSha256": "50445103bad5b88d810ef8eedb3fb4ef53b49c960050815ccd3f25a397d5126a",
+      "included": false
+    },
+    {
+      "registry": "use-throttled-callback",
+      "path": "hooks/use-throttled-callback.ts",
+      "upstreamSha256": "08f50933068ca6860e52c93968fefde5a7dccb45ce31c3c0f99a57324e7f0f71",
+      "included": true
+    },
+    {
+      "registry": "use-tiptap-editor",
+      "path": "hooks/use-tiptap-editor.ts",
+      "upstreamSha256": "defc723bc35cee3eb50b242a8989bd6ec806da207f2535ac625137d957d4fed6",
+      "included": true
+    },
+    {
+      "registry": "use-unmount",
+      "path": "hooks/use-unmount.ts",
+      "upstreamSha256": "9f5e33ac8b59fb74387d7d90cedff06118437ec1ea5358017b2b06f45174eb45",
+      "included": false
+    },
+    {
+      "registry": "use-window-size",
+      "path": "hooks/use-window-size.ts",
+      "upstreamSha256": "a1d7cc07f2d4541ede535e5effa4251799d2ffdc458959fa1f25059e0f5e3151",
+      "included": true
+    },
+    {
+      "registry": "whole-word-icon",
+      "path": "components/tiptap-icons/whole-word-icon.tsx",
+      "upstreamSha256": "49a3f44af787d1142675081b0e5f679fed28f4bc2589cda70136f16107dfca29",
+      "included": true
+    }
+  ]
+}

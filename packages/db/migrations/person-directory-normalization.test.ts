@@ -71,24 +71,36 @@ describe("person directory normalization migration", () => {
          FROM person_localizations
          WHERE person_id = 'person-panaretos' AND language = 'lt'`
       )
-      .get() as Record<string, string>;
+      .get();
 
-    expect(person.honorific).toBe("Jo Ekselencija");
-    expect(person.display_name).toBe("Panaretas");
-    expect(person.alternate_name).toBe("");
-    expect(JSON.parse(person.biography_json)).toMatchObject({
+    expect(person).toMatchObject({
+      alternate_name: "",
+      display_name: "Panaretas",
+      honorific: "Jo Ekselencija",
+    });
+    expect(JSON.parse(String(person?.biography_json))).toMatchObject({
       content: [{ content: [{ text: "Biografija su artefaktu." }] }],
     });
-    expect(person.seo_description).toContain("Jo Ekselencija Panaretas");
+    expect(person?.seo_description).toContain("Jo Ekselencija Panaretas");
 
-    expect(database.prepare("SELECT href FROM person_contacts").get()).toEqual({
-      href: "mailto:test@example.com",
+    expect({
+      contact: {
+        ...database.prepare("SELECT href FROM person_contacts").get(),
+      },
+      label: {
+        ...database
+          .prepare("SELECT label FROM person_contact_localizations")
+          .get(),
+      },
+      media: {
+        ...database
+          .prepare("SELECT alt_text FROM person_media_localizations")
+          .get(),
+      },
+    }).toStrictEqual({
+      contact: { href: "mailto:test@example.com" },
+      label: { label: "El. paštas" },
+      media: { alt_text: "Jo Ekselencija Panaretas" },
     });
-    expect(
-      database.prepare("SELECT label FROM person_contact_localizations").get()
-    ).toEqual({ label: "El. paštas" });
-    expect(
-      database.prepare("SELECT alt_text FROM person_media_localizations").get()
-    ).toEqual({ alt_text: "Jo Ekselencija Panaretas" });
   });
 });

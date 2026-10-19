@@ -1,3 +1,5 @@
+"use client";
+
 import { Fragment, forwardRef, useMemo } from "react";
 
 // --- Icons ---
@@ -7,24 +9,36 @@ import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/tiptap-ui-primitive/tooltip";
+} from "@/components/tiptap-ui-primitive/tooltip/tooltip";
 // --- Lib ---
 import { cn, parseShortcutKeys } from "@/lib/tiptap-utils";
 
 import "@/components/tiptap-ui-primitive/button/button-colors.scss";
 import "@/components/tiptap-ui-primitive/button/button.scss";
 
-export type ButtonStyle = "ghost" | "primary";
+export type ButtonStyle =
+  | "ghost"
+  | "primary"
+  | "secondary"
+  | "tertiary"
+  | "subtle";
+
 export type ButtonVariant = ButtonStyle | "check";
+
 export type ButtonSize = "small" | "default" | "large";
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  shortcutKeys?: string;
   showTooltip?: boolean;
-  size?: ButtonSize;
   tooltip?: React.ReactNode;
+  shortcutKeys?: string;
   /**
    * Visual treatment or feature variant.
+   *
+   * Style values map to `data-style` and pull their colors from
+   * `button-colors.scss`: `subtle` is the neutral default (a faint gray
+   * fill), `ghost` is transparent, `primary` is the brand fill, `secondary`
+   * is a solid neutral (dark fill in light mode, light fill in dark mode),
+   * and `tertiary` currently mirrors `ghost`.
    *
    * The `check` variant is a checkbox-style toggle button. It defaults to
    * the ghost style and small size, supplies `role="checkbox"`, and renders
@@ -43,11 +57,10 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
    * ```
    */
   variant?: ButtonVariant;
+  size?: ButtonSize;
 }
 
-export const ShortcutDisplay: React.FC<{ shortcuts: string[] }> = ({
-  shortcuts,
-}) => {
+export function ShortcutDisplay({ shortcuts }: { shortcuts: string[] }) {
   if (shortcuts.length === 0) {
     return null;
   }
@@ -62,7 +75,16 @@ export const ShortcutDisplay: React.FC<{ shortcuts: string[] }> = ({
       ))}
     </div>
   );
-};
+}
+
+function hasTooltip(tooltip: React.ReactNode) {
+  return (
+    tooltip !== undefined &&
+    tooltip !== null &&
+    tooltip !== false &&
+    tooltip !== ""
+  );
+}
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
@@ -81,40 +103,46 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const isCheckVariant = variant === "check";
+
     const buttonStyle: ButtonStyle | undefined = isCheckVariant
       ? "ghost"
       : variant;
+
     const buttonSize = isCheckVariant ? (size ?? "small") : size;
     const buttonRole = isCheckVariant ? (role ?? "checkbox") : role;
+
     const buttonAriaChecked = isCheckVariant
       ? (ariaChecked ?? false)
       : ariaChecked;
+
     const shortcuts = useMemo<string[]>(
       () => parseShortcutKeys({ shortcutKeys }),
       [shortcutKeys]
     );
+
     const content = (
       <>
         {children}
         {isCheckVariant && (
-          <span aria-hidden="true" className="tiptap-button-check">
+          <span className="tiptap-button-check" aria-hidden="true">
             <CheckIcon />
           </span>
         )}
       </>
     );
 
-    if (!(tooltip && showTooltip)) {
+    if (!showTooltip || !hasTooltip(tooltip)) {
       return (
         <button
-          aria-checked={buttonAriaChecked}
-          className={cn("tiptap-button", className)}
-          data-size={buttonSize}
+          type="button"
           data-slot="tiptap-button"
-          data-style={buttonStyle}
-          data-variant={isCheckVariant ? "check" : undefined}
+          className={cn("tiptap-button", className)}
           ref={ref}
+          data-style={buttonStyle}
+          data-size={buttonSize}
+          data-variant={isCheckVariant ? "check" : undefined}
           role={buttonRole}
+          aria-checked={buttonAriaChecked}
           {...props}
         >
           {content}
@@ -125,14 +153,15 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <Tooltip delay={200}>
         <TooltipTrigger
-          aria-checked={buttonAriaChecked}
-          className={cn("tiptap-button", className)}
-          data-size={buttonSize}
+          type="button"
           data-slot="tiptap-button"
-          data-style={buttonStyle}
-          data-variant={isCheckVariant ? "check" : undefined}
+          className={cn("tiptap-button", className)}
           ref={ref}
+          data-style={buttonStyle}
+          data-size={buttonSize}
+          data-variant={isCheckVariant ? "check" : undefined}
           role={buttonRole}
+          aria-checked={buttonAriaChecked}
           {...props}
         >
           {content}

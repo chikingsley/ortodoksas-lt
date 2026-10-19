@@ -1,18 +1,21 @@
+"use client";
+
+import { hasText } from "@ortodoksas-lt/content/value";
 import { forwardRef, useCallback } from "react";
 
-import { Badge } from "@/components/tiptap-ui-primitive/badge";
+import { Badge } from "@/components/tiptap-ui-primitive/badge/badge";
 // --- UI Primitives ---
-import type { ButtonProps } from "@/components/tiptap-ui-primitive/button";
-import { Button } from "@/components/tiptap-ui-primitive/button";
+import type { ButtonProps } from "@/components/tiptap-ui-primitive/button/button";
+import { Button } from "@/components/tiptap-ui-primitive/button/button";
 // --- Tiptap UI ---
 import type {
   ListType,
   UseListConfig,
-} from "@/components/tiptap-ui/list-button";
+} from "@/components/tiptap-ui/list-button/use-list";
 import {
   LIST_SHORTCUT_KEYS,
   useList,
-} from "@/components/tiptap-ui/list-button";
+} from "@/components/tiptap-ui/list-button/use-list";
 // --- Hooks ---
 import { useTiptapEditor } from "@/hooks/use-tiptap-editor";
 // --- Lib ---
@@ -21,14 +24,14 @@ import { parseShortcutKeys } from "@/lib/tiptap-utils";
 export interface ListButtonProps
   extends Omit<ButtonProps, "type">, UseListConfig {
   /**
+   * Optional text to display alongside the icon.
+   */
+  text?: string;
+  /**
    * Optional show shortcut keys in the button.
    * @default false
    */
   showShortcut?: boolean;
-  /**
-   * Optional text to display alongside the icon.
-   */
-  text?: string;
 }
 
 export function ListShortcutBadge({
@@ -62,6 +65,7 @@ export const ListButton = forwardRef<HTMLButtonElement, ListButtonProps>(
     ref
   ) => {
     const { editor } = useTiptapEditor(providedEditor);
+
     const {
       isVisible,
       canToggle,
@@ -80,9 +84,11 @@ export const ListButton = forwardRef<HTMLButtonElement, ListButtonProps>(
     const handleClick = useCallback(
       (event: React.MouseEvent<HTMLButtonElement>) => {
         onClick?.(event);
+
         if (event.defaultPrevented) {
           return;
         }
+
         handleToggle();
       },
       [handleToggle, onClick]
@@ -94,26 +100,27 @@ export const ListButton = forwardRef<HTMLButtonElement, ListButtonProps>(
 
     return (
       <Button
-        aria-label={label}
-        aria-pressed={isActive}
-        data-active-state={isActive ? "on" : "off"}
-        data-disabled={!canToggle}
-        disabled={!canToggle}
-        onClick={handleClick}
-        role="button"
-        tabIndex={-1}
-        tooltip={label}
         type="button"
         variant="ghost"
+        data-active-state={isActive ? "on" : "off"}
+        tabIndex={-1}
+        disabled={!canToggle}
+        data-disabled={!canToggle}
+        aria-label={label}
+        aria-pressed={isActive}
+        tooltip={label}
+        onClick={handleClick}
         {...buttonProps}
         ref={ref}
       >
         {children ?? (
           <>
             <Icon className="tiptap-button-icon" />
-            {text && <span className="tiptap-button-text">{text}</span>}
+            {hasText(text) && (
+              <span className="tiptap-button-text">{text}</span>
+            )}
             {showShortcut && (
-              <ListShortcutBadge shortcutKeys={shortcutKeys} type={type} />
+              <ListShortcutBadge type={type} shortcutKeys={shortcutKeys} />
             )}
           </>
         )}

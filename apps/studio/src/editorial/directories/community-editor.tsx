@@ -1,10 +1,10 @@
-// biome-ignore-all lint/performance/noJsxPropsBind: TanStack Form collection controls bind each input to its typed field path.
+import type { CommunityEditorInput } from "@ortodoksas-lt/content/directory";
 import {
   communityEditorSchema,
   slugifyDirectoryName,
 } from "@ortodoksas-lt/content/directory";
-import type { CommunityEditorInput } from "@ortodoksas-lt/content/directory";
 import type { SiteLocale } from "@ortodoksas-lt/content/site";
+import { firstText, hasText } from "@ortodoksas-lt/content/value";
 import { useForm, useSelector } from "@tanstack/react-form";
 import { useCallback, useRef, useState } from "react";
 
@@ -54,7 +54,7 @@ const createCommunityLocalization = (
   seoDescription: "",
 });
 
-export const CommunityEditor = ({
+export function CommunityEditor({
   initialValue,
   locale,
   onLocaleChange,
@@ -64,7 +64,7 @@ export const CommunityEditor = ({
   locale: SiteLocale;
   onLocaleChange: (locale: SiteLocale) => void;
   onSaved: (id: string) => Promise<void>;
-}) => {
+}) {
   const [message, setMessage] = useState("");
   const [slugOverride, setSlugOverride] = useState(Boolean(initialValue.slug));
 
@@ -101,7 +101,7 @@ export const CommunityEditor = ({
         (item) => item.language === locale
       );
 
-      if (!activeLocalization?.name.trim()) {
+      if (!hasText(activeLocalization?.name.trim())) {
         setMessage("Enter a name before saving.");
 
         return;
@@ -245,7 +245,7 @@ export const CommunityEditor = ({
         {
           localizations: [
             {
-              altText: uploaded.altText || localization?.name || "Community",
+              altText: (uploaded.altText || localization?.name) ?? "Community",
               caption: uploaded.caption,
               language: locale,
             },
@@ -267,19 +267,23 @@ export const CommunityEditor = ({
       className="grid gap-5"
       onSubmit={(event) => {
         event.preventDefault();
-        form.handleSubmit().catch(() => {
-          setMessage("Save failed");
-        });
+        void (async () => {
+          try {
+            await form.handleSubmit();
+          } catch {
+            setMessage("Save failed");
+          }
+        })();
       }}
     >
       <form.Subscribe
-        selector={(state) => [
-          state.canSubmit,
-          state.isDirty,
-          state.isSubmitting,
-        ]}
+        selector={(state) => ({
+          canSubmit: state.canSubmit,
+          isDirty: state.isDirty,
+          isSubmitting: state.isSubmitting,
+        })}
       >
-        {([canSubmit, isDirty, isSubmitting]) => (
+        {({ canSubmit, isDirty, isSubmitting }) => (
           <DirectoryEditorHeader
             canSubmit={canSubmit}
             isDirty={isDirty}
@@ -287,9 +291,11 @@ export const CommunityEditor = ({
             locale={locale}
             message={message}
             onLocaleChange={onLocaleChange}
-            recordTitle={
-              localization?.name || initialValue.slug || "New community"
-            }
+            recordTitle={firstText(
+              localization?.name,
+              initialValue.slug,
+              "New community"
+            )}
             saveLabel="Save community"
           />
         )}
@@ -493,4 +499,4 @@ export const CommunityEditor = ({
       </form.Field>
     </form>
   );
-};
+}

@@ -1,13 +1,10 @@
 ---
 import SearchPage from "../../components/archive/SearchPage.astro";
-import { localeShells } from '../../i18n/config';
-import type { SiteLocale } from '../../i18n/config';
+import { localeShells } from "../../i18n/config";
 
-const locale = Astro.params.locale as SiteLocale;
+const locale = localeShells.find((candidate) => candidate === Astro.params.locale);
 
-if (!localeShells.includes(locale as never)) {
-  return Astro.redirect("/paieska");
-}
+if (locale === undefined) {return Astro.redirect("/paieska");}
 ---
 
 <SearchPage locale={locale} />

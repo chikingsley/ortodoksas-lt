@@ -1,3 +1,4 @@
+import { tiptapDocumentSchema } from "@ortodoksas-lt/content/article";
 import { renderToHTMLString } from "@tiptap/static-renderer/pm/html-string";
 import { describe, expect, it } from "vitest";
 
@@ -72,8 +73,8 @@ describe("canonical article content", () => {
       extensions: articleEditorExtensions,
     });
 
-    expect(renderArticleBody(body)).toBe(expected);
-    expect(renderArticleBody(body)).toBe(expected);
+    expect(renderArticleBody(tiptapDocumentSchema.parse(body))).toBe(expected);
+    expect(renderArticleBody(tiptapDocumentSchema.parse(body))).toBe(expected);
   });
 
   it("keeps intentional single hard breaks inside a paragraph", () => {
@@ -249,7 +250,7 @@ describe("canonical article content", () => {
       },
     });
 
-    expect(issues).toEqual([]);
+    expect(issues).toStrictEqual([]);
   });
 
   it("flags Ukrainian em dashes for en-dash typography", () => {
@@ -352,7 +353,7 @@ describe("canonical article content", () => {
       type: "doc",
     };
 
-    const html = renderArticleBody(body);
+    const html = renderArticleBody(tiptapDocumentSchema.parse(body));
 
     const issues = getArticleQualityIssues({
       body,

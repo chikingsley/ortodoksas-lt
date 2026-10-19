@@ -9,7 +9,9 @@
     "strict": true,
     "noEmit": true,
     "noUncheckedIndexedAccess": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true
   },
   "include": ["worker", "worker-configuration.d.ts"]
 }

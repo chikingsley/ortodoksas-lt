@@ -5,8 +5,10 @@ interface Props {
   reviewStatus: "approved" | "changes_requested" | "not_required" | "pending";
 }
 
-export const TranslationBadge = ({ kind, reviewStatus }: Props) => (
-  <span className="bg-muted text-muted-foreground inline-flex min-h-[22px] items-center rounded-full border px-2 text-[9px] font-semibold whitespace-nowrap">
-    {formatTranslationLabel(kind, reviewStatus)}
-  </span>
-);
+export function TranslationBadge({ kind, reviewStatus }: Props) {
+  return (
+    <span className="bg-muted text-muted-foreground inline-flex min-h-[22px] items-center rounded-full border px-2 text-xs font-semibold whitespace-nowrap">
+      {formatTranslationLabel(kind, reviewStatus)}
+    </span>
+  );
+}

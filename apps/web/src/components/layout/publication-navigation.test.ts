@@ -47,7 +47,7 @@ describe("publication navigation contract", () => {
 
   it("shows only published counterparts in a localized edition", () => {
     const items = getPrimaryNavigation("en");
-    expect(items.map((item) => item.id)).toEqual(["home", "archive"]);
-    expect(getContactNavigation("en")).toEqual([]);
+    expect(items.map((item) => item.id)).toStrictEqual(["home", "archive"]);
+    expect(getContactNavigation("en")).toStrictEqual([]);
   });
 });

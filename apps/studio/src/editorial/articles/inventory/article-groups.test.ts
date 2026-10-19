@@ -144,7 +144,7 @@ describe("article inventory groups", () => {
       Object.fromEntries(
         grouped.map(({ groups, role }) => [role, groups.length])
       )
-    ).toEqual({
+    ).toStrictEqual({
       archive: 1,
       library: 10,
       navigation: 6,
@@ -166,7 +166,7 @@ describe("article inventory groups", () => {
       ])
     );
 
-    expect(grouped.find(({ role }) => role === "other")).toEqual(
+    expect(grouped.find(({ role }) => role === "other")).toStrictEqual(
       expect.objectContaining({
         groups: [expect.objectContaining({ id: "new-page-group" })],
       })

@@ -1,6 +1,8 @@
+"use client";
+
 import type { FindAndReplaceStorage } from "@tiptap/extension-find-and-replace";
 import type { Editor } from "@tiptap/react";
-import { useCurrentEditor } from "@tiptap/react";
+import { useEditorState } from "@tiptap/react";
 import { useCallback, useEffect, useState } from "react";
 
 // --- Icons ---
@@ -53,6 +55,14 @@ export interface UseSearchAndReplaceConfig {
  */
 export interface SearchAndReplaceEditorState {
   /**
+   * Number of results for the applied search term.
+   */
+  total: number;
+  /**
+   * Zero-based index of the current result, or `null` when none is selected.
+   */
+  currentIndex: number | null;
+  /**
    * The search term the extension has applied (post-debounce).
    */
   appliedSearchTerm: string;
@@ -61,21 +71,13 @@ export interface SearchAndReplaceEditorState {
    */
   caseSensitive: boolean;
   /**
-   * Zero-based index of the current result, or `null` when none is selected.
+   * Whether only whole words are matched.
    */
-  currentIndex: number | null;
-  /**
-   * Number of results for the applied search term.
-   */
-  total: number;
+  wholeWord: boolean;
   /**
    * Whether the search term is treated as a regular expression.
    */
   useRegex: boolean;
-  /**
-   * Whether only whole words are matched.
-   */
-  wholeWord: boolean;
 }
 
 const EMPTY_EDITOR_STATE: SearchAndReplaceEditorState = {
@@ -103,6 +105,7 @@ export function getFindAndReplaceStorage(
   if (!isFindAndReplaceAvailable(editor)) {
     return null;
   }
+
   return editor?.storage.findAndReplace ?? null;
 }
 
@@ -118,6 +121,7 @@ export function shouldShowSearchAndReplace(props: {
   if (!editor) {
     return false;
   }
+
   if (hideWhenUnavailable) {
     return isFindAndReplaceAvailable(editor);
   }
@@ -137,6 +141,7 @@ export function formatResultCount(
   if (total === 0) {
     return "0 / 0";
   }
+
   if (currentIndex === null) {
     return `0 / ${total}`;
   }
@@ -145,16 +150,17 @@ export function formatResultCount(
 }
 
 interface NavigateSearchResultOptions {
-  direction: "next" | "previous";
   editor: Editor;
+  direction: "next" | "previous";
 }
 
 function navigateSearchResult({
   editor,
   direction,
 }: NavigateSearchResultOptions): boolean {
-  const selection = editor.state.selection;
+  const { selection } = editor.state;
   const chain = editor.chain();
+
   const navigation =
     direction === "next" ? chain.goToNextResult() : chain.goToPreviousResult();
 
@@ -162,7 +168,9 @@ function navigateSearchResult({
   // editor selection that drives toolbar state.
   return navigation
     .command(({ tr }) => {
+      // oxlint-disable-next-line unicorn/no-array-method-this-argument -- ProseMirror Selection.map accepts the document and transaction mapping.
       tr.setSelection(selection.map(tr.doc, tr.mapping));
+
       return true;
     })
     .run();
@@ -185,21 +193,25 @@ export function scrollCurrentResultIntoView(
 
   const storage = getFindAndReplaceStorage(editor);
   const currentIndex = storage?.currentIndex;
+
   if (!storage || currentIndex === null || currentIndex === undefined) {
     return;
   }
 
   const result = storage.results[currentIndex];
+
   if (!result) {
     return;
   }
 
   const editorDom = editor.view.dom;
+
   if (editorDom.contains(document.activeElement)) {
     return;
   }
 
   let target: HTMLElement | null = null;
+
   try {
     const { node } = editor.view.domAtPos(result.from);
     target = node instanceof HTMLElement ? node : node.parentElement;
@@ -207,18 +219,19 @@ export function scrollCurrentResultIntoView(
     return;
   }
 
-  if (!target || typeof target.scrollIntoView !== "function") {
+  if (target === null) {
     return;
   }
 
-  const prefersReducedMotion =
-    typeof window.matchMedia === "function" &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const prefersReducedMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)"
+  ).matches;
 
   target.scrollIntoView({
-    behavior: "smooth",
     ...scrollIntoViewOptions,
-    ...(prefersReducedMotion ? { behavior: "auto" } : {}),
+    behavior: prefersReducedMotion
+      ? "auto"
+      : (scrollIntoViewOptions.behavior ?? "smooth"),
   });
 }
 
@@ -257,116 +270,47 @@ export function scrollCurrentResultIntoView(
  * }
  * ```
  */
-export function useSearchAndReplace(config?: UseSearchAndReplaceConfig) {
-  const {
-    editor: providedEditor,
-    hideWhenUnavailable = false,
-    scrollIntoViewOptions = DEFAULT_SCROLL_INTO_VIEW_OPTIONS,
-  } = config || {};
+function storedSearchTerms(editor: Editor | null) {
+  const storage = getFindAndReplaceStorage(editor);
 
-  // `useTiptapEditor` resolves through `useEditorState`, whose snapshot stays
-  // `null` until the editor's first transaction (with `immediatelyRender:
-  // false` there may be none on mount). Fall back to the always-fresh context
-  // editor so the trigger and commands work before any interaction.
-  const { editor: resolvedEditor } = useTiptapEditor(providedEditor);
-  const { editor: contextEditor } = useCurrentEditor();
-  const editor = resolvedEditor ?? providedEditor ?? contextEditor ?? null;
+  return {
+    replaceTerm: storage?.replaceTerm ?? "",
+    searchTerm: storage?.searchTerm ?? "",
+  };
+}
+
+export function useSearchAndReplace({
+  editor: providedEditor,
+  hideWhenUnavailable = false,
+  scrollIntoViewOptions = DEFAULT_SCROLL_INTO_VIEW_OPTIONS,
+}: UseSearchAndReplaceConfig = {}) {
+  const { editor } = useTiptapEditor(providedEditor);
   const canSearch = isFindAndReplaceAvailable(editor);
+  const isVisible = shouldShowSearchAndReplace({ editor, hideWhenUnavailable });
+  const [searchDraft, setSearchDraft] = useState<string | null>(null);
+  const [replaceDraft, setReplaceDraft] = useState<string | null>(null);
+  const storedTerms = storedSearchTerms(editor);
+  const searchTerm = searchDraft ?? storedTerms.searchTerm;
+  const replaceTerm = replaceDraft ?? storedTerms.replaceTerm;
 
-  // Visibility defaults to true and is refined once the editor reports
-  // activity. The editor resolved above stays `null` until its first
-  // transaction (with `immediatelyRender: false` there may be none on
-  // mount), so deriving visibility directly would hide the trigger on load.
-  const [isVisible, setIsVisible] = useState(true);
+  const editorState =
+    useEditorState({
+      editor,
+      selector: ({ editor: current }) => {
+        const currentStorage = getFindAndReplaceStorage(current);
 
-  useEffect(() => {
-    if (!editor) {
-      return;
-    }
-
-    const handleUpdate = () => {
-      setIsVisible(shouldShowSearchAndReplace({ editor, hideWhenUnavailable }));
-    };
-
-    handleUpdate();
-
-    editor.on("transaction", handleUpdate);
-
-    return () => {
-      editor.off("transaction", handleUpdate);
-    };
-  }, [editor, hideWhenUnavailable]);
-
-  // Immediate input values. Extension storage lags behind the search input by
-  // the extension's debounce, so the inputs keep their own state while the
-  // extension owns matching, navigation and replacement.
-  const [searchTerm, setSearchTermState] = useState("");
-  const [replaceTerm, setReplaceTermState] = useState("");
-
-  // Adopt terms configured on the extension (e.g. an initial `searchTerm`
-  // option) once the editor is available.
-  useEffect(() => {
-    const storage = getFindAndReplaceStorage(editor);
-    if (!storage) {
-      return;
-    }
-
-    if (storage.searchTerm) {
-      setSearchTermState((previous) => previous || storage.searchTerm);
-    }
-    if (storage.replaceTerm) {
-      setReplaceTermState((previous) => previous || storage.replaceTerm);
-    }
-  }, [editor]);
-
-  // Subscribe to extension transactions so count, current index and disabled
-  // states update immediately. Synced eagerly on subscribe: the extension may
-  // already hold results from a configured `searchTerm` before any
-  // transaction happens (e.g. on a freshly loaded page).
-  const [editorState, setEditorState] =
-    useState<SearchAndReplaceEditorState>(EMPTY_EDITOR_STATE);
-
-  useEffect(() => {
-    if (!(editor && isFindAndReplaceAvailable(editor))) {
-      setEditorState(EMPTY_EDITOR_STATE);
-      return;
-    }
-
-    const sync = () => {
-      const storage = getFindAndReplaceStorage(editor);
-      if (!storage) {
-        return;
-      }
-
-      const next: SearchAndReplaceEditorState = {
-        appliedSearchTerm: storage.searchTerm,
-        caseSensitive: storage.caseSensitive,
-        currentIndex: storage.currentIndex,
-        total: storage.results.length,
-        useRegex: storage.useRegex,
-        wholeWord: storage.wholeWord,
-      };
-
-      setEditorState((previous) =>
-        previous.total === next.total &&
-        previous.currentIndex === next.currentIndex &&
-        previous.appliedSearchTerm === next.appliedSearchTerm &&
-        previous.caseSensitive === next.caseSensitive &&
-        previous.wholeWord === next.wholeWord &&
-        previous.useRegex === next.useRegex
-          ? previous
-          : next
-      );
-    };
-
-    sync();
-
-    editor.on("transaction", sync);
-
-    return () => {
-      editor.off("transaction", sync);
-    };
-  }, [editor]);
+        return currentStorage
+          ? {
+              appliedSearchTerm: currentStorage.searchTerm,
+              caseSensitive: currentStorage.caseSensitive,
+              currentIndex: currentStorage.currentIndex,
+              total: currentStorage.results.length,
+              useRegex: currentStorage.useRegex,
+              wholeWord: currentStorage.wholeWord,
+            }
+          : EMPTY_EDITOR_STATE;
+      },
+    }) ?? EMPTY_EDITOR_STATE;
 
   const {
     total,
@@ -374,14 +318,14 @@ export function useSearchAndReplace(config?: UseSearchAndReplaceConfig) {
     appliedSearchTerm,
     caseSensitive,
     wholeWord,
-    useRegex,
+    useRegex: regexEnabled,
   } = editorState;
 
   const setSearchTerm = useCallback(
     (value: string) => {
-      setSearchTermState(value);
+      setSearchDraft(value);
 
-      if (!(editor && isFindAndReplaceAvailable(editor))) {
+      if (!editor || !isFindAndReplaceAvailable(editor)) {
         return;
       }
 
@@ -398,43 +342,52 @@ export function useSearchAndReplace(config?: UseSearchAndReplaceConfig) {
 
   const setReplaceTerm = useCallback(
     (value: string) => {
-      setReplaceTermState(value);
+      setReplaceDraft(value);
 
-      if (!(editor && isFindAndReplaceAvailable(editor))) {
+      if (!editor || !isFindAndReplaceAvailable(editor)) {
         return;
       }
+
       editor.commands.setReplaceTerm(value);
     },
     [editor]
   );
 
   const toggleCaseSensitive = useCallback(() => {
-    if (!(editor && isFindAndReplaceAvailable(editor))) {
+    if (!editor || !isFindAndReplaceAvailable(editor)) {
       return;
     }
+
     editor.commands.setCaseSensitive(
-      !getFindAndReplaceStorage(editor)?.caseSensitive
+      getFindAndReplaceStorage(editor)?.caseSensitive !== true
     );
   }, [editor]);
 
   const toggleWholeWord = useCallback(() => {
-    if (!(editor && isFindAndReplaceAvailable(editor))) {
+    if (!editor || !isFindAndReplaceAvailable(editor)) {
       return;
     }
-    editor.commands.setWholeWord(!getFindAndReplaceStorage(editor)?.wholeWord);
+
+    editor.commands.setWholeWord(
+      getFindAndReplaceStorage(editor)?.wholeWord !== true
+    );
   }, [editor]);
 
   const toggleUseRegex = useCallback(() => {
-    if (!(editor && isFindAndReplaceAvailable(editor))) {
+    if (!editor || !isFindAndReplaceAvailable(editor)) {
       return;
     }
-    editor.commands.setUseRegex(!getFindAndReplaceStorage(editor)?.useRegex);
+
+    editor.commands.setUseRegex(
+      getFindAndReplaceStorage(editor)?.useRegex !== true
+    );
   }, [editor]);
 
   const goToNext = useCallback(() => {
     if (!editor) {
       return false;
     }
+
     return navigateSearchResult({ direction: "next", editor });
   }, [editor]);
 
@@ -442,20 +395,23 @@ export function useSearchAndReplace(config?: UseSearchAndReplaceConfig) {
     if (!editor) {
       return false;
     }
+
     return navigateSearchResult({ direction: "previous", editor });
   }, [editor]);
 
   const replaceCurrent = useCallback(() => {
-    if (!(editor && editor.isEditable)) {
+    if (!editor || !editor.isEditable) {
       return false;
     }
+
     return editor.commands.replace();
   }, [editor]);
 
   const replaceAll = useCallback(() => {
-    if (!(editor && editor.isEditable)) {
+    if (!editor || !editor.isEditable) {
       return false;
     }
+
     return editor.commands.replaceAll();
   }, [editor]);
 
@@ -464,11 +420,12 @@ export function useSearchAndReplace(config?: UseSearchAndReplaceConfig) {
    * reopens while the hook instance stayed mounted (e.g. popover reopen).
    */
   const applySearch = useCallback(() => {
-    if (!(editor && isFindAndReplaceAvailable(editor))) {
+    if (!editor || !isFindAndReplaceAvailable(editor)) {
       return;
     }
 
     editor.commands.setReplaceTerm(replaceTerm);
+
     if (searchTerm) {
       editor.commands.setSearchTerm(searchTerm);
     }
@@ -479,9 +436,10 @@ export function useSearchAndReplace(config?: UseSearchAndReplaceConfig) {
    * terms, so closing the search UI does not erase non-empty field values.
    */
   const suspendSearch = useCallback(() => {
-    if (!(editor && isFindAndReplaceAvailable(editor)) || editor.isDestroyed) {
+    if (!editor || !isFindAndReplaceAvailable(editor) || editor.isDestroyed) {
       return;
     }
+
     editor.commands.clearSearch();
   }, [editor]);
 
@@ -489,12 +447,13 @@ export function useSearchAndReplace(config?: UseSearchAndReplaceConfig) {
    * Clears the search entirely: highlights, pending work and field values.
    */
   const clearSearch = useCallback(() => {
-    setSearchTermState("");
-    setReplaceTermState("");
+    setSearchDraft("");
+    setReplaceDraft("");
 
-    if (!(editor && isFindAndReplaceAvailable(editor)) || editor.isDestroyed) {
+    if (!editor || !isFindAndReplaceAvailable(editor) || editor.isDestroyed) {
       return;
     }
+
     editor.commands.clearSearch();
   }, [editor]);
 
@@ -503,7 +462,7 @@ export function useSearchAndReplace(config?: UseSearchAndReplaceConfig) {
   // Unconditional on purpose: a debounced search may still be pending without
   // being reflected in the extension storage yet.
   useEffect(() => {
-    if (!(editor && canSearch)) {
+    if (!editor || !canSearch) {
       return;
     }
 
@@ -511,6 +470,7 @@ export function useSearchAndReplace(config?: UseSearchAndReplaceConfig) {
       if (editor.isDestroyed) {
         return;
       }
+
       editor.commands.clearSearch();
     };
   }, [editor, canSearch]);
@@ -519,7 +479,11 @@ export function useSearchAndReplace(config?: UseSearchAndReplaceConfig) {
   // active result changes. Deferred a frame so layout-heavy integrations
   // (e.g. paginated documents) have settled before measuring.
   useEffect(() => {
-    if (total === 0 || currentIndex === null) {
+    if (
+      appliedSearchTerm.length === 0 ||
+      total === 0 ||
+      currentIndex === null
+    ) {
       return;
     }
 
@@ -527,21 +491,20 @@ export function useSearchAndReplace(config?: UseSearchAndReplaceConfig) {
       scrollCurrentResultIntoView(editor, scrollIntoViewOptions);
     });
 
-    return () => cancelAnimationFrame(frame);
+    return () => {
+      cancelAnimationFrame(frame);
+    };
   }, [editor, total, currentIndex, appliedSearchTerm, scrollIntoViewOptions]);
 
-  const isEditable = !!editor?.isEditable;
+  const isEditable = editor?.isEditable === true;
   const canNavigate = canSearch && total > 0;
   const hasReplaceTerm = replaceTerm.length > 0;
-  const canReplace =
-    canSearch &&
-    isEditable &&
-    hasReplaceTerm &&
-    total > 0 &&
-    currentIndex !== null;
-  const canReplaceAll = canSearch && isEditable && hasReplaceTerm && total > 0;
+
+  const canReplaceAll = canNavigate && isEditable && hasReplaceTerm;
+  const canReplace = canReplaceAll && currentIndex !== null;
 
   return {
+    Icon: SearchIcon,
     appliedSearchTerm,
     applySearch,
     canNavigate,
@@ -554,7 +517,6 @@ export function useSearchAndReplace(config?: UseSearchAndReplaceConfig) {
     editor,
     goToNext,
     goToPrevious,
-    Icon: SearchIcon,
     isVisible,
     label: "Search and replace",
     replaceAll,
@@ -570,7 +532,7 @@ export function useSearchAndReplace(config?: UseSearchAndReplaceConfig) {
     toggleUseRegex,
     toggleWholeWord,
     total,
-    useRegex,
+    useRegex: regexEnabled,
     wholeWord,
   };
 }

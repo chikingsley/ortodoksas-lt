@@ -1,4 +1,3 @@
-// biome-ignore-all lint/suspicious/noArrayIndexKey: Slider thumbs are stable positional controls whose order matches the value tuple.
 import { Slider as SliderPrimitive } from "@base-ui/react/slider";
 
 import { cn } from "@/lib/utils";

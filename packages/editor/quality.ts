@@ -1,3 +1,4 @@
+import { figureAttributesSchema } from "@ortodoksas-lt/content/media";
 import type { JSONContent } from "@tiptap/core";
 
 interface ArticleQualityInput {
@@ -110,8 +111,8 @@ const isCaptionLikeParagraph = (node: JSONContent): boolean => {
 
   return (
     textNodes.length > 0 &&
-    textNodes.every((child) =>
-      child.marks?.some((mark) => mark.type === "italic")
+    textNodes.every(
+      (child) => child.marks?.some((mark) => mark.type === "italic") === true
     )
   );
 };
@@ -140,8 +141,9 @@ const getFigureIssues = (
   seenSources: Set<string>
 ): string[] => {
   const issues: string[] = [];
-  const src = typeof node.attrs?.src === "string" ? node.attrs.src.trim() : "";
-  const alt = typeof node.attrs?.alt === "string" ? node.attrs.alt.trim() : "";
+  const attributes = figureAttributesSchema.parse(node.attrs ?? {});
+  const src = attributes.src.trim();
+  const alt = attributes.alt.trim();
 
   if (!src) {
     issues.push(`Add an image source to figure ${index + 1}.`);
@@ -161,6 +163,48 @@ const getFigureIssues = (
 
   return issues;
 };
+
+function getHeadingIssues(
+  node: JSONContent,
+  text: string,
+  index: number
+): string[] {
+  const issues: string[] = [];
+
+  if (node.type === "heading" && !text) {
+    issues.push(`Write text for heading ${index + 1}.`);
+  }
+
+  if (node.type === "heading" && node.attrs?.level === 1) {
+    issues.push(`Use the article title instead of body heading ${index + 1}.`);
+  }
+
+  return issues;
+}
+
+function isRepeatedDivider(
+  node: JSONContent,
+  previousNode: JSONContent | undefined
+) {
+  return (
+    node.type === "horizontalRule" && previousNode?.type === "horizontalRule"
+  );
+}
+
+function isDuplicateBlock(
+  node: JSONContent,
+  text: string,
+  previousNode: JSONContent | undefined
+) {
+  const previousText = previousNode ? getNodeText(previousNode).trim() : "";
+
+  return (
+    node.type !== "figure" &&
+    node.type === previousNode?.type &&
+    text.length >= 20 &&
+    text === previousText
+  );
+}
 
 const getNodeIssues = (
   node: JSONContent,
@@ -187,18 +231,9 @@ const getNodeIssues = (
     issues.push(`Attach caption-like paragraph ${index + 1} to its image.`);
   }
 
-  if (node.type === "heading" && !text) {
-    issues.push(`Write text for heading ${index + 1}.`);
-  }
+  issues.push(...getHeadingIssues(node, text, index));
 
-  if (node.type === "heading" && node.attrs?.level === 1) {
-    issues.push(`Use the article title instead of body heading ${index + 1}.`);
-  }
-
-  if (
-    node.type === "horizontalRule" &&
-    nodes[index - 1]?.type === "horizontalRule"
-  ) {
+  if (isRepeatedDivider(node, nodes[index - 1])) {
     issues.push(`Remove repeated divider ${index + 1}.`);
   }
 
@@ -210,15 +245,7 @@ const getNodeIssues = (
     issues.push(`Replace placeholder text in block ${index + 1}.`);
   }
 
-  const previousNode = nodes[index - 1];
-  const previousText = previousNode ? getNodeText(previousNode).trim() : "";
-
-  if (
-    node.type !== "figure" &&
-    node.type === nodes[index - 1]?.type &&
-    text.length >= 20 &&
-    text === previousText
-  ) {
+  if (isDuplicateBlock(node, text, nodes[index - 1])) {
     issues.push(`Remove duplicated block ${index + 1}.`);
   }
 
@@ -237,11 +264,11 @@ export const getArticleQualityIssues = ({
 
   const hasSubstantiveMedia = nodes.some((node) => {
     if (node.type === "youtube") {
-      return typeof node.attrs?.src === "string" && node.attrs.src.length > 0;
+      return figureAttributesSchema.parse(node.attrs ?? {}).src.length > 0;
     }
 
     if (node.type === "figure") {
-      return typeof node.attrs?.src === "string" && node.attrs.src.length > 0;
+      return figureAttributesSchema.parse(node.attrs ?? {}).src.length > 0;
     }
 
     return false;

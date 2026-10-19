@@ -26,11 +26,11 @@ const articleRevisionMetadataSchema = z.looseObject({
   summary: z.string().optional(),
   title: z.string().optional(),
   translationKind: z.enum(["human", "machine", "original"]).optional(),
-  translationReviewedAt: z.number().int().nullable().optional(),
-  translationReviewedBy: z.string().nullable().optional(),
   translationReviewStatus: z
     .enum(["approved", "changes_requested", "not_required", "pending"])
     .optional(),
+  translationReviewedAt: z.number().int().nullable().optional(),
+  translationReviewedBy: z.string().nullable().optional(),
   translationSourceArticleId: z.string().nullable().optional(),
   translationSourceHash: z.string().nullable().optional(),
 });
@@ -106,14 +106,14 @@ export const articleRevisionMetadata = (
     article.translationKind === "human" || article.translationKind === "machine"
       ? article.translationKind
       : "original",
-  translationReviewedAt: article.translationReviewedAt,
-  translationReviewedBy: article.translationReviewedBy,
   translationReviewStatus:
     article.translationReviewStatus === "approved" ||
     article.translationReviewStatus === "changes_requested" ||
     article.translationReviewStatus === "pending"
       ? article.translationReviewStatus
       : "not_required",
+  translationReviewedAt: article.translationReviewedAt,
+  translationReviewedBy: article.translationReviewedBy,
   translationSourceArticleId: article.translationSourceArticleId,
   translationSourceHash: article.translationSourceHash,
 });

@@ -1,3 +1,4 @@
+/* oxlint-disable jsx-a11y/label-has-associated-control -- The shared label forwards htmlFor and children from its typed props; callers associate each control. */
 import type * as React from "react";
 
 import { cn } from "@/lib/utils";

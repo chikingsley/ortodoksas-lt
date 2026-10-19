@@ -1,3 +1,4 @@
+import { hasText } from "@ortodoksas-lt/content/value";
 import type { JSONContent } from "@tiptap/core";
 import type { ChangeEvent } from "react";
 
@@ -34,8 +35,8 @@ export function ArticleEditorDocument({
   title,
 }: Props) {
   return (
-    <div className="min-w-0 px-[clamp(28px,5vw,72px)] pt-12 pb-24 max-md:px-4 max-md:pt-7 max-md:pb-12">
-      <div className="[&_label]:text-secondary-foreground [&_textarea:last-of-type:focus]:border-primary [&_textarea]:text-foreground relative mx-auto grid max-w-[860px] gap-2 [&_label]:text-xs [&_label]:font-semibold [&_textarea]:w-full [&_textarea]:rounded-none [&_textarea]:border-0 [&_textarea]:bg-transparent [&_textarea]:p-0 [&_textarea]:outline-none [&_textarea:first-of-type]:mb-6 [&_textarea:first-of-type]:h-auto [&_textarea:first-of-type]:min-h-[1.2em] [&_textarea:first-of-type]:resize-none [&_textarea:first-of-type]:overflow-hidden [&_textarea:first-of-type]:text-[clamp(34px,4.3vw,56px)] [&_textarea:first-of-type]:leading-none [&_textarea:first-of-type]:font-bold [&_textarea:first-of-type]:tracking-[-0.035em] [&_textarea:last-of-type]:min-h-[88px] [&_textarea:last-of-type]:resize-y [&_textarea:last-of-type]:border-b [&_textarea:last-of-type]:py-3 [&_textarea:last-of-type]:text-lg [&_textarea:last-of-type]:leading-relaxed [&_textarea:last-of-type:focus]:shadow-[0_1px_0_var(--primary)]">
+    <div className="min-w-0 px-7 pt-12 pb-24 max-md:px-4 max-md:pt-7 max-md:pb-12 md:px-12 xl:px-18">
+      <div className="[&_label]:text-secondary-foreground [&_textarea:last-of-type:focus]:border-primary [&_textarea]:text-foreground [&_textarea:last-of-type:focus]:border-primary relative mx-auto grid max-w-[860px] gap-2 [&_label]:text-xs [&_label]:font-semibold [&_textarea]:w-full [&_textarea]:rounded-none [&_textarea]:border-0 [&_textarea]:bg-transparent [&_textarea]:p-0 [&_textarea]:outline-none [&_textarea:first-of-type]:mb-6 [&_textarea:first-of-type]:h-auto [&_textarea:first-of-type]:min-h-[1.2em] [&_textarea:first-of-type]:resize-none [&_textarea:first-of-type]:overflow-hidden [&_textarea:first-of-type]:text-4xl [&_textarea:first-of-type]:leading-none [&_textarea:first-of-type]:font-bold [&_textarea:first-of-type]:tracking-tight xl:[&_textarea:first-of-type]:text-5xl [&_textarea:last-of-type]:min-h-[88px] [&_textarea:last-of-type]:resize-y [&_textarea:last-of-type]:border-b [&_textarea:last-of-type]:py-3 [&_textarea:last-of-type]:text-lg [&_textarea:last-of-type]:leading-relaxed [&_textarea:last-of-type:focus]:border-b">
         <label htmlFor="review-title">Title</label>
         <AutoResizeTextarea
           id="review-title"
@@ -50,12 +51,13 @@ export function ArticleEditorDocument({
           rows={3}
           value={summary}
         />
-        <span className="text-muted-foreground -mt-1 justify-self-end text-[11px]">
+        <span className="text-muted-foreground -mt-1 justify-self-end text-xs">
           {summary.length} / 600
         </span>
       </div>
 
-      {bodyHasLeadFigure || !(heroMediaId || heroUrl) ? null : (
+      {bodyHasLeadFigure ||
+      !(hasText(heroMediaId) || hasText(heroUrl)) ? null : (
         <section className="mx-auto mt-10 max-w-[860px]">
           <div className="mb-3 flex items-baseline justify-between max-sm:flex-col max-sm:items-start max-sm:gap-1">
             <strong className="text-secondary-foreground text-xs font-semibold">
@@ -64,10 +66,14 @@ export function ArticleEditorDocument({
           </div>
           <img
             alt={`Lead for ${title}`}
-            className={`bg-secondary block h-[280px] w-full rounded-lg ${heroFit === "contain" ? "object-contain" : "object-cover"}`}
+            className={`bg-secondary block h-[280px] w-full rounded-lg object-[var(--hero-position)] ${heroFit === "contain" ? "object-contain" : "object-cover"}`}
             height="900"
-            src={heroMediaId ? `/api/media/${heroMediaId}` : (heroUrl ?? "")}
-            style={{ objectPosition: `${heroFocalX}% ${heroFocalY}%` }}
+            src={
+              hasText(heroMediaId)
+                ? `/api/media/${heroMediaId}`
+                : (heroUrl ?? "")
+            }
+            style={{ "--hero-position": `${heroFocalX}% ${heroFocalY}%` }}
             width="1600"
           />
         </section>

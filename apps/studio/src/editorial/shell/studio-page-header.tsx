@@ -9,7 +9,7 @@ export function StudioPageHeader({
   return (
     <header
       className={cn(
-        "max-inventory-mobile:h-auto max-inventory-mobile:min-h-[72px] max-inventory-compact:px-6 max-inventory-mobile:px-4 max-inventory-mobile:py-3 flex h-[var(--studio-shell-header-height)] shrink-0 items-center justify-between gap-6 border-b px-[42px]",
+        "max-inventory-mobile:h-auto max-inventory-mobile:min-h-[72px] max-inventory-compact:px-6 max-inventory-mobile:px-4 max-inventory-mobile:py-3 flex h-[var(--studio-shell-header-height)] shrink-0 items-center justify-between gap-6 border-b px-10.5",
         className
       )}
       {...props}

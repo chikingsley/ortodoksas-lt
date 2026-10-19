@@ -2,6 +2,7 @@ import type {
   TiptapDocument,
   UpdateArticleInput,
 } from "@ortodoksas-lt/content/article";
+import { tiptapDocumentSchema } from "@ortodoksas-lt/content/article";
 import {
   articleBaselines,
   articleRevisions,
@@ -45,7 +46,7 @@ export const translationMetadataUpdate = (
   },
   reviewer: { editorId: string; timestamp: number }
 ) => {
-  const update: {
+  interface TranslationMetadataUpdate {
     translationReviewStatus?:
       | "approved"
       | "changes_requested"
@@ -53,7 +54,9 @@ export const translationMetadataUpdate = (
       | "pending";
     translationReviewedAt?: number | null;
     translationReviewedBy?: string | null;
-  } = {};
+  }
+
+  const update: TranslationMetadataUpdate = {};
 
   if (input.action === "approve") {
     update.translationReviewStatus = "approved";
@@ -83,9 +86,9 @@ export const getTranslationSourceHash = async (source: {
   summary: string;
   title: string;
 }) =>
-  hashText(
+  await hashText(
     JSON.stringify({
-      body: JSON.parse(source.bodyJson) as TiptapDocument,
+      body: tiptapDocumentSchema.parse(JSON.parse(source.bodyJson)),
       byline: source.byline,
       bylineType: source.bylineType,
       bylineUrl: source.bylineUrl,
@@ -158,9 +161,9 @@ export const createTranslationDraft = async (input: {
     title,
     translationGroupId: source.translationGroupId,
     translationKind: "human",
+    translationReviewStatus: "pending",
     translationReviewedAt: null,
     translationReviewedBy: null,
-    translationReviewStatus: "pending",
     translationSourceArticleId: source.id,
     translationSourceHash: sourceHash,
     updatedAt: timestamp,

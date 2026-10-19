@@ -1,5 +1,5 @@
 import type { NodeType } from "@tiptap/pm/model";
-import { mergeAttributes, Node, ReactNodeViewRenderer } from "@tiptap/react";
+import { Node, ReactNodeViewRenderer, mergeAttributes } from "@tiptap/react";
 
 import { ImageUploadNode as ImageUploadNodeComponent } from "@/components/tiptap-node/image-upload-node/image-upload-node";
 
@@ -31,7 +31,7 @@ export interface ImageUploadNodeOptions {
    * @default {}
    * @example { class: 'foo' }
    */
-  HTMLAttributes: Record<string, unknown>;
+  HTMLAttributes: Record<string, string | number | boolean>;
   /**
    * Maximum number of files that can be uploaded.
    * @default 1
@@ -115,15 +115,19 @@ export const ImageUploadNode = Node.create<ImageUploadNodeOptions>({
           editor.isActive("imageUpload")
         ) {
           const nodeEl = editor.view.nodeDOM(selection.$from.pos);
+
           if (nodeEl && nodeEl instanceof HTMLElement) {
             // Since NodeViewWrapper is wrapped with a div, we need to click the first child
-            const firstChild = nodeEl.firstChild;
+            const { firstChild } = nodeEl;
+
             if (firstChild && firstChild instanceof HTMLElement) {
               firstChild.click();
+
               return true;
             }
           }
         }
+
         return false;
       },
     };
@@ -135,8 +139,8 @@ export const ImageUploadNode = Node.create<ImageUploadNodeOptions>({
 
   addOptions() {
     return {
-      accept: "image/*",
       HTMLAttributes: {},
+      accept: "image/*",
       limit: 1,
       maxSize: 0,
       onError: undefined,

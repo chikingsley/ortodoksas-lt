@@ -7,8 +7,8 @@ import {
   useTable,
 } from "@tanstack/react-table";
 import { FilePlus2 } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
 import type { ChangeEvent, MouseEvent } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import type { ValueOption } from "@/editorial/shared/value-combobox";
@@ -16,8 +16,8 @@ import { StudioPageHeader } from "@/editorial/shell/studio-page-header";
 import { cn } from "@/lib/utils";
 
 import type { CatalogArticle } from "../types";
-import { filterArticleGroups, groupArticles } from "./article-groups";
 import type { ArticleGroup } from "./article-groups";
+import { filterArticleGroups, groupArticles } from "./article-groups";
 import { InventoryPanel } from "./inventory-panel";
 
 interface Props {
@@ -56,7 +56,7 @@ const contentKinds = [
   { label: "Pages", value: "page" },
 ] as const;
 
-export const ArticleInventory = ({
+export function ArticleInventory({
   articles,
   catalogState,
   contentKind,
@@ -66,7 +66,7 @@ export const ArticleInventory = ({
   onCreate,
   onCreateTranslation,
   onOpen,
-}: Props) => {
+}: Props) {
   const [query, setQuery] = useState("");
   const [section, setSection] = useState("All sections");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -75,7 +75,7 @@ export const ArticleInventory = ({
     () =>
       articles
         .filter((article) => article.kind === contentKind)
-        .sort((left, right) =>
+        .toSorted((left, right) =>
           (right.published ?? "").localeCompare(left.published ?? "")
         ),
     [articles, contentKind]
@@ -162,13 +162,19 @@ export const ArticleInventory = ({
   const previousPage = useCallback(() => {
     table.previousPage();
   }, [table]);
+
   const nextPage = useCallback(() => {
     table.nextPage();
   }, [table]);
 
   const selectContentKind = useCallback(
     (event: MouseEvent<HTMLButtonElement>) => {
-      const nextKind = event.currentTarget.value as CatalogArticle["kind"];
+      const nextKind = event.currentTarget.value;
+
+      if (nextKind !== "article" && nextKind !== "page") {
+        return;
+      }
+
       onContentKindChange(nextKind);
       setQuery("");
       setSection("All sections");
@@ -186,12 +192,10 @@ export const ArticleInventory = ({
   const pluralLabel = contentKind === "page" ? "pages" : "stories";
 
   return (
-    <div className="max-inventory-mobile:pb-12 mx-auto w-full max-w-[1500px] pb-[72px]">
+    <div className="max-inventory-mobile:pb-12 mx-auto w-full max-w-[1500px] pb-18">
       <StudioPageHeader className="max-inventory-phone:flex-wrap max-inventory-phone:gap-2 max-inventory-phone:py-3">
         <div className="max-inventory-phone:gap-3 flex min-w-0 items-center gap-5">
-          <h1 className="m-0 text-2xl font-[650] tracking-[-0.03em]">
-            Content
-          </h1>
+          <h1 className="m-0 text-2xl font-semibold tracking-tight">Content</h1>
           <fieldset className="bg-muted flex h-9 items-center rounded-lg p-1">
             <legend className="sr-only">Content type</legend>
             {contentKinds.map((item) => {
@@ -202,8 +206,7 @@ export const ArticleInventory = ({
                   aria-pressed={active}
                   className={cn(
                     "text-muted-foreground hover:text-foreground inline-flex h-7 items-center gap-1.5 rounded-md border-0 bg-transparent px-2.5 text-xs font-medium transition-colors",
-                    active &&
-                      "bg-card text-foreground shadow-[0_1px_2px_rgb(17_17_17/0.08)]"
+                    active && "bg-card text-foreground shadow-xs"
                   )}
                   key={item.value}
                   onClick={selectContentKind}
@@ -211,7 +214,7 @@ export const ArticleInventory = ({
                   value={item.value}
                 >
                   {item.label}
-                  <span className="text-muted-foreground text-[10px] tabular-nums">
+                  <span className="text-muted-foreground text-xs tabular-nums">
                     {contentCounts[item.value].toLocaleString("en-US")}
                   </span>
                 </button>
@@ -257,4 +260,4 @@ export const ArticleInventory = ({
       </div>
     </div>
   );
-};
+}

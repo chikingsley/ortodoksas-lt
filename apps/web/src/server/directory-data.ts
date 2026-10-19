@@ -1,3 +1,4 @@
+import { tiptapDocumentSchema } from "@ortodoksas-lt/content/article";
 import {
   communities,
   communityContactLocalizations,
@@ -125,7 +126,9 @@ export async function getPeopleDirectory(locale: SiteLocale) {
 
   return records.map(({ biographyJson, ...record }) => ({
     ...record,
-    biographyHtml: renderArticleBody(JSON.parse(biographyJson)),
+    biographyHtml: renderArticleBody(
+      tiptapDocumentSchema.parse(JSON.parse(biographyJson))
+    ),
     contacts: contacts.filter(({ personId }) => personId === record.id),
     media: media.filter(({ personId }) => personId === record.id),
     positions: positions.filter(({ personId }) => personId === record.id),

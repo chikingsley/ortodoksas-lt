@@ -1,80 +1,19 @@
 import type { Editor } from "@tiptap/react";
 import { useCurrentEditor, useEditorState } from "@tiptap/react";
-import { useEffect, useState } from "react";
 
-function getActivePageEditor(editor: Editor): Editor | null {
-  const storage = editor.storage as unknown as Record<string, unknown>;
-  const pages = storage.pages as { activeEditor?: Editor | null } | undefined;
+// Studio edits a single document. Tiptap's subscription keeps toolbar state
+// current while useEditor avoids rerendering the entire editor on each change.
+export function useTiptapEditor(providedEditor?: Editor | null) {
+  const { editor: contextEditor } = useCurrentEditor();
+  const editor = providedEditor ?? contextEditor;
 
-  if (!(pages && "activeEditor" in pages)) {
-    return null;
-  }
-
-  return pages.activeEditor ?? null;
-}
-
-export function useTiptapEditor(providedEditor?: Editor | null): {
-  editor: Editor | null;
-  editorState?: Editor["state"];
-  canCommand?: Editor["can"];
-} {
-  const { editor: coreEditor } = useCurrentEditor();
-  const mainEditor = providedEditor ?? coreEditor;
-
-  const [storageEditor, setStorageEditor] = useState<Editor | null>(null);
-
-  useEffect(() => {
-    if (!mainEditor) {
-      setStorageEditor(null);
-
-      return;
-    }
-
-    const updateHandler = () => {
-      setStorageEditor(getActivePageEditor(mainEditor));
-    };
-
-    updateHandler();
-
-    mainEditor.on("update", updateHandler);
-    mainEditor.on("selectionUpdate", updateHandler);
-
-    return () => {
-      mainEditor.off("update", updateHandler);
-      mainEditor.off("selectionUpdate", updateHandler);
-    };
-  }, [mainEditor]);
-
-  useEffect(() => {
-    if (!storageEditor) {
-      return;
-    }
-
-    const handleDestroy = () => {
-      setStorageEditor(null);
-    };
-
-    storageEditor.on("destroy", handleDestroy);
-
-    return () => {
-      storageEditor.off("destroy", handleDestroy);
-    };
-  }, [storageEditor]);
-
-  const editorState = useEditorState({
-    editor: storageEditor ?? mainEditor,
-    selector(context) {
-      if (!context.editor) {
-        return { canCommand: undefined, editor: null, editorState: undefined };
-      }
-
-      return {
-        canCommand: context.editor.can,
-        editor: context.editor,
-        editorState: context.editor.state,
-      };
-    },
+  const state = useEditorState({
+    editor,
+    selector: ({ editor: current }) => ({
+      editor: current,
+      editorState: current?.state,
+    }),
   });
 
-  return editorState ?? { editor: null };
+  return { editor, editorState: state?.editorState };
 }
