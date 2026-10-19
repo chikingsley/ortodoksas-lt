@@ -18,7 +18,7 @@ describe("publication database read budgets", () => {
     INSERT INTO articles(id,translation_group_id,language,slug,title,summary,body_json,status,section,published_at,created_at,updated_at)
     SELECT 'budget-article-' || n, 'budget-group-' || n, 'lt', '2026/budget-' || n,
       'Budget article ' || n, 'Publication read budget', '{"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"Read budget fixture"}]}]}',
-      'published', 'Budget section ' || (n % 3), 1704067200000 + n * 1000, 1, 1 FROM numbers
+      'published', 'Budget section ' || (n % 300), 1704067200000 + n * 1000, 1, 1 FROM numbers
   `),
     ]);
   });
@@ -130,24 +130,65 @@ describe("publication database read budgets", () => {
       "SELECT * FROM publication_counts WHERE language = 'lt' AND section LIKE 'Budget section %'"
     ).all();
 
-    expect(summaries.results).toHaveLength(3);
-    expect(summaries.meta.rows_read).toBeLessThan(30);
+    expect(summaries.results).toHaveLength(300);
+    expect(summaries.meta.rows_read).toBeLessThanOrEqual(400);
 
-    await env.DB.prepare(
+    const unpublished = await env.DB.prepare(
       "UPDATE articles SET status = 'draft' WHERE id = 'budget-article-4'"
     ).run();
+
+    expect(unpublished.meta.rows_read).toBeLessThanOrEqual(50);
     await expect(totals()).resolves.toBe((before ?? 0) - 1);
     await env.DB.prepare(
       "UPDATE articles SET status = 'published', section = 'Changed section' WHERE id = 'budget-article-4'"
     ).run();
     await expect(totals()).resolves.toBe(before);
-    await env.DB.prepare(
+
+    const reclassified = await env.DB.prepare(
       "UPDATE publication_groups SET kind = 'page' WHERE id = 'budget-group-4'"
     ).run();
+
+    expect(reclassified.meta.rows_read).toBeLessThanOrEqual(50);
     await expect(totals()).resolves.toBe((before ?? 0) - 1);
-    await env.DB.prepare(
+
+    const deleted = await env.DB.prepare(
       "DELETE FROM articles WHERE id = 'budget-article-5'"
     ).run();
+
+    expect(deleted.meta.rows_read).toBeLessThanOrEqual(50);
     await expect(totals()).resolves.toBe((before ?? 0) - 2);
+
+    const lastEdition = await env.DB.prepare(
+      "DELETE FROM articles WHERE id = 'budget-article-6'"
+    ).run();
+
+    expect(lastEdition.meta.rows_read).toBeLessThanOrEqual(50);
+
+    const groupDeleted = await env.DB.prepare(
+      "DELETE FROM publication_groups WHERE id = 'budget-group-6'"
+    ).run();
+
+    expect(groupDeleted.meta.rows_read).toBeLessThanOrEqual(50);
+    await expect(totals()).resolves.toBe((before ?? 0) - 3);
+  });
+
+  it("reclassifies only the affected multilingual group", async () => {
+    await env.DB.prepare(`INSERT INTO articles(id,translation_group_id,language,slug,title,body_json,status,published_at,created_at,updated_at,section)
+      SELECT 'budget-russian',translation_group_id,'ru',slug,'Russian fixture',body_json,status,published_at,1,1,section FROM articles WHERE id='budget-article-1'`).run();
+    const before = await totals();
+
+    const hidden = await env.DB.prepare(
+      "UPDATE publication_groups SET kind='page' WHERE id='budget-group-1'"
+    ).run();
+
+    expect(hidden.meta.rows_read).toBeLessThanOrEqual(50);
+    await expect(totals()).resolves.toBe((before ?? 0) - 2);
+
+    const restored = await env.DB.prepare(
+      "UPDATE publication_groups SET kind='article' WHERE id='budget-group-1'"
+    ).run();
+
+    expect(restored.meta.rows_read).toBeLessThanOrEqual(50);
+    await expect(totals()).resolves.toBe(before);
   });
 });

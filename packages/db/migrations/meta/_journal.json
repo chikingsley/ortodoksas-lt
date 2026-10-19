@@ -134,6 +134,20 @@
       "when": 1792319748907,
       "tag": "0020_publication_read_budget",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "6",
+      "when": 1792380168154,
+      "tag": "0021_publication_write_budget",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "6",
+      "when": 1792380308713,
+      "tag": "0022_publication_reference_indexes",
+      "breakpoints": true
     }
   ]
 }

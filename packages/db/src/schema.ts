@@ -133,6 +133,10 @@ export const articles = sqliteTable(
     index("articles_public_hero_date_idx")
       .on(table.status, table.language, sql`${table.publishedAt} DESC`)
       .where(sql`${table.heroMediaId} IS NOT NULL`),
+    index("articles_translation_source_idx").on(
+      table.translationSourceArticleId
+    ),
+    index("articles_hero_media_idx").on(table.heroMediaId),
     index("articles_translation_group_idx").on(table.translationGroupId),
   ]
 );
@@ -164,6 +168,7 @@ export const translationRuns = sqliteTable(
       table.targetLanguage,
       table.createdAt
     ),
+    index("translation_runs_target_idx").on(table.targetArticleId),
     index("translation_runs_status_idx").on(table.status, table.createdAt),
   ]
 );
@@ -249,6 +254,7 @@ export const homepagePlacements = sqliteTable(
       table.slot,
       table.position
     ),
+    index("homepage_placements_article_idx").on(table.articleId),
     index("homepage_placements_layout_revision_idx").on(table.layoutRevision),
   ]
 );

@@ -45,7 +45,7 @@ The old esbuild transitive development dependency is overridden to 0.28.2. brace
 
 ## Live measurements and release result
 
-The live migration preserved all article, publication-group, media and revision counts. Integrity checks passed. The complete pnpm check gate passed on both repositories, including 210 Vitest tests across them and OBL source-migration tests. Both production dependency audits report zero vulnerabilities.
+The initial read-budget migration preserved all article, publication-group, media and revision counts. Integrity checks passed. The complete pnpm check gate passed on both repositories, including 212 Vitest tests across them and OBL source-migration tests. Both production dependency audits report zero vulnerabilities.
 
 | Live D1 operation                  | Rows read |
 | ---------------------------------- | --------: |
@@ -56,3 +56,7 @@ The live migration preserved all article, publication-group, media and revision 
 | Complete month summary             |       914 |
 
 The previous Ortodoksas full Lithuanian catalogue query read 4,928 rows. The public cache hit path executes the one-row revision lookup. Live OBL checks confirmed MISS followed by HIT for its homepage, news and missing-page responses. An injected lint violation was rejected by both migration gates.
+
+## Review follow-up: write budgets
+
+Archive-count triggers now update the affected edition or publication group and skip unchanged publication metadata. Translation-source, translation-target, hero-media and homepage-article indexes also bound reference checks. With 3,000 articles and 300 archive buckets, article unpublishing and deletion, group reclassification and empty-group deletion each stay within 50 rows read. The earlier article deletion read 6,019 rows. Multilingual group reclassification and restoration preserve the archive totals. Both live databases received these additive migrations with unchanged summary data.
