@@ -1,10 +1,10 @@
-import { env } from "cloudflare:workers";
 import { pageTemplateSchema } from "@ortodoksas-lt/content/site";
 import type {
   TranslationKind,
   TranslationReviewStatus,
 } from "@ortodoksas-lt/content/translation";
 import { articles, mediaAssets, publicationGroups } from "@ortodoksas-lt/db";
+import { env } from "cloudflare:workers";
 import { and, desc, eq, inArray } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
 
@@ -12,6 +12,7 @@ import type { CatalogEntry } from "../components/publication/publication";
 import type { SiteLocale } from "../i18n/config";
 
 export type ArticleRow = typeof articles.$inferSelect;
+
 export type PublicationRow = Pick<
   ArticleRow,
   | "byline"
@@ -69,6 +70,7 @@ export function articlePath(slug: string) {
 
 export function parseLabels(value: string) {
   const parsed: unknown = JSON.parse(value);
+
   return Array.isArray(parsed)
     ? parsed.filter((label): label is string => typeof label === "string")
     : [];
@@ -76,13 +78,16 @@ export function parseLabels(value: string) {
 
 export async function heroMap(rows: Pick<ArticleRow, "heroMediaId">[]) {
   const ids = [...new Set(rows.flatMap((row) => row.heroMediaId ?? []))];
+
   if (ids.length === 0) {
     return new Map<string, string>();
   }
+
   const batches = Array.from(
     { length: Math.ceil(ids.length / 100) },
     (_, index) => ids.slice(index * 100, index * 100 + 100)
   );
+
   const media = (
     await Promise.all(
       batches.map((batch) =>
@@ -93,6 +98,7 @@ export async function heroMap(rows: Pick<ArticleRow, "heroMediaId">[]) {
       )
     )
   ).flat();
+
   return new Map(media.map((asset) => [asset.id, asset.altText]));
 }
 
@@ -107,6 +113,7 @@ export function catalogEntry(
     placement?.slot === "feed"
       ? placement.slot
       : undefined;
+
   return {
     byline: row.byline,
     bylineType: row.bylineType === "organization" ? "organization" : "person",

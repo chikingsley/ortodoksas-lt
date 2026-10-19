@@ -1,11 +1,14 @@
 ---
 import SiteLayout from "../components/layout/SiteLayout.astro";
-import { localeShells, type SiteLocale } from "../i18n/config";
+import { localeShells } from '../i18n/config';
+import type { SiteLocale } from '../i18n/config';
 
 const requestedLocale = Astro.url.pathname.split("/")[1];
+
 const locale: SiteLocale = localeShells.includes(requestedLocale as never)
   ? (requestedLocale as SiteLocale)
   : "lt";
+
 const copy = {
   be: {
     archive: "Адкрыць публікацыі",
@@ -38,6 +41,7 @@ const copy = {
     title: "Сторінку не знайдено",
   },
 }[locale];
+
 const homeHref = locale === "lt" ? "/archyvas" : `/${locale}#articles`;
 ---
 

@@ -11,6 +11,7 @@ export function DirectoryUnsavedChanges({ isDirty }: { isDirty: boolean }) {
     shouldBlockFn: () => isDirty,
     withResolver: true,
   });
+
   const handleOpenChange = useCallback(
     (open: boolean) => {
       if (!open && navigationBlocker.status === "blocked") {
@@ -19,11 +20,13 @@ export function DirectoryUnsavedChanges({ isDirty }: { isDirty: boolean }) {
     },
     [navigationBlocker]
   );
+
   const discardAndLeave = useCallback(() => {
     if (navigationBlocker.status === "blocked") {
       navigationBlocker.proceed();
     }
   }, [navigationBlocker]);
+
   const keepEditing = useCallback(() => {
     if (navigationBlocker.status === "blocked") {
       navigationBlocker.reset();
@@ -39,7 +42,7 @@ export function DirectoryUnsavedChanges({ isDirty }: { isDirty: boolean }) {
       title="Leave this record?"
     >
       <div className="grid gap-5 p-5">
-        <p className="m-0 text-muted-foreground text-sm leading-6">
+        <p className="text-muted-foreground m-0 text-sm leading-6">
           Leaving now discards the current editing session. The latest saved
           record stays available in Studio.
         </p>

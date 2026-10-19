@@ -1,5 +1,6 @@
 import type { ChainedCommands, Editor } from "@tiptap/react";
 import { useCallback, useEffect, useState } from "react";
+
 // --- Icons ---
 import { AlignCenterIcon } from "@/components/tiptap-icons/align-center-icon";
 import { AlignJustifyIcon } from "@/components/tiptap-icons/align-justify-icon";

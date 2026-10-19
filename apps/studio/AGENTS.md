@@ -6,7 +6,7 @@
 - Store canonical article bodies as Tiptap JSON. Use the shared extension manifest for editing, validation, preview, and static rendering.
 - Use D1 for editorial records and R2 for media. Generate binding types after every Wrangler configuration change.
 - Keep copied shadcn components in `src/components/ui` and use Base UI primitives.
-- Use Ultracite and Biome as the formatter and linter. Keep repository hooks absent.
+- Use Ultracite with Oxlint and Oxfmt as the formatter and linter. Keep repository hooks absent.
 - Run `pnpm check` before handoff.
 
 ## Ultracite Code Standards
@@ -15,13 +15,13 @@ This project uses **Ultracite**, a zero-config preset that enforces strict code 
 
 ## Quick Reference
 
-- **Format code**: `pnpm dlx ultracite fix`
-- **Check for issues**: `pnpm dlx ultracite check`
-- **Diagnose setup**: `pnpm dlx ultracite doctor`
+- **Format code**: `pnpm exec ultracite fix`
+- **Check for issues**: `pnpm exec ultracite check`
+- **Diagnose setup**: `pnpm exec ultracite doctor`
 
-Biome (the underlying engine) provides robust linting and formatting. Most issues are automatically fixable.
+Oxlint + Oxfmt (the underlying engine) provides robust linting and formatting. Most issues are automatically fixable.
 
-______________________________________________________________________
+---
 
 ## Core Principles
 
@@ -112,7 +112,7 @@ Write code that is **accessible, performant, type-safe, and maintainable**. Focu
 
 - Use `class` and `for` attributes (not `className` or `htmlFor`)
 
-______________________________________________________________________
+---
 
 ## Testing
 
@@ -121,17 +121,17 @@ ______________________________________________________________________
 - Don't use `.only` or `.skip` in committed code
 - Keep test suites reasonably flat - avoid excessive `describe` nesting
 
-## When Biome Can't Help
+## When Oxlint + Oxfmt Can't Help
 
-Biome's linter will catch most issues automatically. Focus your attention on:
+Oxlint + Oxfmt's linter will catch most issues automatically. Focus your attention on:
 
-1. **Business logic correctness** - Biome can't validate your algorithms
+1. **Business logic correctness** - Oxlint + Oxfmt can't validate your algorithms
 1. **Meaningful naming** - Use descriptive names for functions, variables, and types
 1. **Architecture decisions** - Component structure, data flow, and API design
 1. **Edge cases** - Handle boundary conditions and error states
 1. **User experience** - Accessibility, performance, and usability considerations
 1. **Documentation** - Add comments for complex logic, but prefer self-documenting code
 
-______________________________________________________________________
+---
 
-Most formatting and common issues are automatically fixed by Biome. Run `pnpm dlx ultracite fix` before committing to ensure compliance.
+Most formatting and common issues are automatically fixed by Oxlint + Oxfmt. Run `pnpm exec ultracite fix` before committing to ensure compliance.

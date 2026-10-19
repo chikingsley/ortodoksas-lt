@@ -12,11 +12,13 @@ export async function GET() {
     getCatalog(),
     getArticles(),
     getSections(),
-    ...localeShells.map((locale) => getCatalog(locale)),
+    ...localeShells.map(async (locale) => getCatalog(locale)),
   ]);
+
   const localizedEntries = localeShells.flatMap((locale, index) =>
     (localizedCatalogs[index] ?? []).map((page) => ({ locale, page }))
   );
+
   const paths = [
     "/",
     "/archyvas",
@@ -26,9 +28,13 @@ export async function GET() {
     ...sections.map((section) => `/tema/${sectionSlug(section)}`),
     ...pages.map((page) => page.path),
   ];
+
   const lastModified = new Map(
     [
-      ...articles.map((entry) => ({ path: entry.path, published: entry.published })),
+      ...articles.map((entry) => ({
+        path: entry.path,
+        published: entry.published,
+      })),
       ...localizedEntries.map(({ locale, page }) => ({
         path: `/${locale}${page.path}`,
         published: page.published,
@@ -37,12 +43,15 @@ export async function GET() {
       .filter((entry) => entry.published)
       .map((entry) => [entry.path, entry.published as string])
   );
+
   const urls = [...new Set(paths)]
     .map((path) => {
       const modified = lastModified.get(path);
+
       return `<url><loc>${escapeXml(absoluteUrl(path))}</loc>${modified ? `<lastmod>${new Date(modified).toISOString()}</lastmod>` : ""}</url>`;
     })
     .join("");
+
   return new Response(
     `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}</urlset>`,
     { headers: { "Content-Type": "application/xml; charset=utf-8" } }

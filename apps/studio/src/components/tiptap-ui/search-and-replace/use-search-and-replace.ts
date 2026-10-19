@@ -2,11 +2,11 @@ import type { FindAndReplaceStorage } from "@tiptap/extension-find-and-replace";
 import type { Editor } from "@tiptap/react";
 import { useCurrentEditor } from "@tiptap/react";
 import { useCallback, useEffect, useState } from "react";
+
 // --- Icons ---
 import { SearchIcon } from "@/components/tiptap-icons/search-icon";
 // --- Hooks ---
 import { useTiptapEditor } from "@/hooks/use-tiptap-editor";
-
 // --- Lib ---
 import { isExtensionAvailable } from "@/lib/tiptap-utils";
 

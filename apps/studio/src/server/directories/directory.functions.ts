@@ -1,11 +1,12 @@
-import { env } from "cloudflare:workers";
 import {
   communityEditorSchema,
   personEditorSchema,
 } from "@ortodoksas-lt/content/directory";
 import { queryOptions } from "@tanstack/react-query";
 import { createServerFn } from "@tanstack/react-start";
+import { env } from "cloudflare:workers";
 import { z } from "zod";
+
 import { requireStudioEditor } from "../auth";
 import { getDatabase } from "../db.server";
 import { requireStudioWritesOpen } from "../write-mode";
@@ -26,7 +27,8 @@ const communityAddressSearchSchema = z.object({
 export const loadPeopleDirectory = createServerFn({ method: "GET" }).handler(
   async () => {
     await requireStudioEditor(env);
-    return listPeopleDirectory(getDatabase(env.DB));
+
+    return await listPeopleDirectory(getDatabase(env.DB));
   }
 );
 
@@ -35,7 +37,8 @@ export const savePersonDirectoryMutation = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     await requireStudioEditor(env);
     requireStudioWritesOpen(env);
-    return savePersonDirectory({
+
+    return await savePersonDirectory({
       database: getDatabase(env.DB),
       payload: data,
     });
@@ -44,7 +47,8 @@ export const savePersonDirectoryMutation = createServerFn({ method: "POST" })
 export const loadCommunityDirectory = createServerFn({ method: "GET" }).handler(
   async () => {
     await requireStudioEditor(env);
-    return listCommunityDirectory(getDatabase(env.DB));
+
+    return await listCommunityDirectory(getDatabase(env.DB));
   }
 );
 
@@ -53,7 +57,8 @@ export const saveCommunityDirectoryMutation = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     await requireStudioEditor(env);
     requireStudioWritesOpen(env);
-    return saveCommunityDirectory({
+
+    return await saveCommunityDirectory({
       database: getDatabase(env.DB),
       payload: data,
     });
@@ -63,17 +68,18 @@ export const searchCommunityAddressesQuery = createServerFn({ method: "GET" })
   .validator((input: unknown) => communityAddressSearchSchema.parse(input))
   .handler(async ({ data }) => {
     await requireStudioEditor(env);
-    return searchCommunityAddresses(data.query);
+
+    return await searchCommunityAddresses(data.query);
   });
 
 export const peopleDirectoryQueryOptions = () =>
   queryOptions({
-    queryFn: () => loadPeopleDirectory(),
+    queryFn: async () => loadPeopleDirectory(),
     queryKey: ["studio", "people-directory"] as const,
   });
 
 export const communityDirectoryQueryOptions = () =>
   queryOptions({
-    queryFn: () => loadCommunityDirectory(),
+    queryFn: async () => loadCommunityDirectory(),
     queryKey: ["studio", "community-directory"] as const,
   });

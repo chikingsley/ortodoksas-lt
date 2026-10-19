@@ -2,6 +2,7 @@
 
 import type { Editor } from "@tiptap/react";
 import { useEffect, useState } from "react";
+
 // --- Icons ---
 import { HeadingIcon } from "@/components/tiptap-icons/heading-icon";
 // --- Tiptap UI ---

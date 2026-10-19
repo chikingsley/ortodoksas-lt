@@ -7,7 +7,9 @@ import type {
   TranslationKind,
   TranslationReviewStatus,
 } from "@ortodoksas-lt/content/translation";
-import { localeMetadata, type SiteLocale } from "../../i18n/config";
+
+import { localeMetadata } from "../../i18n/config";
+import type { SiteLocale } from "../../i18n/config";
 import { ui } from "../../i18n/ui";
 import { site } from "../../site";
 
@@ -43,6 +45,7 @@ export interface ContentPage extends CatalogEntry {
 }
 
 export type LocalizedPage = ContentPage & { locale: Exclude<SiteLocale, "lt"> };
+
 export type LocalizedArticle = LocalizedPage & { kind: "article" };
 
 export interface LocaleDestination {
@@ -52,11 +55,15 @@ export interface LocaleDestination {
 
 const imageSourcePattern = /\bsrc\s*=\s*["']([^"']+)["']/i;
 const firstMediaTablePattern = /<table\b[\s\S]*?<img\b[^>]*>[\s\S]*?<\/table>/i;
+
 const standaloneStrongHeadingPattern =
   /<p>\s*<strong>([^<]{1,180})<\/strong>\s*<\/p>/gi;
+
 const youtubeIframePattern = /<iframe\b[^>]*><\/iframe\s*>/gi;
+
 const youtubeEmbedSourcePattern =
   /\bsrc\s*=\s*["'](https:\/\/www\.youtube-nocookie\.com\/embed\/[A-Za-z0-9_-]+(?:\?[^"']*)?)["']/i;
+
 const leadFigurePattern = /<figure\b[^>]*\bdata-figure-role=["']lead["']/i;
 const openingFigurePattern = /^\s*<figure\b/i;
 const figurePattern = /<figure\b[^>]*>[\s\S]*?<\/figure>/gi;
@@ -71,6 +78,7 @@ export function formatDate(
   if (!value) {
     return ui[locale].undated;
   }
+
   return new Intl.DateTimeFormat(localeMetadata[locale].dateLocale, {
     day: "numeric",
     month: "long",
@@ -81,21 +89,22 @@ export function formatDate(
 export function normalizeText(value: string) {
   return value
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
+    .replaceAll(/[\u0300-\u036F]/g, "")
     .toLocaleLowerCase("lt");
 }
 
 export function sectionSlug(section: string) {
   return normalizeText(section)
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
+    .replaceAll(/[^a-z0-9]+/g, "-")
+    .replaceAll(/^-|-$/g, "");
 }
 
 export function excerpt(value: string, length = 180) {
   const text = value
-    .replace(/<[^>]+>/g, " ")
-    .replace(/\s+/g, " ")
+    .replaceAll(/<[^>]+>/g, " ")
+    .replaceAll(/\s+/g, " ")
     .trim();
+
   return text.length > length
     ? `${text.slice(0, length - 1).trimEnd()}…`
     : text;
@@ -110,52 +119,64 @@ interface CleanHtmlOptions {
 export function cleanHtml(value: string, options: CleanHtmlOptions = {}) {
   const { hero, heroMediaId, removeFirstMedia = false } = options;
   const trustedYoutubeFrames: string[] = [];
+
   const cleaned = value
-    .replace(/<script[\s\S]*?<\/script>/gi, "")
-    .replace(/<style[\s\S]*?<\/style>/gi, "")
-    .replace(/\s+on[a-z]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, "")
+    .replaceAll(/<script[\s\S]*?<\/script>/gi, "")
+    .replaceAll(/<style[\s\S]*?<\/style>/gi, "")
+    .replaceAll(/\s+on[a-z]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, "")
     .replace(youtubeIframePattern, (frame) => {
       if (!youtubeEmbedSourcePattern.test(frame)) {
         return "";
       }
+
       const index = trustedYoutubeFrames.push(frame) - 1;
+
       return `<!--canonical-youtube-${index}-->`;
     })
-    .replace(/<(iframe|frame|object|form)\b[\s\S]*?<\/\1\s*>/gi, "")
-    .replace(/<(?:iframe|frame|object|embed|form)\b[^>]*\/?\s*>/gi, "")
-    .replace(/<link\b[^>]*>/gi, "")
-    .replace(/<base\b[^>]*>/gi, "")
-    .replace(
+    .replaceAll(/<(iframe|frame|object|form)\b[\s\S]*?<\/\1\s*>/gi, "")
+    .replaceAll(/<(?:iframe|frame|object|embed|form)\b[^>]*\/?\s*>/gi, "")
+    .replaceAll(/<link\b[^>]*>/gi, "")
+    .replaceAll(/<base\b[^>]*>/gi, "")
+    .replaceAll(
       /\s+(?:href|src|data|action|formaction)\s*=\s*(?:"\s*(?:javascript|vbscript|file):[^"]*"|'\s*(?:javascript|vbscript|file):[^']*')/gi,
       ""
     )
     .replace(standaloneStrongHeadingPattern, "<h2>$1</h2>")
-    .replace(
+    .replaceAll(
       /<!--canonical-youtube-(\d+)-->/g,
       (_token, index: string) => trustedYoutubeFrames[Number(index)] ?? ""
     );
+
   if (!hero) {
     return cleaned;
   }
+
   const withoutHeroFigure = heroMediaId
     ? cleaned.replace(figurePattern, (figure) => {
-        const mediaId = figure.match(figureMediaIdPattern);
+        const mediaId = figureMediaIdPattern.exec(figure);
+
         return (mediaId?.[1] ?? mediaId?.[2]) === heroMediaId ? "" : figure;
       })
     : cleaned;
+
   const heroName =
     decodeURIComponent(hero).split("?")[0]?.split("/").pop() ?? "";
+
   if (!heroName) {
     return withoutHeroFigure;
   }
+
   const deduped = removeFirstMedia
     ? withoutHeroFigure.replace(firstMediaTablePattern, "")
     : withoutHeroFigure;
-  return deduped.replace(/<img\b[^>]*>/gi, (tag) => {
-    const source = tag.match(imageSourcePattern)?.[1];
+
+  return deduped.replaceAll(/<img\b[^>]*>/gi, (tag) => {
+    const source = imageSourcePattern.exec(tag)?.[1];
+
     const sourceName = source
       ? (decodeURIComponent(source).split("?")[0]?.split("/").pop() ?? "")
       : undefined;
+
     return sourceName === heroName ? "" : tag;
   });
 }
@@ -169,6 +190,7 @@ export function getInternalPublicationPaths(value: string) {
     ...new Set(
       [...value.matchAll(hrefPattern)].flatMap((match) => {
         const internalHref = parseInternalPublicationHref(match[2] ?? "");
+
         return internalHref ? [internalHref.path] : [];
       })
     ),
@@ -186,11 +208,15 @@ export function localizePublicationLinks(
       if (localizedPathPattern.test(href)) {
         return attribute;
       }
+
       const source = parseInternalPublicationHref(href);
+
       if (!source) {
         return attribute;
       }
+
       const destination = localizedPaths.get(source.path) ?? source.path;
+
       return `href=${quote}/${locale}${destination}${source.suffix}${quote}`;
     }
   );
@@ -201,6 +227,7 @@ export function canonicalizePublicationLinks(value: string) {
     hrefPattern,
     (attribute, quote: string, href: string) => {
       const canonicalHref = canonicalizePublicationHref(href);
+
       return canonicalHref === href
         ? attribute
         : `href=${quote}${canonicalHref}${quote}`;
@@ -210,11 +237,11 @@ export function canonicalizePublicationLinks(value: string) {
 
 export function escapeXml(value: string) {
   return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;");
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&apos;");
 }
 
 export function absoluteUrl(path: string) {

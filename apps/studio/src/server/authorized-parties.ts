@@ -8,11 +8,13 @@ export const parseAuthorizedParties = (
       ?.split(",")
       .map((candidate) => candidate.trim())
       .filter(Boolean) ?? [];
+
   const origins = [
     ...new Set(
       configured.map((candidate) => {
         const normalized = candidate.replace(TRAILING_SLASH_PATTERN, "");
         const url = new URL(candidate);
+
         if (
           (url.protocol !== "http:" && url.protocol !== "https:") ||
           url.origin !== normalized
@@ -21,12 +23,15 @@ export const parseAuthorizedParties = (
             `CLERK_AUTHORIZED_PARTIES requires HTTP origins; received ${candidate}`
           );
         }
+
         return normalized;
       })
     ),
   ];
+
   if (origins.length === 0) {
     throw new Error("CLERK_AUTHORIZED_PARTIES requires at least one origin");
   }
+
   return origins;
 };

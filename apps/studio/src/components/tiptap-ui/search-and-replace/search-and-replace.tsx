@@ -2,6 +2,7 @@
 
 import { forwardRef, useCallback, useEffect, useRef } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
+
 // --- Icons ---
 import { ArrowRightIcon } from "@/components/tiptap-icons/arrow-right-icon";
 import { CaseSensitiveIcon } from "@/components/tiptap-icons/case-sensitive-icon";
@@ -11,14 +12,6 @@ import { CloseIcon } from "@/components/tiptap-icons/close-icon";
 import { ExternalLinkIcon } from "@/components/tiptap-icons/external-link-icon";
 import { SearchIcon } from "@/components/tiptap-icons/search-icon";
 import { WholeWordIcon } from "@/components/tiptap-icons/whole-word-icon";
-// --- Tiptap UI ---
-import type { UseSearchAndReplaceConfig } from "@/components/tiptap-ui/search-and-replace";
-import {
-  NEXT_RESULT_SHORTCUT_KEY,
-  PREVIOUS_RESULT_SHORTCUT_KEY,
-  SEARCH_AND_REPLACE_SHORTCUT_KEY,
-  useSearchAndReplace,
-} from "@/components/tiptap-ui/search-and-replace";
 // --- UI Primitives ---
 import type { ButtonProps } from "@/components/tiptap-ui-primitive/button";
 import { Button } from "@/components/tiptap-ui-primitive/button";
@@ -36,6 +29,14 @@ import {
 } from "@/components/tiptap-ui-primitive/input-group";
 import { Separator } from "@/components/tiptap-ui-primitive/separator";
 import { Switch } from "@/components/tiptap-ui-primitive/switch";
+// --- Tiptap UI ---
+import type { UseSearchAndReplaceConfig } from "@/components/tiptap-ui/search-and-replace";
+import {
+  NEXT_RESULT_SHORTCUT_KEY,
+  PREVIOUS_RESULT_SHORTCUT_KEY,
+  SEARCH_AND_REPLACE_SHORTCUT_KEY,
+  useSearchAndReplace,
+} from "@/components/tiptap-ui/search-and-replace";
 // --- Hooks ---
 import { useComposedRef } from "@/hooks/use-composed-ref";
 // --- Lib ---
@@ -45,7 +46,8 @@ import { cn } from "@/lib/tiptap-utils";
 import "@/components/tiptap-ui/search-and-replace/search-and-replace.scss";
 
 export interface SearchAndReplaceProps
-  extends Omit<React.HTMLAttributes<HTMLDivElement>, "children">,
+  extends
+    Omit<React.HTMLAttributes<HTMLDivElement>, "children">,
     UseSearchAndReplaceConfig {
   /**
    * Whether the search input focuses itself when the panel becomes open.

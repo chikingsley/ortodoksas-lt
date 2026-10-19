@@ -1,5 +1,6 @@
 import type { JSONContent } from "@tiptap/core";
 import { z } from "zod";
+
 import { pageTemplateSchema, siteLocaleSchema } from "./site";
 
 export const articleStatusSchema = z.enum([
@@ -35,8 +36,10 @@ export const articleBylineUrlSchema = z
       if (value === "") {
         return true;
       }
+
       try {
         const { protocol } = new URL(value);
+
         return protocol === "http:" || protocol === "https:";
       } catch {
         return false;
@@ -107,6 +110,7 @@ export const createArticleSchema = z.strictObject({
 });
 
 export type CreateArticleInput = z.infer<typeof createArticleSchema>;
+
 export type TiptapDocument = z.infer<typeof tiptapDocumentSchema>;
 
 export const createInteractiveArticleSchema = createArticleSchema

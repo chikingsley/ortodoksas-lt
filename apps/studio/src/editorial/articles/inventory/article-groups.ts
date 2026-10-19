@@ -1,4 +1,6 @@
-import { type SiteLocale, siteLocales } from "@ortodoksas-lt/content/site";
+import { siteLocales } from "@ortodoksas-lt/content/site";
+import type { SiteLocale } from "@ortodoksas-lt/content/site";
+
 import type { CatalogArticle } from "../types";
 
 export const EDITION_LANGUAGES = siteLocales;
@@ -99,12 +101,14 @@ export const groupPagesByRole = (
       const canonicalOrder = pagePathsByRole[role];
       const leftIndex = canonicalOrder.indexOf(left.representative.path);
       const rightIndex = canonicalOrder.indexOf(right.representative.path);
-      if (leftIndex >= 0 || rightIndex >= 0) {
+
+      if (leftIndex !== -1 || rightIndex !== -1) {
         return (
-          (leftIndex >= 0 ? leftIndex : Number.MAX_SAFE_INTEGER) -
-          (rightIndex >= 0 ? rightIndex : Number.MAX_SAFE_INTEGER)
+          (leftIndex !== -1 ? leftIndex : Number.MAX_SAFE_INTEGER) -
+          (rightIndex !== -1 ? rightIndex : Number.MAX_SAFE_INTEGER)
         );
       }
+
       return left.representative.title.localeCompare(
         right.representative.title,
         "lt"
@@ -116,6 +120,7 @@ export const groupPagesByRole = (
     if (role === "other") {
       return roleGroups.length > 0;
     }
+
     return includeEmptyRoles || roleGroups.length > 0;
   });
 };
@@ -131,6 +136,7 @@ export const groupArticles = (articles: CatalogArticle[]): ArticleGroup[] => {
   for (const article of articles) {
     const key = article.translationGroupId || `article:${article.id}`;
     const editions = grouped.get(key);
+
     if (editions) {
       editions.push(article);
     } else {
@@ -143,6 +149,7 @@ export const groupArticles = (articles: CatalogArticle[]): ArticleGroup[] => {
       const sortedEditions = editions.toSorted((left, right) =>
         (right.published ?? "").localeCompare(left.published ?? "")
       );
+
       const representative = preferredRepresentative(sortedEditions);
 
       return {
@@ -164,6 +171,7 @@ export const groupArticles = (articles: CatalogArticle[]): ArticleGroup[] => {
       const byPublication = (right.latestPublished ?? "").localeCompare(
         left.latestPublished ?? ""
       );
+
       return (
         byPublication ||
         left.representative.title.localeCompare(
@@ -188,11 +196,14 @@ export const filterArticleGroups = (
 
   return groups.filter((group) => {
     const articles = Object.values(group.editions);
+
     const matchesSection =
       section === "All sections" ||
       articles.some((article) => article.section === section);
+
     const matchesStatus =
       status === "all" || articles.some((article) => article.status === status);
+
     const matchesQuery =
       normalized.length === 0 ||
       articles.some((article) =>
@@ -207,12 +218,15 @@ export const filterArticleGroups = (
 
 export const getGroupPublicationSummary = (group: ArticleGroup) => {
   const articles = Object.values(group.editions);
+
   const published = articles.filter(
     (article) => article.status === "published"
   ).length;
+
   const scheduled = articles.filter(
     (article) => article.status === "scheduled"
   ).length;
+
   const drafts = articles.filter(
     (article) => article.status === "draft"
   ).length;
@@ -220,11 +234,14 @@ export const getGroupPublicationSummary = (group: ArticleGroup) => {
   if (published > 0) {
     return `${published} / ${EDITION_LANGUAGES.length} published`;
   }
+
   if (scheduled > 0) {
     return `${scheduled} scheduled`;
   }
+
   if (drafts > 0) {
     return `${drafts} ${drafts === 1 ? "draft" : "drafts"}`;
   }
+
   return "Archived";
 };

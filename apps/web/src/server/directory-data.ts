@@ -43,10 +43,13 @@ export async function getPeopleDirectory(locale: SiteLocale) {
     )
     .where(eq(people.status, "published"))
     .orderBy(asc(people.sortOrder));
+
   const ids = records.map(({ id }) => id);
+
   if (ids.length === 0) {
     return [];
   }
+
   const [positions, contacts, media] = await Promise.all([
     database()
       .select({
@@ -119,6 +122,7 @@ export async function getPeopleDirectory(locale: SiteLocale) {
       .where(inArray(personMedia.personId, ids))
       .orderBy(asc(personMedia.sortOrder)),
   ]);
+
   return records.map(({ biographyJson, ...record }) => ({
     ...record,
     biographyHtml: renderArticleBody(JSON.parse(biographyJson)),
@@ -133,6 +137,7 @@ export async function getPersonDirectoryEntry(
   slug: string
 ) {
   const records = await getPeopleDirectory(locale);
+
   return records.find((person) => person.slug === slug);
 }
 
@@ -159,10 +164,13 @@ export async function getCommunityDirectory(locale: SiteLocale) {
     )
     .where(eq(communities.status, "published"))
     .orderBy(asc(communities.sortOrder));
+
   const ids = records.map(({ id }) => id);
+
   if (ids.length === 0) {
     return [];
   }
+
   const [contacts, services, media] = await Promise.all([
     database()
       .select({
@@ -221,6 +229,7 @@ export async function getCommunityDirectory(locale: SiteLocale) {
       .where(inArray(communityMedia.communityId, ids))
       .orderBy(asc(communityMedia.sortOrder)),
   ]);
+
   return records.map((record) => ({
     ...record,
     contacts: contacts.filter(({ communityId }) => communityId === record.id),

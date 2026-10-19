@@ -1,6 +1,7 @@
 import type { CommunityEditorInput } from "@ortodoksas-lt/content/directory";
 import type { SiteLocale } from "@ortodoksas-lt/content/site";
-import { type ChangeEvent, useCallback } from "react";
+import { useCallback } from "react";
+import type { ChangeEvent } from "react";
 
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -41,12 +42,16 @@ export function CommunityOverviewFields({
   onNameChange,
 }: OverviewProps) {
   const changeName = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => onNameChange(event.target.value),
+    (event: ChangeEvent<HTMLInputElement>) => {
+      onNameChange(event.target.value);
+    },
     [onNameChange]
   );
+
   const changeDescription = useCallback(
-    (event: ChangeEvent<HTMLTextAreaElement>) =>
-      onDescriptionChange(event.target.value),
+    (event: ChangeEvent<HTMLTextAreaElement>) => {
+      onDescriptionChange(event.target.value);
+    },
     [onDescriptionChange]
   );
 
@@ -97,8 +102,9 @@ export function CommunityOperationsFields({
   type,
 }: OperationsProps) {
   const changeNotice = useCallback(
-    (event: ChangeEvent<HTMLTextAreaElement>) =>
-      onNoticeChange(event.target.value),
+    (event: ChangeEvent<HTMLTextAreaElement>) => {
+      onNoticeChange(event.target.value);
+    },
     [onNoticeChange]
   );
 

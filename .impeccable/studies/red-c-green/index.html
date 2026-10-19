@@ -7,14 +7,16 @@
     <style>
       @font-face {
         font-family: "Playfair Display";
-        src: url("../../../apps/web/public/assets/brand/fonts/PlayfairDisplay-Variable.ttf") format("truetype");
+        src: url("../../../apps/web/public/assets/brand/fonts/PlayfairDisplay-Variable.ttf")
+          format("truetype");
         font-weight: 400 900;
         font-display: swap;
       }
 
       @font-face {
         font-family: Arimo;
-        src: url("../../../apps/web/public/assets/brand/fonts/Arimo-Variable.ttf") format("truetype");
+        src: url("../../../apps/web/public/assets/brand/fonts/Arimo-Variable.ttf")
+          format("truetype");
         font-weight: 400 700;
         font-display: swap;
       }
@@ -75,7 +77,6 @@
         outline: 2px solid #2a4782;
         outline-offset: 4px;
       }
-
 
       .page {
         width: min(100%, 1264px);
@@ -347,7 +348,8 @@
         gap: var(--space-105);
         align-items: center;
         min-height: 72px;
-        padding: var(--space-105) calc(var(--space-4) + var(--space-1)) var(--space-105) var(--space-2);
+        padding: var(--space-105) calc(var(--space-4) + var(--space-1))
+          var(--space-105) var(--space-2);
         overflow: hidden;
         color: #fff;
       }
@@ -359,7 +361,8 @@
         bottom: 0;
         width: 20px;
         content: "";
-        background: url("../../../apps/web/public/assets/brand/production/canva-patterns/motif-gold-chain.png") center / cover;
+        background: url("../../../apps/web/public/assets/brand/production/canva-patterns/motif-gold-chain.png")
+          center / cover;
       }
 
       body[data-motif="off"] .service-grid a::after {
@@ -951,92 +954,310 @@
           margin-top: var(--space-2);
           font-size: 8px;
         }
-
       }
     </style>
   </head>
   <body>
-
     <main class="page">
       <header>
         <div class="site-width masthead">
-          <a class="institution" href="#" aria-label="Visuotinis Patriarchatas ir Egzarchatas Lietuvoje">
-            <img class="patriarchate-emblem" src="../../../apps/web/public/assets/brand/source/ecumenical-patriarchate-emblem.svg" alt="Visuotinis Patriarchatas" width="46" height="46" />
-            <span class="exarchate"><img src="../../../apps/web/public/assets/brand/production/exarchate-crest-client.png" alt="" /><span class="exarchate-wordmark"><span>VISUOTINIO</span><span>PATRIARCHATO</span><span>EGZARCHATAS</span><span>LIETUVOJE</span></span></span>
+          <a
+            class="institution"
+            href="#"
+            aria-label="Visuotinis Patriarchatas ir Egzarchatas Lietuvoje"
+          >
+            <img
+              class="patriarchate-emblem"
+              src="../../../apps/web/public/assets/brand/source/ecumenical-patriarchate-emblem.svg"
+              alt="Visuotinis Patriarchatas"
+              width="46"
+              height="46"
+            />
+            <span class="exarchate"
+              ><img
+                src="../../../apps/web/public/assets/brand/production/exarchate-crest-client.png"
+                alt=""
+              /><span class="exarchate-wordmark"
+                ><span>VISUOTINIO</span><span>PATRIARCHATO</span
+                ><span>EGZARCHATAS</span><span>LIETUVOJE</span></span
+              ></span
+            >
           </a>
           <span class="identity-rule" aria-hidden="true"></span>
-          <a class="publication" href="#"><strong>ortodoksas.lt</strong><span>Bažnyčios leidinys</span></a>
+          <a class="publication" href="#"
+            ><strong>ortodoksas.lt</strong><span>Bažnyčios leidinys</span></a
+          >
           <nav class="languages" aria-label="Kalbos">
-            <a class="active" href="#" lang="lt">LT</a><a href="#" lang="en">EN</a><a href="#" lang="ru">RU</a><a href="#" lang="uk">UA</a><a href="#" lang="be">BY</a>
+            <a class="active" href="#" lang="lt">LT</a
+            ><a href="#" lang="en">EN</a><a href="#" lang="ru">RU</a
+            ><a href="#" lang="uk">UA</a><a href="#" lang="be">BY</a>
           </nav>
-          <button class="menu-button" type="button" aria-label="Atverti meniu" aria-haspopup="dialog" aria-expanded="false"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"></path></svg></button>
+          <button
+            class="menu-button"
+            type="button"
+            aria-label="Atverti meniu"
+            aria-haspopup="dialog"
+            aria-expanded="false"
+          >
+            <svg aria-hidden="true" viewBox="0 0 24 24">
+              <path d="M3 6h18M3 12h18M3 18h18"></path>
+            </svg>
+          </button>
         </div>
         <nav class="primary-nav" aria-label="Pagrindinė navigacija">
-          <div class="site-width"><a href="#" aria-current="page">Pradžia</a><a href="#">Pamaldos</a><a href="#">Dvasininkai</a><a href="#">Biblioteka</a><a href="#">Kalendorius</a><a href="#">Archyvas</a></div>
+          <div class="site-width">
+            <a href="#" aria-current="page">Pradžia</a><a href="#">Pamaldos</a
+            ><a href="#">Dvasininkai</a><a href="#">Biblioteka</a
+            ><a href="#">Kalendorius</a><a href="#">Archyvas</a>
+          </div>
         </nav>
-        <dialog class="mobile-menu-sheet" id="mobile-menu" aria-labelledby="mobile-menu-title">
-          <div class="sheet-header"><strong id="mobile-menu-title">Meniu</strong><button class="sheet-close" type="button" aria-label="Užverti meniu"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m5 5 14 14M19 5 5 19"></path></svg></button></div>
-          <nav class="sheet-nav" aria-label="Mobilioji navigacija"><a href="#" aria-current="page">Pradžia</a><a href="#">Pamaldos</a><a href="#">Dvasininkai</a><a href="#">Biblioteka</a><a href="#">Kalendorius</a><a href="#">Archyvas</a></nav>
+        <dialog
+          class="mobile-menu-sheet"
+          id="mobile-menu"
+          aria-labelledby="mobile-menu-title"
+        >
+          <div class="sheet-header">
+            <strong id="mobile-menu-title">Meniu</strong
+            ><button
+              class="sheet-close"
+              type="button"
+              aria-label="Užverti meniu"
+            >
+              <svg aria-hidden="true" viewBox="0 0 24 24">
+                <path d="m5 5 14 14M19 5 5 19"></path>
+              </svg>
+            </button>
+          </div>
+          <nav class="sheet-nav" aria-label="Mobilioji navigacija">
+            <a href="#" aria-current="page">Pradžia</a><a href="#">Pamaldos</a
+            ><a href="#">Dvasininkai</a><a href="#">Biblioteka</a
+            ><a href="#">Kalendorius</a><a href="#">Archyvas</a>
+          </nav>
         </dialog>
       </header>
 
       <section class="site-width home-hero">
         <article class="lead-story">
-          <img class="lead-image" src="../../mocks/assets/hero-antalija.jpg" alt="Antalijos bažnyčios interjeras" width="960" height="593" />
+          <img
+            class="lead-image"
+            src="../../mocks/assets/hero-antalija.jpg"
+            alt="Antalijos bažnyčios interjeras"
+            width="960"
+            height="593"
+          />
           <div class="section-label">Naujienos</div>
-          <h1>Antalijos krikščionių atgimimas: kaip vyskupas ramią „pensiją“ iškeitė į misiją</h1>
-          <p class="lead-copy">Vos prieš kelerius metus Antalijos pakrantėse tebuvo saujelė stačiatikių bendruomenių, o šiandien čia veikia gyva parapija ir misija.</p>
+          <h1>
+            Antalijos krikščionių atgimimas: kaip vyskupas ramią „pensiją“
+            iškeitė į misiją
+          </h1>
+          <p class="lead-copy">
+            Vos prieš kelerius metus Antalijos pakrantėse tebuvo saujelė
+            stačiatikių bendruomenių, o šiandien čia veikia gyva parapija ir
+            misija.
+          </p>
           <a class="story-link" href="#">Skaityti daugiau →</a>
         </article>
         <div class="secondary-stories">
-          <article class="secondary-story"><img src="../../mocks/assets/card-bulgaria.jpg" alt="Bulgarijos vienuolynas" width="420" height="295" /><div><div class="section-label">Bažnyčios gyvenimas</div><h2>Bulgarijos šventosios vietos netoli kurortų</h2><p>Vienuolynai ir šventovės, kurias verta aplankyti.</p></div></article>
-          <article class="secondary-story"><img src="../../mocks/assets/card-pazaislis.jpg" alt="Pažaislio vienuolynas" width="420" height="295" /><div><div class="section-label">Bažnyčios gyvenimas</div><h2>Piligrimystė į Pažaislį (2026)</h2><p>Paskelbta data ir programa didžiajam piligriminiam žygiui.</p></div></article>
-          <article class="secondary-story"><img src="../../mocks/assets/card-sermon.jpg" alt="Pamaldos šventovėje" width="420" height="295" /><div><div class="section-label">Pamokslai</div><h2>Dievo artumas kasdienybėje</h2><p>Naujas sekmadienio pamokslas ir Evangelijos skaitiniai.</p></div></article>
-          <article class="secondary-story"><img src="https://ortodoksas.grassinside.com/media/files/557dec1277f57aff1371fa403ee1994fe029d435a6644af1db60731fd71d7266.jpg" alt="Arkadijaus vienuolyno varpinė" width="1200" height="630" /><div><div class="section-label">Tikėjimas ir kultūra</div><h2>Arkadijaus vienuolynas – „Kretos Pilėnai“</h2><p>Jaudinanti ir įkvepianti vieta bei jos istorija.</p></div></article>
+          <article class="secondary-story">
+            <img
+              src="../../mocks/assets/card-bulgaria.jpg"
+              alt="Bulgarijos vienuolynas"
+              width="420"
+              height="295"
+            />
+            <div>
+              <div class="section-label">Bažnyčios gyvenimas</div>
+              <h2>Bulgarijos šventosios vietos netoli kurortų</h2>
+              <p>Vienuolynai ir šventovės, kurias verta aplankyti.</p>
+            </div>
+          </article>
+          <article class="secondary-story">
+            <img
+              src="../../mocks/assets/card-pazaislis.jpg"
+              alt="Pažaislio vienuolynas"
+              width="420"
+              height="295"
+            />
+            <div>
+              <div class="section-label">Bažnyčios gyvenimas</div>
+              <h2>Piligrimystė į Pažaislį (2026)</h2>
+              <p>Paskelbta data ir programa didžiajam piligriminiam žygiui.</p>
+            </div>
+          </article>
+          <article class="secondary-story">
+            <img
+              src="../../mocks/assets/card-sermon.jpg"
+              alt="Pamaldos šventovėje"
+              width="420"
+              height="295"
+            />
+            <div>
+              <div class="section-label">Pamokslai</div>
+              <h2>Dievo artumas kasdienybėje</h2>
+              <p>Naujas sekmadienio pamokslas ir Evangelijos skaitiniai.</p>
+            </div>
+          </article>
+          <article class="secondary-story">
+            <img
+              src="https://ortodoksas.grassinside.com/media/files/557dec1277f57aff1371fa403ee1994fe029d435a6644af1db60731fd71d7266.jpg"
+              alt="Arkadijaus vienuolyno varpinė"
+              width="1200"
+              height="630"
+            />
+            <div>
+              <div class="section-label">Tikėjimas ir kultūra</div>
+              <h2>Arkadijaus vienuolynas – „Kretos Pilėnai“</h2>
+              <p>Jaudinanti ir įkvepianti vieta bei jos istorija.</p>
+            </div>
+          </article>
         </div>
       </section>
 
       <section class="service-band" aria-label="Praktinė informacija">
         <div class="site-width service-grid">
-          <a href="#"><svg aria-hidden="true" viewBox="0 0 32 32"><path d="M16 3v7M12.5 6.5h7M8 27h16M10 27V14l6-4 6 4v13M14 27v-7h4v7"></path></svg><span><strong>Pamaldos</strong><small>Tvarkaraščiai ir bendruomenės</small></span></a>
-          <a href="#"><svg aria-hidden="true" viewBox="0 0 32 32"><rect x="6" y="8" width="20" height="18" rx="1"></rect><path d="M10 5v6M22 5v6M6 13h20M11 18h3M18 18h3M11 22h3M18 22h3"></path></svg><span><strong>Kalendorius</strong><small>Šventės ir pasninkai</small></span></a>
-          <a href="#"><svg aria-hidden="true" viewBox="0 0 32 32"><path d="M5 7h8a3 3 0 0 1 3 3v17a4 4 0 0 0-4-4H5zM27 7h-8a3 3 0 0 0-3 3v17a4 4 0 0 1 4-4h7z"></path></svg><span><strong>Biblioteka</strong><small>Straipsniai ir knygos</small></span></a>
-          <a href="#"><svg aria-hidden="true" viewBox="0 0 32 32"><path d="M16 27S6 21 6 13.5A5.5 5.5 0 0 1 16 10a5.5 5.5 0 0 1 10 3.5C26 21 16 27 16 27Z"></path></svg><span><strong>Paremti</strong><small>Prisidėkite prie misijos</small></span></a>
+          <a href="#"
+            ><svg aria-hidden="true" viewBox="0 0 32 32">
+              <path
+                d="M16 3v7M12.5 6.5h7M8 27h16M10 27V14l6-4 6 4v13M14 27v-7h4v7"
+              ></path></svg
+            ><span
+              ><strong>Pamaldos</strong
+              ><small>Tvarkaraščiai ir bendruomenės</small></span
+            ></a
+          >
+          <a href="#"
+            ><svg aria-hidden="true" viewBox="0 0 32 32">
+              <rect x="6" y="8" width="20" height="18" rx="1"></rect>
+              <path
+                d="M10 5v6M22 5v6M6 13h20M11 18h3M18 18h3M11 22h3M18 22h3"
+              ></path></svg
+            ><span
+              ><strong>Kalendorius</strong
+              ><small>Šventės ir pasninkai</small></span
+            ></a
+          >
+          <a href="#"
+            ><svg aria-hidden="true" viewBox="0 0 32 32">
+              <path
+                d="M5 7h8a3 3 0 0 1 3 3v17a4 4 0 0 0-4-4H5zM27 7h-8a3 3 0 0 0-3 3v17a4 4 0 0 1 4-4h7z"
+              ></path></svg
+            ><span
+              ><strong>Biblioteka</strong
+              ><small>Straipsniai ir knygos</small></span
+            ></a
+          >
+          <a href="#"
+            ><svg aria-hidden="true" viewBox="0 0 32 32">
+              <path
+                d="M16 27S6 21 6 13.5A5.5 5.5 0 0 1 16 10a5.5 5.5 0 0 1 10 3.5C26 21 16 27 16 27Z"
+              ></path></svg
+            ><span
+              ><strong>Paremti</strong
+              ><small>Prisidėkite prie misijos</small></span
+            ></a
+          >
         </div>
       </section>
 
       <section class="site-width lower">
         <div>
-          <div class="section-heading"><h2>Naujausi straipsniai</h2><a href="#">Visi straipsniai →</a></div>
+          <div class="section-heading">
+            <h2>Naujausi straipsniai</h2>
+            <a href="#">Visi straipsniai →</a>
+          </div>
           <div class="cards">
-            <article class="card"><img src="../../mocks/assets/card-sermon.jpg" alt="Pamaldos šventovėje" width="420" height="295" /><div class="section-label">Tikėjimas ir kultūra</div><h3>Pasninko prasmė šiandien: apsivalymas, ne dieta</h3></article>
-            <article class="card"><img src="../../mocks/assets/card-pazaislis.jpg" alt="Pažaislio vienuolynas" width="420" height="295" /><div class="section-label">Bažnyčios gyvenimas</div><h3>Piligrimystė, bendrystė ir kelias</h3></article>
-            <article class="card"><img src="../../mocks/assets/card-bulgaria.jpg" alt="Bulgarijos vienuolynas" width="420" height="295" /><div class="section-label">Kelionės</div><h3>Šventosios vietos ir gyva tradicija</h3></article>
+            <article class="card">
+              <img
+                src="../../mocks/assets/card-sermon.jpg"
+                alt="Pamaldos šventovėje"
+                width="420"
+                height="295"
+              />
+              <div class="section-label">Tikėjimas ir kultūra</div>
+              <h3>Pasninko prasmė šiandien: apsivalymas, ne dieta</h3>
+            </article>
+            <article class="card">
+              <img
+                src="../../mocks/assets/card-pazaislis.jpg"
+                alt="Pažaislio vienuolynas"
+                width="420"
+                height="295"
+              />
+              <div class="section-label">Bažnyčios gyvenimas</div>
+              <h3>Piligrimystė, bendrystė ir kelias</h3>
+            </article>
+            <article class="card">
+              <img
+                src="../../mocks/assets/card-bulgaria.jpg"
+                alt="Bulgarijos vienuolynas"
+                width="420"
+                height="295"
+              />
+              <div class="section-label">Kelionės</div>
+              <h3>Šventosios vietos ir gyva tradicija</h3>
+            </article>
           </div>
         </div>
-        <aside class="archive"><div class="section-heading"><h2>Archyvas</h2></div><a class="archive-row" href="#"><span>2026 liepa</span><strong>18</strong></a><a class="archive-row" href="#"><span>2026 birželis</span><strong>42</strong></a><a class="archive-row" href="#"><span>2026 gegužė</span><strong>36</strong></a><a class="archive-row" href="#"><span>2026 balandis</span><strong>31</strong></a><a class="archive-all" href="#">Visas archyvas →</a></aside>
+        <aside class="archive">
+          <div class="section-heading"><h2>Archyvas</h2></div>
+          <a class="archive-row" href="#"
+            ><span>2026 liepa</span><strong>18</strong></a
+          ><a class="archive-row" href="#"
+            ><span>2026 birželis</span><strong>42</strong></a
+          ><a class="archive-row" href="#"
+            ><span>2026 gegužė</span><strong>36</strong></a
+          ><a class="archive-row" href="#"
+            ><span>2026 balandis</span><strong>31</strong></a
+          ><a class="archive-all" href="#">Visas archyvas →</a>
+        </aside>
       </section>
 
       <section class="site-width library-callout">
-        <div><h2>Biblioteka</h2><p>Biblijos komentarai ir „Kasdienė duona“, natos, troparai ir kondakai, žodynas ir katekizmas.</p><a class="story-link" href="#">Atverti biblioteką →</a></div>
-        <img src="../../../apps/web/public/assets/brand/production/canva-patterns/pattern-gold-grid.png" alt="" />
+        <div>
+          <h2>Biblioteka</h2>
+          <p>
+            Biblijos komentarai ir „Kasdienė duona“, natos, troparai ir
+            kondakai, žodynas ir katekizmas.
+          </p>
+          <a class="story-link" href="#">Atverti biblioteką →</a>
+        </div>
+        <img
+          src="../../../apps/web/public/assets/brand/production/canva-patterns/pattern-gold-grid.png"
+          alt=""
+        />
       </section>
 
       <footer class="site-footer">
         <div class="site-width footer-main">
-          <div class="footer-brand"><strong>ortodoksas.lt</strong><p>Apie Ortodoksų Bažnyčią Lietuvoje ir pasaulyje, jos tikėjimą, tradiciją ir gyvenimą.</p></div>
+          <div class="footer-brand">
+            <strong>ortodoksas.lt</strong>
+            <p>
+              Apie Ortodoksų Bažnyčią Lietuvoje ir pasaulyje, jos tikėjimą,
+              tradiciją ir gyvenimą.
+            </p>
+          </div>
           <nav class="footer-nav" aria-label="Poraštės navigacija">
-            <div><strong>Įrašai</strong><a href="#">Katekizmas</a><a href="#">Dvasininkai</a><a href="#">Biblioteka</a></div>
-            <div><strong>Susisiekti</strong><a href="#">Kontaktai</a><a href="#">Paremti veiklą</a><a href="#">Redakcija</a></div>
+            <div>
+              <strong>Įrašai</strong><a href="#">Katekizmas</a
+              ><a href="#">Dvasininkai</a><a href="#">Biblioteka</a>
+            </div>
+            <div>
+              <strong>Susisiekti</strong><a href="#">Kontaktai</a
+              ><a href="#">Paremti veiklą</a><a href="#">Redakcija</a>
+            </div>
           </nav>
         </div>
-        <div class="site-width footer-meta">Atkurta iš viešojo ortodoksas.lt archyvo<span>2012–2026</span></div>
+        <div class="site-width footer-meta">
+          Atkurta iš viešojo ortodoksas.lt archyvo<span>2012–2026</span>
+        </div>
       </footer>
-
     </main>
 
     <script>
-      document.body.dataset.motif = new URLSearchParams(location.search).get("motif") === "off" ? "off" : "on";
+      document.body.dataset.motif =
+        new URLSearchParams(location.search).get("motif") === "off"
+          ? "off"
+          : "on";
       const menuButton = document.querySelector(".menu-button");
       const menuSheet = document.querySelector(".mobile-menu-sheet");
       const menuClose = document.querySelector(".sheet-close");
@@ -1045,7 +1266,9 @@
         menuButton.setAttribute("aria-expanded", "true");
       });
       menuClose.addEventListener("click", () => menuSheet.close());
-      menuSheet.addEventListener("close", () => menuButton.setAttribute("aria-expanded", "false"));
+      menuSheet.addEventListener("close", () =>
+        menuButton.setAttribute("aria-expanded", "false")
+      );
       menuSheet.addEventListener("click", (event) => {
         if (event.target === menuSheet) menuSheet.close();
       });

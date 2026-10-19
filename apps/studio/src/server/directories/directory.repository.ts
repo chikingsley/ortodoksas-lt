@@ -59,6 +59,7 @@ export const listPeopleDirectory = async (database: StudioDatabase) => {
         updatedAt: _updatedAt,
         ...person
       } = record;
+
       return {
         ...personEditorSchema.parse(
           prepareDirectoryRecordForEditing({
@@ -158,6 +159,7 @@ export const listCommunityDirectory = async (database: StudioDatabase) => {
         updatedAt: _updatedAt,
         ...community
       } = record;
+
       return {
         ...communityEditorSchema.parse(
           prepareDirectoryRecordForEditing({

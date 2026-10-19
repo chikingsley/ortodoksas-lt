@@ -16,7 +16,7 @@ import { upsertLocalization } from "@/editorial/directories/directory-form-data"
 type Positions = PersonEditorInput["positions"];
 
 interface Props {
-  communityOptions: Array<{ label: string; value: string }>;
+  communityOptions: { label: string; value: string }[];
   locale: SiteLocale;
   onChange: (positions: Positions) => void;
   positions: Positions;
@@ -37,12 +37,13 @@ export function PersonPositionsFields({
   const replacePosition = (
     index: number,
     update: (position: Positions[number]) => Positions[number]
-  ) =>
+  ) => {
     onChange(
       positions.map((position, positionIndex) =>
         positionIndex === index ? update(position) : position
       )
     );
+  };
 
   return (
     <Section title="Positions">
@@ -50,12 +51,13 @@ export function PersonPositionsFields({
         const translated = position.localizations.find(
           (item) => item.language === locale
         );
+
         const updatePositionLocalization = (
           update: (value: { description: string; title: string }) => {
             description: string;
             title: string;
           }
-        ) =>
+        ) => {
           replacePosition(index, (current) => ({
             ...current,
             localizations: upsertLocalization(
@@ -69,7 +71,10 @@ export function PersonPositionsFields({
               (value) => ({ ...value, ...update(value) })
             ),
           }));
+        };
+
         const positionId = position.id ?? String(index);
+
         return (
           <div
             className="grid gap-4 border-t pt-4 first:border-t-0 first:pt-0"
@@ -124,7 +129,7 @@ export function PersonPositionsFields({
                 </Button>
                 <Button
                   aria-label="Remove position"
-                  onClick={() =>
+                  onClick={() => {
                     onChange(
                       positions
                         .filter((_, positionIndex) => positionIndex !== index)
@@ -132,8 +137,8 @@ export function PersonPositionsFields({
                           ...item,
                           sortOrder: itemIndex,
                         }))
-                    )
-                  }
+                    );
+                  }}
                   size="icon-sm"
                   type="button"
                   variant="ghost"
@@ -149,24 +154,24 @@ export function PersonPositionsFields({
                 </FieldLabel>
                 <Input
                   id={`position-${positionId}-role`}
-                  onChange={(event) =>
+                  onChange={(event) => {
                     replacePosition(index, (current) => ({
                       ...current,
                       roleKey: event.target.value,
-                    }))
-                  }
+                    }));
+                  }}
                   value={position.roleKey}
                 />
               </Field>
               <SelectField
                 label="Assigned community"
-                onChange={(communityId) =>
+                onChange={(communityId) => {
                   replacePosition(index, (current) => ({
                     ...current,
                     communityId:
                       communityId === "unassigned" ? null : communityId,
-                  }))
-                }
+                  }));
+                }}
                 options={[
                   { label: "Unassigned", value: "unassigned" },
                   ...communityOptions,
@@ -180,12 +185,12 @@ export function PersonPositionsFields({
               </FieldLabel>
               <Input
                 id={`position-${positionId}-title-${locale}`}
-                onChange={(event) =>
+                onChange={(event) => {
                   updatePositionLocalization((value) => ({
                     ...value,
                     title: event.target.value,
-                  }))
-                }
+                  }));
+                }}
                 value={translated?.title ?? ""}
               />
             </Field>
@@ -197,12 +202,12 @@ export function PersonPositionsFields({
               </FieldLabel>
               <Textarea
                 id={`position-${positionId}-description-${locale}`}
-                onChange={(event) =>
+                onChange={(event) => {
                   updatePositionLocalization((value) => ({
                     ...value,
                     description: event.target.value,
-                  }))
-                }
+                  }));
+                }}
                 rows={3}
                 value={translated?.description ?? ""}
               />
@@ -214,12 +219,12 @@ export function PersonPositionsFields({
                 </FieldLabel>
                 <Input
                   id={`position-${positionId}-start`}
-                  onChange={(event) =>
+                  onChange={(event) => {
                     replacePosition(index, (current) => ({
                       ...current,
                       startsAt: dateTimestamp(event.target.value),
-                    }))
-                  }
+                    }));
+                  }}
                   type="date"
                   value={dateInputValue(position.startsAt)}
                 />
@@ -230,12 +235,12 @@ export function PersonPositionsFields({
                 </FieldLabel>
                 <Input
                   id={`position-${positionId}-end`}
-                  onChange={(event) =>
+                  onChange={(event) => {
                     replacePosition(index, (current) => ({
                       ...current,
                       endsAt: dateTimestamp(event.target.value),
-                    }))
-                  }
+                    }));
+                  }}
                   type="date"
                   value={dateInputValue(position.endsAt)}
                 />
@@ -245,7 +250,7 @@ export function PersonPositionsFields({
         );
       })}
       <Button
-        onClick={() =>
+        onClick={() => {
           onChange([
             ...positions,
             {
@@ -256,8 +261,8 @@ export function PersonPositionsFields({
               sortOrder: positions.length,
               startsAt: null,
             },
-          ])
-        }
+          ]);
+        }}
         type="button"
         variant="outline"
       >

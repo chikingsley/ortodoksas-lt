@@ -1,4 +1,5 @@
 import { DatabaseSync } from "node:sqlite";
+
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import readinessMigration from "./0011_translation_readiness_backfill.sql?raw";
@@ -74,25 +75,30 @@ describe("translation readiness migration", () => {
     `);
   });
 
-  afterEach(() => database.close());
+  afterEach(() => {
+    database.close();
+  });
 
   it("backfills authoritative targets once and remains idempotent", () => {
     const suffix = crypto.randomUUID();
     const groupId = `readiness-group-${suffix}`;
     const sourceId = `readiness-source-${suffix}`;
     const targetId = `readiness-target-${suffix}`;
+
     const sourceBody = JSON.stringify({
       content: [
         { content: [{ text: "Šaltinis", type: "text" }], type: "paragraph" },
       ],
       type: "doc",
     });
+
     const targetBody = JSON.stringify({
       content: [
         { content: [{ text: "Target", type: "text" }], type: "paragraph" },
       ],
       type: "doc",
     });
+
     const sourceHash = "a".repeat(64);
 
     database
@@ -156,6 +162,7 @@ describe("translation readiness migration", () => {
         "SELECT body_json, editor_id, metadata_json, version FROM article_revisions WHERE article_id = ?"
       )
       .all(targetId);
+
     expect(revisions).toHaveLength(1);
     expect(revisions[0]).toMatchObject({
       body_json: targetBody,

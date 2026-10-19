@@ -4,9 +4,9 @@ import { requireStudioWritesOpen } from "./write-mode";
 
 describe("Studio write mode", () => {
   it("allows the standard editorial mode", () => {
-    expect(() =>
-      requireStudioWritesOpen({ STUDIO_WRITE_MODE: "open" })
-    ).not.toThrow();
+    expect(() => {
+      requireStudioWritesOpen({ STUDIO_WRITE_MODE: "open" });
+    }).not.toThrow();
   });
 
   it("returns a retryable maintenance response during cutover", () => {
@@ -17,8 +17,10 @@ describe("Studio write mode", () => {
       const response = error as Response;
       expect(response.status).toBe(503);
       expect(response.headers.get("retry-after")).toBe("300");
+
       return;
     }
+
     throw new Error("Frozen write mode must return a maintenance response");
   });
 });

@@ -51,21 +51,26 @@ export const CommunitiesDirectoryWorkspace = ({
 }: Props) => {
   const queryClient = useQueryClient();
   const { data } = useSuspenseQuery(communityDirectoryQueryOptions());
+
   const selectedId =
     recordKey === "new"
       ? null
       : (data.records.find((record) => record.id === recordKey)?.id ??
         data.records[0]?.id ??
         null);
+
   useEffect(() => {
     const normalizedRecord = selectedId ?? "new";
+
     if (recordKey !== normalizedRecord) {
       onRecordChange(normalizedRecord, true);
     }
   }, [onRecordChange, recordKey, selectedId]);
+
   const selected =
     data.records.find((record) => record.id === selectedId) ??
     communityDraft(locale);
+
   const onSaved = useCallback(
     async (id: string) => {
       await queryClient.invalidateQueries(communityDirectoryQueryOptions());
@@ -73,10 +78,10 @@ export const CommunitiesDirectoryWorkspace = ({
     },
     [onRecordChange, queryClient]
   );
-  const createRecord = useCallback(
-    () => onRecordChange("new"),
-    [onRecordChange]
-  );
+
+  const createRecord = useCallback(() => {
+    onRecordChange("new");
+  }, [onRecordChange]);
 
   return (
     <DirectoryShell

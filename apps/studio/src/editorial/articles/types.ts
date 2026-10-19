@@ -1,22 +1,26 @@
-import type {
-  TranslationKind,
-  TranslationReviewStatus,
-} from "@ortodoksas-lt/content/translation";
+import {
+  articleStatusSchema,
+  translationKindSchema,
+  translationReviewStatusSchema,
+} from "@ortodoksas-lt/content/article";
+import { z } from "zod";
 
-export interface CatalogArticle {
-  description: string;
-  hero: string | null;
-  id: string;
-  kind: "article" | "page";
-  labels: string[];
-  language: string;
-  path: string;
-  published: string | null;
-  section: string;
-  status: "draft" | "scheduled" | "published" | "archived";
-  thumbnail: string | null;
-  title: string;
-  translationGroupId: string;
-  translationKind: TranslationKind;
-  translationReviewStatus: TranslationReviewStatus;
-}
+export const catalogArticleSchema = z.object({
+  description: z.string(),
+  hero: z.string().nullable(),
+  id: z.string(),
+  kind: z.enum(["article", "page"]),
+  labels: z.array(z.string()),
+  language: z.string(),
+  path: z.string(),
+  published: z.string().nullable(),
+  section: z.string(),
+  status: articleStatusSchema,
+  thumbnail: z.string().nullable(),
+  title: z.string(),
+  translationGroupId: z.string(),
+  translationKind: translationKindSchema,
+  translationReviewStatus: translationReviewStatusSchema,
+});
+
+export type CatalogArticle = z.infer<typeof catalogArticleSchema>;

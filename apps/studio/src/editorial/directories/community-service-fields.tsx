@@ -24,7 +24,9 @@ export function CommunityServiceFields({ locale, onChange, services }: Props) {
         const translated = service.localizations.find(
           (item) => item.language === locale
         );
+
         const serviceId = service.id ?? String(index);
+
         return (
           <div
             className="grid gap-3 rounded-lg border p-3 md:grid-cols-[1fr_auto]"
@@ -36,7 +38,7 @@ export function CommunityServiceFields({ locale, onChange, services }: Props) {
               </FieldLabel>
               <Input
                 id={`service-${serviceId}-${locale}`}
-                onChange={(event) =>
+                onChange={(event) => {
                   onChange(
                     services.map((item, itemIndex) =>
                       itemIndex === index
@@ -54,16 +56,18 @@ export function CommunityServiceFields({ locale, onChange, services }: Props) {
                           }
                         : item
                     )
-                  )
-                }
+                  );
+                }}
                 value={translated?.scheduleText ?? ""}
               />
             </Field>
             <Button
               aria-label="Remove service"
-              onClick={() =>
-                onChange(services.filter((_, itemIndex) => itemIndex !== index))
-              }
+              onClick={() => {
+                onChange(
+                  services.filter((_, itemIndex) => itemIndex !== index)
+                );
+              }}
               size="icon"
               type="button"
               variant="ghost"
@@ -74,7 +78,7 @@ export function CommunityServiceFields({ locale, onChange, services }: Props) {
         );
       })}
       <Button
-        onClick={() =>
+        onClick={() => {
           onChange([
             ...services,
             {
@@ -83,8 +87,8 @@ export function CommunityServiceFields({ locale, onChange, services }: Props) {
               sortOrder: services.length,
               startsAt: null,
             },
-          ])
-        }
+          ]);
+        }}
         type="button"
         variant="outline"
       >

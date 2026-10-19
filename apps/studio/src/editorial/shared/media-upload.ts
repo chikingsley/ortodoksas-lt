@@ -36,21 +36,30 @@ export const uploadStudioMedia = async (
         error?: string;
         media?: UploadedMedia;
       } | null;
+
       if (request.status >= 200 && request.status < 300 && response?.media) {
         resolve(response.media);
+
         return;
       }
+
       reject(new Error(response?.error ?? "Image upload failed"));
     });
-    request.addEventListener("error", () =>
-      reject(new Error("Image upload failed"))
-    );
-    request.addEventListener("abort", () =>
-      reject(new Error("Upload cancelled"))
-    );
-    abortSignal?.addEventListener("abort", () => request.abort(), {
-      once: true,
+    request.addEventListener("error", () => {
+      reject(new Error("Image upload failed"));
     });
+    request.addEventListener("abort", () => {
+      reject(new Error("Upload cancelled"));
+    });
+    abortSignal?.addEventListener(
+      "abort",
+      () => {
+        request.abort();
+      },
+      {
+        once: true,
+      }
+    );
     request.send(file);
   });
 };

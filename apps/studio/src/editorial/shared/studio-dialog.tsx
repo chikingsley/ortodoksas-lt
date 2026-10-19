@@ -26,19 +26,19 @@ export function StudioDialog({
     <Dialog.Root onOpenChange={onOpenChange} open={open}>
       <Dialog.Portal>
         <Dialog.Backdrop className="fixed inset-0 z-[100] bg-[rgb(12_21_18/68%)]" />
-        <Dialog.Viewport className="fixed inset-0 z-[101] grid place-items-center p-6 max-editor-phone:p-0">
+        <Dialog.Viewport className="max-editor-phone:p-0 fixed inset-0 z-[101] grid place-items-center p-6">
           <Dialog.Popup
             className={cn(
-              "grid h-[min(860px,100%)] w-[min(1180px,100%)] grid-rows-[auto_minmax(0,1fr)] overflow-hidden rounded-[14px] bg-card shadow-[0_24px_70px_rgb(0_0_0/30%)] outline-none max-editor-phone:h-full max-editor-phone:w-full max-editor-phone:rounded-none",
+              "bg-card max-editor-phone:h-full max-editor-phone:w-full max-editor-phone:rounded-none grid h-[min(860px,100%)] w-[min(1180px,100%)] grid-rows-[auto_minmax(0,1fr)] overflow-hidden rounded-[14px] shadow-[0_24px_70px_rgb(0_0_0/30%)] outline-none",
               popupClassName
             )}
           >
             <header className="flex min-h-[62px] items-center justify-between border-b py-2.5 pr-3.5 pl-5">
               <div>
-                <Dialog.Title className="block font-bold text-sm">
+                <Dialog.Title className="block text-sm font-bold">
                   {title}
                 </Dialog.Title>
-                <Dialog.Description className="mt-0.5 block text-[11px] text-muted-foreground">
+                <Dialog.Description className="text-muted-foreground mt-0.5 block text-[11px]">
                   {description}
                 </Dialog.Description>
               </div>

@@ -4,8 +4,10 @@ import { ui } from "../../i18n/ui";
 import { getLocalizedCounterparts } from "../../server/publication-localization";
 
 interface Props { locale?: SiteLocale; }
+
 const { locale = "lt" } = Astro.props;
 const copy = ui[locale];
+
 const serviceDefinitions = [
   {
     detail: copy.serviceWorshipDescription,
@@ -32,6 +34,7 @@ const serviceDefinitions = [
     title: copy.support,
   },
 ] as const;
+
 const localizedEntries =
   locale === "lt"
     ? new Map()
@@ -39,6 +42,7 @@ const localizedEntries =
         locale,
         serviceDefinitions.map((service) => service.href)
       );
+
 const serviceLinks = serviceDefinitions.map((service) => ({
   ...service,
   href:
@@ -48,6 +52,7 @@ const serviceLinks = serviceDefinitions.map((service) => ({
         ? `/${locale}${localizedEntries.get(service.href)?.path}`
         : service.href,
 }));
+
 const motifPositions = [
   "left-1/4 -translate-x-1/2 max-sm:hidden",
   "left-1/2 -translate-x-1/2",

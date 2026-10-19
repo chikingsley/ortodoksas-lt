@@ -9,10 +9,8 @@ import {
   homepageLayoutState,
   homepagePlacements,
 } from "@ortodoksas-lt/db";
-import {
-  type annotateArticleBody,
-  getChangeKind,
-} from "@ortodoksas-lt/editor/provenance";
+import { getChangeKind } from "@ortodoksas-lt/editor/provenance";
+import type { annotateArticleBody } from "@ortodoksas-lt/editor/provenance";
 import { getArticleQualityIssues } from "@ortodoksas-lt/editor/quality";
 import { and, desc, eq, exists, notExists, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/sqlite-core";
@@ -34,9 +32,11 @@ export const sanitizeDirectoryBody = (
   if (pageTemplate === "community_directory") {
     return { content: [], type: "doc" };
   }
+
   if (pageTemplate === "people_directory") {
     return { content: body.content?.slice(0, 1) ?? [], type: "doc" };
   }
+
   return body;
 };
 
@@ -63,24 +63,31 @@ export const resolveArticleMetadataUpdate = (
     bylineType: currentBylineType,
     bylineUrl: currentBylineUrl,
   } = article;
+
   const {
     byline: requestedByline,
     bylineType: requestedBylineType,
     bylineUrl: requestedBylineUrl,
   } = update;
+
   const byline =
     requestedByline === undefined
       ? currentByline
       : optionalText(requestedByline);
+
   const bylineChanged =
     requestedByline !== undefined && byline !== currentByline;
+
   let bylineType = currentBylineType;
+
   if (requestedBylineType !== undefined) {
     bylineType = requestedBylineType;
   } else if (bylineChanged) {
     bylineType = "person";
   }
+
   let bylineUrl = currentBylineUrl;
+
   if (!byline) {
     bylineUrl = null;
   } else if (requestedBylineUrl !== undefined) {
@@ -88,6 +95,7 @@ export const resolveArticleMetadataUpdate = (
   } else if (bylineChanged) {
     bylineUrl = null;
   }
+
   return {
     byline,
     bylineType,
@@ -124,10 +132,11 @@ export const success = <T>(data: T): StudioOperationResult<T> => ({
 });
 
 export const validationIssues = (
-  issues: Array<{ message: string; path: PropertyKey[] }>
+  issues: { message: string; path: PropertyKey[] }[]
 ) =>
   issues.map((issue) => {
     const path = issue.path.map(String).join(".");
+
     return path ? `${path}: ${issue.message}` : issue.message;
   });
 
@@ -139,6 +148,7 @@ export const contentChanges = (input: {
   title: string;
 }) => {
   const changes = [...input.bodyChanges];
+
   if (input.baselineTitle !== input.title) {
     changes.push({
       afterValue: input.title,
@@ -148,6 +158,7 @@ export const contentChanges = (input: {
       provenance: textChangeProvenance(input.baselineTitle, input.title),
     });
   }
+
   if (input.baselineSummary !== input.summary) {
     changes.push({
       afterValue: input.summary || null,
@@ -157,6 +168,7 @@ export const contentChanges = (input: {
       provenance: textChangeProvenance(input.baselineSummary, input.summary),
     });
   }
+
   return changes;
 };
 
@@ -196,6 +208,7 @@ export const resolveEditionIdentity = (
       ok: false,
     };
   }
+
   if (hasEditionIdentityChanged(article, next)) {
     return {
       failure: {
@@ -207,6 +220,7 @@ export const resolveEditionIdentity = (
       ok: false,
     };
   }
+
   return { article, ok: true };
 };
 
@@ -222,6 +236,7 @@ export const getPublicationQualityIssues = async (
         where: eq(articles.id, article.translationSourceArticleId),
       })
     : undefined;
+
   return getArticleQualityIssues({
     body: article.body,
     language: article.language,
@@ -258,6 +273,7 @@ export const resolveTranslationReviewUpdate = async (input: {
       status: 422 as const,
     };
   }
+
   const metadata = translationMetadataUpdate(
     {
       action: input.reviewAction,
@@ -266,8 +282,10 @@ export const resolveTranslationReviewUpdate = async (input: {
     },
     { editorId: input.editorId, timestamp: input.timestamp }
   );
+
   const reviewStatus =
     metadata.translationReviewStatus ?? input.article.translationReviewStatus;
+
   if (reviewStatus !== "approved") {
     return {
       metadata,
@@ -276,12 +294,15 @@ export const resolveTranslationReviewUpdate = async (input: {
       translationSourceSnapshot: undefined,
     };
   }
+
   const { translationSourceArticleId } = input.article;
+
   const translationSource = translationSourceArticleId
     ? await input.database.query.articles.findFirst({
         where: eq(articles.id, translationSourceArticleId),
       })
     : undefined;
+
   if (!translationSource) {
     if (input.reviewAction !== "approve") {
       return {
@@ -296,13 +317,16 @@ export const resolveTranslationReviewUpdate = async (input: {
         translationSourceSnapshot: undefined,
       };
     }
+
     return {
       error: "Translation approval requires an available source article",
       ok: false as const,
       status: 422 as const,
     };
   }
+
   const currentSourceHash = await getTranslationSourceHash(translationSource);
+
   if (
     input.reviewAction === "approve" &&
     input.expectedTranslationSourceHash !== currentSourceHash
@@ -313,6 +337,7 @@ export const resolveTranslationReviewUpdate = async (input: {
       status: 409 as const,
     };
   }
+
   if (
     input.reviewAction !== "approve" &&
     currentSourceHash !== input.article.translationSourceHash
@@ -329,6 +354,7 @@ export const resolveTranslationReviewUpdate = async (input: {
       translationSourceSnapshot: undefined,
     };
   }
+
   return {
     metadata,
     ok: true as const,
@@ -352,22 +378,27 @@ export const getDependentReviewInvalidationQueries = (input: {
   if (!input.contentChanged) {
     return [];
   }
+
   const sourceMutationGuard = alias(
     articleRevisions,
     "source_invalidation_mutation_guard"
   );
+
   const sourceMutationCommitted = exists(
     input.database
       .select({ id: sourceMutationGuard.id })
       .from(sourceMutationGuard)
       .where(eq(sourceMutationGuard.id, input.guardRevisionId))
   );
+
   const invalidationArticle = alias(articles, "translation_invalidation");
+
   const approvedDependents = and(
     eq(invalidationArticle.translationSourceArticleId, input.sourceArticleId),
     eq(invalidationArticle.translationReviewStatus, "approved"),
     sourceMutationCommitted
   );
+
   const metadataJson = sql<string>`json_object(
     'byline', ${invalidationArticle.byline},
     'bylineType', ${invalidationArticle.bylineType},
@@ -444,6 +475,7 @@ export const resolveRestoredTranslationReview = async (
     translationReviewedBy: metadata.translationReviewedBy,
     translationReviewStatus: metadata.translationReviewStatus,
   };
+
   if (
     (metadata.snapshotCompleteness === "legacy_partial" && contentChanged) ||
     metadata.translationReviewStatus !== "approved" ||
@@ -461,12 +493,15 @@ export const resolveRestoredTranslationReview = async (
       sourceSnapshot: undefined,
     };
   }
+
   const translationSource = await database.query.articles.findFirst({
     where: eq(articles.id, metadata.translationSourceArticleId),
   });
+
   const currentSourceHash = translationSource
     ? await getTranslationSourceHash(translationSource)
     : null;
+
   if (currentSourceHash !== metadata.translationSourceHash) {
     return {
       restoredReview: {
@@ -477,6 +512,7 @@ export const resolveRestoredTranslationReview = async (
       sourceSnapshot: undefined,
     };
   }
+
   return {
     restoredReview,
     sourceSnapshot: translationSource
@@ -512,8 +548,10 @@ export const articlePersistenceQueries = (input: {
     metadataJson: input.metadataJson,
     version: input.version,
   };
+
   const mutationTarget = alias(articles, "article_mutation_target");
   const approvalSource = alias(articles, "approval_source");
+
   const sourceSnapshotMatches =
     input.sourceArticleId && input.sourceSnapshot
       ? exists(
@@ -530,19 +568,23 @@ export const articlePersistenceQueries = (input: {
             )
         )
       : undefined;
+
   const staysHomepageEligible =
     input.article.kind === "article" &&
     input.article.language === "lt" &&
     input.article.status === "published" &&
     input.article.heroMediaId !== null;
+
   const activePlacement = alias(
     homepagePlacements,
     "article_mutation_active_placement"
   );
+
   const activeLayout = alias(
     homepageLayoutState,
     "article_mutation_active_layout"
   );
+
   const homepageTransitionAllowed = staysHomepageEligible
     ? undefined
     : notExists(
@@ -560,17 +602,20 @@ export const articlePersistenceQueries = (input: {
             )
           )
       );
+
   const mutationCondition = and(
     eq(mutationTarget.id, input.articleId),
     sourceSnapshotMatches,
     homepageTransitionAllowed
   );
+
   const mutationAllowed = exists(
     input.database
       .select({ id: mutationTarget.id })
       .from(mutationTarget)
       .where(mutationCondition)
   );
+
   return {
     queries: [
       input.database
@@ -613,15 +658,18 @@ export const getRevisionCommitConflict = async (input: {
     .from(articleRevisions)
     .where(eq(articleRevisions.id, input.revisionId))
     .limit(1);
+
   if (committedRevision) {
     return;
   }
+
   const [latestRevision] = await input.database
     .select({ version: articleRevisions.version })
     .from(articleRevisions)
     .where(eq(articleRevisions.articleId, input.articleId))
     .orderBy(desc(articleRevisions.version))
     .limit(1);
+
   return {
     currentVersion: latestRevision?.version ?? input.currentVersion,
     error: "Article state changed during the guarded save",

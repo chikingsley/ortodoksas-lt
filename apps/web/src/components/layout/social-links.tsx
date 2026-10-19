@@ -1,5 +1,6 @@
 import { MailIcon, RssIcon } from "lucide-react";
 import { siFacebook, siInstagram, siYoutube } from "simple-icons";
+
 import { cn } from "@/components/ui/utils";
 import type { SiteLocale } from "@/i18n/config";
 import { ui } from "@/i18n/ui";
@@ -34,6 +35,7 @@ export default function SocialLinks({
   locale = "lt",
 }: Props) {
   const copy = ui[locale];
+
   return (
     <nav
       aria-label={copy.contacts}
@@ -42,7 +44,7 @@ export default function SocialLinks({
       {socialLinks.map(({ href, icon, label }) => (
         <a
           aria-label={label}
-          className="grid size-11 place-items-center text-foreground transition-colors hover:text-primary focus-visible:text-primary [&_svg]:size-3.5"
+          className="text-foreground hover:text-primary focus-visible:text-primary grid size-11 place-items-center transition-colors [&_svg]:size-3.5"
           href={href}
           key={label}
           rel="noreferrer"
@@ -56,7 +58,7 @@ export default function SocialLinks({
       ))}
       <a
         aria-label={copy.contact}
-        className="grid size-11 place-items-center text-foreground transition-colors hover:text-primary focus-visible:text-primary [&_svg]:size-4"
+        className="text-foreground hover:text-primary focus-visible:text-primary grid size-11 place-items-center transition-colors [&_svg]:size-4"
         href={contactHref}
       >
         <MailIcon aria-hidden="true" />
@@ -64,7 +66,7 @@ export default function SocialLinks({
       </a>
       <a
         aria-label="RSS"
-        className="grid size-11 place-items-center text-foreground transition-colors hover:text-primary focus-visible:text-primary [&_svg]:size-4"
+        className="text-foreground hover:text-primary focus-visible:text-primary grid size-11 place-items-center transition-colors [&_svg]:size-4"
         href="/rss.xml"
       >
         <RssIcon aria-hidden="true" />

@@ -54,6 +54,7 @@ describe("article mutation boundaries", () => {
         createArticleSchema.safeParse({ ...article, bylineUrl }).success
       ).toBe(false);
     }
+
     for (const bylineUrl of [
       "http://example.com/profile",
       "https://example.com/profile",

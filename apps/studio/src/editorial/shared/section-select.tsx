@@ -1,15 +1,11 @@
 import {
   getSectionLabel,
   getSectionOptions,
-  type SectionLocale,
 } from "@ortodoksas-lt/content/sections";
-import {
-  type ChangeEvent,
-  type KeyboardEvent,
-  useCallback,
-  useMemo,
-  useState,
-} from "react";
+import type { SectionLocale } from "@ortodoksas-lt/content/sections";
+import { useCallback, useMemo, useState } from "react";
+import type { ChangeEvent, KeyboardEvent } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -37,6 +33,7 @@ export const SectionSelect = ({
 }: Props) => {
   const [adding, setAdding] = useState(false);
   const [draft, setDraft] = useState("");
+
   const sectionOptions = useMemo(
     () =>
       getSectionOptions([...options, value]).map((section) => ({
@@ -45,19 +42,23 @@ export const SectionSelect = ({
       })),
     [language, options, value]
   );
+
   const selectedSection = sectionOptions.find(
     (section) => section.value === value
   );
 
   const addSection = useCallback(() => {
     const nextSection = draft.trim();
+
     if (nextSection.length === 0) {
       return;
     }
+
     onChange(nextSection);
     setDraft("");
     setAdding(false);
   }, [draft, onChange]);
+
   const selectSection = useCallback(
     (nextValue: string | null) => {
       if (nextValue) {
@@ -66,10 +67,11 @@ export const SectionSelect = ({
     },
     [onChange]
   );
-  const updateDraft = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => setDraft(event.target.value),
-    []
-  );
+
+  const updateDraft = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    setDraft(event.target.value);
+  }, []);
+
   const submitFromKeyboard = useCallback(
     (event: KeyboardEvent<HTMLInputElement>) => {
       if (event.key === "Enter") {
@@ -79,7 +81,11 @@ export const SectionSelect = ({
     },
     [addSection]
   );
-  const startAdding = useCallback(() => setAdding(true), []);
+
+  const startAdding = useCallback(() => {
+    setAdding(true);
+  }, []);
+
   const cancelAdding = useCallback(() => {
     setAdding(false);
     setDraft("");
@@ -138,7 +144,7 @@ export const SectionSelect = ({
           Add new section
         </Button>
       )}
-      <small className="mt-1.5 block text-[11px] text-muted-foreground leading-snug">
+      <small className="text-muted-foreground mt-1.5 block text-[11px] leading-snug">
         Select a canonical section or add a deliberate new one.
       </small>
     </div>

@@ -14,7 +14,13 @@ import {
   localizeHomepageCatalog,
 } from "../components/home/homepage-model";
 import type { ContentPage } from "../components/publication/publication";
-import { defaultLocale, type SiteLocale } from "../i18n/config";
+import { defaultLocale } from "../i18n/config";
+import type { SiteLocale } from "../i18n/config";
+import {
+  homepageCandidates,
+  homepageMonths,
+  homepageTranslations,
+} from "./homepage-data";
 import {
   catalogEntry,
   catalogSelection,
@@ -47,13 +53,16 @@ export async function getCatalog(language: SiteLocale = defaultLocale) {
           )
       : Promise.resolve([]),
   ]);
+
   const heroes = await heroMap(rows);
+
   const placementByArticle = new Map(
     placements.map((placement) => [
       placement.articleId,
       { position: placement.position, slot: placement.slot },
     ])
   );
+
   return rows.map((row) =>
     catalogEntry(row, heroes, placementByArticle.get(row.id))
   );
@@ -61,24 +70,27 @@ export async function getCatalog(language: SiteLocale = defaultLocale) {
 
 export async function getHomepageCatalog(language: SiteLocale = defaultLocale) {
   if (language === defaultLocale) {
-    return getCatalog(defaultLocale);
+    return await homepageCandidates();
   }
-  const [canonicalCatalog, localizedCatalog] = await Promise.all([
-    getCatalog(defaultLocale),
-    getCatalog(language),
-  ]);
+
+  const canonicalCatalog = await homepageCandidates();
+
   const canonicalArticles = canonicalCatalog.filter(
     (entry) => entry.kind === "article"
   );
+
   const sections = getSectionOptions(
     canonicalArticles.map((entry) => entry.section)
   );
+
   const canonicalModel = buildHomepageModel({
     articles: canonicalArticles,
     catalog: canonicalCatalog,
     sections,
   });
+
   const homepageGroups = getHomepageArticleGroups(canonicalModel);
+
   const homepageCatalog = canonicalCatalog.filter(
     (entry) =>
       entry.kind === "page" ||
@@ -86,15 +98,27 @@ export async function getHomepageCatalog(language: SiteLocale = defaultLocale) {
         ? homepageGroups.has(entry.translationGroupId)
         : false)
   );
+
+  const localizedCatalog = await homepageTranslations(
+    language,
+    homepageCatalog
+  );
+
   return localizeHomepageCatalog(homepageCatalog, localizedCatalog);
 }
 
 export async function getHomepageModel(language: SiteLocale = defaultLocale) {
-  const catalog = await getHomepageCatalog(language);
+  const [catalog, archiveMonths] = await Promise.all([
+    getHomepageCatalog(language),
+    homepageMonths(language),
+  ]);
+
   const entries = catalog.filter((entry) => entry.kind === "article");
+
   return {
     entries,
     model: buildHomepageModel({
+      archiveMonths,
       articles: entries,
       catalog,
       locale: language,
@@ -111,7 +135,7 @@ export async function getArticles(language: SiteLocale = defaultLocale) {
 
 export async function getRecentArticles(language: SiteLocale, limit: number) {
   const rows = await database()
-    .select({ ...catalogSelection, bodyJson: articles.bodyJson })
+    .select(catalogSelection)
     .from(articles)
     .innerJoin(
       publicationGroups,
@@ -126,12 +150,15 @@ export async function getRecentArticles(language: SiteLocale, limit: number) {
     )
     .orderBy(desc(articles.publishedAt))
     .limit(limit);
+
   const heroes = await heroMap(rows);
+
   return rows.map((row) => catalogEntry(row, heroes));
 }
 
 export async function getPage(language: SiteLocale, path: string) {
   const slug = path.replace(leadingSlash, "");
+
   const rows = await database()
     .select({ ...catalogSelection, bodyJson: articles.bodyJson })
     .from(articles)
@@ -147,14 +174,19 @@ export async function getPage(language: SiteLocale, path: string) {
       )
     )
     .limit(1);
+
   const [row] = rows;
+
   if (!row) {
     return;
   }
+
   const heroes = await heroMap([row]);
+
   const body = JSON.parse(row.bodyJson) as Parameters<
     typeof renderArticleBody
   >[0];
+
   return {
     ...catalogEntry(row, heroes),
     html: renderArticleBody(body),

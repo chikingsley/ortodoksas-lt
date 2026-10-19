@@ -55,6 +55,7 @@ export function SelectField<T extends string>({
 }: SelectFieldProps<T>) {
   const id = useId();
   const selected = options.find((option) => option.value === value);
+
   const update = useCallback(
     (nextValue: string | null) => {
       if (nextValue) {
@@ -63,6 +64,7 @@ export function SelectField<T extends string>({
     },
     [onChange]
   );
+
   return (
     <ShadcnField>
       <FieldLabel htmlFor={id}>{label}</FieldLabel>

@@ -4,42 +4,31 @@
   "main": "@astrojs/cloudflare/entrypoints/server",
   "compatibility_date": "2026-08-05",
   "compatibility_flags": ["nodejs_compat"],
-  "routes": [
-    {
-      "pattern": "ortodoksas.grassinside.com",
-      "custom_domain": true
-    },
-    {
-      "pattern": "ortodoksas.lt",
-      "custom_domain": true
-    },
-    {
-      "pattern": "www.ortodoksas.lt",
-      "custom_domain": true
-    }
-  ],
+  "routes": [],
   "vars": {
-    "ENVIRONMENT": "production"
+    "ENVIRONMENT": "production",
   },
   "assets": {
     "binding": "ASSETS",
     "directory": "./dist",
-    "run_worker_first": ["/api/*"]
+    "run_worker_first": ["/api/*"],
   },
   "r2_buckets": [
     {
-      "binding": "MEDIA"
-    }
+      "binding": "MEDIA",
+    },
   ],
   "d1_databases": [
     {
       "binding": "DB",
-      "migrations_dir": "../../packages/db/migrations"
-    }
+      "migrations_dir": "../../packages/db/migrations",
+    },
   ],
   "observability": {
     "enabled": true,
     "logs": { "head_sampling_rate": 1 },
-    "traces": { "enabled": true, "head_sampling_rate": 0.01 }
-  }
+    "traces": { "enabled": true, "head_sampling_rate": 0.01 },
+  },
+  "workers_dev": false,
+  "preview_urls": false,
 }

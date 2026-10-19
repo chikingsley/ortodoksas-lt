@@ -1,4 +1,5 @@
 import { MenuIcon, SearchIcon } from "lucide-react";
+
 import type { LocaleDestination } from "@/components/publication/publication";
 import {
   NavigationMenu,
@@ -13,13 +14,13 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { localeMetadata, type SiteLocale, siteLocales } from "@/i18n/config";
+import { localeMetadata, siteLocales } from "@/i18n/config";
+import type { SiteLocale } from "@/i18n/config";
 import { ui } from "@/i18n/ui";
+
 import PublicationLogo from "./publication-logo";
-import {
-  isNavigationItemActive,
-  type NavigationItem,
-} from "./publication-navigation";
+import { isNavigationItemActive } from "./publication-navigation";
+import type { NavigationItem } from "./publication-navigation";
 import SocialLinks from "./social-links";
 
 interface Props {
@@ -36,15 +37,19 @@ const languageControlClassName = (input: {
   mobile: boolean;
 }) => {
   const { active, available, mobile } = input;
+
   const size = mobile
     ? "min-h-11 min-w-11 text-[10px]"
     : "min-h-9 min-w-8 text-[10px]";
+
   if (active) {
     return `inline-flex items-center justify-center font-bold text-primary ${size}`;
   }
+
   const state = available
     ? "hover:text-primary"
     : "cursor-not-allowed opacity-55";
+
   return `inline-flex items-center justify-center border-0 bg-transparent p-0 font-bold text-muted-foreground transition-colors ${state} ${size}`;
 };
 
@@ -63,16 +68,20 @@ export default function PublicationHeader({
 
   const languageLink = (code: SiteLocale, mobile = false) => {
     const destination = localeLinks[code];
+
     const className = languageControlClassName({
       active: code === locale,
       available: destination.hasCounterpart,
       mobile,
     });
+
     const label = `${localeMetadata[code].languageName}${
       destination.hasCounterpart ? "" : `. ${copy.pageUnavailable}`
     }`;
+
     const content = localeMetadata[code].displayCode;
     const key = `${mobile ? "mobile" : "desktop"}-${code}`;
+
     const title = destination.hasCounterpart
       ? localeMetadata[code].languageName
       : `${localeMetadata[code].languageName} — ${copy.pageUnavailable}`;
@@ -107,7 +116,7 @@ export default function PublicationHeader({
   };
 
   return (
-    <header className="relative z-20 bg-white text-foreground">
+    <header className="text-foreground relative z-20 bg-white">
       <div className="mx-auto w-[min(1200px,calc(100%-64px))] max-sm:w-full">
         <div className="grid min-h-20 grid-cols-[1fr_auto_1fr] items-center max-sm:min-h-16 max-sm:grid-cols-[48px_minmax(0,1fr)_48px] max-sm:px-3">
           <SocialLinks
@@ -122,7 +131,7 @@ export default function PublicationHeader({
                 render={
                   <button
                     aria-label={copy.navigation}
-                    className="inline-grid size-11 place-items-center border-0 bg-transparent text-foreground transition-colors hover:text-primary [&_svg]:size-6"
+                    className="text-foreground hover:text-primary inline-grid size-11 place-items-center border-0 bg-transparent transition-colors [&_svg]:size-6"
                     type="button"
                   />
                 }
@@ -130,7 +139,7 @@ export default function PublicationHeader({
                 <MenuIcon aria-hidden="true" />
               </SheetTrigger>
               <SheetContent
-                className="fixed inset-y-0 right-0 z-50 flex w-[min(340px,88vw)] max-w-full flex-col gap-4 border-primary border-l bg-white p-0 shadow-[-12px_0_28px_rgb(46_16_18/18%)] [&_[data-slot=sheet-close]]:top-[18px] [&_[data-slot=sheet-close]]:right-[18px] [&_[data-slot=sheet-close]]:size-9 [&_[data-slot=sheet-close]_svg]:size-[22px] [&_[data-slot=sheet-header]]:relative [&_[data-slot=sheet-header]]:border-primary [&_[data-slot=sheet-header]]:border-b [&_[data-slot=sheet-header]]:p-6"
+                className="border-primary [&_[data-slot=sheet-header]]:border-primary fixed inset-y-0 right-0 z-50 flex w-[min(340px,88vw)] max-w-full flex-col gap-4 border-l bg-white p-0 shadow-[-12px_0_28px_rgb(46_16_18/18%)] [&_[data-slot=sheet-close]]:top-[18px] [&_[data-slot=sheet-close]]:right-[18px] [&_[data-slot=sheet-close]]:size-9 [&_[data-slot=sheet-close]_svg]:size-[22px] [&_[data-slot=sheet-header]]:relative [&_[data-slot=sheet-header]]:border-b [&_[data-slot=sheet-header]]:p-6"
                 side="right"
               >
                 <SheetHeader>
@@ -147,8 +156,8 @@ export default function PublicationHeader({
                       }
                       className={
                         isNavigationItemActive(currentPath, item)
-                          ? "flex min-h-12 items-center border-border border-b py-3 font-semibold font-serif text-[17px] text-primary leading-none"
-                          : "flex min-h-12 items-center border-border border-b py-3 font-semibold font-serif text-[17px] text-foreground leading-none transition-colors hover:text-primary"
+                          ? "border-border text-primary flex min-h-12 items-center border-b py-3 font-serif text-[17px] leading-none font-semibold"
+                          : "border-border text-foreground hover:text-primary flex min-h-12 items-center border-b py-3 font-serif text-[17px] leading-none font-semibold transition-colors"
                       }
                       href={item.href}
                       key={item.id}
@@ -157,7 +166,7 @@ export default function PublicationHeader({
                     </a>
                   ))}
                 </nav>
-                <div className="mt-auto border-border border-t px-6 py-5">
+                <div className="border-border mt-auto border-t px-6 py-5">
                   <SocialLinks contactHref={contactHref} locale={locale} />
                 </div>
               </SheetContent>
@@ -185,8 +194,8 @@ export default function PublicationHeader({
               aria-label={copy.search}
               className={
                 searchActive
-                  ? "ml-2 grid size-9 place-items-center text-primary [&_svg]:size-4"
-                  : "ml-2 grid size-9 place-items-center transition-colors hover:text-primary [&_svg]:size-4"
+                  ? "text-primary ml-2 grid size-9 place-items-center [&_svg]:size-4"
+                  : "hover:text-primary ml-2 grid size-9 place-items-center transition-colors [&_svg]:size-4"
               }
               href={searchHref}
             >
@@ -199,8 +208,8 @@ export default function PublicationHeader({
             aria-label={copy.search}
             className={
               searchActive
-                ? "grid size-11 place-items-center justify-self-end text-primary sm:hidden [&_svg]:size-5"
-                : "grid size-11 place-items-center justify-self-end text-foreground transition-colors hover:text-primary sm:hidden [&_svg]:size-5"
+                ? "text-primary grid size-11 place-items-center justify-self-end sm:hidden [&_svg]:size-5"
+                : "text-foreground hover:text-primary grid size-11 place-items-center justify-self-end transition-colors sm:hidden [&_svg]:size-5"
             }
             href={searchHref}
           >
@@ -210,7 +219,7 @@ export default function PublicationHeader({
 
         <nav
           aria-label={copy.languages}
-          className="hidden min-h-11 items-center justify-center border-primary border-y max-sm:flex"
+          className="border-primary hidden min-h-11 items-center justify-center border-y max-sm:flex"
         >
           {siteLocales.map((code) => languageLink(code, true))}
         </nav>
@@ -227,7 +236,7 @@ export default function PublicationHeader({
                 <NavigationMenuItem key={item.id}>
                   <NavigationMenuLink
                     active={isNavigationItemActive(currentPath, item)}
-                    className="relative inline-flex min-h-12 items-center rounded-none bg-transparent px-[27px] pt-4 pb-3.5 font-semibold font-serif text-foreground text-sm leading-none transition-colors hover:bg-transparent hover:text-primary focus:bg-transparent focus:text-primary data-[active]:bg-transparent data-[active]:font-bold data-[active]:text-primary"
+                    className="text-foreground hover:text-primary focus:text-primary data-[active]:text-primary relative inline-flex min-h-12 items-center rounded-none bg-transparent px-[27px] pt-4 pb-3.5 font-serif text-sm leading-none font-semibold transition-colors hover:bg-transparent focus:bg-transparent data-[active]:bg-transparent data-[active]:font-bold"
                     href={item.href}
                   >
                     {item.label}

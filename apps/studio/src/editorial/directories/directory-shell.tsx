@@ -32,6 +32,7 @@ export const DirectoryShell = ({
   title: string;
 }) => {
   const [mobilePickerOpen, setMobilePickerOpen] = useState(false);
+
   const selectRecord = useCallback(
     (id: string) => {
       onSelect(id);
@@ -39,6 +40,7 @@ export const DirectoryShell = ({
     },
     [onSelect]
   );
+
   const recordList = (
     <div className="grid gap-1">
       {records.map((record) => (
@@ -46,7 +48,9 @@ export const DirectoryShell = ({
           aria-current={record.id === selectedId ? "true" : undefined}
           className={`rounded-md px-3 py-2 text-left text-sm ${record.id === selectedId ? "bg-accent font-medium" : "hover:bg-muted"}`}
           key={record.id}
-          onClick={() => selectRecord(record.id)}
+          onClick={() => {
+            selectRecord(record.id);
+          }}
           type="button"
         >
           {record.label}
@@ -54,12 +58,14 @@ export const DirectoryShell = ({
       ))}
     </div>
   );
+
   const selectedLabel =
     records.find((record) => record.id === selectedId)?.label ??
     `New ${title.toLowerCase().replace(TRAILING_S_PATTERN, "")}`;
+
   return (
     <div className="grid min-h-[calc(100dvh-var(--studio-mobile-header-height))] min-w-0 grid-cols-[224px_minmax(0,1fr)] max-[1000px]:block md:min-h-svh">
-      <aside className="sticky top-0 hidden h-svh min-h-0 flex-col border-r bg-muted/25 max-[1000px]:hidden min-[1001px]:flex">
+      <aside className="bg-muted/25 sticky top-0 hidden h-svh min-h-0 flex-col border-r max-[1000px]:hidden min-[1001px]:flex">
         <div className="flex h-[var(--studio-shell-header-height)] shrink-0 items-center justify-between border-b px-3">
           <div className="flex min-w-0 items-center gap-2">
             <SidebarTrigger className="-ml-1" />
@@ -67,7 +73,7 @@ export const DirectoryShell = ({
               className="data-vertical:h-4 data-vertical:self-auto"
               orientation="vertical"
             />
-            <h1 className="m-0 truncate font-semibold text-sm">{title}</h1>
+            <h1 className="m-0 truncate text-sm font-semibold">{title}</h1>
           </div>
           <Button
             aria-label={`Add ${title.toLowerCase()}`}
@@ -80,12 +86,12 @@ export const DirectoryShell = ({
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto p-3">{recordList}</div>
       </aside>
-      <div className="min-w-0 px-[clamp(16px,3vw,40px)] py-4 sm:py-6 min-[1001px]:py-8">
+      <div className="min-w-0 px-[clamp(16px,3vw,40px)] py-4 min-[1001px]:py-8 sm:py-6">
         <div className="mx-auto mb-3 hidden max-w-6xl items-center justify-between gap-3 max-[1000px]:flex">
           <Sheet onOpenChange={setMobilePickerOpen} open={mobilePickerOpen}>
             <SheetTrigger
               render={
-                <Button className="min-w-0 max-w-full" variant="outline" />
+                <Button className="max-w-full min-w-0" variant="outline" />
               }
             >
               <span className="truncate">{selectedLabel}</span>

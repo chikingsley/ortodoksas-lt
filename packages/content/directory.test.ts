@@ -9,6 +9,7 @@ import {
 import { siteLocales } from "./site";
 
 const biography = { content: [{ type: "paragraph" }], type: "doc" } as const;
+
 const peopleLocalizations = siteLocales.map((language) => ({
   alternateName: "",
   biography,
@@ -17,6 +18,7 @@ const peopleLocalizations = siteLocales.map((language) => ({
   language,
   seoDescription: "",
 }));
+
 const primaryPersonMedia = {
   localizations: siteLocales.map((language) => ({
     altText: `Portrait ${language}`,
@@ -27,6 +29,7 @@ const primaryPersonMedia = {
   role: "primary" as const,
   sortOrder: 0,
 };
+
 const communityLocalizations = siteLocales.map((language) => ({
   accessibility: "",
   addressLabel: "",
@@ -37,6 +40,7 @@ const communityLocalizations = siteLocales.map((language) => ({
   operationalNotice: "",
   seoDescription: "",
 }));
+
 const primaryCommunityMedia = {
   localizations: siteLocales.map((language) => ({
     altText: `Community ${language}`,

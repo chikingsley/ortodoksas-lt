@@ -1,5 +1,7 @@
 import { getTranslationDisplayState } from "@ortodoksas-lt/content/translation";
-import { localeShells, type SiteLocale } from "../../i18n/config";
+
+import { localeShells } from "../../i18n/config";
+import type { SiteLocale } from "../../i18n/config";
 import { ui } from "../../i18n/ui";
 import {
   getCommunityDirectory,
@@ -11,24 +13,29 @@ import {
   getTranslationGroupCounterpart,
 } from "../../server/publication-localization";
 import {
-  type ContentPage,
   canonicalizePublicationLinks,
   cleanHtml,
   getInternalPublicationPaths,
   hasLeadFigure,
   localizePublicationLinks,
 } from "./publication";
+import type { ContentPage } from "./publication";
 
 const CALENDAR_PREFIX_PATTERN = /^🗓️\s*/u;
+
 const resolveLocalePath = (path: string) => {
   const [requestedLocale, ...remainingSegments] = path.split("/");
+
   const locale: SiteLocale = localeShells.includes(requestedLocale as never)
     ? (requestedLocale as SiteLocale)
     : "lt";
+
   const localized = locale !== "lt";
+
   const pathSegments = localized
     ? remainingSegments
     : [requestedLocale, ...remainingSegments];
+
   return {
     locale,
     localized,
@@ -41,11 +48,14 @@ const getLocalizedHtml = async (
   locale: SiteLocale
 ): Promise<string> => {
   const canonicalHtml = canonicalizePublicationLinks(html);
+
   if (locale === "lt") {
     return canonicalHtml;
   }
+
   const sourceLinks = getInternalPublicationPaths(canonicalHtml);
   const localizedLinks = await getLocalizedCounterparts(locale, sourceLinks);
+
   return localizePublicationLinks(
     canonicalHtml,
     locale,
@@ -60,10 +70,17 @@ const getDirectoryData = (
   locale: SiteLocale
 ) => {
   if (pageTemplate === "people_directory") {
-    return getPeopleDirectory(locale);
+    return getPeopleDirectory(locale).then((people) => ({
+      kind: "people" as const,
+      people,
+    }));
   }
+
   if (pageTemplate === "community_directory") {
-    return getCommunityDirectory(locale);
+    return getCommunityDirectory(locale).then((communities) => ({
+      kind: "communities" as const,
+      communities,
+    }));
   }
 };
 
@@ -79,6 +96,7 @@ const getArticleSchema = (page: ContentPage, canonicalPath: string) => {
   if (page.kind !== "article") {
     return;
   }
+
   const author = page.byline
     ? {
         "@type": page.bylineType === "organization" ? "Organization" : "Person",
@@ -86,6 +104,7 @@ const getArticleSchema = (page: ContentPage, canonicalPath: string) => {
         ...(page.bylineUrl ? { url: page.bylineUrl } : {}),
       }
     : undefined;
+
   return {
     articleSection: page.section,
     ...(author ? { author } : {}),
@@ -100,29 +119,36 @@ const getArticleSchema = (page: ContentPage, canonicalPath: string) => {
 export async function resolvePublicationPage(path: string) {
   const { locale, localized, publicationPath } = resolveLocalePath(path);
   const page = await getPage(locale, publicationPath);
+
   if (!page) {
     return;
   }
 
   const copy = ui[locale];
   const canonicalPath = localized ? `/${locale}${page.path}` : page.path;
+
   const original =
     localized && page.translationGroupId
       ? await getTranslationGroupCounterpart("lt", page.translationGroupId)
       : undefined;
+
   const translationState = getTranslationDisplayState({
     kind: page.translationKind ?? "original",
     reviewStatus: page.translationReviewStatus ?? "not_required",
   });
+
   const bodyOwnsLeadImage = hasLeadFigure(page.html);
   const { pageTemplate } = page;
   const displayTitle = page.title.replace(CALENDAR_PREFIX_PATTERN, "");
   const { description, searchTitle } = getSearchMetadata(page, displayTitle);
+
   const structuredTemplate =
     pageTemplate === "people_directory" ||
     pageTemplate === "community_directory";
+
   const directoryData = await getDirectoryData(pageTemplate, locale);
   const localizedHtml = await getLocalizedHtml(page.html, locale);
+
   const bodyHtml = cleanHtml(localizedHtml, {
     hero: bodyOwnsLeadImage ? null : page.hero,
     heroMediaId: bodyOwnsLeadImage ? null : page.heroMediaId,

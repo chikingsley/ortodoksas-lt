@@ -1,4 +1,6 @@
 import { queryOptions } from "@tanstack/react-query";
+
+import type { StudioOperationResult } from "@/server/articles/article-operation-support.server";
 import {
   createArticleMutation,
   deleteArticleDraftMutation,
@@ -9,7 +11,7 @@ import {
   updateArticleMutation,
   verifyArticlePublicationQuery,
 } from "@/server/articles/article.functions";
-import type { StudioOperationResult } from "@/server/articles/article-operation-support.server";
+
 import type {
   BaselineResponse,
   PersistArticleInput,
@@ -43,6 +45,7 @@ const TRANSLATION_CREATION_FIELDS = new Set([
   "translationSourceArticleId",
   "translationSourceHash",
 ]);
+
 const IMMUTABLE_UPDATE_FIELDS = new Set(["kind", "translationGroupId"]);
 
 export async function fetchArticleWorkspace(
@@ -50,18 +53,21 @@ export async function fetchArticleWorkspace(
   signal: AbortSignal
 ): Promise<ArticleWorkspaceResponse> {
   const workspace = await loadArticleWorkspace({ data: { articleId } });
+
   if (signal.aborted) {
     throw new DOMException("Article load cancelled", "AbortError");
   }
+
   if (!workspace) {
     throw new Error("Article request failed");
   }
+
   return workspace as ArticleWorkspaceResponse;
 }
 
 export const articleWorkspaceQueryOptions = (articleId: string) =>
   queryOptions({
-    queryFn: ({ signal }) => fetchArticleWorkspace(articleId, signal),
+    queryFn: async ({ signal }) => fetchArticleWorkspace(articleId, signal),
     queryKey: ["studio", "article-workspace", articleId] as const,
   });
 
@@ -76,10 +82,10 @@ export async function fetchArticleBaseline(
 export async function fetchArticleRevisions(
   articleId: string
 ): Promise<Revision[]> {
-  return (await loadArticleRevisions({ data: { articleId } })) as Revision[];
+  return await loadArticleRevisions({ data: { articleId } });
 }
 
-export function persistArticle({
+export async function persistArticle({
   articleId,
   baseline,
   payload,
@@ -89,22 +95,25 @@ export function persistArticle({
       ([field]) => !TRANSLATION_CREATION_FIELDS.has(field)
     )
   );
+
   if (articleId) {
     const updatePayload = Object.fromEntries(
       Object.entries(payload).filter(
         ([field]) => !IMMUTABLE_UPDATE_FIELDS.has(field)
       )
     );
+
     return updateArticleMutation({
       data: { articleId, payload: updatePayload },
     });
   }
+
   return createArticleMutation({
     data: { ...interactivePayload, baseline },
   });
 }
 
-export function deleteArticleDraft(articleId: string) {
+export async function deleteArticleDraft(articleId: string) {
   return deleteArticleDraftMutation({ data: { articleId } });
 }
 
@@ -114,6 +123,7 @@ export async function verifyArticlePublication(
   const result = await verifyArticlePublicationQuery({
     data: { articleId },
   });
+
   return result.ok ? result.data : null;
 }
 
@@ -125,5 +135,6 @@ export async function restoreArticleRevision(
   const result = await restoreArticleRevisionMutation({
     data: { articleId, expectedVersion, version },
   });
+
   return result.ok ? (result.data.article as StoredArticle) : null;
 }

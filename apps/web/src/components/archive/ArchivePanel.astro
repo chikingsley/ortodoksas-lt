@@ -5,7 +5,7 @@ import { ui } from "../../i18n/ui";
 
 interface Props {
   locale?: SiteLocale;
-  months: Array<[string, number]>;
+  months: [string, number][];
 }
 
 const { locale = "lt", months } = Astro.props;

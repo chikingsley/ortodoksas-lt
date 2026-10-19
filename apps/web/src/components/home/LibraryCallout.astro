@@ -6,6 +6,7 @@ interface Props {
 }
 
 import { ui } from "../../i18n/ui";
+
 const { description, locale = "lt", title } = Astro.props;
 const copy = ui[locale];
 const href = "/p/biblioteka";

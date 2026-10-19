@@ -49,14 +49,17 @@ export const savePersonDirectory = async (input: {
   const { database, payload } = input;
   const id = payload.id ?? crypto.randomUUID();
   const timestamp = Date.now();
+
   const positions = payload.positions.map((position) => ({
     ...position,
     id: position.id ?? crypto.randomUUID(),
   }));
+
   const media = payload.media.map((item) => ({
     ...item,
     id: item.id ?? crypto.randomUUID(),
   }));
+
   const contacts = payload.contacts.map((contact) => ({
     ...contact,
     id: contact.id ?? crypto.randomUUID(),
@@ -211,14 +214,17 @@ export const saveCommunityDirectory = async (input: {
   const { database, payload } = input;
   const id = payload.id ?? crypto.randomUUID();
   const timestamp = Date.now();
+
   const contacts = payload.contacts.map((contact) => ({
     ...contact,
     id: contact.id ?? crypto.randomUUID(),
   }));
+
   const services = payload.services.map((service) => ({
     ...service,
     id: service.id ?? crypto.randomUUID(),
   }));
+
   const media = payload.media.map((item) => ({
     ...item,
     id: item.id ?? crypto.randomUUID(),

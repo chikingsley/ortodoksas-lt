@@ -24,35 +24,25 @@ declare module "@tiptap/core" {
   }
 }
 
-interface ParsedElement {
-  getAttribute: (name: string) => string | null;
-  querySelector: (selector: string) => ParsedElement | null;
-  tagName: string;
-  textContent?: string | null;
-}
-
-const readImageAttributes = (value: unknown) => {
-  const element = value as ParsedElement;
+const readImageAttributes = (element: HTMLElement) => {
   const image =
     element.tagName === "IMG" ? element : element.querySelector("img");
 
   return {
     alt: image?.getAttribute("alt") ?? "",
-    altProvenance: element.getAttribute("data-alt-provenance") ?? "missing",
-    captionProvenance:
-      element.getAttribute("data-caption-provenance") ?? "missing",
+    altProvenance: element.dataset.altProvenance ?? "missing",
+    captionProvenance: element.dataset.captionProvenance ?? "missing",
     credit:
-      element.getAttribute("data-credit") ??
+      element.dataset.credit ??
       element.querySelector("[data-figure-credit]")?.textContent?.trim() ??
       "",
     height: image?.getAttribute("height")
       ? Number.parseInt(image.getAttribute("height") ?? "", 10)
       : null,
-    mediaId: element.getAttribute("data-media-id"),
-    role:
-      element.getAttribute("data-figure-role") === "lead" ? "lead" : "content",
-    sourceAlt: element.getAttribute("data-source-alt") ?? "",
-    sourceCaption: element.getAttribute("data-source-caption") ?? "",
+    mediaId: element.dataset.mediaId,
+    role: element.dataset.figureRole === "lead" ? "lead" : "content",
+    sourceAlt: element.dataset.sourceAlt ?? "",
+    sourceCaption: element.dataset.sourceCaption ?? "",
     src: image?.getAttribute("src") ?? "",
     title: image?.getAttribute("title"),
     width: image?.getAttribute("width")
@@ -128,6 +118,7 @@ export const Figure = Node.create({
       title,
       width,
     } = node.attrs;
+
     const imageAttributes = {
       alt,
       ...(height ? { height } : {}),

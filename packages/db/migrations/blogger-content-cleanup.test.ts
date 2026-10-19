@@ -1,4 +1,5 @@
 import { DatabaseSync } from "node:sqlite";
+
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import cleanupMigration from "./0012_blogger_content_cleanup.sql?raw";
@@ -9,10 +10,13 @@ import externalReferenceRepairMigration from "./0016_repair_external_reference_u
 const mediaId = `media_${"a".repeat(64)}`;
 const recoveredSource = "https://legacy.example/recovered.jpg";
 const unresolvedSource = "https://legacy.example/unresolved.jpg";
+
 const malformedInternalLinkText =
   "http://ortodhttp://ortodoksas.blogspot.com/2013/11/sv-jono-auksaburnio-liturgija-su.htmloksas.blogspot.com/2013/11/sv-jono-auksaburnio-liturgija-su.html";
+
 const malformedExternalReference =
   "http://www.religion.in.ua/news/ukrainian_news/24945-sinod-upc-kp-viznachiv-pripiniti-pominannya-vladi-za-bogosluzhinnyam.html,";
+
 const canonicalExternalReference =
   "https://www.religion.in.ua/news/ukrainian_news/24945-sinod-upc-kp-viznachiv-pripiniti-pominannya-vladi-za-bogosluzhinnyam.html";
 
@@ -147,7 +151,9 @@ describe("Blogger content cleanup migration", () => {
       .run(figureDocument(unresolvedSource));
   });
 
-  afterEach(() => database.close());
+  afterEach(() => {
+    database.close();
+  });
 
   it("canonicalizes recoverable content and retires live source storage", () => {
     database.exec(cleanupMigration.replaceAll("--> statement-breakpoint", ""));
@@ -168,6 +174,7 @@ describe("Blogger content cleanup migration", () => {
           .get()?.body_json
       )
     );
+
     expect(article.content[0].content[0]).toMatchObject({
       marks: [{ attrs: { href: "/2020/01/story" } }],
       text: "https://ortodoksas.lt/2020/01/story",
@@ -193,6 +200,7 @@ describe("Blogger content cleanup migration", () => {
         "SELECT body_json, metadata_json FROM article_revisions WHERE id = 'revision'"
       )
       .get();
+
     expect(JSON.parse(String(revision?.body_json)).content[0].attrs).toEqual({
       mediaId,
       src: `/api/media/${mediaId}`,
@@ -206,6 +214,7 @@ describe("Blogger content cleanup migration", () => {
         "SELECT body_json FROM article_baselines WHERE article_id = 'baseline'"
       )
       .get();
+
     expect(JSON.parse(String(baseline?.body_json)).content[0].attrs).toEqual({
       mediaId: null,
       src: unresolvedSource,
@@ -218,6 +227,7 @@ describe("Blogger content cleanup migration", () => {
         WHERE name IN ('source_article_id', 'source_capture', 'source_html', 'source_url')`
       )
       .get()?.count;
+
     expect(sourceColumnCount).toBe(0);
     expect(
       database
@@ -233,6 +243,7 @@ describe("Baseline media canonicalization migration", () => {
   it("copies canonical media references from the matching current figures", () => {
     const database = new DatabaseSync(":memory:");
     const secondMediaId = `media_${"c".repeat(64)}`;
+
     const document = (firstAttrs: object, secondAttrs: object) =>
       JSON.stringify({
         content: [
@@ -293,6 +304,7 @@ describe("Baseline media canonicalization migration", () => {
           .get()?.body_json
       )
     );
+
     expect(baseline.content[0].attrs).toEqual({
       mediaId,
       src: `/api/media/${mediaId}`,

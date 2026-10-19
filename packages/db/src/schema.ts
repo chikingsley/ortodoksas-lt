@@ -1,6 +1,5 @@
 import { sql } from "drizzle-orm";
 import {
-  type AnySQLiteColumn,
   check,
   index,
   integer,
@@ -10,6 +9,7 @@ import {
   text,
   uniqueIndex,
 } from "drizzle-orm/sqlite-core";
+import type { AnySQLiteColumn } from "drizzle-orm/sqlite-core";
 
 export const mediaAssets = sqliteTable(
   "media_assets",
@@ -108,6 +108,31 @@ export const articles = sqliteTable(
       table.language
     ),
     index("articles_status_updated_idx").on(table.status, table.updatedAt),
+    index("articles_public_language_date_idx").on(
+      table.status,
+      table.language,
+      sql`${table.publishedAt} DESC`
+    ),
+    index("articles_public_section_date_idx").on(
+      table.status,
+      table.language,
+      table.section,
+      sql`${table.publishedAt} DESC`
+    ),
+    index("articles_public_slug_idx").on(
+      table.status,
+      table.slug,
+      table.language
+    ),
+    index("articles_public_group_idx").on(
+      table.status,
+      table.translationGroupId,
+      table.language
+    ),
+    index("articles_editorial_updated_idx").on(sql`${table.updatedAt} DESC`),
+    index("articles_public_hero_date_idx")
+      .on(table.status, table.language, sql`${table.publishedAt} DESC`)
+      .where(sql`${table.heroMediaId} IS NOT NULL`),
     index("articles_translation_group_idx").on(table.translationGroupId),
   ]
 );
@@ -630,5 +655,27 @@ export const communityMediaLocalizations = sqliteTable(
       "community_media_localizations_language_check",
       sql`${table.language} IN ('lt', 'en', 'ru', 'uk', 'be')`
     ),
+  ]
+);
+
+export const publicationState = sqliteTable(
+  "publication_state",
+  {
+    id: integer("id").primaryKey(),
+    revision: integer("revision").notNull().default(1),
+  },
+  (table) => [check("publication_state_singleton", sql`${table.id} = 1`)]
+);
+
+export const publicationCounts = sqliteTable(
+  "publication_counts",
+  {
+    language: text("language").notNull(),
+    month: text("month").notNull(),
+    section: text("section").notNull(),
+    total: integer("total").notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.language, table.section, table.month] }),
   ]
 );

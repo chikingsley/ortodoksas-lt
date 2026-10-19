@@ -1,8 +1,8 @@
 import {
   createInteractiveArticleSchema,
-  type TiptapDocument,
   updateArticleSchema,
 } from "@ortodoksas-lt/content/article";
+import type { TiptapDocument } from "@ortodoksas-lt/content/article";
 import { canonicalizePublicationDocument } from "@ortodoksas-lt/content/publication-link";
 import {
   articleBaselines,
@@ -33,11 +33,11 @@ import {
   resolveEditionIdentity,
   resolveRestoredTranslationReview,
   resolveTranslationReviewUpdate,
-  type StudioOperationResult,
   sanitizeDirectoryBody,
   success,
   validationIssues,
 } from "./article-operation-support.server";
+import type { StudioOperationResult } from "./article-operation-support.server";
 import { publicationTimestamp } from "./article-publication.server";
 import {
   articleRevisionMetadata,
@@ -59,6 +59,7 @@ export const createArticle = async (input: {
   }>
 > => {
   const parsed = createInteractiveArticleSchema.safeParse(input.payload);
+
   if (!parsed.success) {
     return {
       error: "Article validation failed",
@@ -67,6 +68,7 @@ export const createArticle = async (input: {
       status: 422,
     };
   }
+
   if (
     parsed.data.kind === "article" &&
     parsed.data.pageTemplate !== "standard"
@@ -77,11 +79,13 @@ export const createArticle = async (input: {
       status: 422,
     };
   }
+
   if (parsed.data.status === "published") {
     const qualityIssues = await getPublicationQualityIssues(
       input.database,
       parsed.data
     );
+
     if (qualityIssues.length > 0) {
       return {
         error: "Article quality checks failed",
@@ -93,13 +97,16 @@ export const createArticle = async (input: {
   }
 
   const id = crypto.randomUUID();
+
   const translationGroupId =
     parsed.data.translationGroupId ?? crypto.randomUUID();
+
   const existingGroup = parsed.data.translationGroupId
     ? await input.database.query.publicationGroups.findFirst({
         where: eq(publicationGroups.id, parsed.data.translationGroupId),
       })
     : undefined;
+
   if (
     existingGroup &&
     (existingGroup.kind !== parsed.data.kind ||
@@ -111,26 +118,32 @@ export const createArticle = async (input: {
       status: 409,
     };
   }
+
   const timestamp = Date.now();
+
   const baseline = parsed.data.baseline ?? {
     body: parsed.data.body,
     converterVersion: "native-v1",
     summary: parsed.data.summary,
     title: parsed.data.title,
   };
+
   const currentBody = canonicalizePublicationDocument(parsed.data.body);
   const comparableBaselineBody = canonicalizePublicationDocument(baseline.body);
   const annotated = annotateArticleBody(currentBody, comparableBaselineBody);
   const bodyJson = JSON.stringify(annotated.body);
+
   const heroMediaId = await findMediaId(
     input.database,
     parsed.data.heroSourceUrl
   );
+
   const publishedAt = publicationTimestamp(
     parsed.data.status,
     parsed.data.publishedAt,
     timestamp
   );
+
   const changes = contentChanges({
     baselineSummary: baseline.summary,
     baselineTitle: baseline.title,
@@ -138,6 +151,7 @@ export const createArticle = async (input: {
     summary: parsed.data.summary,
     title: parsed.data.title,
   });
+
   const articleRecord: typeof articles.$inferSelect = {
     bodyJson,
     byline: optionalText(parsed.data.byline),
@@ -235,6 +249,7 @@ export const updateArticle = async (input: {
   }>
 > => {
   const parsed = updateArticleSchema.safeParse(input.payload);
+
   if (!parsed.success) {
     return {
       error: "Article validation failed",
@@ -252,17 +267,22 @@ export const updateArticle = async (input: {
       where: eq(articleBaselines.articleId, input.articleId),
     }),
   ]);
+
   const identityResolution = resolveEditionIdentity(storedArticle, parsed.data);
+
   if (!identityResolution.ok) {
     return identityResolution.failure;
   }
+
   const { article: existingArticle } = identityResolution;
+
   if (parsed.data.status === "published") {
     const qualityIssues = await getPublicationQualityIssues(input.database, {
       ...parsed.data,
       translationSourceArticleId:
         existingArticle.translationSourceArticleId ?? undefined,
     });
+
     if (qualityIssues.length > 0) {
       return {
         error: "Article quality checks failed",
@@ -279,7 +299,9 @@ export const updateArticle = async (input: {
     .where(eq(articleRevisions.articleId, input.articleId))
     .orderBy(desc(articleRevisions.version))
     .limit(1);
+
   const currentVersion = latestRevision?.version ?? 0;
+
   if (parsed.data.expectedVersion !== currentVersion) {
     return {
       currentVersion,
@@ -291,21 +313,26 @@ export const updateArticle = async (input: {
 
   const version = currentVersion + 1;
   const timestamp = Date.now();
+
   const baselineBody = baseline?.bodyJson
     ? (JSON.parse(baseline.bodyJson) as TiptapDocument)
     : parsed.data.body;
+
   const currentBody = canonicalizePublicationDocument(parsed.data.body);
   const comparableBaselineBody = canonicalizePublicationDocument(baselineBody);
   const annotated = annotateArticleBody(currentBody, comparableBaselineBody);
   const bodyJson = JSON.stringify(annotated.body);
+
   const heroMediaId =
     (await findMediaId(input.database, parsed.data.heroSourceUrl)) ??
     existingArticle.heroMediaId;
+
   const publishedAt = publicationTimestamp(
     parsed.data.status,
     parsed.data.publishedAt,
     timestamp
   );
+
   const changes = contentChanges({
     baselineSummary: baseline?.summary ?? parsed.data.summary,
     baselineTitle: baseline?.title ?? parsed.data.title,
@@ -313,6 +340,7 @@ export const updateArticle = async (input: {
     summary: parsed.data.summary,
     title: parsed.data.title,
   });
+
   const {
     byline: nextByline,
     bylineType: nextBylineType,
@@ -320,6 +348,7 @@ export const updateArticle = async (input: {
     seoDescription: nextSeoDescription,
     seoTitle: nextSeoTitle,
   } = resolveArticleMetadataUpdate(existingArticle, parsed.data);
+
   const contentChanged = hasArticleContentChanged(existingArticle, {
     bodyJson,
     byline: nextByline,
@@ -328,6 +357,7 @@ export const updateArticle = async (input: {
     summary: parsed.data.summary,
     title: parsed.data.title,
   });
+
   const reviewResolution = await resolveTranslationReviewUpdate({
     article: existingArticle,
     contentChanged,
@@ -338,9 +368,11 @@ export const updateArticle = async (input: {
     timestamp,
     translationKind: parsed.data.translationKind,
   });
+
   if (!reviewResolution.ok) {
     return reviewResolution;
   }
+
   const nextArticle: typeof articles.$inferSelect = {
     ...existingArticle,
     bodyJson,
@@ -368,7 +400,9 @@ export const updateArticle = async (input: {
     updatedAt: timestamp,
     ...reviewResolution.metadata,
   };
+
   const metadataJson = JSON.stringify(articleRevisionMetadata(nextArticle));
+
   const persistence = articlePersistenceQueries({
     article: nextArticle,
     articleId: input.articleId,
@@ -384,6 +418,7 @@ export const updateArticle = async (input: {
     timestamp,
     version,
   });
+
   const dependentRevisionQueries = getDependentReviewInvalidationQueries({
     contentChanged,
     database: input.database,
@@ -392,10 +427,12 @@ export const updateArticle = async (input: {
     sourceArticleId: input.articleId,
     timestamp,
   });
+
   const changeMutationGuard = alias(
     articleRevisions,
     "article_change_mutation_guard"
   );
+
   const articleMutationCommitted = exists(
     input.database
       .select({ id: changeMutationGuard.id })
@@ -430,7 +467,9 @@ export const updateArticle = async (input: {
       .where(eq(articleRevisions.articleId, input.articleId))
       .orderBy(desc(articleRevisions.version))
       .limit(1);
+
     const concurrentVersion = currentRevision?.version ?? 0;
+
     if (concurrentVersion > parsed.data.expectedVersion) {
       return {
         currentVersion: concurrentVersion,
@@ -439,6 +478,7 @@ export const updateArticle = async (input: {
         status: 409,
       };
     }
+
     throw error;
   }
 
@@ -448,6 +488,7 @@ export const updateArticle = async (input: {
     database: input.database,
     revisionId: persistence.revisionId,
   });
+
   return (
     commitConflict ??
     success({
@@ -494,6 +535,7 @@ export const restoreArticleRevision = async (input: {
       where: eq(articles.id, input.articleId),
     }),
   ]);
+
   if (!(revision && currentArticle)) {
     return { error: "Revision unavailable", ok: false, status: 404 };
   }
@@ -504,7 +546,9 @@ export const restoreArticleRevision = async (input: {
     .where(eq(articleRevisions.articleId, input.articleId))
     .orderBy(desc(articleRevisions.version))
     .limit(1);
+
   const currentVersion = latest?.version ?? 0;
+
   if (input.expectedVersion !== currentVersion) {
     return {
       currentVersion,
@@ -518,7 +562,9 @@ export const restoreArticleRevision = async (input: {
     revision.metadataJson,
     currentArticle
   );
+
   const timestamp = Date.now();
+
   const [[baseline], publicationGroup] = await Promise.all([
     input.database
       .select({
@@ -533,6 +579,7 @@ export const restoreArticleRevision = async (input: {
       where: eq(publicationGroups.id, currentArticle.translationGroupId),
     }),
   ]);
+
   const restoredBody = canonicalizePublicationDocument(
     metadata.snapshotCompleteness === "legacy_partial"
       ? sanitizeDirectoryBody(
@@ -541,6 +588,7 @@ export const restoreArticleRevision = async (input: {
         )
       : (JSON.parse(revision.bodyJson) as TiptapDocument)
   );
+
   const annotated = baseline
     ? annotateArticleBody(
         restoredBody,
@@ -549,7 +597,9 @@ export const restoreArticleRevision = async (input: {
         )
       )
     : { body: restoredBody, changes: [] };
+
   const restoredBodyJson = JSON.stringify(annotated.body);
+
   const changes = contentChanges({
     baselineSummary: baseline?.summary ?? metadata.summary,
     baselineTitle: baseline?.title ?? metadata.title,
@@ -557,7 +607,9 @@ export const restoreArticleRevision = async (input: {
     summary: metadata.summary,
     title: metadata.title,
   });
+
   const nextVersion = currentVersion + 1;
+
   const restoredContentChanged = hasArticleContentChanged(currentArticle, {
     bodyJson: restoredBodyJson,
     byline: metadata.byline,
@@ -566,12 +618,14 @@ export const restoreArticleRevision = async (input: {
     summary: metadata.summary,
     title: metadata.title,
   });
+
   const { restoredReview, sourceSnapshot: restorationSourceSnapshot } =
     await resolveRestoredTranslationReview(
       input.database,
       metadata,
       restoredContentChanged
     );
+
   const restoredArticle: typeof articles.$inferSelect = {
     ...currentArticle,
     bodyJson: restoredBodyJson,
@@ -600,6 +654,7 @@ export const restoreArticleRevision = async (input: {
     updatedAt: timestamp,
     ...restoredReview,
   };
+
   const restoration = articlePersistenceQueries({
     article: restoredArticle,
     articleId: input.articleId,
@@ -615,6 +670,7 @@ export const restoreArticleRevision = async (input: {
     timestamp,
     version: nextVersion,
   });
+
   const dependentRevisionQueries = getDependentReviewInvalidationQueries({
     contentChanged: restoredContentChanged,
     database: input.database,
@@ -623,10 +679,12 @@ export const restoreArticleRevision = async (input: {
     sourceArticleId: input.articleId,
     timestamp,
   });
+
   const restoreMutationGuard = alias(
     articleRevisions,
     "restore_change_mutation_guard"
   );
+
   const restoreCommitted = exists(
     input.database
       .select({ id: restoreMutationGuard.id })
@@ -661,7 +719,9 @@ export const restoreArticleRevision = async (input: {
       .where(eq(articleRevisions.articleId, input.articleId))
       .orderBy(desc(articleRevisions.version))
       .limit(1);
+
     const concurrentVersion = currentRevision?.version ?? 0;
+
     if (concurrentVersion > input.expectedVersion) {
       return {
         currentVersion: concurrentVersion,
@@ -670,6 +730,7 @@ export const restoreArticleRevision = async (input: {
         status: 409,
       };
     }
+
     throw error;
   }
 
@@ -679,12 +740,14 @@ export const restoreArticleRevision = async (input: {
     database: input.database,
     revisionId: restoration.revisionId,
   });
+
   if (commitConflict) {
     return {
       ...commitConflict,
       error: "Article state changed during the guarded revision restoration",
     };
   }
+
   const [article, [latestRevision]] = await Promise.all([
     input.database.query.articles.findFirst({
       where: eq(articles.id, input.articleId),
@@ -696,9 +759,11 @@ export const restoreArticleRevision = async (input: {
       .orderBy(desc(articleRevisions.version))
       .limit(1),
   ]);
+
   if (!article) {
     return { error: "Article unavailable", ok: false, status: 404 };
   }
+
   return success({
     article,
     restoredFrom: input.version,

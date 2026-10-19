@@ -12,12 +12,8 @@ import type {
   CatalogEntry,
   LocaleDestination,
 } from "../components/publication/publication";
-import {
-  defaultLocale,
-  localeShells,
-  type SiteLocale,
-  siteLocales,
-} from "../i18n/config";
+import { defaultLocale, localeShells, siteLocales } from "../i18n/config";
+import type { SiteLocale } from "../i18n/config";
 import {
   articlePath,
   catalogEntry,
@@ -32,13 +28,17 @@ const DIRECTORY_DETAIL_PARTS_PATTERN = /^\/(community|person)\/([^/]+)$/u;
 
 async function getDirectoryLocaleLinks(publicationPath: string) {
   const match = DIRECTORY_DETAIL_PARTS_PATTERN.exec(publicationPath);
+
   if (!match) {
     return;
   }
+
   const [, kind, slug] = match;
+
   if (!(kind && slug)) {
     return;
   }
+
   const rows =
     kind === "person"
       ? await database()
@@ -59,7 +59,9 @@ async function getDirectoryLocaleLinks(publicationPath: string) {
           .where(
             and(eq(communities.slug, slug), eq(communities.status, "published"))
           );
+
   const available = new Set(rows.map(({ language }) => language));
+
   return Object.fromEntries(
     siteLocales.map((locale) => [
       locale,
@@ -79,10 +81,12 @@ function stripLocale(path: string) {
     if (path === `/${locale}`) {
       return "/";
     }
+
     if (path.startsWith(`/${locale}/`)) {
       return path.slice(locale.length + 1);
     }
   }
+
   return path;
 }
 
@@ -92,11 +96,15 @@ async function currentTranslationGroup(currentPath: string) {
       (locale) =>
         currentPath === `/${locale}` || currentPath.startsWith(`/${locale}/`)
     ) ?? defaultLocale;
+
   const path = stripLocale(currentPath);
+
   if (path === "/") {
     return;
   }
+
   const slug = path.replace(leadingSlash, "");
+
   const [row] = await database()
     .select({ translationGroupId: articles.translationGroupId })
     .from(articles)
@@ -108,6 +116,7 @@ async function currentTranslationGroup(currentPath: string) {
       )
     )
     .limit(1);
+
   return row?.translationGroupId;
 }
 
@@ -130,11 +139,15 @@ export async function getTranslationGroupCounterpart(
       )
     )
     .limit(1);
+
   const [row] = rows;
+
   if (!row) {
     return;
   }
+
   const heroes = await heroMap(rows);
+
   return catalogEntry(row, heroes);
 }
 
@@ -143,6 +156,7 @@ export async function getLocalizedCounterparts(
   sourcePaths: string[]
 ) {
   const sourceSlugs = sourcePaths.map((path) => path.replace(leadingSlash, ""));
+
   if (sourceSlugs.length === 0) {
     return new Map<string, CatalogEntry>();
   }
@@ -159,7 +173,9 @@ export async function getLocalizedCounterparts(
         inArray(articles.slug, sourceSlugs)
       )
     );
+
   const groups = sourceRows.map((row) => row.translationGroupId);
+
   if (groups.length === 0) {
     return new Map<string, CatalogEntry>();
   }
@@ -178,7 +194,9 @@ export async function getLocalizedCounterparts(
         inArray(articles.translationGroupId, groups)
       )
     );
+
   const heroes = await heroMap(localizedRows);
+
   const localizedByGroup = new Map(
     localizedRows.map((row) => [
       row.translationGroupId,
@@ -189,6 +207,7 @@ export async function getLocalizedCounterparts(
   return new Map(
     sourceRows.flatMap((source) => {
       const localized = localizedByGroup.get(source.translationGroupId);
+
       return localized ? [[articlePath(source.slug), localized] as const] : [];
     })
   );
@@ -196,6 +215,7 @@ export async function getLocalizedCounterparts(
 
 export async function getLocaleLinks(currentPath: string) {
   const publicationPath = stripLocale(currentPath);
+
   if (publicationPath === "/") {
     return {
       be: { hasCounterpart: true, href: "/be" },
@@ -205,6 +225,7 @@ export async function getLocaleLinks(currentPath: string) {
       uk: { hasCounterpart: true, href: "/uk" },
     } satisfies Record<SiteLocale, LocaleDestination>;
   }
+
   if (publicationPath === "/paieska") {
     return {
       be: { hasCounterpart: true, href: "/be/paieska" },
@@ -214,14 +235,18 @@ export async function getLocaleLinks(currentPath: string) {
       uk: { hasCounterpart: true, href: "/uk/paieska" },
     } satisfies Record<SiteLocale, LocaleDestination>;
   }
+
   if (DIRECTORY_DETAIL_PATH_PATTERN.test(publicationPath)) {
     const localeLinks = await getDirectoryLocaleLinks(publicationPath);
+
     if (localeLinks) {
       return localeLinks;
     }
   }
+
   const slug = publicationPath.replace(leadingSlash, "");
   const group = await currentTranslationGroup(currentPath);
+
   const rows = await database()
     .select({ language: articles.language, slug: articles.slug })
     .from(articles)
@@ -231,6 +256,7 @@ export async function getLocaleLinks(currentPath: string) {
         group ? eq(articles.translationGroupId, group) : eq(articles.slug, slug)
       )
     );
+
   const pathByLocale = new Map(
     rows.flatMap((row) =>
       siteLocales.includes(row.language as SiteLocale)
@@ -238,12 +264,15 @@ export async function getLocaleLinks(currentPath: string) {
         : []
     )
   );
+
   const hrefFor = (locale: SiteLocale, pagePath?: string) => {
     if (locale === defaultLocale) {
       return pagePath ?? "/";
     }
+
     return pagePath ? `/${locale}${pagePath}` : `/${locale}`;
   };
+
   return Object.fromEntries(
     siteLocales.map((locale) => [
       locale,

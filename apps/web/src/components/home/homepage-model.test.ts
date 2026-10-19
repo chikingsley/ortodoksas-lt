@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import type { CatalogEntry } from "../publication/publication";
 import {
   buildHomepageModel,
@@ -59,7 +60,7 @@ function catalogEntry(
   };
 }
 
-describe("selectHomepageArticles", () => {
+describe(selectHomepageArticles, () => {
   it("honors explicit lead and secondary placement", () => {
     const result = selectHomepageArticles([
       article("/latest", "2026-08-05"),
@@ -116,6 +117,7 @@ describe("selectHomepageArticles", () => {
       catalogEntry("/six", "2026-07-31"),
       catalogEntry("/seven", "2026-07-30"),
     ];
+
     const library = catalogEntry("/p/biblioteka", null, {
       description: "Library description",
       kind: "page",
@@ -173,7 +175,7 @@ describe("selectHomepageArticles", () => {
   });
 });
 
-describe("localizeHomepageCatalog", () => {
+describe(localizeHomepageCatalog, () => {
   it("keeps canonical placement and presentation while replacing editorial text and paths", () => {
     const canonical = catalogEntry("/lt-lead", "2026-08-06", {
       homepage: "lead",
@@ -182,6 +184,7 @@ describe("localizeHomepageCatalog", () => {
       title: "Lietuviškas pavadinimas",
       translationGroupId: "group-1",
     });
+
     const localized = catalogEntry("/english-lead", "2026-08-05", {
       hero: "/media/different.jpg",
       section: "News",
@@ -215,11 +218,12 @@ describe("localizeHomepageCatalog", () => {
   });
 });
 
-describe("getHomepageArticleGroups", () => {
+describe(getHomepageArticleGroups, () => {
   it("returns exactly the groups rendered by the homepage model", () => {
     const lead = catalogEntry("/lead", "2026-08-06", {
       translationGroupId: "lead-group",
     });
+
     const recent = catalogEntry("/recent", "2026-08-05", {
       translationGroupId: "recent-group",
     });

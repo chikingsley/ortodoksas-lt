@@ -26,20 +26,25 @@ interface RowProps {
 function TeamInvitationRow({ busy, invitation, onRevoke }: RowProps) {
   const [confirming, setConfirming] = useState(false);
   const role = invitation.role === "org:admin" ? "org:admin" : "org:member";
-  const requestRevoke = useCallback(() => setConfirming(true), []);
-  const cancelRevoke = useCallback(() => setConfirming(false), []);
+  const requestRevoke = useCallback(() => {
+    setConfirming(true);
+  }, []);
+  const cancelRevoke = useCallback(() => {
+    setConfirming(false);
+  }, []);
+
   const revoke = useCallback(
-    async () => onRevoke(invitation.id),
+    async () => await onRevoke(invitation.id),
     [invitation.id, onRevoke]
   );
 
   return (
     <li className="grid items-center gap-4 px-4 py-3 sm:grid-cols-[minmax(0,1fr)_7rem_auto]">
       <span className="min-w-0">
-        <strong className="block truncate font-medium text-sm">
+        <strong className="block truncate text-sm font-medium">
           {invitation.emailAddress}
         </strong>
-        <small className="block text-muted-foreground text-xs">
+        <small className="text-muted-foreground block text-xs">
           Invited {dateFormatter.format(invitation.createdAt)}
         </small>
       </span>
@@ -90,7 +95,7 @@ export function TeamInvitationList({
 }: ListProps) {
   if (invitations.length === 0) {
     return (
-      <p className="m-0 p-4 text-muted-foreground">
+      <p className="text-muted-foreground m-0 p-4">
         Every invitation has been accepted or cleared.
       </p>
     );

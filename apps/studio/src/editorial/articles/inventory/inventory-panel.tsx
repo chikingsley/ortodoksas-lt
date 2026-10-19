@@ -8,10 +8,8 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import {
-  ValueCombobox,
-  type ValueOption,
-} from "@/editorial/shared/value-combobox";
+import { ValueCombobox } from "@/editorial/shared/value-combobox";
+import type { ValueOption } from "@/editorial/shared/value-combobox";
 
 import type { CatalogArticle } from "../types";
 import type { ArticleGroup } from "./article-groups";
@@ -74,17 +72,19 @@ export function InventoryPanel({
 }: Props) {
   const capitalizedLabel =
     contentLabel.charAt(0).toUpperCase() + contentLabel.slice(1);
+
   const hasActiveFilters =
     query.trim().length > 0 ||
     section !== "All sections" ||
     statusFilter !== "all";
+
   const pageRoleGroups =
     contentLabel === "page" ? groupPagesByRole(visible, !hasActiveFilters) : [];
 
   return (
     <section
       aria-label={`${capitalizedLabel} inventory`}
-      className="overflow-hidden border-y bg-card"
+      className="bg-card overflow-hidden border-y"
     >
       <Tabs.Root onValueChange={onStatusChange} value={statusFilter}>
         <Tabs.List className="flex h-[51px] items-end gap-6 border-b px-5 max-sm:grid max-sm:h-auto max-sm:grid-cols-3 max-sm:gap-x-5 max-sm:gap-y-0 max-sm:pt-1">
@@ -101,9 +101,9 @@ export function InventoryPanel({
 
         <Tabs.Panel value={statusFilter}>
           <div className="grid grid-cols-[minmax(300px,1fr)_180px] items-center gap-2 border-b px-4 py-3 max-sm:grid-cols-1">
-            <InputGroup className="h-9 bg-card">
+            <InputGroup className="bg-card h-9">
               <InputGroupAddon className="pl-2.5">
-                <Search className="size-4 text-muted-foreground" />
+                <Search className="text-muted-foreground size-4" />
               </InputGroupAddon>
               <InputGroupInput
                 aria-label={`Search ${visibleLabel}`}
@@ -124,7 +124,7 @@ export function InventoryPanel({
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[920px] table-fixed border-collapse max-sm:min-w-0 max-sm:table-auto max-md:min-w-[650px]">
+            <table className="w-full min-w-[920px] table-fixed border-collapse max-md:min-w-[650px] max-sm:min-w-0 max-sm:table-auto">
               <thead>
                 <tr>
                   <th className={`${headerCellClass} w-[40%]`}>
@@ -145,14 +145,14 @@ export function InventoryPanel({
                   <tbody key={roleGroup.role}>
                     <tr>
                       <th
-                        className="border-b bg-muted/70 px-4 py-2 text-left font-semibold text-[10px] text-primary uppercase tracking-[0.1em]"
+                        className="bg-muted/70 text-primary border-b px-4 py-2 text-left text-[10px] font-semibold tracking-[0.1em] uppercase"
                         colSpan={5}
                         scope="rowgroup"
                       >
                         <span>
                           {roleGroup.label} · {roleGroup.groups.length}
                         </span>
-                        <span className="ml-2 font-normal text-muted-foreground normal-case tracking-normal">
+                        <span className="text-muted-foreground ml-2 font-normal tracking-normal normal-case">
                           {roleGroup.description}
                         </span>
                       </th>
@@ -168,7 +168,7 @@ export function InventoryPanel({
                     {roleGroup.groups.length === 0 ? (
                       <tr>
                         <td
-                          className="border-b px-4 py-4 text-[11px] text-muted-foreground"
+                          className="text-muted-foreground border-b px-4 py-4 text-[11px]"
                           colSpan={5}
                         >
                           This group is currently empty.
@@ -191,29 +191,29 @@ export function InventoryPanel({
               )}
             </table>
             {catalogState === "loading" ? (
-              <div className="px-5 py-16 text-center text-[13px] text-muted-foreground">
+              <div className="text-muted-foreground px-5 py-16 text-center text-[13px]">
                 Loading the complete archive…
               </div>
             ) : null}
             {catalogState === "error" ? (
-              <div className="px-5 py-16 text-center text-[13px] text-destructive">
+              <div className="text-destructive px-5 py-16 text-center text-[13px]">
                 Archive loading failed. Refresh the page.
               </div>
             ) : null}
             {catalogState === "ready" && visible.length === 0 ? (
-              <div className="px-5 py-16 text-center text-[13px] text-muted-foreground">
+              <div className="text-muted-foreground px-5 py-16 text-center text-[13px]">
                 These filters currently return zero {visibleLabel}.
               </div>
             ) : null}
           </div>
 
-          <footer className="flex min-h-[52px] items-center justify-between gap-4 bg-muted/40 px-4 max-sm:items-start max-sm:px-3.5 max-sm:py-3">
-            <p className="m-0 text-[11px] text-muted-foreground max-sm:max-w-40 max-sm:leading-snug">
+          <footer className="bg-muted/40 flex min-h-[52px] items-center justify-between gap-4 px-4 max-sm:items-start max-sm:px-3.5 max-sm:py-3">
+            <p className="text-muted-foreground m-0 text-[11px] max-sm:max-w-40 max-sm:leading-snug">
               Showing {filteredCount === 0 ? 0 : (safePage - 1) * pageSize + 1}–
               {Math.min(safePage * pageSize, filteredCount)} of{" "}
               {filteredCount.toLocaleString("en-US")}
             </p>
-            <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+            <div className="text-muted-foreground flex items-center gap-2 text-[11px]">
               <Button
                 aria-label="Previous page"
                 className="size-7"

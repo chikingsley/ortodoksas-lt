@@ -1,4 +1,5 @@
 import { StudioDialog } from "@/editorial/shared/studio-dialog";
+
 import type { ContentChange } from "./article-editor-types";
 
 interface Props {
@@ -11,6 +12,7 @@ interface Props {
 }
 
 const FIGURE_FIELD_PATTERN = /^body\.figure\[(\d+)\]\.(alt|caption)$/u;
+
 const FIELD_LABELS: Record<string, string> = {
   summary: "Summary",
   title: "Title",
@@ -18,14 +20,19 @@ const FIELD_LABELS: Record<string, string> = {
 
 const formatField = (fieldPath: string): string => {
   const directLabel = FIELD_LABELS[fieldPath];
+
   if (directLabel) {
     return directLabel;
   }
+
   const figureMatch = FIGURE_FIELD_PATTERN.exec(fieldPath);
+
   if (figureMatch) {
     const [, figureNumber, field] = figureMatch;
+
     return `Figure ${figureNumber} ${field === "alt" ? "alternative text" : "caption"}`;
   }
+
   return fieldPath;
 };
 
@@ -68,7 +75,7 @@ export function ArticleEditorDialogs({
         title="Editorial changes"
       >
         {changes.length === 0 ? (
-          <div className="flex min-h-[calc(100vh-64px)] items-center justify-center gap-2.5 text-muted-foreground text-sm">
+          <div className="text-muted-foreground flex min-h-[calc(100vh-64px)] items-center justify-center gap-2.5 text-sm">
             The current article matches its canonical baseline.
           </div>
         ) : (
@@ -78,12 +85,12 @@ export function ArticleEditorDialogs({
                 className="list-none overflow-hidden rounded-xl border"
                 key={`${change.field_path}-${change.change_kind}`}
               >
-                <div className="flex items-center gap-3 bg-muted px-4 py-3 [&>span]:rounded-full [&>span]:border [&>span]:px-2 [&>span]:py-1 [&>span]:text-xs [&>span]:capitalize [&>strong]:mr-auto">
+                <div className="bg-muted flex items-center gap-3 px-4 py-3 [&>span]:rounded-full [&>span]:border [&>span]:px-2 [&>span]:py-1 [&>span]:text-xs [&>span]:capitalize [&>strong]:mr-auto">
                   <strong>{formatField(change.field_path)}</strong>
                   <span>{change.change_kind}</span>
                   <span>{formatProvenance(change.provenance)}</span>
                 </div>
-                <dl className="[&_dd]:break-anywhere m-0 grid grid-cols-2 [&>div+div]:border-l [&>div]:min-w-0 [&>div]:p-4 [&_dd]:m-0 [&_dd]:whitespace-pre-wrap [&_dd]:leading-normal [&_dt]:mb-1.5 [&_dt]:font-bold [&_dt]:text-muted-foreground [&_dt]:text-xs [&_dt]:uppercase">
+                <dl className="[&_dd]:break-anywhere [&_dt]:text-muted-foreground m-0 grid grid-cols-2 [&_dd]:m-0 [&_dd]:leading-normal [&_dd]:whitespace-pre-wrap [&_dt]:mb-1.5 [&_dt]:text-xs [&_dt]:font-bold [&_dt]:uppercase [&>div]:min-w-0 [&>div]:p-4 [&>div+div]:border-l">
                   <div>
                     <dt>Original</dt>
                     <dd>{change.before_value || "Empty"}</dd>

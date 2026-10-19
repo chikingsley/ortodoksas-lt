@@ -1,7 +1,19 @@
 import { exports as worker } from "cloudflare:workers";
-import { describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 describe("TanStack Start Worker runtime", () => {
+  beforeAll(() => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (...args) => {
+      const request = new Request(...args);
+      const url = new URL(request.url);
+      throw new Error(
+        "Unexpected outbound request: " + url.origin + url.pathname
+      );
+    });
+  });
+  afterAll(() => {
+    vi.restoreAllMocks();
+  });
   it("renders the signed-out Studio shell", async () => {
     const response = await worker.default.fetch("https://studio.test/sign-in");
     expect(response.status).toBe(200);

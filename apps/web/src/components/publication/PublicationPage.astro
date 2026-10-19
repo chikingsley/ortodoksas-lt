@@ -21,7 +21,6 @@ const {
   directoryData,
   description,
   displayTitle,
-  pageTemplate,
   locale,
   localized,
   original,
@@ -32,10 +31,12 @@ const {
   structuredTemplate,
   wideBody,
 } = Astro.props.model;
+
 const heroFit =
   page.heroFit === "contain"
     ? "[&_img]:object-contain [&_img]:p-3"
     : "[&_img]:object-cover";
+
 const heroObjectPosition = `${page.heroFocalX}% ${page.heroFocalY}%`;
 ---
 
@@ -64,8 +65,8 @@ const heroObjectPosition = `${page.heroFocalX}% ${page.heroFocalY}%`;
         {page.hero && !bodyOwnsLeadImage && !structuredTemplate ? <EditorialImage alt={page.heroAlt} class:list={["mx-[50%] mb-[46px] mt-[38px] block aspect-[1.72] w-[min(1080px,calc(100vw-48px))] -translate-x-1/2 overflow-hidden bg-muted max-sm:-mx-3.5 max-sm:mb-[34px] max-sm:mt-7 max-sm:w-[calc(100%+28px)] max-sm:translate-x-0 [&_img]:h-full [&_img]:w-full", heroFit]} objectPosition={heroObjectPosition} priority src={page.hero} unavailableLabel={copy.imageUnavailable} /> : null}
       </header>
       {structuredTemplate && bodyHtml ? <ArticleBody html={bodyHtml} /> : null}
-      {pageTemplate === "community_directory" ? <CommunitiesPage communities={directoryData} locale={locale} /> : null}
-      {pageTemplate === "people_directory" ? <ClergyPage hero={page.hero} heroAlt={page.heroAlt || page.title} locale={locale} people={directoryData} /> : null}
+      {directoryData?.kind === "communities" ? <CommunitiesPage communities={directoryData.communities} locale={locale} /> : null}
+      {directoryData?.kind === "people" ? <ClergyPage hero={page.hero} heroAlt={page.heroAlt || page.title} locale={locale} people={directoryData.people} /> : null}
       {structuredTemplate ? null : <ArticleBody html={bodyHtml} />}
       {page.labels.length > 0 ? <footer class="mt-11 flex flex-wrap gap-2 border-t border-border pt-6">{page.labels.map((label) => <span class="rounded-full border border-border px-[11px] py-[7px] text-[10px] text-muted-foreground">{label}</span>)}</footer> : null}
     </article>

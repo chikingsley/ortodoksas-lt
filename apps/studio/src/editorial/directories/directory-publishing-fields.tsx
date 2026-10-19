@@ -1,5 +1,6 @@
 import type { SiteLocale } from "@ortodoksas-lt/content/site";
-import { type ChangeEvent, useCallback } from "react";
+import { useCallback } from "react";
+import type { ChangeEvent } from "react";
 
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -17,6 +18,7 @@ import {
 import { publicationStatusOptions } from "@/editorial/directories/directory-form-data";
 
 type PublicationStatus = "archived" | "draft" | "published";
+
 type FieldIssue = { message?: string } | undefined;
 
 interface DirectoryPublishingFieldsProps {
@@ -56,18 +58,25 @@ export function DirectoryPublishingFields({
 }: DirectoryPublishingFieldsProps) {
   const slugIsValid = slugErrors.length === 0;
   const sortOrderIsValid = sortOrderErrors.length === 0;
+
   const changeSlug = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => onSlugChange(event.target.value),
+    (event: ChangeEvent<HTMLInputElement>) => {
+      onSlugChange(event.target.value);
+    },
     [onSlugChange]
   );
+
   const changeSortOrder = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) =>
-      onSortOrderChange(Number(event.target.value)),
+    (event: ChangeEvent<HTMLInputElement>) => {
+      onSortOrderChange(Number(event.target.value));
+    },
     [onSortOrderChange]
   );
+
   const changeSeoDescription = useCallback(
-    (event: ChangeEvent<HTMLTextAreaElement>) =>
-      onSeoDescriptionChange(event.target.value),
+    (event: ChangeEvent<HTMLTextAreaElement>) => {
+      onSeoDescriptionChange(event.target.value);
+    },
     [onSeoDescriptionChange]
   );
 

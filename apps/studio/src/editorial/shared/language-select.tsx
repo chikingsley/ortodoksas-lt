@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+
 import {
   Select,
   SelectContent,
@@ -33,6 +34,7 @@ export function LanguageSelect({
   const selectedLanguage = languages.find(
     (language) => language.value === value
   );
+
   const updateLanguage = useCallback(
     (nextLanguage: string | null) => {
       if (nextLanguage) {

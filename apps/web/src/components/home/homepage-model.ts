@@ -1,7 +1,9 @@
 import { getSectionLabel } from "@ortodoksas-lt/content/sections";
+
 import type { SiteLocale } from "../../i18n/config";
 import { ui } from "../../i18n/ui";
-import { type CatalogEntry, sectionSlug } from "../publication/publication";
+import { sectionSlug } from "../publication/publication";
+import type { CatalogEntry } from "../publication/publication";
 
 interface HomepageEntry {
   hero: string | null;
@@ -20,11 +22,11 @@ export interface HomepageModel {
   };
   recent: CatalogEntry[];
   secondary: CatalogEntry[];
-  sectionGroups: Array<{
+  sectionGroups: {
     articles: CatalogEntry[];
     href: string;
     title: string;
-  }>;
+  }[];
 }
 
 const publishedTime = (entry: HomepageEntry): number =>
@@ -53,6 +55,7 @@ export function localizeHomepageCatalog(
     const localized = canonical.translationGroupId
       ? localizedByGroup.get(canonical.translationGroupId)
       : undefined;
+
     if (!localized) {
       return [];
     }
@@ -81,27 +84,36 @@ export function selectHomepageArticles<T extends HomepageEntry>(entries: T[]) {
   const sorted = [...entries].sort(
     (a, b) => publishedTime(b) - publishedTime(a)
   );
+
   const lead =
     sorted.find((entry) => entry.homepage === "lead" && entry.hero) ??
     sorted.find((entry) => entry.hero) ??
     null;
+
   const available = sorted.filter((entry) => entry.path !== lead?.path);
+
   const promoted = available
     .filter((entry) => entry.homepage === "secondary" && entry.hero)
     .sort((a, b) => (a.homepageOrder ?? 99) - (b.homepageOrder ?? 99));
+
   const secondary = [...promoted];
+
   for (const entry of available) {
     if (secondary.length >= 4) {
       break;
     }
+
     if (!entry.hero) {
       continue;
     }
+
     if (!secondary.some((candidate) => candidate.path === entry.path)) {
       secondary.push(entry);
     }
   }
+
   const used = new Set([lead?.path, ...secondary.map((entry) => entry.path)]);
+
   return {
     lead,
     remaining: sorted.filter((entry) => !used.has(entry.path)),
@@ -110,6 +122,7 @@ export function selectHomepageArticles<T extends HomepageEntry>(entries: T[]) {
 }
 
 interface HomepageModelInput {
+  archiveMonths?: [string, number][];
   articles: CatalogEntry[];
   catalog: CatalogEntry[];
   locale?: SiteLocale;
@@ -117,6 +130,7 @@ interface HomepageModelInput {
 }
 
 export function buildHomepageModel({
+  archiveMonths: fullArchiveMonths,
   articles,
   catalog,
   locale = "lt",
@@ -124,22 +138,27 @@ export function buildHomepageModel({
 }: HomepageModelInput): HomepageModel {
   const { lead, remaining, secondary } = selectHomepageArticles(articles);
   const archiveMonths = new Map<string, number>();
+
   for (const article of articles) {
     if (!article.published) {
       continue;
     }
+
     const date = new Date(`${article.published.slice(0, 10)}T00:00:00Z`);
+
     const key = new Intl.DateTimeFormat(locale, {
       month: "long",
       timeZone: "UTC",
       year: "numeric",
     }).format(date);
+
     archiveMonths.set(key, (archiveMonths.get(key) ?? 0) + 1);
   }
 
   const library = catalog.find(
     (entry) => entry.kind === "page" && entry.path === "/p/biblioteka"
   );
+
   const rotatingSections = sections
     .map((title) => ({
       latest: Math.max(
@@ -156,11 +175,13 @@ export function buildHomepageModel({
         left.title.localeCompare(right.title, "lt")
     )
     .slice(0, 2);
+
   const sectionGroups = rotatingSections.flatMap(({ title }) => {
     const sectionArticles = articles
       .filter((entry) => entry.section === title && entry.path !== lead?.path)
       .sort((left, right) => publishedTime(right) - publishedTime(left))
       .slice(0, 4);
+
     return sectionArticles.length
       ? [
           {
@@ -176,7 +197,7 @@ export function buildHomepageModel({
   });
 
   return {
-    archiveMonths: [...archiveMonths.entries()],
+    archiveMonths: fullArchiveMonths ?? [...archiveMonths.entries()],
     lead,
     library: {
       description: library?.description ?? ui[locale].footerDescription,

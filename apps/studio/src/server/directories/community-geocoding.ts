@@ -4,6 +4,7 @@ const LITHUANIA_CENTER = {
   latitude: "55.1694",
   longitude: "23.8813",
 } as const;
+
 const lithuanianPostalCodePattern = /^\d{5}$/u;
 
 const photonFeatureSchema = z.object({
@@ -44,7 +45,7 @@ export interface CommunityAddressSuggestion {
   postalCode: string;
 }
 
-const uniqueParts = (...parts: Array<string | undefined>) =>
+const uniqueParts = (...parts: (string | undefined)[]) =>
   parts.filter(
     (part, index, values): part is string =>
       Boolean(part) && values.indexOf(part) === index
@@ -63,6 +64,7 @@ const toAddressSuggestion = (
 ): CommunityAddressSuggestion | null => {
   const { properties } = feature;
   const countryCode = properties.countrycode?.toUpperCase() ?? "";
+
   if (countryCode !== "LT") {
     return null;
   }
@@ -71,25 +73,31 @@ const toAddressSuggestion = (
     properties.street,
     properties.housenumber
   ).join(" ");
+
   const locality =
     properties.city ??
     properties.town ??
     properties.village ??
     properties.locality ??
     "";
+
   const postalCode = normalizeLithuanianPostalCode(
     properties.postcode ?? "",
     countryCode
   );
+
   const localityLine = uniqueParts(postalCode, locality).join(" ");
   const addressLabel = uniqueParts(addressLine, localityLine).join(", ");
+
   const label = uniqueParts(
     properties.name,
     addressLine,
     localityLine,
     properties.country
   ).join(", ");
+
   const [longitude, latitude] = feature.geometry.coordinates;
+
   if (!(label && Number.isFinite(latitude) && Number.isFinite(longitude))) {
     return null;
   }
@@ -123,17 +131,20 @@ export const searchCommunityAddresses = async (
     headers: { Accept: "application/json" },
     signal: AbortSignal.timeout(5000),
   });
+
   if (!response.ok) {
     throw new Error("Address search is temporarily unavailable.");
   }
 
   const payload = photonResponseSchema.parse(await response.json());
+
   const results = payload.features
     .map(toAddressSuggestion)
     .filter(
       (suggestion): suggestion is CommunityAddressSuggestion =>
         suggestion !== null
     );
+
   return [
     ...new Map(
       results.map((suggestion) => [suggestion.id, suggestion])

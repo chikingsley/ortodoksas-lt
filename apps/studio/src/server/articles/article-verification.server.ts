@@ -2,10 +2,8 @@ import { articles } from "@ortodoksas-lt/db";
 import { eq } from "drizzle-orm";
 
 import type { StudioDatabase } from "../db.server";
-import {
-  type StudioOperationResult,
-  success,
-} from "./article-operation-support.server";
+import { success } from "./article-operation-support.server";
+import type { StudioOperationResult } from "./article-operation-support.server";
 import { publicArticleUrl } from "./article-publication.server";
 
 export const verifyArticlePublication = async (input: {
@@ -28,9 +26,11 @@ export const verifyArticlePublication = async (input: {
     .from(articles)
     .where(eq(articles.id, input.articleId))
     .limit(1);
+
   if (!article) {
     return { error: "Article unavailable", ok: false, status: 404 };
   }
+
   if (article.status !== "published") {
     return {
       error: "Article is awaiting publication",
@@ -38,6 +38,7 @@ export const verifyArticlePublication = async (input: {
       status: 409,
     };
   }
+
   if (!input.publicationOrigin) {
     return {
       error: "Publication origin is unavailable",
@@ -45,13 +46,16 @@ export const verifyArticlePublication = async (input: {
       status: 503,
     };
   }
+
   const url = publicArticleUrl(
     input.publicationOrigin,
     article.language,
     article.slug
   );
+
   try {
     const response = await fetch(url, { method: "HEAD", redirect: "follow" });
+
     return success({ reachable: response.ok, status: response.status, url });
   } catch {
     return success({ reachable: false, status: null, url });

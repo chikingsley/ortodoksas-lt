@@ -61,14 +61,16 @@ export const getSectionLabel = (
   if (isHistoricalSection(section)) {
     return sectionLabels[locale][section];
   }
-  const [first = "", ...rest] = Array.from(section.trim());
+
+  const [first = "", ...rest] = [...section.trim()];
+
   return `${first.toLocaleUpperCase(locale)}${rest.join("")}`;
 };
 
 export const getSectionOptions = (sections: Iterable<string>): string[] =>
-  Array.from(
-    new Set([
+  [
+    ...new Set([
       ...HISTORICAL_SECTIONS,
       ...Array.from(sections, (section) => section.trim()).filter(Boolean),
-    ])
-  ).sort((left, right) => left.localeCompare(right, "lt"));
+    ]),
+  ].sort((left, right) => left.localeCompare(right, "lt"));

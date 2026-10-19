@@ -15,6 +15,7 @@ describe("structured directory migration", () => {
       service_localizations: number;
       services: number;
     }>();
+
     expect(counts).toEqual({
       communities: 9,
       localizations: 45,

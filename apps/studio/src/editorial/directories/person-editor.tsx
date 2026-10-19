@@ -1,10 +1,10 @@
 // biome-ignore-all lint/performance/noJsxPropsBind: TanStack Form collection controls bind each input to its typed field path.
 import { tiptapDocumentSchema } from "@ortodoksas-lt/content/article";
 import {
-  type PersonEditorInput,
   personEditorSchema,
   slugifyDirectoryName,
 } from "@ortodoksas-lt/content/directory";
+import type { PersonEditorInput } from "@ortodoksas-lt/content/directory";
 import type { SiteLocale } from "@ortodoksas-lt/content/site";
 import { useForm, useSelector } from "@tanstack/react-form";
 import { useCallback, useState } from "react";
@@ -39,10 +39,13 @@ const documentText = (value: unknown): string => {
   if (Array.isArray(value)) {
     return value.map(documentText).filter(Boolean).join(" ");
   }
+
   if (!(value && typeof value === "object")) {
     return "";
   }
+
   const node = value as { content?: unknown; text?: unknown };
+
   return typeof node.text === "string" ? node.text : documentText(node.content);
 };
 
@@ -52,7 +55,9 @@ const generatedSeoDescription = (
   const name = [localization.honorific, localization.displayName]
     .filter(Boolean)
     .join(" ");
+
   const biography = documentText(localization.biography).trim();
+
   return [name, biography].filter(Boolean).join(". ").slice(0, 600);
 };
 
@@ -76,10 +81,12 @@ export const PersonEditor = ({
 }) => {
   const [message, setMessage] = useState("");
   const [slugOverride, setSlugOverride] = useState(Boolean(initialValue.slug));
+
   const form = useForm({
     defaultValues: initialValue,
     onSubmit: async ({ value }) => {
       setMessage("Saving…");
+
       try {
         const preparedValue = {
           ...value,
@@ -89,9 +96,11 @@ export const PersonEditor = ({
               item.seoDescription || generatedSeoDescription(item),
           })),
         };
+
         const result = await savePersonDirectoryMutation({
           data: preparedValue,
         });
+
         form.reset({ ...preparedValue, id: result.id });
         await onSaved(result.id);
         setMessage("Saved");
@@ -103,10 +112,13 @@ export const PersonEditor = ({
       const activeLocalization = value.localizations.find(
         (item) => item.language === locale
       );
+
       if (!activeLocalization?.displayName.trim()) {
         setMessage("Enter a display name before saving.");
+
         return;
       }
+
       const result = personEditorSchema.safeParse(value);
       const issue = result.success ? undefined : result.error.issues[0];
       setMessage(directoryIssueMessage(issue));
@@ -115,18 +127,21 @@ export const PersonEditor = ({
       onSubmit: normalizedFormSchema(personEditorSchema),
     },
   });
+
   const localizations = useSelector(
     form.store,
     (state) => state.values.localizations
   );
+
   const positions = useSelector(form.store, (state) => state.values.positions);
   const localization = localizations.find((value) => value.language === locale);
+
   const updateLocalization = useCallback(
     (
       update: (
         value: PersonEditorInput["localizations"][number]
       ) => PersonEditorInput["localizations"][number]
-    ) =>
+    ) => {
       form.setFieldValue("localizations", (current) =>
         upsertLocalization(
           current,
@@ -141,25 +156,31 @@ export const PersonEditor = ({
           }),
           update
         )
-      ),
+      );
+    },
     [form, locale]
   );
+
   const updateDisplayName = useCallback(
     (displayName: string) => {
       updateLocalization((value) => ({ ...value, displayName }));
+
       if (!slugOverride) {
         form.setFieldValue("slug", slugifyDirectoryName(displayName));
       }
     },
     [form, slugOverride, updateLocalization]
   );
+
   const generateSlug = useCallback(() => {
     const sourceName =
       localizations.find((value) => value.language === "lt")?.displayName ??
       localization?.displayName;
+
     form.setFieldValue("slug", slugifyDirectoryName(sourceName ?? ""));
     setSlugOverride(false);
   }, [form, localization?.displayName, localizations]);
+
   const upload = useCallback(
     async (file: File) => {
       setMessage("Uploading image…");
@@ -196,7 +217,9 @@ export const PersonEditor = ({
       className="grid gap-5"
       onSubmit={(event) => {
         event.preventDefault();
-        form.handleSubmit().catch(() => setMessage("Save failed"));
+        form.handleSubmit().catch(() => {
+          setMessage("Save failed");
+        });
       }}
     >
       <form.Subscribe
@@ -232,12 +255,12 @@ export const PersonEditor = ({
             </FieldLabel>
             <Input
               id={`person-honorific-${locale}`}
-              onChange={(event) =>
+              onChange={(event) => {
                 updateLocalization((value) => ({
                   ...value,
                   honorific: event.target.value,
-                }))
-              }
+                }));
+              }}
               value={localization?.honorific ?? ""}
             />
           </Field>
@@ -247,7 +270,9 @@ export const PersonEditor = ({
             </FieldLabel>
             <Input
               id={`person-display-name-${locale}`}
-              onChange={(event) => updateDisplayName(event.target.value)}
+              onChange={(event) => {
+                updateDisplayName(event.target.value);
+              }}
               value={localization?.displayName ?? ""}
             />
           </Field>
@@ -257,12 +282,12 @@ export const PersonEditor = ({
             </FieldLabel>
             <Input
               id={`person-alternate-name-${locale}`}
-              onChange={(event) =>
+              onChange={(event) => {
                 updateLocalization((value) => ({
                   ...value,
                   alternateName: event.target.value,
-                }))
-              }
+                }));
+              }}
               value={localization?.alternateName ?? ""}
             />
           </Field>
@@ -274,21 +299,21 @@ export const PersonEditor = ({
           className="overflow-hidden rounded-lg border"
           content={localization?.biography ?? emptyDocument}
           key={`${initialValue.id ?? "new"}-${locale}`}
-          onUpdate={(biography) =>
+          onUpdate={(biography) => {
             updateLocalization((value) => ({
               ...value,
               biography: tiptapDocumentSchema.parse(biography),
-            }))
-          }
+            }));
+          }}
           purpose="biography"
         />
       </Section>
       <PersonPositionsFields
         communityOptions={communityOptions}
         locale={locale}
-        onChange={(nextPositions) =>
-          form.setFieldValue("positions", nextPositions)
-        }
+        onChange={(nextPositions) => {
+          form.setFieldValue("positions", nextPositions);
+        }}
         positions={positions}
       />
       <form.Field name="contacts">
@@ -323,12 +348,12 @@ export const PersonEditor = ({
                   <DirectoryPublishingFields
                     entityId="person"
                     locale={locale}
-                    onSeoDescriptionChange={(seoDescription) =>
+                    onSeoDescriptionChange={(seoDescription) => {
                       updateLocalization((value) => ({
                         ...value,
                         seoDescription,
-                      }))
-                    }
+                      }));
+                    }}
                     onSlugBlur={slugField.handleBlur}
                     onSlugChange={(slug) => {
                       setSlugOverride(true);

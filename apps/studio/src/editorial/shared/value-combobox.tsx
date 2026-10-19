@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from "react";
+
 import {
   Combobox,
   ComboboxContent,
@@ -40,6 +41,7 @@ export function ValueCombobox({
     () => options.find((option) => option.value === value) ?? null,
     [options, value]
   );
+
   const updateValue = useCallback(
     (nextOption: ValueOption | null) => {
       if (nextOption) {
@@ -70,7 +72,7 @@ export function ValueCombobox({
             )}
           </ComboboxList>
           {options.length > resultLimit ? (
-            <p className="m-0 border-t px-2.5 py-2 text-[11px] text-muted-foreground">
+            <p className="text-muted-foreground m-0 border-t px-2.5 py-2 text-[11px]">
               Recent options appear first. Type to search all{" "}
               {options.length.toLocaleString()} choices.
             </p>

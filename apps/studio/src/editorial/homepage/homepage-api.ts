@@ -1,4 +1,5 @@
 import { queryOptions } from "@tanstack/react-query";
+
 import type { StudioOperationResult } from "@/server/articles/article-operation-support.server";
 import {
   loadHomepagePlacements,
@@ -17,7 +18,7 @@ export interface HomepageLayout {
 }
 
 export async function fetchHomepagePlacements(): Promise<HomepageLayout> {
-  return (await loadHomepagePlacements()) as HomepageLayout;
+  return await loadHomepagePlacements();
 }
 
 export const homepagePlacementsQueryOptions = () =>
@@ -26,7 +27,7 @@ export const homepagePlacementsQueryOptions = () =>
     queryKey: ["studio", "homepage", "placements"] as const,
   });
 
-export function persistHomepagePlacements(input: {
+export async function persistHomepagePlacements(input: {
   expectedRevision: string;
   leadId: string | null;
   secondaryIds: string[];

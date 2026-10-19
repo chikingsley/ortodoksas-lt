@@ -16,12 +16,16 @@ interface Props {
 const { locale, person } = Astro.props;
 const localePrefix = locale === "lt" ? "" : `/${locale}`;
 const canonicalPath = `${localePrefix}/person/${person.slug}`;
+
 const portrait =
   person.media.find((image) => image.role === "primary") ?? person.media[0];
+
 const gallery = person.media.filter((image) => image !== portrait);
 const title = [person.honorific, person.displayName].filter(Boolean).join(" ");
+
 const description =
   person.seoDescription || `${title} · ortodoksas.lt`;
+
 const labels = {
   be: { contacts: "Кантакты", gallery: "Фотаздымкі", positions: "Служэнне" },
   en: { contacts: "Contacts", gallery: "Gallery", positions: "Roles" },
@@ -29,14 +33,17 @@ const labels = {
   ru: { contacts: "Контакты", gallery: "Фотографии", positions: "Служение" },
   uk: { contacts: "Контакти", gallery: "Світлини", positions: "Служіння" },
 } as const;
+
 const dateFormatter = new Intl.DateTimeFormat(locale, {
   day: "numeric",
   month: "long",
   year: "numeric",
 });
+
 const positionDates = (startsAt: number | null, endsAt: number | null) => {
   const start = startsAt ? dateFormatter.format(new Date(startsAt)) : "";
   const end = endsAt ? dateFormatter.format(new Date(endsAt)) : "";
+
   return [start, end].filter(Boolean).join(" – ");
 };
 ---

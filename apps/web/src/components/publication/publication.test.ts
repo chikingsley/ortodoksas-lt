@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import {
   canonicalizePublicationLinks,
   cleanHtml,
@@ -7,7 +8,7 @@ import {
   localizePublicationLinks,
 } from "./publication";
 
-describe("cleanHtml", () => {
+describe(cleanHtml, () => {
   it("promotes a standalone bold subheading to a semantic heading", () => {
     expect(
       cleanHtml("<p><strong>Article section</strong></p><p>Body</p>")
@@ -39,7 +40,7 @@ describe("cleanHtml", () => {
   });
 });
 
-describe("hasLeadFigure", () => {
+describe(hasLeadFigure, () => {
   it("recognizes a canonical lead figure", () => {
     expect(
       hasLeadFigure(

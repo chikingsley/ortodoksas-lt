@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
+
 import { getTranslationDisplayState } from "./translation";
 
-describe("getTranslationDisplayState", () => {
+describe(getTranslationDisplayState, () => {
   it("keeps source articles labeled as originals", () => {
     expect(
       getTranslationDisplayState({

@@ -1,12 +1,13 @@
-import { env } from "cloudflare:workers";
 import {
   articleBaselines,
   articleRevisions,
   articles,
   publicationGroups,
 } from "@ortodoksas-lt/db";
+import { env } from "cloudflare:workers";
 import { eq } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
+
 import { createArticle } from "../src/server/articles/article-commands.server";
 import { deleteArticleDraft } from "../src/server/articles/article-deletion.server";
 import { getArticleWorkspace } from "../src/server/articles/article-queries.server";
@@ -18,6 +19,7 @@ const EDITOR_ID = "clerk-draft-deletion-test";
 describe("article draft deletion", () => {
   it("deletes translation drafts and removes the group after its final draft", async () => {
     const database = getDatabase(env.DB);
+
     const original = await createArticle({
       database,
       editorId: EDITOR_ID,
@@ -29,7 +31,9 @@ describe("article draft deletion", () => {
         title: "Deletion test",
       },
     });
+
     expect(original.ok).toBe(true);
+
     if (!original.ok) {
       return;
     }
@@ -40,7 +44,9 @@ describe("article draft deletion", () => {
       language: "en",
       sourceArticleId: original.data.id,
     });
+
     expect(translation.kind).toBe("created");
+
     if (translation.kind !== "created") {
       return;
     }
@@ -83,6 +89,7 @@ describe("article draft deletion", () => {
 
   it("preserves records that have left draft status", async () => {
     const database = getDatabase(env.DB);
+
     const created = await createArticle({
       database,
       editorId: EDITOR_ID,
@@ -94,10 +101,13 @@ describe("article draft deletion", () => {
         title: "Published deletion guard",
       },
     });
+
     expect(created.ok).toBe(true);
+
     if (!created.ok) {
       return;
     }
+
     await database
       .update(articles)
       .set({ status: "published" })

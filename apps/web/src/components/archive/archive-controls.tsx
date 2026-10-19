@@ -1,6 +1,7 @@
 import { getSectionLabel } from "@ortodoksas-lt/content/sections";
 import { SearchIcon } from "lucide-react";
-import { type ChangeEvent, useCallback, useState } from "react";
+import { useCallback, useState } from "react";
+import type { ChangeEvent } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -38,8 +39,10 @@ interface ArchiveControlsProps {
 }
 
 const allValue = "__all__";
+
 const filterControlText =
   "font-sans text-base font-normal text-foreground md:text-sm";
+
 export function ArchiveControls({
   initialLabel = "",
   initialQuery = "",
@@ -59,15 +62,18 @@ export function ArchiveControls({
   const handleLabelChange = useCallback((value: string | null) => {
     setLabel(value ?? "");
   }, []);
+
   const handleQueryChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
       setQuery(event.currentTarget.value);
     },
     []
   );
+
   const handleSectionChange = useCallback((value: string | null) => {
     setSection(value === allValue || value === null ? "" : value);
   }, []);
+
   const handleYearChange = useCallback((value: string | null) => {
     setYear(value === allValue || value === null ? "" : value);
   }, []);
@@ -79,6 +85,7 @@ export function ArchiveControls({
       value,
     })),
   ];
+
   const yearItems = [
     { label: labelsForLocale.archiveAllYears, value: allValue },
     ...years.map((value) => ({ label: value, value })),
@@ -93,7 +100,7 @@ export function ArchiveControls({
       translate="no"
     >
       <label
-        className="lg:min-w-64 lg:max-w-sm lg:flex-1"
+        className="lg:max-w-sm lg:min-w-64 lg:flex-1"
         htmlFor="archive-query"
       >
         <span className="sr-only">{labelsForLocale.search}</span>
@@ -180,7 +187,7 @@ export function ArchiveControls({
       </Select>
 
       <Button
-        className="h-8 rounded-none bg-primary px-5 text-primary-foreground text-sm hover:bg-primary/90"
+        className="bg-primary text-primary-foreground hover:bg-primary/90 h-8 rounded-none px-5 text-sm"
         type="submit"
       >
         {labelsForLocale.search}

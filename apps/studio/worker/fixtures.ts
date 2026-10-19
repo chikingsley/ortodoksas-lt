@@ -1,5 +1,6 @@
 import { env } from "cloudflare:workers";
 import { expect } from "vitest";
+import { z } from "zod";
 
 import { getDatabase } from "../src/server/db.server";
 import { uploadMedia } from "../src/server/media/media-operations.server";
@@ -27,9 +28,13 @@ export const uploadHero = async (fileName: string) => {
       method: "POST",
     }),
   });
+
   expect([200, 201]).toContain(response.status);
-  return (await response.json()) as {
-    media: { id: string; url: string };
-    reused: boolean;
-  };
+
+  return z
+    .object({
+      reused: z.boolean(),
+      media: z.object({ id: z.string(), url: z.string() }),
+    })
+    .parse(await response.json());
 };

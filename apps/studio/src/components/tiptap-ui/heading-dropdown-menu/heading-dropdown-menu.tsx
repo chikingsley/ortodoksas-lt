@@ -2,10 +2,6 @@ import { forwardRef, useCallback, useState } from "react";
 
 // --- Icons ---
 import { ChevronDownIcon } from "@/components/tiptap-icons/chevron-down-icon";
-// --- Tiptap UI ---
-import { HeadingButton } from "@/components/tiptap-ui/heading-button";
-import type { UseHeadingDropdownMenuConfig } from "@/components/tiptap-ui/heading-dropdown-menu";
-import { useHeadingDropdownMenu } from "@/components/tiptap-ui/heading-dropdown-menu";
 // --- UI Primitives ---
 import type { ButtonProps } from "@/components/tiptap-ui-primitive/button";
 import { Button } from "@/components/tiptap-ui-primitive/button";
@@ -16,12 +12,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/tiptap-ui-primitive/dropdown-menu";
+// --- Tiptap UI ---
+import { HeadingButton } from "@/components/tiptap-ui/heading-button";
+import type { UseHeadingDropdownMenuConfig } from "@/components/tiptap-ui/heading-dropdown-menu";
+import { useHeadingDropdownMenu } from "@/components/tiptap-ui/heading-dropdown-menu";
 // --- Hooks ---
 import { useTiptapEditor } from "@/hooks/use-tiptap-editor";
 
 export interface HeadingDropdownMenuProps
-  extends Omit<ButtonProps, "type">,
-    UseHeadingDropdownMenuConfig {
+  extends Omit<ButtonProps, "type">, UseHeadingDropdownMenuConfig {
   /**
    * Whether the dropdown should use a modal
    */

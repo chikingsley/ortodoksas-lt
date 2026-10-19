@@ -1,4 +1,5 @@
 import path from "node:path";
+
 import { cloudflareTest, readD1Migrations } from "@cloudflare/vitest-plugin";
 import { defineConfig } from "vitest/config";
 
@@ -26,5 +27,7 @@ export default defineConfig({
   test: {
     include: ["worker/**/*.spec.ts"],
     setupFiles: ["./worker/test-setup.ts"],
+    // Parallel Worker integration tests include a cold SSR module compilation.
+    testTimeout: 15_000,
   },
 });

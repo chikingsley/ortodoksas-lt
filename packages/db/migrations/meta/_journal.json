@@ -127,6 +127,13 @@
       "when": 1787853768490,
       "tag": "0019_complete_translation_review",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "6",
+      "when": 1792319748907,
+      "tag": "0020_publication_read_budget",
+      "breakpoints": true
     }
   ]
 }
