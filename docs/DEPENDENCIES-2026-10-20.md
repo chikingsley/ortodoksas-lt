@@ -36,3 +36,11 @@ TIPTAP-SOURCE.json now records the raw registry content hash as upstreamSha256, 
 Both complete pnpm check suites passed after the upgrades, covering lint, formatting, type checks, security regressions, release-evidence tests, package tests, actual Worker integration tests, builds and deployment dry runs. Frozen-lockfile installations and production dependency audits passed with the documented patched advisory exception. Wrangler binding types were regenerated and match the checked-in types.
 
 Live deployment versions, CPU evidence and full sitemap results for this dependency release are recorded below after deployment. The earlier incident and the required CPU acceptance procedure remain in CPU-2026-10-20.md.
+
+## Live acceptance
+
+The public Worker runs version 711e20b5-80d7-4981-8067-49d0506c8e83 from runtime commit fb297ca. The private Studio runs version 2559de83-f8b3-4d47-997a-2ee3b3d33d82. Each deployment serves 100 percent of its configured traffic. Existing database, media, authentication bindings and access settings were preserved.
+
+All 64 public delivery traces and 33 renderer traces passed the deployment-specific CPU gate. Delivery peaked at 2ms and rendering at 323ms. The complete 2,892-page sitemap crawl passed with HTTP 200, page titles, main content and headings. Native Chrome review confirmed desktop presentation, the 320px layout, complete poster images, mobile navigation and library navigation. The current original publication feed's newest entries remain present in the review site.
+
+These are the existing grassinside.com review deployments. Studio access remains private. Church-domain launch and editor onboarding remain separate handoff steps.
