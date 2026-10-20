@@ -7,6 +7,7 @@
 - Use generated Wrangler binding types and rerun `pnpm cf:types` after config changes. Do not put secrets or real resource IDs in source.
 - Keep React tests under `src` and Worker-runtime tests under `worker`. The Worker lane must use Cloudflare's Vitest pool and the real Wrangler config; Node-only tests are not proof that a Worker API works in workerd.
 - Run `pnpm check` before handoff. Build and dry-run results do not prove a deployment, custom domain, browser flow, or live binding.
+- Public release acceptance requires `pnpm verify:cpu <report.json> <deployed-version-id>` with complete cold-render and cache-hit telemetry for that deployment. Keep delivery below 10ms and rendering below 1,000ms. Follow the capture and full-crawl procedure in `docs/CPU-2026-10-20.md`; HTTP success establishes delivery separately from CPU acceptance.
 
 # Ultracite Code Standards
 

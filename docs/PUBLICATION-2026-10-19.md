@@ -26,6 +26,8 @@ The originating task's feedback directory contains the complete public crawls, p
 
 ## Final release evidence
 
+October 20 correction: the successful HTTP and execution-outcome checks below established availability during their samples. Measured uncached CPU still exceeded the free HTTP allowance. The runtime correction and stronger acceptance criteria are recorded in [CPU-2026-10-20.md](CPU-2026-10-20.md).
+
 The final complete crawl returned HTTP 200 with complete page markup for all 568 OBL editions and all 2,880 Ortodoksas editions. The public presentation checks passed for page language, one primary heading, omitted empty dates and editorial labels. A scan match inside an article discussing misleading information was reviewed as substantive source content and preserved.
 
 All 136 layout cases passed: 96 OBL cases and 40 Ortodoksas cases across eight widths, including 68 phone-width cases. The latest Ortodoksas live log sample contains 327 successful executions and zero CPU-limit failures; the complete 2,880-page HTTP crawl independently passed. OBL's final web check passed 37 unit tests and 24 Worker tests. Ortodoksas passed 33 unit tests and 16 Worker tests.
