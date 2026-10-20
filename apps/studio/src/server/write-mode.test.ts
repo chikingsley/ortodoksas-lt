@@ -21,7 +21,7 @@ describe("Studio write mode", () => {
     expect(response).toBeInstanceOf(Response);
 
     if (!(response instanceof Response)) {
-      throw new Error("Expected the maintenance response");
+      throw new TypeError("Expected the maintenance response");
     }
 
     expect({

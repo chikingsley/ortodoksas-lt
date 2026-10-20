@@ -160,7 +160,7 @@ export function cleanHtml(value: string, options: CleanHtmlOptions = {}) {
     .replaceAll(/<script[\s\S]*?<\/script>/giu, "")
     .replaceAll(/<style[\s\S]*?<\/style>/giu, "")
     .replaceAll(/\s+on[a-z]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/giu, "")
-    .replace(youtubeIframePattern, (frame) => {
+    .replaceAll(youtubeIframePattern, (frame) => {
       if (!youtubeEmbedSourcePattern.test(frame)) {
         return "";
       }
@@ -180,7 +180,7 @@ export function cleanHtml(value: string, options: CleanHtmlOptions = {}) {
       /\s+(?:href|src|data|action|formaction)\s*=\s*(?:"\s*(?:javascript|vbscript|file):[^"]*"|'\s*(?:javascript|vbscript|file):[^']*')/giu,
       ""
     )
-    .replace(standaloneStrongHeadingPattern, "<h2>$1</h2>")
+    .replaceAll(standaloneStrongHeadingPattern, "<h2>$1</h2>")
     .replaceAll(
       /<!--canonical-youtube-(?<index>\d+)-->/gu,
       (_token, index: string) => trustedYoutubeFrames[Number(index)] ?? ""
@@ -191,7 +191,7 @@ export function cleanHtml(value: string, options: CleanHtmlOptions = {}) {
   }
 
   const withoutHeroFigure = hasText(heroMediaId)
-    ? cleaned.replace(figurePattern, (figure) => {
+    ? cleaned.replaceAll(figurePattern, (figure) => {
         const mediaId = figureMediaIdPattern.exec(figure);
 
         return (mediaId?.[1] ?? mediaId?.[2]) === heroMediaId ? "" : figure;
@@ -241,7 +241,7 @@ export function localizePublicationLinks(
   locale: Exclude<SiteLocale, "lt">,
   localizedPaths: ReadonlyMap<string, string>
 ) {
-  return value.replace(
+  return value.replaceAll(
     hrefPattern,
     (attribute, quote: string, href: string) => {
       if (localizedPathPattern.test(href)) {
@@ -262,7 +262,7 @@ export function localizePublicationLinks(
 }
 
 export function canonicalizePublicationLinks(value: string) {
-  return value.replace(
+  return value.replaceAll(
     hrefPattern,
     (attribute, quote: string, href: string) => {
       const canonicalHref = canonicalizePublicationHref(href);

@@ -6,962 +6,1284 @@
     {
       "registry": "align-center-icon",
       "path": "components/tiptap-icons/align-center-icon.tsx",
-      "upstreamSha256": "0449707a50aff5e800573e5ad82814e5a7b17ac5b4e28b440b0a02def6faec9e",
-      "included": true
+      "upstreamSha256": "746d194a7f1a28f4e496800b1678f04d2816194d1aee20a5dabbe05ee2685445",
+      "included": true,
+      "adaptedBaselineSha256": "0449707a50aff5e800573e5ad82814e5a7b17ac5b4e28b440b0a02def6faec9e",
+      "upstreamPath": "tiptap-icons/align-center-icon.tsx"
     },
     {
       "registry": "align-justify-icon",
       "path": "components/tiptap-icons/align-justify-icon.tsx",
-      "upstreamSha256": "0b6b3812a0d7f502901cfc19a3c6922e9961feba6396628bf2dfcd25f9889ff6",
-      "included": true
+      "upstreamSha256": "e8b223b692390fc88bd6816973fa5964b95b8b833a1855543b39ef14a5c0087f",
+      "included": true,
+      "adaptedBaselineSha256": "0b6b3812a0d7f502901cfc19a3c6922e9961feba6396628bf2dfcd25f9889ff6",
+      "upstreamPath": "tiptap-icons/align-justify-icon.tsx"
     },
     {
       "registry": "align-left-icon",
       "path": "components/tiptap-icons/align-left-icon.tsx",
-      "upstreamSha256": "7f5f20c684ad15c665476e4781368ad26941032ef5a970bb71f57645e9511d3c",
-      "included": true
+      "upstreamSha256": "fe66c875bc64a8ab827d1349c5e2318cde3c497d68bbc8e960745340ddb9404d",
+      "included": true,
+      "adaptedBaselineSha256": "7f5f20c684ad15c665476e4781368ad26941032ef5a970bb71f57645e9511d3c",
+      "upstreamPath": "tiptap-icons/align-left-icon.tsx"
     },
     {
       "registry": "align-right-icon",
       "path": "components/tiptap-icons/align-right-icon.tsx",
-      "upstreamSha256": "d6999b588590ce24c0c66aa8bd9770caa5655667d4f5121deb3754632f00888a",
-      "included": true
+      "upstreamSha256": "d5ef6167a0a73e8663c17ffe28de51f8b6b47365564ce392274c834f5d9b0c9e",
+      "included": true,
+      "adaptedBaselineSha256": "d6999b588590ce24c0c66aa8bd9770caa5655667d4f5121deb3754632f00888a",
+      "upstreamPath": "tiptap-icons/align-right-icon.tsx"
     },
     {
       "registry": "arrow-left-icon",
       "path": "components/tiptap-icons/arrow-left-icon.tsx",
-      "upstreamSha256": "565861598f21eae5156c2e1c0eba85afea8d6eb098eb075403e925f5487b1697",
-      "included": true
+      "upstreamSha256": "273fa4f5e5b0ff194dffcb4ad7ddea98ab0bc6446b840ef6dda1072b4e89da1e",
+      "included": true,
+      "adaptedBaselineSha256": "565861598f21eae5156c2e1c0eba85afea8d6eb098eb075403e925f5487b1697",
+      "upstreamPath": "tiptap-icons/arrow-left-icon.tsx"
     },
     {
       "registry": "arrow-right-icon",
       "path": "components/tiptap-icons/arrow-right-icon.tsx",
-      "upstreamSha256": "c77e7afb8a7f7be14b0ad7c138e9f136dc49e97a5268222769c714e45518e10a",
-      "included": true
+      "upstreamSha256": "eae7fa78c9792cc0ad93bcc776613220ab48b388369d8ef2d8b17436bdf7e071",
+      "included": true,
+      "adaptedBaselineSha256": "c77e7afb8a7f7be14b0ad7c138e9f136dc49e97a5268222769c714e45518e10a",
+      "upstreamPath": "tiptap-icons/arrow-right-icon.tsx"
     },
     {
       "registry": "badge",
       "path": "components/tiptap-ui-primitive/badge/badge-colors.scss",
-      "upstreamSha256": "c311de041a9db3e6cda7f76d632fad346f7550467177725cbfcf548d6c2d4ea4",
-      "included": true
+      "upstreamSha256": "e2414a4de9fc5807c57d6f65385733a868a5a1819cf22a7c82ac7d1837ab73d4",
+      "included": true,
+      "adaptedBaselineSha256": "c311de041a9db3e6cda7f76d632fad346f7550467177725cbfcf548d6c2d4ea4",
+      "upstreamPath": "tiptap-ui-primitive/badge/badge-colors.scss"
     },
     {
       "registry": "badge",
       "path": "components/tiptap-ui-primitive/badge/badge-group.scss",
       "upstreamSha256": "d0cb773d68cef017d98c8fb5b2c328d7c4f373b15ecc6850d76145979678c097",
-      "included": true
+      "included": true,
+      "adaptedBaselineSha256": "d0cb773d68cef017d98c8fb5b2c328d7c4f373b15ecc6850d76145979678c097",
+      "upstreamPath": "tiptap-ui-primitive/badge/badge-group.scss"
     },
     {
       "registry": "badge",
       "path": "components/tiptap-ui-primitive/badge/badge.scss",
       "upstreamSha256": "62a3fd89ad6f6494f443783ba4a99bb732ffce9afca72688b3a151cffdaccdcd",
-      "included": true
+      "included": true,
+      "adaptedBaselineSha256": "62a3fd89ad6f6494f443783ba4a99bb732ffce9afca72688b3a151cffdaccdcd",
+      "upstreamPath": "tiptap-ui-primitive/badge/badge.scss"
     },
     {
       "registry": "badge",
       "path": "components/tiptap-ui-primitive/badge/badge.tsx",
-      "upstreamSha256": "1fbd41cea204eaa8393a18c89222f68f1fefb39d03d15d74c1e2e5d7a99718a4",
-      "included": true
+      "upstreamSha256": "67284496bad6fe5262145037dc2c703f45bd0b90687b4eab504a44c88da309ce",
+      "included": true,
+      "adaptedBaselineSha256": "1fbd41cea204eaa8393a18c89222f68f1fefb39d03d15d74c1e2e5d7a99718a4",
+      "upstreamPath": "tiptap-ui-primitive/badge/badge.tsx"
     },
     {
       "registry": "badge",
       "path": "components/tiptap-ui-primitive/badge/index.tsx",
-      "upstreamSha256": "81ad73491cb8a1b830298a77ce0d1a91f6808f5351e39113afdc011600e25f37",
-      "included": false
+      "upstreamSha256": "58caaaf0c3a0750b39d00dcb5486093aebbd154606a4c49af8cf87edfd7607e0",
+      "included": false,
+      "adaptedBaselineSha256": "81ad73491cb8a1b830298a77ce0d1a91f6808f5351e39113afdc011600e25f37",
+      "upstreamPath": "tiptap-ui-primitive/badge/index.tsx"
     },
     {
       "registry": "ban-icon",
       "path": "components/tiptap-icons/ban-icon.tsx",
-      "upstreamSha256": "3d7879fdf79e1c92ab89b3a2563b6feb132d959cfdc657bc0cfc3525ef2076ff",
-      "included": true
+      "upstreamSha256": "19ba041ea13c2af0d47bd2d48721325c833a050599c38540876a879d1fdcf285",
+      "included": true,
+      "adaptedBaselineSha256": "3d7879fdf79e1c92ab89b3a2563b6feb132d959cfdc657bc0cfc3525ef2076ff",
+      "upstreamPath": "tiptap-icons/ban-icon.tsx"
     },
     {
       "registry": "blockquote-button",
       "path": "components/tiptap-ui/blockquote-button/blockquote-button.tsx",
-      "upstreamSha256": "6a823aa6f9d487b6798e24779b224d03e734af0fc23e09013514d8f4e783a4b6",
-      "included": true
+      "upstreamSha256": "f0ed129ffd3773910d53c089b279ee86cba0b5fac8bf59eb9c8ab51dd1328d0e",
+      "included": true,
+      "adaptedBaselineSha256": "6a823aa6f9d487b6798e24779b224d03e734af0fc23e09013514d8f4e783a4b6",
+      "upstreamPath": "tiptap-ui/blockquote-button/blockquote-button.tsx"
     },
     {
       "registry": "blockquote-button",
       "path": "components/tiptap-ui/blockquote-button/index.tsx",
-      "upstreamSha256": "c871b34f59ffb113e99cb4bfff222dd5144bf737108a34e3a6256593ef57dd98",
-      "included": false
+      "upstreamSha256": "f12e0b7f7dc629ecf4247a4df0eb94a2ea683f95efeaf84d30322e569fb6c28a",
+      "included": false,
+      "adaptedBaselineSha256": "c871b34f59ffb113e99cb4bfff222dd5144bf737108a34e3a6256593ef57dd98",
+      "upstreamPath": "tiptap-ui/blockquote-button/index.tsx"
     },
     {
       "registry": "blockquote-button",
       "path": "components/tiptap-ui/blockquote-button/use-blockquote.ts",
-      "upstreamSha256": "40a441c7f4318edaa68bfe5e3955a4a8d36ead13fdd0bb87786d4348d3875354",
-      "included": true
+      "upstreamSha256": "1f90e8f89c08f4af9bf0c4354bd09f1a2194ff3ed8fa258821edace28221de41",
+      "included": true,
+      "adaptedBaselineSha256": "40a441c7f4318edaa68bfe5e3955a4a8d36ead13fdd0bb87786d4348d3875354",
+      "upstreamPath": "tiptap-ui/blockquote-button/use-blockquote.ts"
     },
     {
       "registry": "blockquote-icon",
       "path": "components/tiptap-icons/blockquote-icon.tsx",
-      "upstreamSha256": "5810ee4c8999bbbcb7862adddba532f6174b647ea220e9c636e9aa6eec22e593",
-      "included": true
+      "upstreamSha256": "2bb93731549059a01f40f3c8748447c9fea0410b0e42648750ccd2eeaa2ad2b7",
+      "included": true,
+      "adaptedBaselineSha256": "5810ee4c8999bbbcb7862adddba532f6174b647ea220e9c636e9aa6eec22e593",
+      "upstreamPath": "tiptap-icons/blockquote-icon.tsx"
     },
     {
       "registry": "blockquote-node",
       "path": "components/tiptap-node/blockquote-node/blockquote-node.scss",
       "upstreamSha256": "b945a853c52cb20e18493694b73397150ab59f3722ce916d057acc8221f1285b",
-      "included": true
+      "included": true,
+      "adaptedBaselineSha256": "b945a853c52cb20e18493694b73397150ab59f3722ce916d057acc8221f1285b",
+      "upstreamPath": "tiptap-node/blockquote-node/blockquote-node.scss"
     },
     {
       "registry": "bold-icon",
       "path": "components/tiptap-icons/bold-icon.tsx",
-      "upstreamSha256": "c6152ebdbd0c428f878f12731557ce66e7284652ce1ceace87a1b7163e86c95b",
-      "included": true
+      "upstreamSha256": "33b5e15738eb8910c7cf9ce78ace4a6befdfd194ed1871c1500c9e0865ecf141",
+      "included": true,
+      "adaptedBaselineSha256": "c6152ebdbd0c428f878f12731557ce66e7284652ce1ceace87a1b7163e86c95b",
+      "upstreamPath": "tiptap-icons/bold-icon.tsx"
     },
     {
       "registry": "button-group",
       "path": "components/tiptap-ui-primitive/button-group/button-group.scss",
       "upstreamSha256": "02c2f2d85398e0ed737f98e56d8999b2203b6dc1ac02df721c0f75568dc2f762",
-      "included": true
+      "included": true,
+      "adaptedBaselineSha256": "02c2f2d85398e0ed737f98e56d8999b2203b6dc1ac02df721c0f75568dc2f762",
+      "upstreamPath": "tiptap-ui-primitive/button-group/button-group.scss"
     },
     {
       "registry": "button-group",
       "path": "components/tiptap-ui-primitive/button-group/button-group.tsx",
-      "upstreamSha256": "509790df71b6207aceec81d20ae516381664f8b3f4e41823ab924f7b09ee1add",
-      "included": true
+      "upstreamSha256": "928834a590cd5c3a1acdf73ca34752a37b7c8b90cbc63b337683152795297844",
+      "included": true,
+      "adaptedBaselineSha256": "509790df71b6207aceec81d20ae516381664f8b3f4e41823ab924f7b09ee1add",
+      "upstreamPath": "tiptap-ui-primitive/button-group/button-group.tsx"
     },
     {
       "registry": "button-group",
       "path": "components/tiptap-ui-primitive/button-group/index.tsx",
-      "upstreamSha256": "6daa24b131a888185afbacfa5bb7d12c07edcd16f33dbb6dc6528ffff1b982da",
-      "included": false
+      "upstreamSha256": "ae7a82b7958a8ef77b2d3af8c545ea79c48965a0baa3aaff7b7a0623c4ffdbaa",
+      "included": false,
+      "adaptedBaselineSha256": "6daa24b131a888185afbacfa5bb7d12c07edcd16f33dbb6dc6528ffff1b982da",
+      "upstreamPath": "tiptap-ui-primitive/button-group/index.tsx"
     },
     {
       "registry": "button",
       "path": "components/tiptap-ui-primitive/button/button-colors.scss",
-      "upstreamSha256": "7dcb6cce116336efaca0a768cd59d60e2b313240123ac8442ce78aefa9e85afd",
-      "included": true
+      "upstreamSha256": "a790c1db50770199ef888a3ea9ceef1331a541dae6a48d65308c7b2eb2e3d006",
+      "included": true,
+      "adaptedBaselineSha256": "7dcb6cce116336efaca0a768cd59d60e2b313240123ac8442ce78aefa9e85afd",
+      "upstreamPath": "tiptap-ui-primitive/button/button-colors.scss"
     },
     {
       "registry": "button",
       "path": "components/tiptap-ui-primitive/button/button.scss",
       "upstreamSha256": "e4c07db120178e19f178edab0085eaa5ec88d5120bb9f595440b400cc562aa6e",
-      "included": true
+      "included": true,
+      "adaptedBaselineSha256": "e4c07db120178e19f178edab0085eaa5ec88d5120bb9f595440b400cc562aa6e",
+      "upstreamPath": "tiptap-ui-primitive/button/button.scss"
     },
     {
       "registry": "button",
       "path": "components/tiptap-ui-primitive/button/button.tsx",
-      "upstreamSha256": "e0179db1beeaf840ddd4b81377faced2b44499de8cf91f401f7823d800f9b782",
-      "included": true
+      "upstreamSha256": "b3760137bf473f093523ed0ad83673499e3f68eb2b8c2d54a4ff9db2dcb59cd5",
+      "included": true,
+      "adaptedBaselineSha256": "e0179db1beeaf840ddd4b81377faced2b44499de8cf91f401f7823d800f9b782",
+      "upstreamPath": "tiptap-ui-primitive/button/button.tsx"
     },
     {
       "registry": "button",
       "path": "components/tiptap-ui-primitive/button/index.tsx",
-      "upstreamSha256": "ba9130d2ead921ef44b042091f1d2f339696771aed8e8ebada07646b5cdd375b",
-      "included": false
+      "upstreamSha256": "af34b9af96acc5b433c667d1faf5c5f79cd169ef33a47d3e27b6d6f94ced22c3",
+      "included": false,
+      "adaptedBaselineSha256": "ba9130d2ead921ef44b042091f1d2f339696771aed8e8ebada07646b5cdd375b",
+      "upstreamPath": "tiptap-ui-primitive/button/index.tsx"
     },
     {
       "registry": "card",
       "path": "components/tiptap-ui-primitive/card/card.scss",
       "upstreamSha256": "42950a12b605b88a92c1cf14695ecd210d43a701c0e04256bdb0d344c0418a02",
-      "included": true
+      "included": true,
+      "adaptedBaselineSha256": "42950a12b605b88a92c1cf14695ecd210d43a701c0e04256bdb0d344c0418a02",
+      "upstreamPath": "tiptap-ui-primitive/card/card.scss"
     },
     {
       "registry": "card",
       "path": "components/tiptap-ui-primitive/card/card.tsx",
-      "upstreamSha256": "067a59bfa35115dcfcb5f58d1dcacaa2cdeb6c9ce7f2f5d4104502bc02b627f6",
-      "included": true
+      "upstreamSha256": "32f629fe5f4873591c39fee3dbd2e03d758ba970c5188bd503c94777ff1ace22",
+      "included": true,
+      "adaptedBaselineSha256": "067a59bfa35115dcfcb5f58d1dcacaa2cdeb6c9ce7f2f5d4104502bc02b627f6",
+      "upstreamPath": "tiptap-ui-primitive/card/card.tsx"
     },
     {
       "registry": "card",
       "path": "components/tiptap-ui-primitive/card/index.tsx",
-      "upstreamSha256": "5a42e9abafd5de36f4f26e385aa2402defc0665761a004bca78511383c34d1ba",
-      "included": false
+      "upstreamSha256": "20a86e9872f005ab5bcb37572776cc4fb6b1edc36ef9c60e7192b8d9608c176c",
+      "included": false,
+      "adaptedBaselineSha256": "5a42e9abafd5de36f4f26e385aa2402defc0665761a004bca78511383c34d1ba",
+      "upstreamPath": "tiptap-ui-primitive/card/index.tsx"
     },
     {
       "registry": "case-sensitive-icon",
       "path": "components/tiptap-icons/case-sensitive-icon.tsx",
-      "upstreamSha256": "df3d54b0c2d9d0cd92d37d44b918d46f9a5a710b6d92c97c20ec54a6225689fa",
-      "included": true
+      "upstreamSha256": "1b5831eec2a20e521e1792ddc5ef9de9b80bb54b45369db377a7bd2efb09aadb",
+      "included": true,
+      "adaptedBaselineSha256": "df3d54b0c2d9d0cd92d37d44b918d46f9a5a710b6d92c97c20ec54a6225689fa",
+      "upstreamPath": "tiptap-icons/case-sensitive-icon.tsx"
     },
     {
       "registry": "check-icon",
       "path": "components/tiptap-icons/check-icon.tsx",
-      "upstreamSha256": "298c6487d5d7e679f8251a97883638869ed85b6ff6b6eaecc6e224adab41b8c0",
-      "included": true
+      "upstreamSha256": "85a66dd06e42bcc366e30e139c4c73b5ce3a4948e6d9f8e7ee62a80896a8453e",
+      "included": true,
+      "adaptedBaselineSha256": "298c6487d5d7e679f8251a97883638869ed85b6ff6b6eaecc6e224adab41b8c0",
+      "upstreamPath": "tiptap-icons/check-icon.tsx"
     },
     {
       "registry": "chevron-down-icon",
       "path": "components/tiptap-icons/chevron-down-icon.tsx",
-      "upstreamSha256": "314f2f7473f60ba8e2b9240348f60337644d8d3b55da5a087275ac286a1f43c8",
-      "included": true
+      "upstreamSha256": "37bd304a310f22da6098a80216473630dff9a5842b29767a2696758b5c1021a5",
+      "included": true,
+      "adaptedBaselineSha256": "314f2f7473f60ba8e2b9240348f60337644d8d3b55da5a087275ac286a1f43c8",
+      "upstreamPath": "tiptap-icons/chevron-down-icon.tsx"
     },
     {
       "registry": "chevron-up-icon",
       "path": "components/tiptap-icons/chevron-up-icon.tsx",
-      "upstreamSha256": "b913d361e4e17898f10bda1a63bd015de81792381c6e184759f1d16a587f4b2f",
-      "included": true
+      "upstreamSha256": "18f8484b7a9181b0129fe361b4de952fdd0696f49cfeb641875953b656805922",
+      "included": true,
+      "adaptedBaselineSha256": "b913d361e4e17898f10bda1a63bd015de81792381c6e184759f1d16a587f4b2f",
+      "upstreamPath": "tiptap-icons/chevron-up-icon.tsx"
     },
     {
       "registry": "close-icon",
       "path": "components/tiptap-icons/close-icon.tsx",
-      "upstreamSha256": "a2f20ae312bdc2743d98047da8b2b5160314909ab08ce75c99f790c8d900d7f5",
-      "included": true
+      "upstreamSha256": "504c78d61a19252064b5ab836b81404a663d9409ec1c572fb18838241ec651cf",
+      "included": true,
+      "adaptedBaselineSha256": "a2f20ae312bdc2743d98047da8b2b5160314909ab08ce75c99f790c8d900d7f5",
+      "upstreamPath": "tiptap-icons/close-icon.tsx"
     },
     {
       "registry": "code-block-button",
       "path": "components/tiptap-ui/code-block-button/code-block-button.tsx",
-      "upstreamSha256": "af315407b0962f6576631e6dd237e4e907ff5a498cab899ba1c2e8ed43689b52",
-      "included": true
+      "upstreamSha256": "13d0f91a0f4c5256920c08b139ccdb172ffcdeb7d51c305f1c321c6e28c8337b",
+      "included": true,
+      "adaptedBaselineSha256": "af315407b0962f6576631e6dd237e4e907ff5a498cab899ba1c2e8ed43689b52",
+      "upstreamPath": "tiptap-ui/code-block-button/code-block-button.tsx"
     },
     {
       "registry": "code-block-button",
       "path": "components/tiptap-ui/code-block-button/index.tsx",
-      "upstreamSha256": "aa29a706e69a6bf73e98e07a7e272bf6a0b299d8aacc2ca48872f1d604f58b3e",
-      "included": false
+      "upstreamSha256": "b2448bf4af6dd5b913c75e004fb91bc8a1986557b3a1d63f29d2250d719910da",
+      "included": false,
+      "adaptedBaselineSha256": "aa29a706e69a6bf73e98e07a7e272bf6a0b299d8aacc2ca48872f1d604f58b3e",
+      "upstreamPath": "tiptap-ui/code-block-button/index.tsx"
     },
     {
       "registry": "code-block-button",
       "path": "components/tiptap-ui/code-block-button/use-code-block.ts",
-      "upstreamSha256": "b97ab068ac1a33285ab707790f65311f5846a8892b6532f1fbcbef1684d787b7",
-      "included": true
+      "upstreamSha256": "66e18f023913b76c1991ee4ce3b5d99c6ef5ff0746ffa0aca33dc7382e985a0e",
+      "included": true,
+      "adaptedBaselineSha256": "b97ab068ac1a33285ab707790f65311f5846a8892b6532f1fbcbef1684d787b7",
+      "upstreamPath": "tiptap-ui/code-block-button/use-code-block.ts"
     },
     {
       "registry": "code-block-icon",
       "path": "components/tiptap-icons/code-block-icon.tsx",
-      "upstreamSha256": "542adab7003b09d72c168d1df3e7c13231d084b07272d1e0c904850480b7fc76",
-      "included": true
+      "upstreamSha256": "8c85eb9beec76955f56bfeafd3aa2d2b5b318f65181255627afa2b23a02726ef",
+      "included": true,
+      "adaptedBaselineSha256": "542adab7003b09d72c168d1df3e7c13231d084b07272d1e0c904850480b7fc76",
+      "upstreamPath": "tiptap-icons/code-block-icon.tsx"
     },
     {
       "registry": "code-block-node",
       "path": "components/tiptap-node/code-block-node/code-block-node.scss",
       "upstreamSha256": "e0cd584b72de8b344a049e0c84afecf683923cec9348d6e6aa003a34a61cf657",
-      "included": true
+      "included": true,
+      "adaptedBaselineSha256": "e0cd584b72de8b344a049e0c84afecf683923cec9348d6e6aa003a34a61cf657",
+      "upstreamPath": "tiptap-node/code-block-node/code-block-node.scss"
     },
     {
       "registry": "code2-icon",
       "path": "components/tiptap-icons/code2-icon.tsx",
-      "upstreamSha256": "2710b40c6d29dad96900993073410f95a58e9fd55399189e594f94d32c84dabe",
-      "included": true
+      "upstreamSha256": "c0ed8661ec52f392ab390eaa4fa9fdde80b2862e42b2ade2e55485d337918a68",
+      "included": true,
+      "adaptedBaselineSha256": "2710b40c6d29dad96900993073410f95a58e9fd55399189e594f94d32c84dabe",
+      "upstreamPath": "tiptap-icons/code2-icon.tsx"
     },
     {
       "registry": "color-highlight-button",
       "path": "components/tiptap-ui/color-highlight-button/color-highlight-button.scss",
       "upstreamSha256": "8ed29651763eb3cd5e13acde4c8b3208013a5830bf54c7fe37690a305e533500",
-      "included": true
+      "included": true,
+      "adaptedBaselineSha256": "8ed29651763eb3cd5e13acde4c8b3208013a5830bf54c7fe37690a305e533500",
+      "upstreamPath": "tiptap-ui/color-highlight-button/color-highlight-button.scss"
     },
     {
       "registry": "color-highlight-button",
       "path": "components/tiptap-ui/color-highlight-button/color-highlight-button.tsx",
-      "upstreamSha256": "de32df879014fbe05c2dcad4c660f3a11af480bc2b00fe299dfe30886db4d61c",
-      "included": true
+      "upstreamSha256": "7d7d7dfb3dd419201fe0b33e1e1515c83ecadee92dd7b0e07b0db60d1b4b4ca5",
+      "included": true,
+      "adaptedBaselineSha256": "de32df879014fbe05c2dcad4c660f3a11af480bc2b00fe299dfe30886db4d61c",
+      "upstreamPath": "tiptap-ui/color-highlight-button/color-highlight-button.tsx"
     },
     {
       "registry": "color-highlight-button",
       "path": "components/tiptap-ui/color-highlight-button/index.tsx",
-      "upstreamSha256": "d75e60760d56889f2186d67392702f7b18f6ca4f418b699db7b5c07ab7e33d7e",
-      "included": false
+      "upstreamSha256": "ed4e326a8b9cd2891e46f3f947eb972cd1e39c010f262f7d24d3901c0538ea1a",
+      "included": false,
+      "adaptedBaselineSha256": "d75e60760d56889f2186d67392702f7b18f6ca4f418b699db7b5c07ab7e33d7e",
+      "upstreamPath": "tiptap-ui/color-highlight-button/index.tsx"
     },
     {
       "registry": "color-highlight-button",
       "path": "components/tiptap-ui/color-highlight-button/use-color-highlight.ts",
-      "upstreamSha256": "244ba5ba99f740ca0f32ed3cd2fb7ed5644b0c0a89eb08820e65bdc3b323edbf",
-      "included": true
+      "upstreamSha256": "d73ca6373e4055a861301a2107a0e824b4fda17e5581a71511594b8a0f1fead5",
+      "included": true,
+      "adaptedBaselineSha256": "244ba5ba99f740ca0f32ed3cd2fb7ed5644b0c0a89eb08820e65bdc3b323edbf",
+      "upstreamPath": "tiptap-ui/color-highlight-button/use-color-highlight.ts"
     },
     {
       "registry": "color-highlight-popover",
       "path": "components/tiptap-ui/color-highlight-popover/color-highlight-popover.tsx",
-      "upstreamSha256": "6cfd6c3386e51d9e176e6b1614b37c37e569adcafa2952cb0836b5f914d571b1",
-      "included": true
+      "upstreamSha256": "d531ac6d56e1c7b486f4a7498eea151b031c264bf60f6dda467a17a863b90efa",
+      "included": true,
+      "adaptedBaselineSha256": "6cfd6c3386e51d9e176e6b1614b37c37e569adcafa2952cb0836b5f914d571b1",
+      "upstreamPath": "tiptap-ui/color-highlight-popover/color-highlight-popover.tsx"
     },
     {
       "registry": "color-highlight-popover",
       "path": "components/tiptap-ui/color-highlight-popover/index.tsx",
-      "upstreamSha256": "26d5790a04b19e1f800b17340f1cb817e2b3dca3126afbbb5d97f4b9a8baa438",
-      "included": false
+      "upstreamSha256": "70c56df2fda70ffb7ba8ecb59e69c72c6ac34e2cf0fd3c40f52d0dea15a147ec",
+      "included": false,
+      "adaptedBaselineSha256": "26d5790a04b19e1f800b17340f1cb817e2b3dca3126afbbb5d97f4b9a8baa438",
+      "upstreamPath": "tiptap-ui/color-highlight-popover/index.tsx"
     },
     {
       "registry": "corner-down-left-icon",
       "path": "components/tiptap-icons/corner-down-left-icon.tsx",
-      "upstreamSha256": "df215a94d5ef88e2ad00bb30b8f5d2da64010ee1ba1c15f22ea3631ced634fc5",
-      "included": true
+      "upstreamSha256": "9686ee892fb0d57ccca050d572fddf6585a433a43ab5d85ca0100c7ff63e00c1",
+      "included": true,
+      "adaptedBaselineSha256": "df215a94d5ef88e2ad00bb30b8f5d2da64010ee1ba1c15f22ea3631ced634fc5",
+      "upstreamPath": "tiptap-icons/corner-down-left-icon.tsx"
     },
     {
       "registry": "dropdown-menu",
       "path": "components/tiptap-ui-primitive/dropdown-menu/dropdown-menu.tsx",
-      "upstreamSha256": "e8301aaf01e1c34045bf3e0d5b58ab2bd1b197356e73d02bbed92a11cd2c836a",
-      "included": true
+      "upstreamSha256": "68f1be3ded1c58737fcba67e63ed4c62e71dfa9d45bdc6b33f9923106b57794e",
+      "included": true,
+      "adaptedBaselineSha256": "e8301aaf01e1c34045bf3e0d5b58ab2bd1b197356e73d02bbed92a11cd2c836a",
+      "upstreamPath": "tiptap-ui-primitive/dropdown-menu/dropdown-menu.tsx"
     },
     {
       "registry": "dropdown-menu",
       "path": "components/tiptap-ui-primitive/dropdown-menu/dropdown-menu.scss",
       "upstreamSha256": "fee65105e2003323856d9cde87661f1b93e94957eb281a451389e785c15b1c2a",
-      "included": true
+      "included": true,
+      "adaptedBaselineSha256": "fee65105e2003323856d9cde87661f1b93e94957eb281a451389e785c15b1c2a",
+      "upstreamPath": "tiptap-ui-primitive/dropdown-menu/dropdown-menu.scss"
     },
     {
       "registry": "dropdown-menu",
       "path": "components/tiptap-ui-primitive/dropdown-menu/index.tsx",
-      "upstreamSha256": "dab0c2b8c23db41a8d9918eca4ade2a917a6bde9cbd3300d300320137b88e3bd",
-      "included": false
+      "upstreamSha256": "61a49d77af85069d456d10aa7a254f736cd82c5c8da788841c2488307f9dd8b8",
+      "included": false,
+      "adaptedBaselineSha256": "dab0c2b8c23db41a8d9918eca4ade2a917a6bde9cbd3300d300320137b88e3bd",
+      "upstreamPath": "tiptap-ui-primitive/dropdown-menu/index.tsx"
     },
     {
       "registry": "external-link-icon",
       "path": "components/tiptap-icons/external-link-icon.tsx",
-      "upstreamSha256": "7536d1d5f4a8b7d6ca21ab358b19886f6b664019d429e44d8d51020bec966d2f",
-      "included": true
+      "upstreamSha256": "6dc615de344513e56fb4e1b5a52b48f3bd3aa2064c5c41aedb06403c0ad415fb",
+      "included": true,
+      "adaptedBaselineSha256": "7536d1d5f4a8b7d6ca21ab358b19886f6b664019d429e44d8d51020bec966d2f",
+      "upstreamPath": "tiptap-icons/external-link-icon.tsx"
     },
     {
       "registry": "heading-button",
       "path": "components/tiptap-ui/heading-button/heading-button.tsx",
-      "upstreamSha256": "ebc47abadf5ea822402ed7b5f97df4fd3cedad796c66fc0d224067e770be8b15",
-      "included": true
+      "upstreamSha256": "c686c78be954fb60063e891571560d234a2a247c8b1d9f2f253203b8bf6f8578",
+      "included": true,
+      "adaptedBaselineSha256": "ebc47abadf5ea822402ed7b5f97df4fd3cedad796c66fc0d224067e770be8b15",
+      "upstreamPath": "tiptap-ui/heading-button/heading-button.tsx"
     },
     {
       "registry": "heading-button",
       "path": "components/tiptap-ui/heading-button/index.tsx",
-      "upstreamSha256": "69fe607e4c8f84547983d156f5afe1e25e3ae8dee435947de5320f0eedd4531b",
-      "included": false
+      "upstreamSha256": "70362da64f74b9ef0ae7d9f6cdeb6b0107f6d3082c5cfa7c4a06a3c9df8b5967",
+      "included": false,
+      "adaptedBaselineSha256": "69fe607e4c8f84547983d156f5afe1e25e3ae8dee435947de5320f0eedd4531b",
+      "upstreamPath": "tiptap-ui/heading-button/index.tsx"
     },
     {
       "registry": "heading-button",
       "path": "components/tiptap-ui/heading-button/use-heading.ts",
-      "upstreamSha256": "3a9cd5b13a5799e504c545ec8547a7a008c078cbabc7e062b446196f8d42ccab",
-      "included": true
+      "upstreamSha256": "192ac443d655720b4e123fcbd6352afcc1b44c33b9f2a115e7784e64f43f433e",
+      "included": true,
+      "adaptedBaselineSha256": "3a9cd5b13a5799e504c545ec8547a7a008c078cbabc7e062b446196f8d42ccab",
+      "upstreamPath": "tiptap-ui/heading-button/use-heading.ts"
     },
     {
       "registry": "heading-dropdown-menu",
       "path": "components/tiptap-ui/heading-dropdown-menu/heading-dropdown-menu.tsx",
-      "upstreamSha256": "858d0a6ae09bd4546bac65a0b780bf149199359903a59d66c6636c616934f273",
-      "included": true
+      "upstreamSha256": "4a2739f37e1ff58e6a3a0e05461f25ebb965b9d2ab6b892e4717daadb34df7ff",
+      "included": true,
+      "adaptedBaselineSha256": "858d0a6ae09bd4546bac65a0b780bf149199359903a59d66c6636c616934f273",
+      "upstreamPath": "tiptap-ui/heading-dropdown-menu/heading-dropdown-menu.tsx"
     },
     {
       "registry": "heading-dropdown-menu",
       "path": "components/tiptap-ui/heading-dropdown-menu/index.tsx",
-      "upstreamSha256": "7339885e9b1c1edb5b8bb5d05454ce0e5836c53e2533d6aa9e55009872ddafb1",
-      "included": false
+      "upstreamSha256": "cd169901c1b460667f6d27fac95f64482c40e55fde30b8d37963f36aba2f3045",
+      "included": false,
+      "adaptedBaselineSha256": "7339885e9b1c1edb5b8bb5d05454ce0e5836c53e2533d6aa9e55009872ddafb1",
+      "upstreamPath": "tiptap-ui/heading-dropdown-menu/index.tsx"
     },
     {
       "registry": "heading-dropdown-menu",
       "path": "components/tiptap-ui/heading-dropdown-menu/use-heading-dropdown-menu.ts",
-      "upstreamSha256": "f1dc80e172c9b6994e94a4ef55b4f817d695bea42eccd2b7f419ccc921a1ea12",
-      "included": true
+      "upstreamSha256": "e56f42d8a507c842b6a48eef82db7a37f1ff46f00c556c59e6fb2b3720a53600",
+      "included": true,
+      "adaptedBaselineSha256": "f1dc80e172c9b6994e94a4ef55b4f817d695bea42eccd2b7f419ccc921a1ea12",
+      "upstreamPath": "tiptap-ui/heading-dropdown-menu/use-heading-dropdown-menu.ts"
     },
     {
       "registry": "heading-five-icon",
       "path": "components/tiptap-icons/heading-five-icon.tsx",
-      "upstreamSha256": "e9257c59fc5ba6e3e7c78c138178a78052dbc5b635c89305c30ccedd8ef5de54",
-      "included": true
+      "upstreamSha256": "d87bac5c13849faba4fa3f1608017378e6254cd7e4df587555ddf04fbaed1b4e",
+      "included": true,
+      "adaptedBaselineSha256": "e9257c59fc5ba6e3e7c78c138178a78052dbc5b635c89305c30ccedd8ef5de54",
+      "upstreamPath": "tiptap-icons/heading-five-icon.tsx"
     },
     {
       "registry": "heading-four-icon",
       "path": "components/tiptap-icons/heading-four-icon.tsx",
-      "upstreamSha256": "8fdcfe79045f3309bb017201e2b0011b5ac19189f19f8e815fa616b9d947de30",
-      "included": true
+      "upstreamSha256": "c91daef2d57c6c86c3250ec11c745eddd1a7778a273d07baf4716dc811916075",
+      "included": true,
+      "adaptedBaselineSha256": "8fdcfe79045f3309bb017201e2b0011b5ac19189f19f8e815fa616b9d947de30",
+      "upstreamPath": "tiptap-icons/heading-four-icon.tsx"
     },
     {
       "registry": "heading-icon",
       "path": "components/tiptap-icons/heading-icon.tsx",
-      "upstreamSha256": "3b02adfcfed80120c7faffe067ed147e459d27e1b4ae5c673e1b0b8eaa13307f",
-      "included": true
+      "upstreamSha256": "5cc7f58c9effd4e76be32fc129388e0a74dfba36114898fe9efe688e69cbb58e",
+      "included": true,
+      "adaptedBaselineSha256": "3b02adfcfed80120c7faffe067ed147e459d27e1b4ae5c673e1b0b8eaa13307f",
+      "upstreamPath": "tiptap-icons/heading-icon.tsx"
     },
     {
       "registry": "heading-node",
       "path": "components/tiptap-node/heading-node/heading-node.scss",
       "upstreamSha256": "20f84095b3fdb7538faa83d4960d9f1adb5cf3c4f7c9722662382741e1083110",
-      "included": true
+      "included": true,
+      "adaptedBaselineSha256": "20f84095b3fdb7538faa83d4960d9f1adb5cf3c4f7c9722662382741e1083110",
+      "upstreamPath": "tiptap-node/heading-node/heading-node.scss"
     },
     {
       "registry": "heading-one-icon",
       "path": "components/tiptap-icons/heading-one-icon.tsx",
-      "upstreamSha256": "da276b8ad0b9481f1c3ee6a99b121b33e322376728c0c50e0c313884eb5e5ad1",
-      "included": true
+      "upstreamSha256": "7db2cf3f85c403a814a1883a50fae1477b883028eb531aa85d960b3b6708db8e",
+      "included": true,
+      "adaptedBaselineSha256": "da276b8ad0b9481f1c3ee6a99b121b33e322376728c0c50e0c313884eb5e5ad1",
+      "upstreamPath": "tiptap-icons/heading-one-icon.tsx"
     },
     {
       "registry": "heading-six-icon",
       "path": "components/tiptap-icons/heading-six-icon.tsx",
-      "upstreamSha256": "0e5786e8408cc3424647e5c3142079c35c9c6edc37e875352b91707b579e5b03",
-      "included": true
+      "upstreamSha256": "c8aa590435e7153c4059eb2d03b09b7bc203ec110d8ce4a6de0d33edffddf54b",
+      "included": true,
+      "adaptedBaselineSha256": "0e5786e8408cc3424647e5c3142079c35c9c6edc37e875352b91707b579e5b03",
+      "upstreamPath": "tiptap-icons/heading-six-icon.tsx"
     },
     {
       "registry": "heading-three-icon",
       "path": "components/tiptap-icons/heading-three-icon.tsx",
-      "upstreamSha256": "a7b60c1051f988b1303a77bc0ff6a2aad4d47df42ea8920a6dece719b25ba901",
-      "included": true
+      "upstreamSha256": "65913a915b5cf5caa9ed135ad6cbd71fcd9e208eb846576b872738c6518d4118",
+      "included": true,
+      "adaptedBaselineSha256": "a7b60c1051f988b1303a77bc0ff6a2aad4d47df42ea8920a6dece719b25ba901",
+      "upstreamPath": "tiptap-icons/heading-three-icon.tsx"
     },
     {
       "registry": "heading-two-icon",
       "path": "components/tiptap-icons/heading-two-icon.tsx",
-      "upstreamSha256": "72400576338fa0f83bb5c3fda735d6120b594c59a77de198da248bf94d0cdce5",
-      "included": true
+      "upstreamSha256": "e202edba448ed735a2ff94cafea95d2d84d22420af94d8adc547d420919cc8da",
+      "included": true,
+      "adaptedBaselineSha256": "72400576338fa0f83bb5c3fda735d6120b594c59a77de198da248bf94d0cdce5",
+      "upstreamPath": "tiptap-icons/heading-two-icon.tsx"
     },
     {
       "registry": "highlighter-icon",
       "path": "components/tiptap-icons/highlighter-icon.tsx",
-      "upstreamSha256": "faf11e1ffbb25ff88c1416493907c3bd07613624fb64a38c844a86038d3e96c1",
-      "included": true
+      "upstreamSha256": "da39c30eee834555ac6f588f47ed5d85dcddcb336c0658486d0f12008e321dc8",
+      "included": true,
+      "adaptedBaselineSha256": "faf11e1ffbb25ff88c1416493907c3bd07613624fb64a38c844a86038d3e96c1",
+      "upstreamPath": "tiptap-icons/highlighter-icon.tsx"
     },
     {
       "registry": "horizontal-rule-node",
       "path": "components/tiptap-node/horizontal-rule-node/horizontal-rule-node-extension.ts",
-      "upstreamSha256": "aeaf7f4499c36c79b6994111efac670bdc984a20982cb953c3caf5c900a9563a",
-      "included": true
+      "upstreamSha256": "c1f7b52f8ffeeee95e3b10d199094061bef5d445d03d3cd5fef2c92bfc865e47",
+      "included": true,
+      "adaptedBaselineSha256": "aeaf7f4499c36c79b6994111efac670bdc984a20982cb953c3caf5c900a9563a",
+      "upstreamPath": "tiptap-node/horizontal-rule-node/horizontal-rule-node-extension.ts"
     },
     {
       "registry": "horizontal-rule-node",
       "path": "components/tiptap-node/horizontal-rule-node/horizontal-rule-node.scss",
       "upstreamSha256": "1baead700a5bd15786770a7ec57406625a3fd51981ca8e53b1bba14265994aa5",
-      "included": true
+      "included": true,
+      "adaptedBaselineSha256": "1baead700a5bd15786770a7ec57406625a3fd51981ca8e53b1bba14265994aa5",
+      "upstreamPath": "tiptap-node/horizontal-rule-node/horizontal-rule-node.scss"
     },
     {
       "registry": "image-node",
       "path": "components/tiptap-node/image-node/image-node.scss",
       "upstreamSha256": "72a67c91d848ddda36c12083b7b16295013c8b411ee12b1d748df265f31ad19a",
-      "included": true
+      "included": true,
+      "adaptedBaselineSha256": "72a67c91d848ddda36c12083b7b16295013c8b411ee12b1d748df265f31ad19a",
+      "upstreamPath": "tiptap-node/image-node/image-node.scss"
     },
     {
       "registry": "image-plus-icon",
       "path": "components/tiptap-icons/image-plus-icon.tsx",
-      "upstreamSha256": "478fb3d5109b860a4de4947a9114601f92d7598fb9197d91a7f4109608e25546",
-      "included": true
+      "upstreamSha256": "9094e621e6140f54fd2a68dadf26812e2c3dae0af19a2f7f0dcacd2c05f55e84",
+      "included": true,
+      "adaptedBaselineSha256": "478fb3d5109b860a4de4947a9114601f92d7598fb9197d91a7f4109608e25546",
+      "upstreamPath": "tiptap-icons/image-plus-icon.tsx"
     },
     {
       "registry": "image-upload-button",
       "path": "components/tiptap-ui/image-upload-button/image-upload-button.tsx",
-      "upstreamSha256": "510aca01cfd8da0012da9e8fabfeda3f18064ba71323f5c2ad8c2ff21f58982f",
-      "included": true
+      "upstreamSha256": "cadfe5e90f8822ae696ec432b0871e37129eff2ca369a0806bbf59b76bd6f91b",
+      "included": true,
+      "adaptedBaselineSha256": "510aca01cfd8da0012da9e8fabfeda3f18064ba71323f5c2ad8c2ff21f58982f",
+      "upstreamPath": "tiptap-ui/image-upload-button/image-upload-button.tsx"
     },
     {
       "registry": "image-upload-button",
       "path": "components/tiptap-ui/image-upload-button/index.tsx",
-      "upstreamSha256": "982872afa9969e49a100ae0744c79cebf449877ee91f3e4a1ab1834eec3a49da",
-      "included": false
+      "upstreamSha256": "fa02073abfd60460b713f9fe577ff9b51c7a116179db2b7ddede4b47697bb05f",
+      "included": false,
+      "adaptedBaselineSha256": "982872afa9969e49a100ae0744c79cebf449877ee91f3e4a1ab1834eec3a49da",
+      "upstreamPath": "tiptap-ui/image-upload-button/index.tsx"
     },
     {
       "registry": "image-upload-button",
       "path": "components/tiptap-ui/image-upload-button/use-image-upload.ts",
-      "upstreamSha256": "4ac6b756e320ef30df366f2890b05e81e3347c9c9c04f5f42db31da6f19f01b2",
-      "included": true
+      "upstreamSha256": "fd8ff9ddb6aef09131dfbb6caa36e09b9dc65b7a11193770e83ac16b6ba37721",
+      "included": true,
+      "adaptedBaselineSha256": "4ac6b756e320ef30df366f2890b05e81e3347c9c9c04f5f42db31da6f19f01b2",
+      "upstreamPath": "tiptap-ui/image-upload-button/use-image-upload.ts"
     },
     {
       "registry": "image-upload-node",
       "path": "components/tiptap-node/image-upload-node/image-upload-node-extension.ts",
-      "upstreamSha256": "37774a0c14fa9bb9a1af6ef6eb549d8d6ca0c5bbae8e3d6ea260027cbd0142c4",
-      "included": true
+      "upstreamSha256": "3d55fdf98f3cb68b6a193546c0421f0955e74077d2fa7df95d2aee18d0e695f7",
+      "included": true,
+      "adaptedBaselineSha256": "37774a0c14fa9bb9a1af6ef6eb549d8d6ca0c5bbae8e3d6ea260027cbd0142c4",
+      "upstreamPath": "tiptap-node/image-upload-node/image-upload-node-extension.ts"
     },
     {
       "registry": "image-upload-node",
       "path": "components/tiptap-node/image-upload-node/image-upload-node.scss",
       "upstreamSha256": "9fce3a746eadd5be3a6ea910852a94c5b456e38ac764b5eb8644cbe7e4d9e83e",
-      "included": true
+      "included": true,
+      "adaptedBaselineSha256": "9fce3a746eadd5be3a6ea910852a94c5b456e38ac764b5eb8644cbe7e4d9e83e",
+      "upstreamPath": "tiptap-node/image-upload-node/image-upload-node.scss"
     },
     {
       "registry": "image-upload-node",
       "path": "components/tiptap-node/image-upload-node/image-upload-node.tsx",
-      "upstreamSha256": "14e0ce86813e5430b36b95a85a9e892e9ad121200f0115e773610d6c3ee9defc",
-      "included": true
+      "upstreamSha256": "23b878fec8a4083967cd6ada4b4b2930792d8a3985692aa27cfc4a8e178c8423",
+      "included": true,
+      "adaptedBaselineSha256": "14e0ce86813e5430b36b95a85a9e892e9ad121200f0115e773610d6c3ee9defc",
+      "upstreamPath": "tiptap-node/image-upload-node/image-upload-node.tsx"
     },
     {
       "registry": "image-upload-node",
       "path": "components/tiptap-node/image-upload-node/index.tsx",
-      "upstreamSha256": "9fa87b052eb3ee415fcdcf549c744b34d7f6b03f439ff861bf478c137cbba9c2",
-      "included": false
+      "upstreamSha256": "aad44e945d839210830410335b5bc7f3dc21ae90c4b65c794193e6aa508d42dc",
+      "included": false,
+      "adaptedBaselineSha256": "9fa87b052eb3ee415fcdcf549c744b34d7f6b03f439ff861bf478c137cbba9c2",
+      "upstreamPath": "tiptap-node/image-upload-node/index.tsx"
     },
     {
       "registry": "input-group",
       "path": "components/tiptap-ui-primitive/input-group/input-group.tsx",
-      "upstreamSha256": "30f2049c7bdd3145fa7ebd4ca984d3ec23efbe3692157c502bcf03d590c52644",
-      "included": true
+      "upstreamSha256": "a92f4f4356c4a8d7557969768ed161148a50943080f9334f94e8af6b42f5fea2",
+      "included": true,
+      "adaptedBaselineSha256": "30f2049c7bdd3145fa7ebd4ca984d3ec23efbe3692157c502bcf03d590c52644",
+      "upstreamPath": "tiptap-ui-primitive/input-group/input-group.tsx"
     },
     {
       "registry": "input-group",
       "path": "components/tiptap-ui-primitive/input-group/input-group.scss",
       "upstreamSha256": "ff13152d8e68e707118bee29127157b31ab17fb9cb66d8703a7c4cf49d3ea89d",
-      "included": true
+      "included": true,
+      "adaptedBaselineSha256": "ff13152d8e68e707118bee29127157b31ab17fb9cb66d8703a7c4cf49d3ea89d",
+      "upstreamPath": "tiptap-ui-primitive/input-group/input-group.scss"
     },
     {
       "registry": "input-group",
       "path": "components/tiptap-ui-primitive/input-group/index.tsx",
-      "upstreamSha256": "0f423fe35fd6bb68ea745c4da46f89622ef72789ce716e0f1b5293c7a891d961",
-      "included": false
+      "upstreamSha256": "b668f31e8819d61661777e0e1ba8efed05171651b7e4baee53199deaf3db1a99",
+      "included": false,
+      "adaptedBaselineSha256": "0f423fe35fd6bb68ea745c4da46f89622ef72789ce716e0f1b5293c7a891d961",
+      "upstreamPath": "tiptap-ui-primitive/input-group/index.tsx"
     },
     {
       "registry": "input",
       "path": "components/tiptap-ui-primitive/input/input.tsx",
-      "upstreamSha256": "b926fbec8be85e65117bf029c769cf50447d7e18d0cd4e0f496d82bf9ed04118",
-      "included": true
+      "upstreamSha256": "68490cc30b6c8d3c32c2923a723ffd712f6806d7c563c2826478b2d4e49d58ae",
+      "included": true,
+      "adaptedBaselineSha256": "b926fbec8be85e65117bf029c769cf50447d7e18d0cd4e0f496d82bf9ed04118",
+      "upstreamPath": "tiptap-ui-primitive/input/input.tsx"
     },
     {
       "registry": "input",
       "path": "components/tiptap-ui-primitive/input/input.scss",
       "upstreamSha256": "fe415daeecb5f6961f415d425be03de2d286f8dd6105036d3cea943c1a43d9c9",
-      "included": true
+      "included": true,
+      "adaptedBaselineSha256": "fe415daeecb5f6961f415d425be03de2d286f8dd6105036d3cea943c1a43d9c9",
+      "upstreamPath": "tiptap-ui-primitive/input/input.scss"
     },
     {
       "registry": "input",
       "path": "components/tiptap-ui-primitive/input/index.tsx",
-      "upstreamSha256": "aab0825399bfbc98165b3619e172054f43380756f64521bb2b77919731a37864",
-      "included": false
+      "upstreamSha256": "3116182228536c5b9f9a84ad00741dbbf40ba9fc3c037d1742ba387b0c34e539",
+      "included": false,
+      "adaptedBaselineSha256": "aab0825399bfbc98165b3619e172054f43380756f64521bb2b77919731a37864",
+      "upstreamPath": "tiptap-ui-primitive/input/index.tsx"
     },
     {
       "registry": "italic-icon",
       "path": "components/tiptap-icons/italic-icon.tsx",
-      "upstreamSha256": "b22e8fe72568d8c3940d551d1cfcd5ed49a18c89b853a34986d28f137b8a2033",
-      "included": true
+      "upstreamSha256": "59cce87f6098ca53cb301eb756df8d0509e35b89259b98375eea4cc32a4970d4",
+      "included": true,
+      "adaptedBaselineSha256": "b22e8fe72568d8c3940d551d1cfcd5ed49a18c89b853a34986d28f137b8a2033",
+      "upstreamPath": "tiptap-icons/italic-icon.tsx"
     },
     {
       "registry": "link-icon",
       "path": "components/tiptap-icons/link-icon.tsx",
-      "upstreamSha256": "7fcf0d6934a2b8c15f226dc52729324660e06ba52922d487068d311471dcc406",
-      "included": true
+      "upstreamSha256": "473e0eda806864486a58a9d65adb04882f6c508bec02d39833c860e21896bfd3",
+      "included": true,
+      "adaptedBaselineSha256": "7fcf0d6934a2b8c15f226dc52729324660e06ba52922d487068d311471dcc406",
+      "upstreamPath": "tiptap-icons/link-icon.tsx"
     },
     {
       "registry": "link-popover",
       "path": "components/tiptap-ui/link-popover/link-popover.tsx",
-      "upstreamSha256": "83356d4cfccdc0f3ea648087b4642159875f6a4c9efab0e45c668d9c0fba0028",
-      "included": true
+      "upstreamSha256": "045cdface6a2b608c503d940516f3734c04751477a6e6b85eeb115cc4a70a1ff",
+      "included": true,
+      "adaptedBaselineSha256": "83356d4cfccdc0f3ea648087b4642159875f6a4c9efab0e45c668d9c0fba0028",
+      "upstreamPath": "tiptap-ui/link-popover/link-popover.tsx"
     },
     {
       "registry": "link-popover",
       "path": "components/tiptap-ui/link-popover/link-popover.scss",
       "upstreamSha256": "291064a0a9bda50597bd07e0f8acc59ca1eeb3af282a42bcf190f2544fc64e76",
-      "included": true
+      "included": true,
+      "adaptedBaselineSha256": "291064a0a9bda50597bd07e0f8acc59ca1eeb3af282a42bcf190f2544fc64e76",
+      "upstreamPath": "tiptap-ui/link-popover/link-popover.scss"
     },
     {
       "registry": "link-popover",
       "path": "components/tiptap-ui/link-popover/index.tsx",
-      "upstreamSha256": "a266a0e43a0bea509aec6da865f427f516acc3f24f3dcca608f76f7aea709237",
-      "included": false
+      "upstreamSha256": "af91196a1eea0d2fc1dba43e6c94dad88d97ca13723fd6b03ebe18af83808f85",
+      "included": false,
+      "adaptedBaselineSha256": "a266a0e43a0bea509aec6da865f427f516acc3f24f3dcca608f76f7aea709237",
+      "upstreamPath": "tiptap-ui/link-popover/index.tsx"
     },
     {
       "registry": "link-popover",
       "path": "components/tiptap-ui/link-popover/use-link-popover.ts",
-      "upstreamSha256": "c4d8e7b82ee4ce88aacde8ea873fb4b7a278b3689e8141f3051e2364e51d1a32",
-      "included": true
+      "upstreamSha256": "62ca23e95f38247f820ab37d9035e8bcc51e359bc092ac23824c8a58b5233f84",
+      "included": true,
+      "adaptedBaselineSha256": "c4d8e7b82ee4ce88aacde8ea873fb4b7a278b3689e8141f3051e2364e51d1a32",
+      "upstreamPath": "tiptap-ui/link-popover/use-link-popover.ts"
     },
     {
       "registry": "list-button",
       "path": "components/tiptap-ui/list-button/list-button.tsx",
-      "upstreamSha256": "fec02090811495d58e95d44239ddac12fb429da5834cb4302888fe0090843db2",
-      "included": true
+      "upstreamSha256": "a1db5556aa6a49b7fe70c74fde8441c966ee0808d4f3c4a0037e6a314e2ea52a",
+      "included": true,
+      "adaptedBaselineSha256": "fec02090811495d58e95d44239ddac12fb429da5834cb4302888fe0090843db2",
+      "upstreamPath": "tiptap-ui/list-button/list-button.tsx"
     },
     {
       "registry": "list-button",
       "path": "components/tiptap-ui/list-button/index.tsx",
-      "upstreamSha256": "64845024baabbb7d47967febc9a3f8f046a8e60e2886def03b6d1fe3f606ab82",
-      "included": false
+      "upstreamSha256": "1dcaef38339a6cc5fca287411b18a3e0ce221ddc21cf1e489e57cdc35ea03d14",
+      "included": false,
+      "adaptedBaselineSha256": "64845024baabbb7d47967febc9a3f8f046a8e60e2886def03b6d1fe3f606ab82",
+      "upstreamPath": "tiptap-ui/list-button/index.tsx"
     },
     {
       "registry": "list-button",
       "path": "components/tiptap-ui/list-button/use-list.ts",
-      "upstreamSha256": "a900a07625d634a8551ea0d2adc6051e485fc2efac9ac4c87da0b6a31760aadb",
-      "included": true
+      "upstreamSha256": "f0280cef6b1679383cbcdebea7c1401c56c6dc12b4bc1a29758af5dbdb8c42ae",
+      "included": true,
+      "adaptedBaselineSha256": "a900a07625d634a8551ea0d2adc6051e485fc2efac9ac4c87da0b6a31760aadb",
+      "upstreamPath": "tiptap-ui/list-button/use-list.ts"
     },
     {
       "registry": "list-dropdown-menu",
       "path": "components/tiptap-ui/list-dropdown-menu/list-dropdown-menu.tsx",
-      "upstreamSha256": "cee3354f325a4113d581eb44b00c97a5a0c692f7c08f27cbb68b9e827e2804a3",
-      "included": true
+      "upstreamSha256": "ccc19099837f541be221fc7c18ce62260a42b5c24a788867ad6ab394424a227a",
+      "included": true,
+      "adaptedBaselineSha256": "cee3354f325a4113d581eb44b00c97a5a0c692f7c08f27cbb68b9e827e2804a3",
+      "upstreamPath": "tiptap-ui/list-dropdown-menu/list-dropdown-menu.tsx"
     },
     {
       "registry": "list-dropdown-menu",
       "path": "components/tiptap-ui/list-dropdown-menu/index.tsx",
-      "upstreamSha256": "caa266a898c0fc9a6d06335e263fe124f027ac911bf2b36353210458d5d68206",
-      "included": false
+      "upstreamSha256": "512164ed0601571a810693fbddc3af3b9bfcf3339387924bdf84de2f8b59f539",
+      "included": false,
+      "adaptedBaselineSha256": "caa266a898c0fc9a6d06335e263fe124f027ac911bf2b36353210458d5d68206",
+      "upstreamPath": "tiptap-ui/list-dropdown-menu/index.tsx"
     },
     {
       "registry": "list-dropdown-menu",
       "path": "components/tiptap-ui/list-dropdown-menu/use-list-dropdown-menu.ts",
-      "upstreamSha256": "5b34e34362bdba79afad10f5c26919f917486d2e86d2304f8668ac38ea612570",
-      "included": true
+      "upstreamSha256": "c0cd3da996f02fa98c97e0c4728c8d6c1ba4748e965c427172b03452494c4db6",
+      "included": true,
+      "adaptedBaselineSha256": "5b34e34362bdba79afad10f5c26919f917486d2e86d2304f8668ac38ea612570",
+      "upstreamPath": "tiptap-ui/list-dropdown-menu/use-list-dropdown-menu.ts"
     },
     {
       "registry": "list-icon",
       "path": "components/tiptap-icons/list-icon.tsx",
-      "upstreamSha256": "9e9cb6d7a9320427b0db609d5e604441ea98464efd01172e498575e2e7e908e8",
-      "included": true
+      "upstreamSha256": "093724779c2b85ea4fbd3e60ce3e19d0ba5b6e9cdc1c803a077ea3f019bc1af8",
+      "included": true,
+      "adaptedBaselineSha256": "9e9cb6d7a9320427b0db609d5e604441ea98464efd01172e498575e2e7e908e8",
+      "upstreamPath": "tiptap-icons/list-icon.tsx"
     },
     {
       "registry": "list-node",
       "path": "components/tiptap-node/list-node/list-node.scss",
       "upstreamSha256": "6d2bfc5afcde2470b641732d3a4996b3d98222a635303c89790da11f476b928b",
-      "included": true
+      "included": true,
+      "adaptedBaselineSha256": "6d2bfc5afcde2470b641732d3a4996b3d98222a635303c89790da11f476b928b",
+      "upstreamPath": "tiptap-node/list-node/list-node.scss"
     },
     {
       "registry": "list-ordered-icon",
       "path": "components/tiptap-icons/list-ordered-icon.tsx",
-      "upstreamSha256": "b5b5075581583e441db2c175447e71b81fa1c0e50712d53ed43cb3da43cf782a",
-      "included": true
+      "upstreamSha256": "93759d8f12aa9e1ee70259907b89792b7ff2d0ed4931bdfdcd8b62eed1e8b3b6",
+      "included": true,
+      "adaptedBaselineSha256": "b5b5075581583e441db2c175447e71b81fa1c0e50712d53ed43cb3da43cf782a",
+      "upstreamPath": "tiptap-icons/list-ordered-icon.tsx"
     },
     {
       "registry": "list-todo-icon",
       "path": "components/tiptap-icons/list-todo-icon.tsx",
-      "upstreamSha256": "14a06b936fc2498002df9f913ddae765465e97e762835dec60df10a4bdf2cea6",
-      "included": true
+      "upstreamSha256": "37afe638842e280e54cf1ad9fb353777ae844f40a1880b76306878402fba3827",
+      "included": true,
+      "adaptedBaselineSha256": "14a06b936fc2498002df9f913ddae765465e97e762835dec60df10a4bdf2cea6",
+      "upstreamPath": "tiptap-icons/list-todo-icon.tsx"
     },
     {
       "registry": "mark-button",
       "path": "components/tiptap-ui/mark-button/mark-button.tsx",
-      "upstreamSha256": "e84f0712d17688ff7762730c46416c11367a99f38229a4c34b8cc0ffc9ef2ce1",
-      "included": true
+      "upstreamSha256": "7c6d86631464c683368a194ad5c6ef7a97ce4d2304010f4a64b562885ccbdf76",
+      "included": true,
+      "adaptedBaselineSha256": "e84f0712d17688ff7762730c46416c11367a99f38229a4c34b8cc0ffc9ef2ce1",
+      "upstreamPath": "tiptap-ui/mark-button/mark-button.tsx"
     },
     {
       "registry": "mark-button",
       "path": "components/tiptap-ui/mark-button/index.tsx",
-      "upstreamSha256": "1499519977fab6ca3f1383c8e9be8b23c3d463c8b0b8ceb988d337c054ceef96",
-      "included": false
+      "upstreamSha256": "56eaf59da2c4f1d5ed1ce8c261e0dbac098d2cd9fdad07215cfe907e1db6bfa8",
+      "included": false,
+      "adaptedBaselineSha256": "1499519977fab6ca3f1383c8e9be8b23c3d463c8b0b8ceb988d337c054ceef96",
+      "upstreamPath": "tiptap-ui/mark-button/index.tsx"
     },
     {
       "registry": "mark-button",
       "path": "components/tiptap-ui/mark-button/use-mark.ts",
-      "upstreamSha256": "8f7432b8987de12745a868e655c897e4db931ab68ee0180fa88b117a095b26ea",
-      "included": true
+      "upstreamSha256": "fc05aaf0a5c329333ac355b991297d111dad17b4ef065f6e656d6bffc386f325",
+      "included": true,
+      "adaptedBaselineSha256": "8f7432b8987de12745a868e655c897e4db931ab68ee0180fa88b117a095b26ea",
+      "upstreamPath": "tiptap-ui/mark-button/use-mark.ts"
     },
     {
       "registry": "moon-star-icon",
       "path": "components/tiptap-icons/moon-star-icon.tsx",
-      "upstreamSha256": "9478d5468d66d1e2508f8cd3f1b9c663e088292522a2a7af7dd977781bca7dd1",
-      "included": true
+      "upstreamSha256": "fc9a709b9dada4cf42002e75d0c9d7e3adbcc3ceadfea6ed94386336f7e0651a",
+      "included": true,
+      "adaptedBaselineSha256": "9478d5468d66d1e2508f8cd3f1b9c663e088292522a2a7af7dd977781bca7dd1",
+      "upstreamPath": "tiptap-icons/moon-star-icon.tsx"
     },
     {
       "registry": "node-background-extension",
       "path": "components/tiptap-extension/node-background-extension.ts",
-      "upstreamSha256": "847be9136f88c6b5e32ad87dbfc518d337893bdb435150383e4daec7b72b2cf6",
-      "included": true
+      "upstreamSha256": "cb7668d2d30516c8fb76a5dd0fedd87121516df0402e6e959a552bd5f97c4d43",
+      "included": true,
+      "adaptedBaselineSha256": "847be9136f88c6b5e32ad87dbfc518d337893bdb435150383e4daec7b72b2cf6",
+      "upstreamPath": "tiptap-extension/node-background-extension.ts"
     },
     {
       "registry": "paragraph-node",
       "path": "components/tiptap-node/paragraph-node/paragraph-node.scss",
       "upstreamSha256": "632e8eeb9e9e92111fecce35f923b7992132cd1f6a6edd53a83752d8d574f546",
-      "included": true
+      "included": true,
+      "adaptedBaselineSha256": "632e8eeb9e9e92111fecce35f923b7992132cd1f6a6edd53a83752d8d574f546",
+      "upstreamPath": "tiptap-node/paragraph-node/paragraph-node.scss"
     },
     {
       "registry": "popover",
       "path": "components/tiptap-ui-primitive/popover/popover.tsx",
-      "upstreamSha256": "50415d737178c0109002486fdb4d60b255bcb20e23201250b4e1fdb51efaa528",
-      "included": true
+      "upstreamSha256": "df0fb9255d94942e4b550bcbccce363851a505690b867e9eb60fc2a0b12ef67d",
+      "included": true,
+      "adaptedBaselineSha256": "50415d737178c0109002486fdb4d60b255bcb20e23201250b4e1fdb51efaa528",
+      "upstreamPath": "tiptap-ui-primitive/popover/popover.tsx"
     },
     {
       "registry": "popover",
       "path": "components/tiptap-ui-primitive/popover/popover.scss",
       "upstreamSha256": "abfc9b1271c0f872c472f8416c290c8c4fb859656db5e168b5914d75c8a66e17",
-      "included": true
+      "included": true,
+      "adaptedBaselineSha256": "abfc9b1271c0f872c472f8416c290c8c4fb859656db5e168b5914d75c8a66e17",
+      "upstreamPath": "tiptap-ui-primitive/popover/popover.scss"
     },
     {
       "registry": "popover",
       "path": "components/tiptap-ui-primitive/popover/index.tsx",
-      "upstreamSha256": "f2062fe83ae3e98ea90b66a0a8d27a4b659ad8dccae0a88b85500dba9808d645",
-      "included": false
+      "upstreamSha256": "f804efd927af02ab26a38a3ac62b1051c8e96a6b3e943215dfabcbd7793ded61",
+      "included": false,
+      "adaptedBaselineSha256": "f2062fe83ae3e98ea90b66a0a8d27a4b659ad8dccae0a88b85500dba9808d645",
+      "upstreamPath": "tiptap-ui-primitive/popover/index.tsx"
     },
     {
       "registry": "redo2-icon",
       "path": "components/tiptap-icons/redo2-icon.tsx",
-      "upstreamSha256": "2a3833887160e877666dfd06e2ee0f7043106aa40877fd066ac704d625e5b7ff",
-      "included": true
+      "upstreamSha256": "68a6e427fe8d4eaa75d52544c72aebc02b0243af0b2141e2e9fe31a0a2023703",
+      "included": true,
+      "adaptedBaselineSha256": "2a3833887160e877666dfd06e2ee0f7043106aa40877fd066ac704d625e5b7ff",
+      "upstreamPath": "tiptap-icons/redo2-icon.tsx"
     },
     {
       "registry": "search-and-replace",
       "path": "components/tiptap-ui/search-and-replace/search-and-replace.scss",
       "upstreamSha256": "d821ce68040b64b9918edf97f54eb0456bce55dcbc981b8653b736c3141a1a75",
-      "included": true
+      "included": true,
+      "adaptedBaselineSha256": "d821ce68040b64b9918edf97f54eb0456bce55dcbc981b8653b736c3141a1a75",
+      "upstreamPath": "tiptap-ui/search-and-replace/search-and-replace.scss"
     },
     {
       "registry": "search-and-replace",
       "path": "components/tiptap-ui/search-and-replace/search-and-replace.tsx",
-      "upstreamSha256": "1bba13a66f97eb42bdd16064f854b9310151d35c05a7bb1108df796651ccd1fd",
-      "included": true
+      "upstreamSha256": "10961e9502c54bcc9652b2fe090a4c523032e74b06a95da08d2e69994494632b",
+      "included": true,
+      "adaptedBaselineSha256": "1bba13a66f97eb42bdd16064f854b9310151d35c05a7bb1108df796651ccd1fd",
+      "upstreamPath": "tiptap-ui/search-and-replace/search-and-replace.tsx"
     },
     {
       "registry": "search-and-replace",
       "path": "components/tiptap-ui/search-and-replace/index.tsx",
-      "upstreamSha256": "9db745e71c4382ff4141bfbc174683e0e327a70d0cc26092069f7533f4289cbb",
-      "included": false
+      "upstreamSha256": "f42607e3ef07cd2d5ac49c3cb4de40569c63164a88666b23554e9413b51b3eec",
+      "included": false,
+      "adaptedBaselineSha256": "9db745e71c4382ff4141bfbc174683e0e327a70d0cc26092069f7533f4289cbb",
+      "upstreamPath": "tiptap-ui/search-and-replace/index.tsx"
     },
     {
       "registry": "search-and-replace",
       "path": "components/tiptap-ui/search-and-replace/use-search-and-replace.ts",
-      "upstreamSha256": "df8e1b083053e97e4715b9b0d39faf03b76f03f8e78764155c7c8f2b448c7fcf",
-      "included": true
+      "upstreamSha256": "d934f76b37419920c9c99b1615fea37db85bcfacb36116ff08c6102ae35b35ef",
+      "included": true,
+      "adaptedBaselineSha256": "df8e1b083053e97e4715b9b0d39faf03b76f03f8e78764155c7c8f2b448c7fcf",
+      "upstreamPath": "tiptap-ui/search-and-replace/use-search-and-replace.ts"
     },
     {
       "registry": "search-icon",
       "path": "components/tiptap-icons/search-icon.tsx",
-      "upstreamSha256": "f3e49f05956c1b2e07f5563350553ae35b4a253786000d39f21acb56673642d5",
-      "included": true
+      "upstreamSha256": "ea8f93f846d1beaacf12647844046ecdce06dbbc9313d260e6cc73e9af554628",
+      "included": true,
+      "adaptedBaselineSha256": "f3e49f05956c1b2e07f5563350553ae35b4a253786000d39f21acb56673642d5",
+      "upstreamPath": "tiptap-icons/search-icon.tsx"
     },
     {
       "registry": "separator",
       "path": "components/tiptap-ui-primitive/separator/separator.scss",
       "upstreamSha256": "fb4f37772cc0d8c896fde2816316be1b47132c77453e14688061bd3db85efad7",
-      "included": true
+      "included": true,
+      "adaptedBaselineSha256": "fb4f37772cc0d8c896fde2816316be1b47132c77453e14688061bd3db85efad7",
+      "upstreamPath": "tiptap-ui-primitive/separator/separator.scss"
     },
     {
       "registry": "separator",
       "path": "components/tiptap-ui-primitive/separator/separator.tsx",
-      "upstreamSha256": "d198a05fb187eb3e645397055d357ed9ce17ad791bcd68c1c5fbee86b461741e",
-      "included": true
+      "upstreamSha256": "64cb405e79275eaf68f74d5e7174f369d3ce0068bf3510aa0283582216c4f92b",
+      "included": true,
+      "adaptedBaselineSha256": "d198a05fb187eb3e645397055d357ed9ce17ad791bcd68c1c5fbee86b461741e",
+      "upstreamPath": "tiptap-ui-primitive/separator/separator.tsx"
     },
     {
       "registry": "separator",
       "path": "components/tiptap-ui-primitive/separator/index.tsx",
-      "upstreamSha256": "15022a2f6e562c53e8e0e05380d52ffac619351e497dfd15c8c5495b6db90601",
-      "included": false
+      "upstreamSha256": "c756fb0059b0d231c8a45691be566a43de183cc4a415f5d5182c71d453804336",
+      "included": false,
+      "adaptedBaselineSha256": "15022a2f6e562c53e8e0e05380d52ffac619351e497dfd15c8c5495b6db90601",
+      "upstreamPath": "tiptap-ui-primitive/separator/index.tsx"
     },
     {
       "registry": "simple-editor",
       "path": "components/tiptap-templates/simple/simple-editor.scss",
       "upstreamSha256": "45e5cb2f888d5003dcf3b593aa48cac87ae9383fd60db2f3297a320e4707915a",
-      "included": true
+      "included": true,
+      "adaptedBaselineSha256": "45e5cb2f888d5003dcf3b593aa48cac87ae9383fd60db2f3297a320e4707915a",
+      "upstreamPath": "tiptap-templates/simple/components/simple-editor.scss"
     },
     {
       "registry": "simple-editor",
       "path": "components/tiptap-templates/simple/simple-editor.tsx",
-      "upstreamSha256": "a7f241444982df47e0ee59b2af3521179d70cf34ee22181e1d6ebb9f1c8cb544",
-      "included": true
+      "upstreamSha256": "5332083a9b2d571cc0ad96e3f01ed2971cb7e0172acfa7562a2eb6084e34f13e",
+      "included": true,
+      "adaptedBaselineSha256": "a7f241444982df47e0ee59b2af3521179d70cf34ee22181e1d6ebb9f1c8cb544",
+      "upstreamPath": "tiptap-templates/simple/components/simple-editor.tsx"
     },
     {
       "registry": "simple-editor",
       "path": "components/tiptap-templates/simple/theme-toggle.tsx",
-      "upstreamSha256": "3f8670b600524e46e9a02a965ef262ec04a16a53623a57984ec0ac67fee40a26",
-      "included": true
+      "upstreamSha256": "38d093b7b82ba9c974dc2805982a24a7c3f1453b3ca6972781070a4897e0613b",
+      "included": true,
+      "adaptedBaselineSha256": "3f8670b600524e46e9a02a965ef262ec04a16a53623a57984ec0ac67fee40a26",
+      "upstreamPath": "tiptap-templates/simple/components/theme-toggle.tsx"
     },
     {
       "registry": "spacer",
       "path": "components/tiptap-ui-primitive/spacer/spacer.tsx",
-      "upstreamSha256": "cf2c13774a8268c4d67628b1257c56fc9d0910a92b7f0b7c0daf0b764839424f",
-      "included": true
+      "upstreamSha256": "a353b8a4caa19f03ddaa92e89a7078c58b8b2687994483a43c054d765e27e2cc",
+      "included": true,
+      "adaptedBaselineSha256": "cf2c13774a8268c4d67628b1257c56fc9d0910a92b7f0b7c0daf0b764839424f",
+      "upstreamPath": "tiptap-ui-primitive/spacer/spacer.tsx"
     },
     {
       "registry": "spacer",
       "path": "components/tiptap-ui-primitive/spacer/index.tsx",
-      "upstreamSha256": "0edc1568b551aceb01bd83aca4974449b60ebc0becdc57fe559f8db2f38fb48a",
-      "included": false
+      "upstreamSha256": "38200c16e27cee596954eddc6d4f6395427b8bcd5f78d8aacb6efd63ea823fb0",
+      "included": false,
+      "adaptedBaselineSha256": "0edc1568b551aceb01bd83aca4974449b60ebc0becdc57fe559f8db2f38fb48a",
+      "upstreamPath": "tiptap-ui-primitive/spacer/index.tsx"
     },
     {
       "registry": "strike-icon",
       "path": "components/tiptap-icons/strike-icon.tsx",
-      "upstreamSha256": "a29ab570ebe3abe2ede2404b2b452205318ce125e84fcb8f23e7e2a8b7ae4129",
-      "included": true
+      "upstreamSha256": "8b1fbcc9d3c227540fc7937c3f7a7aeeefc0cec79ba1e8dcabd0a74c4dbe252b",
+      "included": true,
+      "adaptedBaselineSha256": "a29ab570ebe3abe2ede2404b2b452205318ce125e84fcb8f23e7e2a8b7ae4129",
+      "upstreamPath": "tiptap-icons/strike-icon.tsx"
     },
     {
       "registry": "styles",
       "path": "styles/_variables.scss",
       "upstreamSha256": "ca13d9d458162405b33327f83dd4d5c930e04c4f03648016fdd7ec73145b8c91",
-      "included": true
+      "included": true,
+      "adaptedBaselineSha256": "ca13d9d458162405b33327f83dd4d5c930e04c4f03648016fdd7ec73145b8c91",
+      "upstreamPath": "styles/_variables.scss"
     },
     {
       "registry": "styles",
       "path": "styles/_keyframe-animations.scss",
       "upstreamSha256": "1803b74fff82ae664de5f31998f58adbd6e2195146869b9567477e7075768bec",
-      "included": true
+      "included": true,
+      "adaptedBaselineSha256": "1803b74fff82ae664de5f31998f58adbd6e2195146869b9567477e7075768bec",
+      "upstreamPath": "styles/_keyframe-animations.scss"
     },
     {
       "registry": "subscript-icon",
       "path": "components/tiptap-icons/subscript-icon.tsx",
-      "upstreamSha256": "ef2df6bd2384669f011099ed66c690ad515596b15a10d0a6b95604fcb329cac0",
-      "included": true
+      "upstreamSha256": "0044398703180367971e76aeb5e8482d1e5393c2dbb1c9fc6cdf0db5cdfa3f7d",
+      "included": true,
+      "adaptedBaselineSha256": "ef2df6bd2384669f011099ed66c690ad515596b15a10d0a6b95604fcb329cac0",
+      "upstreamPath": "tiptap-icons/subscript-icon.tsx"
     },
     {
       "registry": "sun-icon",
       "path": "components/tiptap-icons/sun-icon.tsx",
-      "upstreamSha256": "b21479879abbcdda5dfc09768ebbc1ec1a86498ca23cbcbae4eb36ddf5ca6bb7",
-      "included": true
+      "upstreamSha256": "e1f836a35f03fe4c39e4d5c3ae2cf3481b7bae73ba57e1566abb4cf0ae851590",
+      "included": true,
+      "adaptedBaselineSha256": "b21479879abbcdda5dfc09768ebbc1ec1a86498ca23cbcbae4eb36ddf5ca6bb7",
+      "upstreamPath": "tiptap-icons/sun-icon.tsx"
     },
     {
       "registry": "superscript-icon",
       "path": "components/tiptap-icons/superscript-icon.tsx",
-      "upstreamSha256": "4de50e75d05a97cf93deb6c14c4211f30f3273d9780e21e4c3325bd51e65e5bf",
-      "included": true
+      "upstreamSha256": "77a5861aa0c0ea574dfe7925fdfc78176aa018889d0f24e6a0515ff669037cc6",
+      "included": true,
+      "adaptedBaselineSha256": "4de50e75d05a97cf93deb6c14c4211f30f3273d9780e21e4c3325bd51e65e5bf",
+      "upstreamPath": "tiptap-icons/superscript-icon.tsx"
     },
     {
       "registry": "switch",
       "path": "components/tiptap-ui-primitive/switch/switch.scss",
       "upstreamSha256": "366f1eec02c7db268cbecdb5c526d92284318bc00b5501f70791cf513ac7ab7b",
-      "included": true
+      "included": true,
+      "adaptedBaselineSha256": "366f1eec02c7db268cbecdb5c526d92284318bc00b5501f70791cf513ac7ab7b",
+      "upstreamPath": "tiptap-ui-primitive/switch/switch.scss"
     },
     {
       "registry": "switch",
       "path": "components/tiptap-ui-primitive/switch/switch.tsx",
-      "upstreamSha256": "280adb67029c917910c201e695b2a16da06157159de2357c67894d459e1e3dc6",
-      "included": true
+      "upstreamSha256": "c757540840e0afcac613b596d4ee94ca53d6e414485b29e8d1b2c902c362031f",
+      "included": true,
+      "adaptedBaselineSha256": "280adb67029c917910c201e695b2a16da06157159de2357c67894d459e1e3dc6",
+      "upstreamPath": "tiptap-ui-primitive/switch/switch.tsx"
     },
     {
       "registry": "switch",
       "path": "components/tiptap-ui-primitive/switch/index.tsx",
-      "upstreamSha256": "cd3d3b96454fa5e66a75077f4177a81d5166ab0419e84add423b806d8521f1ea",
-      "included": false
+      "upstreamSha256": "7b45f4e5c0eb12fb1683d10e1f4a5d992a94aa47878824a3f54d68d6c8dddea6",
+      "included": false,
+      "adaptedBaselineSha256": "cd3d3b96454fa5e66a75077f4177a81d5166ab0419e84add423b806d8521f1ea",
+      "upstreamPath": "tiptap-ui-primitive/switch/index.tsx"
     },
     {
       "registry": "text-align-button",
       "path": "components/tiptap-ui/text-align-button/text-align-button.tsx",
-      "upstreamSha256": "704a2c997eef5f0fbb6ad94a4a9cc358c11c89a71cfea774f5db85d8e128edac",
-      "included": true
+      "upstreamSha256": "ccefea65d4685f155098785a744099e9aad0898203948fa492a1612fabe495ca",
+      "included": true,
+      "adaptedBaselineSha256": "704a2c997eef5f0fbb6ad94a4a9cc358c11c89a71cfea774f5db85d8e128edac",
+      "upstreamPath": "tiptap-ui/text-align-button/text-align-button.tsx"
     },
     {
       "registry": "text-align-button",
       "path": "components/tiptap-ui/text-align-button/index.tsx",
-      "upstreamSha256": "7cf9c7242b5b8a71fba7819cae79a1e0b5efdc8b85a36132f0d7a7a5855d6524",
-      "included": false
+      "upstreamSha256": "5a0978c487b0ae46c9b8ae376e7bd28ef2575404508f977dae15bae126666112",
+      "included": false,
+      "adaptedBaselineSha256": "7cf9c7242b5b8a71fba7819cae79a1e0b5efdc8b85a36132f0d7a7a5855d6524",
+      "upstreamPath": "tiptap-ui/text-align-button/index.tsx"
     },
     {
       "registry": "text-align-button",
       "path": "components/tiptap-ui/text-align-button/use-text-align.ts",
-      "upstreamSha256": "eddf601fbac5b10b5506b06746e90db52ae35542dbadb326c7fb424782ee7286",
-      "included": true
+      "upstreamSha256": "7719a69f195682342c905963e258bb0cd76544ef0124aba1289d9c479fa3996a",
+      "included": true,
+      "adaptedBaselineSha256": "eddf601fbac5b10b5506b06746e90db52ae35542dbadb326c7fb424782ee7286",
+      "upstreamPath": "tiptap-ui/text-align-button/use-text-align.ts"
     },
     {
       "registry": "textarea",
       "path": "components/tiptap-ui-primitive/textarea/textarea.tsx",
-      "upstreamSha256": "06b64d3461e71790b26b68d70ba9aaa51702091ac615063e57f9a8c0e55bc537",
-      "included": false
+      "upstreamSha256": "418a087c04b7634fffa58fcd891cacd7ea3f0a9eaee7a75be2099c91f1f92ed9",
+      "included": false,
+      "adaptedBaselineSha256": "06b64d3461e71790b26b68d70ba9aaa51702091ac615063e57f9a8c0e55bc537",
+      "upstreamPath": "tiptap-ui-primitive/textarea/textarea.tsx"
     },
     {
       "registry": "textarea",
       "path": "components/tiptap-ui-primitive/textarea/textarea.scss",
       "upstreamSha256": "8b27e3a74172b50ba78251663f3300d124bdc5f65aa6a055c6b23cbd6dc1e623",
-      "included": false
+      "included": false,
+      "adaptedBaselineSha256": "8b27e3a74172b50ba78251663f3300d124bdc5f65aa6a055c6b23cbd6dc1e623",
+      "upstreamPath": "tiptap-ui-primitive/textarea/textarea.scss"
     },
     {
       "registry": "textarea",
       "path": "components/tiptap-ui-primitive/textarea/index.tsx",
-      "upstreamSha256": "cc8aad975d7b469cb03d29f1bf3a0a7fad094d1ccb8f309fdf3939e11bd9eeef",
-      "included": false
+      "upstreamSha256": "4d24cf05eb2ac939ac81aa6fa6a222e514355dd4df29b99da7c262750132e1b8",
+      "included": false,
+      "adaptedBaselineSha256": "cc8aad975d7b469cb03d29f1bf3a0a7fad094d1ccb8f309fdf3939e11bd9eeef",
+      "upstreamPath": "tiptap-ui-primitive/textarea/index.tsx"
     },
     {
       "registry": "tiptap-utils",
       "path": "lib/tiptap-utils.ts",
-      "upstreamSha256": "8de470736a687b04d45839c25371b20e45881312961671094ee6711641e6934b",
-      "included": true
+      "upstreamSha256": "d1a4cd3236f81cc2b1187360bfaf4d03f2436ca3421136ba187cd9f69fd327df",
+      "included": true,
+      "adaptedBaselineSha256": "8de470736a687b04d45839c25371b20e45881312961671094ee6711641e6934b",
+      "upstreamPath": "lib/tiptap-utils.ts"
     },
     {
       "registry": "toolbar",
       "path": "components/tiptap-ui-primitive/toolbar/toolbar.scss",
       "upstreamSha256": "c962575cc3b233977aef912758005bd88cdec3f9a829bf7fd0fc90491a4e2648",
-      "included": true
+      "included": true,
+      "adaptedBaselineSha256": "c962575cc3b233977aef912758005bd88cdec3f9a829bf7fd0fc90491a4e2648",
+      "upstreamPath": "tiptap-ui-primitive/toolbar/toolbar.scss"
     },
     {
       "registry": "toolbar",
       "path": "components/tiptap-ui-primitive/toolbar/toolbar.tsx",
-      "upstreamSha256": "67c2ea6177ea63c585c659d506f349f1caf2d0b44c1111759d15b8073e5eb36b",
-      "included": true
+      "upstreamSha256": "d1aedcb816859d48bfb20ee43031a03315e214dfab9aea2964cff53efcc4eaee",
+      "included": true,
+      "adaptedBaselineSha256": "67c2ea6177ea63c585c659d506f349f1caf2d0b44c1111759d15b8073e5eb36b",
+      "upstreamPath": "tiptap-ui-primitive/toolbar/toolbar.tsx"
     },
     {
       "registry": "toolbar",
       "path": "components/tiptap-ui-primitive/toolbar/index.tsx",
-      "upstreamSha256": "01ec5b92a33733aae0dd34f16f51a9c336e64376cfe790f88fe09c1581ff9458",
-      "included": false
+      "upstreamSha256": "8d30c7b35aa0363236117b2141f433abbe9f341ca5c72c69865b41ee256f95ee",
+      "included": false,
+      "adaptedBaselineSha256": "01ec5b92a33733aae0dd34f16f51a9c336e64376cfe790f88fe09c1581ff9458",
+      "upstreamPath": "tiptap-ui-primitive/toolbar/index.tsx"
     },
     {
       "registry": "tooltip",
       "path": "components/tiptap-ui-primitive/tooltip/tooltip.scss",
-      "upstreamSha256": "6e4a967d5e369a38060f74e8f1164bee763a4aa8906953b4c78b8b8a596db06f",
-      "included": true
+      "upstreamSha256": "3bc48e44de598dd28f4ae9666216180579b5dccaedbcf317f88fc808deb18a67",
+      "included": true,
+      "adaptedBaselineSha256": "6e4a967d5e369a38060f74e8f1164bee763a4aa8906953b4c78b8b8a596db06f",
+      "upstreamPath": "tiptap-ui-primitive/tooltip/tooltip.scss"
     },
     {
       "registry": "tooltip",
       "path": "components/tiptap-ui-primitive/tooltip/tooltip.tsx",
-      "upstreamSha256": "96e7c9bf1b8f253cb36fd2d6de4094762dd6bfef214bdd3d52406b8dd15f97b1",
-      "included": true
+      "upstreamSha256": "06558964579290feebcf27e1634b4f5ec48a8feb806d78d380fc77bb0a60e775",
+      "included": true,
+      "adaptedBaselineSha256": "96e7c9bf1b8f253cb36fd2d6de4094762dd6bfef214bdd3d52406b8dd15f97b1",
+      "upstreamPath": "tiptap-ui-primitive/tooltip/tooltip.tsx"
     },
     {
       "registry": "tooltip",
       "path": "components/tiptap-ui-primitive/tooltip/index.tsx",
-      "upstreamSha256": "25fafcee9ce83db8a01c3d6a5fd2b10697f7d2038d2654a531ff3a347370fa51",
-      "included": false
+      "upstreamSha256": "72adb579c7efd98b33712c48a5ccbb804780983fdf674ba48ef87a168bb64f76",
+      "included": false,
+      "adaptedBaselineSha256": "25fafcee9ce83db8a01c3d6a5fd2b10697f7d2038d2654a531ff3a347370fa51",
+      "upstreamPath": "tiptap-ui-primitive/tooltip/index.tsx"
     },
     {
       "registry": "trash-icon",
       "path": "components/tiptap-icons/trash-icon.tsx",
-      "upstreamSha256": "1c87791930fdcf29f5c5ee2c7fc2c0339bb9c5b823cbb788d9bda1a71647544a",
-      "included": true
+      "upstreamSha256": "c94e87fb3400a421b715acbc3106b0ba9bfaa4d9e698e55a44f34f8600ba0e5b",
+      "included": true,
+      "adaptedBaselineSha256": "1c87791930fdcf29f5c5ee2c7fc2c0339bb9c5b823cbb788d9bda1a71647544a",
+      "upstreamPath": "tiptap-icons/trash-icon.tsx"
     },
     {
       "registry": "underline-icon",
       "path": "components/tiptap-icons/underline-icon.tsx",
-      "upstreamSha256": "eb180636b1f5f9662c2b0c1525b6d16830f1cc6daa6bb2277d46e34ded3d67a4",
-      "included": true
+      "upstreamSha256": "ee36f2e81b04364c02c87c3524d2479baf0896d40a32af57159d79c4e0ecae0d",
+      "included": true,
+      "adaptedBaselineSha256": "eb180636b1f5f9662c2b0c1525b6d16830f1cc6daa6bb2277d46e34ded3d67a4",
+      "upstreamPath": "tiptap-icons/underline-icon.tsx"
     },
     {
       "registry": "undo-redo-button",
       "path": "components/tiptap-ui/undo-redo-button/undo-redo-button.tsx",
-      "upstreamSha256": "5def1cc0973abf7cf212aca23c02b25353309242e11d2bb01aeb3fc1a08f489a",
-      "included": true
+      "upstreamSha256": "ce116cf7c8a74b25a100da3b3d304aa1d204e09597f64f89b01b5443402a7a37",
+      "included": true,
+      "adaptedBaselineSha256": "5def1cc0973abf7cf212aca23c02b25353309242e11d2bb01aeb3fc1a08f489a",
+      "upstreamPath": "tiptap-ui/undo-redo-button/undo-redo-button.tsx"
     },
     {
       "registry": "undo-redo-button",
       "path": "components/tiptap-ui/undo-redo-button/index.tsx",
-      "upstreamSha256": "267e8f1625035bc48d986c70142e5601c0290fddeb46f4ffd0401078e5fc5383",
-      "included": false
+      "upstreamSha256": "21584e590022dd13e939571b798b2f90bb3ce6009d328e9fc79df7e658050ec0",
+      "included": false,
+      "adaptedBaselineSha256": "267e8f1625035bc48d986c70142e5601c0290fddeb46f4ffd0401078e5fc5383",
+      "upstreamPath": "tiptap-ui/undo-redo-button/index.tsx"
     },
     {
       "registry": "undo-redo-button",
       "path": "components/tiptap-ui/undo-redo-button/use-undo-redo.ts",
-      "upstreamSha256": "136aea8e9183e4831b167c2999a69f7d6f3305852c1b707629457fc0f4fa5c97",
-      "included": true
+      "upstreamSha256": "162765efe9ad29636f54308151375fbd5259ba31991e260f20532b3a84c2ed2a",
+      "included": true,
+      "adaptedBaselineSha256": "136aea8e9183e4831b167c2999a69f7d6f3305852c1b707629457fc0f4fa5c97",
+      "upstreamPath": "tiptap-ui/undo-redo-button/use-undo-redo.ts"
     },
     {
       "registry": "undo2-icon",
       "path": "components/tiptap-icons/undo2-icon.tsx",
-      "upstreamSha256": "cd380e52a075c08bbefe6e57a9707c21a79212e474a31f8cdb52577048c9e1da",
-      "included": true
+      "upstreamSha256": "4f1119b557296f9eb0481814230ffe596e07f914a891581acd75a8283524374f",
+      "included": true,
+      "adaptedBaselineSha256": "cd380e52a075c08bbefe6e57a9707c21a79212e474a31f8cdb52577048c9e1da",
+      "upstreamPath": "tiptap-icons/undo2-icon.tsx"
     },
     {
       "registry": "use-composed-ref",
       "path": "hooks/use-composed-ref.ts",
-      "upstreamSha256": "fa30c4084ae16a5396737144ae2cf835f03ebe5e8714a405ce2837777fdd9075",
-      "included": true
+      "upstreamSha256": "d0eb90b856ced8deda4d503f74fae5acb9984c63ba5690c3b72147d771ad46ba",
+      "included": true,
+      "adaptedBaselineSha256": "fa30c4084ae16a5396737144ae2cf835f03ebe5e8714a405ce2837777fdd9075",
+      "upstreamPath": "hooks/use-composed-ref.ts"
     },
     {
       "registry": "use-cursor-visibility",
       "path": "hooks/use-cursor-visibility.ts",
-      "upstreamSha256": "b34cf956eeae0b5e11e11badc7236eba3169e8fd06a56687b4b79fa09cf05101",
-      "included": true
+      "upstreamSha256": "e202e9a45c02025072d22ed5c37fb41732cfa9c10cd79ffbb30d12bcb61eef50",
+      "included": true,
+      "adaptedBaselineSha256": "b34cf956eeae0b5e11e11badc7236eba3169e8fd06a56687b4b79fa09cf05101",
+      "upstreamPath": "hooks/use-cursor-visibility.ts"
     },
     {
       "registry": "use-element-rect",
       "path": "hooks/use-element-rect.ts",
-      "upstreamSha256": "8b68ceca726808535716aa5d2756f5724e30ac6a68dc7afc2834fc0e481c66dc",
-      "included": true
+      "upstreamSha256": "0493a921860d84b4670abdceb6a6d2210b23569d46cd61c741c4527234b8445f",
+      "included": true,
+      "adaptedBaselineSha256": "8b68ceca726808535716aa5d2756f5724e30ac6a68dc7afc2834fc0e481c66dc",
+      "upstreamPath": "hooks/use-element-rect.ts"
     },
     {
       "registry": "use-is-breakpoint",
       "path": "hooks/use-is-breakpoint.ts",
-      "upstreamSha256": "0035e7382732b93a05b79a654916b58ac508a3afd8272f3df402081ff909ffad",
-      "included": true
+      "upstreamSha256": "6eecfed6a85cc628de1896c8426ed8b1ded38b0b15979f08658a1205259b9b2e",
+      "included": true,
+      "adaptedBaselineSha256": "0035e7382732b93a05b79a654916b58ac508a3afd8272f3df402081ff909ffad",
+      "upstreamPath": "hooks/use-is-breakpoint.ts"
     },
     {
       "registry": "use-menu-navigation",
       "path": "hooks/use-menu-navigation.ts",
-      "upstreamSha256": "d6d9b3cc1280efa2ed46bb9f2e98689045896dae69c791cf15a92efba0cadf0b",
-      "included": true
+      "upstreamSha256": "7e65cbea3f2261d163c624d10e09f1a1cb042e6b1e0d5bc54dc95831a9cce481",
+      "included": true,
+      "adaptedBaselineSha256": "d6d9b3cc1280efa2ed46bb9f2e98689045896dae69c791cf15a92efba0cadf0b",
+      "upstreamPath": "hooks/use-menu-navigation.ts"
     },
     {
       "registry": "use-scrolling",
       "path": "hooks/use-scrolling.ts",
-      "upstreamSha256": "50445103bad5b88d810ef8eedb3fb4ef53b49c960050815ccd3f25a397d5126a",
-      "included": false
+      "upstreamSha256": "d091e76cc3e282c517e7bbf8edae1286f16488676f949d3dbcc2a1859b461055",
+      "included": false,
+      "adaptedBaselineSha256": "50445103bad5b88d810ef8eedb3fb4ef53b49c960050815ccd3f25a397d5126a",
+      "upstreamPath": "hooks/use-scrolling.ts"
     },
     {
       "registry": "use-throttled-callback",
       "path": "hooks/use-throttled-callback.ts",
-      "upstreamSha256": "08f50933068ca6860e52c93968fefde5a7dccb45ce31c3c0f99a57324e7f0f71",
-      "included": true
+      "upstreamSha256": "2abcb2ce209f037cd7bf736f993f537be447f0eb0cd216f07f4d79d1525e348f",
+      "included": true,
+      "adaptedBaselineSha256": "08f50933068ca6860e52c93968fefde5a7dccb45ce31c3c0f99a57324e7f0f71",
+      "upstreamPath": "hooks/use-throttled-callback.ts"
     },
     {
       "registry": "use-tiptap-editor",
       "path": "hooks/use-tiptap-editor.ts",
-      "upstreamSha256": "defc723bc35cee3eb50b242a8989bd6ec806da207f2535ac625137d957d4fed6",
-      "included": true
+      "upstreamSha256": "4c81c214a47a7b27e3420eb1521a0098cdcf024e37e49cc30fdc0642055dd816",
+      "included": true,
+      "adaptedBaselineSha256": "defc723bc35cee3eb50b242a8989bd6ec806da207f2535ac625137d957d4fed6",
+      "upstreamPath": "hooks/use-tiptap-editor.ts"
     },
     {
       "registry": "use-unmount",
       "path": "hooks/use-unmount.ts",
-      "upstreamSha256": "9f5e33ac8b59fb74387d7d90cedff06118437ec1ea5358017b2b06f45174eb45",
-      "included": false
+      "upstreamSha256": "5cee44d9b6e9269a240f601aab6f4cdc529f2e9ac21137f2ea9259748d839575",
+      "included": false,
+      "adaptedBaselineSha256": "9f5e33ac8b59fb74387d7d90cedff06118437ec1ea5358017b2b06f45174eb45",
+      "upstreamPath": "hooks/use-unmount.ts"
     },
     {
       "registry": "use-window-size",
       "path": "hooks/use-window-size.ts",
-      "upstreamSha256": "a1d7cc07f2d4541ede535e5effa4251799d2ffdc458959fa1f25059e0f5e3151",
-      "included": true
+      "upstreamSha256": "8049075f0d767da7cd1235f471dfb6915adc9d81fff5baa3ac97526f6db620eb",
+      "included": true,
+      "adaptedBaselineSha256": "a1d7cc07f2d4541ede535e5effa4251799d2ffdc458959fa1f25059e0f5e3151",
+      "upstreamPath": "hooks/use-window-size.ts"
     },
     {
       "registry": "whole-word-icon",
       "path": "components/tiptap-icons/whole-word-icon.tsx",
-      "upstreamSha256": "49a3f44af787d1142675081b0e5f679fed28f4bc2589cda70136f16107dfca29",
-      "included": true
+      "upstreamSha256": "6cfdfcb18608e4f46dc1c7c8c7670278631288d661820324187d02e4d47f5a72",
+      "included": true,
+      "adaptedBaselineSha256": "49a3f44af787d1142675081b0e5f679fed28f4bc2589cda70136f16107dfca29",
+      "upstreamPath": "tiptap-icons/whole-word-icon.tsx"
     }
-  ]
+  ],
+  "verified": "2026-10-20",
+  "hashProvenance": "upstreamSha256 hashes the exact registry content. adaptedBaselineSha256 preserves the previously recorded normalized import baseline; local adaptations are documented separately."
 }
