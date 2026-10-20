@@ -28,12 +28,6 @@ const {
   wideBody,
 } = Astro.props.model;
 
-const heroFit =
-  page.heroFit === "contain"
-    ? "[&_img]:object-contain"
-    : "[&_img]:object-cover";
-
-const heroObjectPosition = `${page.heroFocalX}% ${page.heroFocalY}%`;
 ---
 
 <SiteLayout
@@ -52,7 +46,7 @@ const heroObjectPosition = `${page.heroFocalX}% ${page.heroFocalY}%`;
         {page.kind === "article" ? <div class="text-[10px] font-bold uppercase tracking-[0.08em] text-primary">{getSectionLabel(page.section, locale)}</div> : null}
         <h1 class:list={["mx-auto mb-5 text-balance font-serif text-[clamp(32px,3.4vw,44px)] font-semibold leading-[1.2] tracking-[-0.015em] [overflow-wrap:anywhere] max-sm:text-[32px]", page.kind === "article" ? "mt-3" : "mt-0"]}>{displayTitle}</h1>
         {page.published || page.byline ? <div class="flex justify-center gap-[18px] text-[10px] tracking-[0.06em] text-muted-foreground max-sm:flex-col max-sm:gap-[7px]">{page.published ? <time class="uppercase" datetime={page.published}>{formatDate(page.published, locale)}</time> : null}{page.byline ? page.bylineUrl ? <a class="font-semibold text-foreground hover:text-primary" href={page.bylineUrl}>{page.byline}</a> : <span class="font-semibold text-foreground">{page.byline}</span> : null}</div> : null}
-        {page.hero && !bodyOwnsLeadImage && !structuredTemplate ? <EditorialImage alt={page.heroAlt} class:list={["mx-[50%] mb-[46px] mt-[38px] block aspect-[1.72] w-[min(1080px,calc(100vw-48px))] -translate-x-1/2 overflow-hidden max-sm:-mx-3.5 max-sm:mb-[34px] max-sm:mt-7 max-sm:w-[calc(100%+28px)] max-sm:translate-x-0 [&_img]:h-full [&_img]:w-full", heroFit]} objectPosition={heroObjectPosition} priority src={page.hero} unavailableLabel={copy.imageUnavailable} /> : null}
+        {page.hero && !bodyOwnsLeadImage && !structuredTemplate ? <EditorialImage alt={page.heroAlt} class="mx-[50%] mb-[46px] mt-[38px] block w-[min(1080px,calc(100vw-48px))] -translate-x-1/2 max-sm:mb-[34px] max-sm:mt-7 [&_img]:mx-auto [&_img]:block [&_img]:h-auto [&_img]:max-h-[720px] [&_img]:w-auto [&_img]:max-w-full [&_img]:object-contain" priority src={page.hero} unavailableLabel={copy.imageUnavailable} /> : null}
       </header>
       {structuredTemplate && bodyHtml ? <ArticleBody html={bodyHtml} /> : null}
       {directoryData?.kind === "communities" ? <CommunitiesPage communities={directoryData.communities} locale={locale} /> : null}

@@ -36,19 +36,19 @@ const labels = {
   {communities.map((community) => (
     <section class="worship-community flex min-w-0 flex-col overflow-hidden border border-border">
       {community.media.length > 0 ? (
-      <div class="group relative aspect-[1.62] w-full overflow-hidden" data-gallery>
-        <div aria-label={`${labels.gallery}: ${community.name}`} class="gallery-track flex h-full snap-x snap-mandatory overflow-x-auto scroll-smooth" data-gallery-track role="region" tabindex="0">
+      <div class="group w-full overflow-hidden" data-gallery>
+        <div aria-label={`${labels.gallery}: ${community.name}`} class="gallery-track flex aspect-[1.62] snap-x snap-mandatory overflow-x-auto scroll-smooth" data-gallery-track role="region" tabindex="0">
           {community.media.map((image, imageIndex) => (
             <figure class="h-full w-full min-w-full snap-center" data-gallery-slide>
-              <img class="h-full w-full object-cover" src={`/api/media/${image.mediaId}`} alt={image.altText} loading={imageIndex === 0 ? "eager" : "lazy"} />
+              <img class="h-full w-full object-contain" src={`/api/media/${image.mediaId}`} alt={image.altText} loading={imageIndex === 0 ? "eager" : "lazy"} />
             </figure>
           ))}
         </div>
         {community.media.length > 1 ? (
-          <div class="pointer-events-none absolute inset-x-0 bottom-0 flex items-center justify-between bg-gradient-to-t from-black/65 to-transparent px-3 pb-3 pt-8 text-white">
-            <button aria-label={`${labels.previous}: ${community.name}`} class="pointer-events-auto grid size-8 place-items-center border border-white/55 bg-black/35 text-lg leading-none transition hover:bg-black/60" data-gallery-previous type="button">←</button>
-            <span class="rounded-sm bg-black/45 px-2 py-1 font-bold text-[10px] tabular-nums tracking-[0.08em]" data-gallery-counter>1 / {community.media.length}</span>
-            <button aria-label={`${labels.next}: ${community.name}`} class="pointer-events-auto grid size-8 place-items-center border border-white/55 bg-black/35 text-lg leading-none transition hover:bg-black/60" data-gallery-next type="button">→</button>
+          <div class="flex items-center justify-between border-t border-border px-3 py-2 text-foreground">
+            <button aria-label={`${labels.previous}: ${community.name}`} class="grid size-8 place-items-center border border-border text-lg leading-none transition hover:bg-muted" data-gallery-previous type="button">←</button>
+            <span class="px-2 py-1 font-bold text-[10px] tabular-nums tracking-[0.08em]" data-gallery-counter>1 / {community.media.length}</span>
+            <button aria-label={`${labels.next}: ${community.name}`} class="grid size-8 place-items-center border border-border text-lg leading-none transition hover:bg-muted" data-gallery-next type="button">→</button>
           </div>
         ) : null}
       </div>
