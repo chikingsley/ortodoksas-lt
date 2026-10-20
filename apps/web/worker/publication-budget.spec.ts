@@ -75,6 +75,21 @@ describe("publication database read budgets", () => {
     await expect(changed.text()).resolves.toContain(
       "Changed publication title"
     );
+
+    await env.DB.prepare(
+      "UPDATE articles SET status = 'draft' WHERE id = 'budget-article-1'"
+    ).run();
+    const withdrawn = await exports.default.fetch(url);
+    expect(withdrawn.status).toBe(404);
+    await withdrawn.arrayBuffer();
+    await env.DB.prepare(
+      "UPDATE articles SET status = 'published' WHERE id = 'budget-article-1'"
+    ).run();
+    const republished = await exports.default.fetch(url);
+    expect(republished.status).toBe(200);
+    await expect(republished.text()).resolves.toContain(
+      "Changed publication title"
+    );
   });
 
   it("bypasses the public cache for authenticated requests and API routes", async () => {
@@ -94,6 +109,35 @@ describe("publication database read budgets", () => {
 
     expect(health.status).toBe(200);
     expect(health.headers.get("X-Publication-Cache")).toBeNull();
+  });
+
+  it("renders a cold page inside a Durable Object before edge delivery", async () => {
+    const url = "https://render-budget.test/2026/budget-8";
+    const renderer = env.PUBLICATION_RENDERER.getByName("cold-render-test");
+    const rendered = await renderer.fetch(url);
+    expect(rendered.status).toBe(200);
+    const html = await rendered.text();
+    expect(html).toContain("Budget article 8");
+
+    const delivered = await exports.default.fetch(url);
+    expect(delivered.headers.get("X-Publication-Cache")).toBe("MISS");
+    await expect(delivered.text()).resolves.toBe(html);
+
+    const revision = await env.DB.prepare(
+      "SELECT revision FROM publication_state WHERE id = 1"
+    ).first<number>("revision");
+
+    const key = new URL(url);
+
+    key.searchParams.set("__publication_cache", env.PUBLICATION_VERSION.id);
+    key.searchParams.set("__publication_revision", String(revision));
+    const cache = await caches.open("public-publication-v1");
+    const stored = await cache.match(key.toString());
+    expect(stored?.headers.get("cache-control")).toBe("public, max-age=86400");
+    await expect(stored?.text()).resolves.toBe(html);
+
+    key.searchParams.set("__publication_cache", "previous-deployment");
+    await expect(cache.match(key.toString())).resolves.toBeUndefined();
   });
 
   it("normalizes tracking parameters and serves HEAD requests from the same cache", async () => {

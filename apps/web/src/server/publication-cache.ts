@@ -1,6 +1,6 @@
 import { env } from "cloudflare:workers";
 
-const cacheSeconds = 300;
+const cacheSeconds = 86_400;
 const sessionCookie = /(?:^|;\s*)(?:__session|session)=/u;
 const trackingParameter = /^(?:utm_|fbclid$|gclid$|_ga$)/u;
 
@@ -52,7 +52,7 @@ export async function cachedPublication(
   }
 
   url.searchParams.set("__publication_revision", String(revision));
-  url.searchParams.set("__publication_cache", "1");
+  url.searchParams.set("__publication_cache", env.PUBLICATION_VERSION.id);
   url.searchParams.sort();
   const key = new Request(url, { method: "GET" });
   const cache = await caches.open("public-publication-v1");
