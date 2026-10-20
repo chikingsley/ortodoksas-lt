@@ -6,14 +6,16 @@
   "scripts": {
     "build": "pnpm --filter @ortodoksas-lt/web build && pnpm --filter @ortodoksas-lt/studio build",
     "build:canonical": "pnpm --filter @ortodoksas-lt/web build",
-    "check": "pnpm lint && pnpm typecheck:tooling && pnpm test:security && pnpm --filter @ortodoksas-lt/content test && pnpm --filter @ortodoksas-lt/editor test && pnpm --filter @ortodoksas-lt/db check && pnpm --filter @ortodoksas-lt/web check && pnpm --filter @ortodoksas-lt/studio check",
+    "check": "pnpm lint && pnpm typecheck:tooling && pnpm test:security && pnpm test:release && pnpm --filter @ortodoksas-lt/content test && pnpm --filter @ortodoksas-lt/editor test && pnpm --filter @ortodoksas-lt/db check && pnpm --filter @ortodoksas-lt/web check && pnpm --filter @ortodoksas-lt/studio check",
     "dev:studio": "pnpm --filter @ortodoksas-lt/studio dev",
     "dev:web": "pnpm --filter @ortodoksas-lt/web dev",
     "fix": "ultracite fix",
     "lint": "oxfmt --check && oxlint --deny-warnings",
     "lint:strict": "oxfmt --check && oxlint --deny-warnings",
     "test:security": "node --test tests/braces-security.test.mts",
-    "typecheck:tooling": "pnpm --filter @ortodoksas-lt/studio exec tsc -p ../../tsconfig.tooling.json"
+    "typecheck:tooling": "pnpm --filter @ortodoksas-lt/studio exec tsc -p ../../tsconfig.tooling.json",
+    "verify:cpu": "node deployment/verify-cpu.mts",
+    "test:release": "node --test tests/publication-cpu.test.mts"
   },
   "devDependencies": {
     "@shadcn/lint": "^0.2.1",
