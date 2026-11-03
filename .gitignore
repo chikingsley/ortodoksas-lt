@@ -15,6 +15,7 @@ dist-ssr
 .wrangler/
 apps/web/.canonical-content/
 .dev.vars*
+/migration/local-history/
 worker-configuration.d.ts.tmp
 
 # Canva ZIP extraction workspace; runtime and research brand assets are separated.
