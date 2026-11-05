@@ -16,18 +16,18 @@
   },
   "dependencies": {
     "@ortodoksas-lt/content": "workspace:*",
-    "@tiptap/core": "^3.32.0",
-    "@tiptap/extension-highlight": "^3.32.0",
-    "@tiptap/extension-list": "^3.32.0",
-    "@tiptap/extension-subscript": "^3.32.0",
-    "@tiptap/extension-superscript": "^3.32.0",
-    "@tiptap/extension-text-align": "^3.32.0",
-    "@tiptap/extension-typography": "^3.32.0",
-    "@tiptap/extension-youtube": "^3.32.0",
-    "@tiptap/starter-kit": "^3.32.0",
-    "@tiptap/static-renderer": "^3.32.0"
+    "@tiptap/core": "^3.32.2",
+    "@tiptap/extension-highlight": "^3.32.2",
+    "@tiptap/extension-list": "^3.32.2",
+    "@tiptap/extension-subscript": "^3.32.2",
+    "@tiptap/extension-superscript": "^3.32.2",
+    "@tiptap/extension-text-align": "^3.32.2",
+    "@tiptap/extension-typography": "^3.32.2",
+    "@tiptap/extension-youtube": "^3.32.2",
+    "@tiptap/starter-kit": "^3.32.2",
+    "@tiptap/static-renderer": "^3.32.2"
   },
   "devDependencies": {
-    "vitest": "^5.0.5"
+    "vitest": "^5.1.0"
   }
 }

@@ -11,6 +11,9 @@ export class PublicationRenderer extends DurableObject<Env> {
         this.ctx.abort(String(reason));
       },
       exports: this.ctx.exports,
+      mapVirtualHost: () => {
+        throw new Error("Publication rendering does not map virtual hosts.");
+      },
       passThroughOnException: () => {
         throw new Error("Publication rendering requires a completed response.");
       },
